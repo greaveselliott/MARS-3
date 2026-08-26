@@ -1,0 +1,89 @@
+schemaVersion: 1
+kind: MARS3PRFallbackMainCIAddendum
+
+addendum:
+  id: WAVE-1-pr-fallback-main-ci-addendum
+  classification: PUBLIC
+  issuedAt: 2026-08-26T09:36:15Z
+  expiresAt: 2026-08-29T09:36:15Z
+  baseCommit: a9e203540a9e280fe7059dfa579a9a4089fc3f52
+  baseTree: c326c5d33f075a2c8b7dc4c41a698d57175c8805
+  publicationBaseCommit: 265b0b78a19d0ac50611c360f4614ed24d1cfcd7
+  publicationBaseTree: 87dc32acce9c767f01f94aae25936665e26650ab
+  repository: greaveselliott/MARS-3
+  workingBranch: codex/w-001-bootstrap-transition
+  pullRequest: 5
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  sourceDirective: authorised
+  purpose: correct protected-main squash admission by binding the signed reviewed feature tree without requiring impossible commit identity
+  priorAddendum: WAVE-1-pr-fallback-addendum
+  priorAddendumSHA256: 32002ec48fdc8d7c2d5c8300df9be39b5b7c944edf0b16419fdd9b2fd7561fe9
+  priorAddendumSignatureSHA256: 00bad1bea742a9c63bc9ef3016e6bf887d7a1d0ab1c7f1ec2b222651f80d9d9e
+  reviewDispositionComment: 01a03d6c-f79c-77e3-848c-df769ff27d48
+  reviewedHead: a9e203540a9e280fe7059dfa579a9a4089fc3f52
+  reviewedTree: c326c5d33f075a2c8b7dc4c41a698d57175c8805
+  failureFingerprint: public-pr-fallback-tag-main-squash-commit-identity-unsatisfiable
+  priorTransitionTag: mars3/w001-transition-v1
+  priorTransitionTagObject: 394c9ce749142c2222c1b8081b62f43a895be326
+  priorTransitionTagTarget: a9e203540a9e280fe7059dfa579a9a4089fc3f52
+  priorTransitionTagTree: c326c5d33f075a2c8b7dc4c41a698d57175c8805
+  successorTransitionTag: mars3/w001-transition-v2
+  successorTransitionTagMessage: MARS-3 W-001 transition tree attestation v2
+  mergeMode: squash
+  autonomousMutation: false
+  canonicalWorkMutationAllowed: false
+  githubPolicyMutationAllowed: false
+  secretScannerExceptionAllowed: false
+  allowedEffects:
+    - edit-listed-public-paths
+    - create-one-pinned-signer-correction-commit
+    - preserve-the-v1-transition-tag-exactly
+    - create-and-push-one-pinned-signer-v2-transition-tag
+    - update-existing-pull-request
+    - run-required-public-commit-gate
+    - squash-merge-promptly-after-fresh-qa-and-security-acceptance
+    - append-public-safe-correction-intent-and-receipt
+  authorizedPaths:
+    - .harness/grants/WAVE-1-pr-fallback-main-ci-addendum.yaml
+    - .harness/grants/WAVE-1-pr-fallback-main-ci-addendum.yaml.sig
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - preserve-reviewed-head-and-v1-tag-as-immutable-history
+    - verify-every-feature-commit-with-the-pinned-signer
+    - require-v2-tag-target-equal-current-reviewed-feature-head-on-pull-request
+    - require-v2-tag-tree-equal-pull-request-and-squash-main-trees
+    - require-squash-main-commit-distinct-from-v2-tag-target
+    - require-exact-base-head-event-and-topology
+    - require-public-gate-on-updated-pull-request-and-protected-main
+  prohibitedEffects:
+    - authorize-the-failed-review-retroactively
+    - move-or-delete-the-v1-transition-tag
+    - retry-direct-main-push
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - create-or-move-any-tag-other-than-the-v2-transition-tag
+    - mutate-any-bead-work-field-or-dependency
+    - claim-or-transition-bead
+    - issue-or-assert-live-lease
+    - runtime-or-platform-implementation
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  externalStateReadbackRequired: true
+  protectedMainUnchangedUntilMerge: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-pr-fallback-main-ci-addendum
+  detachedSignature: WAVE-1-pr-fallback-main-ci-addendum.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

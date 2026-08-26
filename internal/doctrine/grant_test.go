@@ -129,6 +129,53 @@ func TestWave1PRFallbackRejectsTampering(t *testing.T) {
 	}
 }
 
+func TestWave1PRFallbackMainCIFixAcceptsPinnedSignedAddendum(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkWave1MainCIFixAddendum(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed main-CI correction addendum was rejected: %v", findings)
+	}
+}
+
+func TestWave1PRFallbackMainCIFixRejectsTampering(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(wave1MainCIFixPath)
+	signature := read(wave1MainCIFixSignature)
+	publicKey := read(wave1PlanningGrantKey)
+	for _, testCase := range []struct {
+		name string
+		old  string
+		new  string
+		code string
+	}{
+		{name: "v1 tag", old: "priorTransitionTagObject: 394c9ce749142c2222c1b8081b62f43a895be326", new: "priorTransitionTagObject: 1111111111111111111111111111111111111111", code: "public.pr_fallback_main_ci_value"},
+		{name: "authority", old: "canonicalWorkMutationAllowed: false", new: "canonicalWorkMutationAllowed: true", code: "public.pr_fallback_main_ci_value"},
+		{name: "scope", old: "    - internal/doctrine/grant_test.go", new: "    - internal/runtime/escape.go", code: "public.pr_fallback_main_ci_sequence"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
+			root := t.TempDir()
+			writePlanningGrantTestFile(t, root, wave1MainCIFixPath, tampered)
+			writePlanningGrantTestFile(t, root, wave1MainCIFixSignature, signature)
+			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+			var findings []Finding
+			checkWave1MainCIFixAddendum(root, &findings)
+			if !findingCodePresent(findings, testCase.code) || !findingCodePresent(findings, "public.pr_fallback_main_ci_signature") {
+				t.Fatalf("tampered main-CI correction was not rejected by contract and signature: %v", findings)
+			}
+		})
+	}
+}
+
 func TestWave1PlanningGrantAcceptsPinnedSignedContract(t *testing.T) {
 	grant, signature, publicKey := loadPlanningGrantFixture(t)
 	root := writePlanningGrantFixture(t, grant, signature, publicKey)
@@ -703,6 +750,54 @@ func TestWave1PlanningGrantBindsCheckoutAndCommitHistory(t *testing.T) {
 	})
 }
 
+func TestWave1PRFallbackMainSquashUsesSignedTreeIdentity(t *testing.T) {
+	root, squash := writeWave1TransitionSquashFixture(t, wave1PublishedMain)
+	var findings []Finding
+	if _, ok := checkWave1MainSquashTopology(root, squash, &findings); !ok {
+		t.Fatalf("canonical one-parent squash topology was rejected: %v", findings)
+	}
+	target, ok := checkWave1TransitionTag(root, wave1TransitionTag, wave1TransitionTagMessage, wave1TransitionReviewedHead, squash, true, &findings)
+	if !ok || target != wave1TransitionReviewedHead || len(findings) != 0 {
+		t.Fatalf("signed feature tag tree did not admit the distinct squash commit: target=%s findings=%v", target, findings)
+	}
+}
+
+func TestWave1PRFallbackProtectedMainAdmissionUsesReviewedTree(t *testing.T) {
+	root, squash := writeWave1PRFallbackMainFixture(t, true)
+	setWave1PRFallbackMainPushFacts(t, root, squash)
+	var findings []Finding
+	checkWave1PRFallbackGitDiff(root, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("protected-main squash with the signed reviewed tree was rejected: %v", findings)
+	}
+}
+
+func TestWave1PRFallbackMainSquashRejectsWrongTreeParentAndTarget(t *testing.T) {
+	t.Run("wrong tree", func(t *testing.T) {
+		root, _ := writeWave1TransitionSquashFixture(t, wave1PublishedMain)
+		var findings []Finding
+		if _, ok := checkWave1TransitionTag(root, wave1TransitionTag, wave1TransitionTagMessage, wave1TransitionReviewedHead, wave1PublishedMain, true, &findings); ok || !findingCodePresent(findings, "public.pr_fallback_tag") {
+			t.Fatalf("wrong squash tree was accepted: %v", findings)
+		}
+	})
+
+	t.Run("wrong parent", func(t *testing.T) {
+		root, squash := writeWave1TransitionSquashFixture(t, wave1TransitionReviewedHead)
+		var findings []Finding
+		if _, ok := checkWave1MainSquashTopology(root, squash, &findings); ok || !findingCodePresent(findings, "public.pr_fallback_topology") {
+			t.Fatalf("squash commit with the wrong parent was accepted: %v", findings)
+		}
+	})
+
+	t.Run("wrong feature target", func(t *testing.T) {
+		root, squash := writeWave1TransitionSquashFixture(t, wave1PublishedMain)
+		var findings []Finding
+		if _, ok := checkWave1TransitionTag(root, wave1TransitionTag, wave1TransitionTagMessage, wave1PublishedMain, squash, true, &findings); ok || !findingCodePresent(findings, "public.pr_fallback_tag") {
+			t.Fatalf("transition tag with the wrong reviewed target was accepted: %v", findings)
+		}
+	})
+}
+
 func TestVerifyPlanningGrantTagRequiresExactSignedTreeAttestation(t *testing.T) {
 	root := t.TempDir()
 	keyPath := filepath.Join(root, "synthetic-tag-key")
@@ -738,6 +833,86 @@ func TestVerifyPlanningGrantTagRequiresExactSignedTreeAttestation(t *testing.T) 
 	if _, err := verifyPlanningGrantTag(tampered, publicKey); err == nil {
 		t.Fatal("tampered signed tag was accepted")
 	}
+}
+
+func writeWave1TransitionSquashFixture(t *testing.T, parent string) (string, string) {
+	t.Helper()
+	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1PublishedMain)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+wave1TransitionTag+":refs/tags/"+wave1TransitionTag)
+	publicKey, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(wave1PlanningGrantKey)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+	tree := planningGrantTestGitOutput(t, root, "rev-parse", "--verify", wave1TransitionReviewedHead+"^{tree}")
+	squash := planningGrantTestGitOutput(t, root,
+		"-c", "user.name=Synthetic Merge Bot",
+		"-c", "user.email=merge-bot@example.com",
+		"-c", "commit.gpgsign=false",
+		"commit-tree", tree,
+		"-p", parent,
+		"-m", "synthetic W-001 squash",
+	)
+	return root, squash
+}
+
+func writeWave1PRFallbackMainFixture(t *testing.T, reviewedTree bool) (string, string) {
+	t.Helper()
+	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sourceHead := planningGrantTestGitOutput(t, source, "rev-parse", "HEAD")
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	for _, revision := range []string{wave1PublishedMain, sourceHead} {
+		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, revision)
+	}
+	for _, tag := range []string{wave1PriorPublicationTag, wave1V2PublicationTag, wave1PublicationTag, wave1TransitionTag, wave1SuccessorTransitionTag} {
+		if _, err := planningGrantGitOutput(source, "rev-parse", "--verify", "refs/tags/"+tag+"^{tag}"); err == nil {
+			runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+tag+":refs/tags/"+tag)
+		}
+	}
+	treeSource := sourceHead
+	if !reviewedTree {
+		treeSource = wave1PublishedMain
+	}
+	tree := planningGrantTestGitOutput(t, root, "rev-parse", "--verify", treeSource+"^{tree}")
+	squash := planningGrantTestGitOutput(t, root,
+		"-c", "user.name=Synthetic Merge Bot",
+		"-c", "user.email=merge-bot@example.com",
+		"-c", "commit.gpgsign=false",
+		"commit-tree", tree,
+		"-p", wave1PublishedMain,
+		"-m", "synthetic protected-main W-001 squash",
+	)
+	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--force", "-B", "main", squash)
+	return root, squash
+}
+
+func setWave1PRFallbackMainPushFacts(t *testing.T, root, head string) {
+	t.Helper()
+	event := map[string]any{
+		"before":      wave1PublishedMain,
+		"after":       head,
+		"ref":         "refs/heads/main",
+		"head_commit": map[string]any{"id": head},
+		"repository":  map[string]any{"full_name": planningGrantRepository},
+	}
+	eventPath := writePlanningGrantGitHubEvent(t, event)
+	setPlanningGrantCommonGitHubFacts(t, root, head, eventPath)
+	t.Setenv("GITHUB_EVENT_NAME", "push")
+	t.Setenv("GITHUB_REF", "refs/heads/main")
+	t.Setenv("GITHUB_HEAD_REF", "")
+	t.Setenv("GITHUB_BASE_REF", "")
+	t.Setenv("GITHUB_REF_PROTECTED", "true")
+	t.Setenv("GITHUB_WORKFLOW_REF", planningGrantRepository+"/"+planningGrantWorkflowPath+"@refs/heads/main")
 }
 
 func TestNormalizedPlanningGrantGitPathsFailsClosed(t *testing.T) {

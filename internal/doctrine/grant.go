@@ -71,6 +71,14 @@ const (
 	wave1PRFallbackFirstTree        = "69d9ab152f5b0a243855ddf613192c662b52306b"
 	wave1TransitionTag              = "mars3/w001-transition-v1"
 	wave1TransitionTagMessage       = "MARS-3 W-001 transition tree attestation v1"
+	wave1TransitionTagObject        = "394c9ce749142c2222c1b8081b62f43a895be326"
+	wave1TransitionReviewedHead     = "a9e203540a9e280fe7059dfa579a9a4089fc3f52"
+	wave1TransitionReviewedTree     = "c326c5d33f075a2c8b7dc4c41a698d57175c8805"
+	wave1MainCIFixPath              = ".harness/grants/WAVE-1-pr-fallback-main-ci-addendum.yaml"
+	wave1MainCIFixSignature         = ".harness/grants/WAVE-1-pr-fallback-main-ci-addendum.yaml.sig"
+	wave1MainCIFixNamespace         = "mars3-pr-fallback-main-ci-addendum"
+	wave1SuccessorTransitionTag     = "mars3/w001-transition-v2"
+	wave1SuccessorTagMessage        = "MARS-3 W-001 transition tree attestation v2"
 )
 
 type grantScalarExpectation struct {
@@ -254,6 +262,96 @@ var wave1PRFallbackSequences = map[string][]string{
 		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
 		"move-or-delete-existing-publication-tags",
 		"create-or-move-any-tag-other-than-the-transition-tag",
+		"mutate-any-bead-work-field-or-dependency",
+		"claim-or-transition-bead",
+		"issue-or-assert-live-lease",
+		"runtime-or-platform-implementation",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var wave1MainCIFixScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3PRFallbackMainCIAddendum"},
+	{path: "addendum.id", value: "WAVE-1-pr-fallback-main-ci-addendum"},
+	{path: "addendum.classification", value: "PUBLIC"},
+	{path: "addendum.issuedAt", value: "2026-08-26T09:36:15Z"},
+	{path: "addendum.expiresAt", value: "2026-08-29T09:36:15Z"},
+	{path: "addendum.baseCommit", value: wave1TransitionReviewedHead},
+	{path: "addendum.baseTree", value: wave1TransitionReviewedTree},
+	{path: "addendum.publicationBaseCommit", value: wave1PublishedMain},
+	{path: "addendum.publicationBaseTree", value: wave1PublishedTree},
+	{path: "addendum.repository", value: planningGrantRepository},
+	{path: "addendum.workingBranch", value: wave1PRFallbackBranch},
+	{path: "addendum.pullRequest", value: "5"},
+	{path: "addendum.signerRole", value: "human-bootstrap-authority"},
+	{path: "addendum.coordinator", value: "delivery-orchestrator"},
+	{path: "addendum.failureOwnership", value: "foundation"},
+	{path: "addendum.sourceDirective", value: "authorised"},
+	{path: "addendum.purpose", value: "correct protected-main squash admission by binding the signed reviewed feature tree without requiring impossible commit identity"},
+	{path: "addendum.priorAddendum", value: "WAVE-1-pr-fallback-addendum"},
+	{path: "addendum.priorAddendumSHA256", value: "32002ec48fdc8d7c2d5c8300df9be39b5b7c944edf0b16419fdd9b2fd7561fe9"},
+	{path: "addendum.priorAddendumSignatureSHA256", value: "00bad1bea742a9c63bc9ef3016e6bf887d7a1d0ab1c7f1ec2b222651f80d9d9e"},
+	{path: "addendum.reviewDispositionComment", value: "01a03d6c-f79c-77e3-848c-df769ff27d48"},
+	{path: "addendum.reviewedHead", value: wave1TransitionReviewedHead},
+	{path: "addendum.reviewedTree", value: wave1TransitionReviewedTree},
+	{path: "addendum.failureFingerprint", value: "public-pr-fallback-tag-main-squash-commit-identity-unsatisfiable"},
+	{path: "addendum.priorTransitionTag", value: wave1TransitionTag},
+	{path: "addendum.priorTransitionTagObject", value: wave1TransitionTagObject},
+	{path: "addendum.priorTransitionTagTarget", value: wave1TransitionReviewedHead},
+	{path: "addendum.priorTransitionTagTree", value: wave1TransitionReviewedTree},
+	{path: "addendum.successorTransitionTag", value: wave1SuccessorTransitionTag},
+	{path: "addendum.successorTransitionTagMessage", value: wave1SuccessorTagMessage},
+	{path: "addendum.mergeMode", value: "squash"},
+	{path: "addendum.autonomousMutation", value: "false"},
+	{path: "addendum.canonicalWorkMutationAllowed", value: "false"},
+	{path: "addendum.githubPolicyMutationAllowed", value: "false"},
+	{path: "addendum.secretScannerExceptionAllowed", value: "false"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.externalStateReadbackRequired", value: "true"},
+	{path: "verification.protectedMainUnchangedUntilMerge", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: wave1MainCIFixNamespace},
+	{path: "integrity.detachedSignature", value: "WAVE-1-pr-fallback-main-ci-addendum.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var wave1MainCIFixSequences = map[string][]string{
+	"addendum.allowedEffects": {
+		"edit-listed-public-paths",
+		"create-one-pinned-signer-correction-commit",
+		"preserve-the-v1-transition-tag-exactly",
+		"create-and-push-one-pinned-signer-v2-transition-tag",
+		"update-existing-pull-request",
+		"run-required-public-commit-gate",
+		"squash-merge-promptly-after-fresh-qa-and-security-acceptance",
+		"append-public-safe-correction-intent-and-receipt",
+	},
+	"addendum.authorizedPaths": {
+		wave1MainCIFixPath,
+		wave1MainCIFixSignature,
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"addendum.requiredProperties": {
+		"preserve-reviewed-head-and-v1-tag-as-immutable-history",
+		"verify-every-feature-commit-with-the-pinned-signer",
+		"require-v2-tag-target-equal-current-reviewed-feature-head-on-pull-request",
+		"require-v2-tag-tree-equal-pull-request-and-squash-main-trees",
+		"require-squash-main-commit-distinct-from-v2-tag-target",
+		"require-exact-base-head-event-and-topology",
+		"require-public-gate-on-updated-pull-request-and-protected-main",
+	},
+	"addendum.prohibitedEffects": {
+		"authorize-the-failed-review-retroactively",
+		"move-or-delete-the-v1-transition-tag",
+		"retry-direct-main-push",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"create-or-move-any-tag-other-than-the-v2-transition-tag",
 		"mutate-any-bead-work-field-or-dependency",
 		"claim-or-transition-bead",
 		"issue-or-assert-live-lease",
@@ -1017,6 +1115,58 @@ func checkWave1PRFallbackAddendum(root string, findings *[]Finding) {
 			addFinding(findings, wave1PRFallbackSignature, "public.pr_fallback_signature", "%v", err)
 		}
 	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(wave1MainCIFixPath))); err == nil {
+		checkWave1MainCIFixAddendum(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_state", "main-CI correction addendum state cannot be established")
+	}
+}
+
+func checkWave1MainCIFixAddendum(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, wave1MainCIFixPath)
+	if err != nil {
+		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_missing", "signed main-CI correction addendum is required")
+		return
+	}
+	document := parseStrictGrant(data, wave1MainCIFixScalars, wave1MainCIFixSequences, []string{"addendum", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_schema", "%s", message)
+	}
+	for _, expected := range wave1MainCIFixScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_value", "%s does not match the signed main-CI correction contract", expected.path)
+		}
+	}
+	for path, expected := range wave1MainCIFixSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_sequence", "%s must equal the exact ordered main-CI correction contract", path)
+		}
+	}
+	for _, section := range []string{"addendum", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	signature, signatureErr := readRepoFile(root, wave1MainCIFixSignature)
+	if signatureErr != nil {
+		addFinding(findings, wave1MainCIFixSignature, "public.pr_fallback_main_ci_signature_missing", "detached main-CI correction signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.pr_fallback_main_ci_key", "main-CI correction must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, wave1MainCIFixNamespace); err != nil {
+			addFinding(findings, wave1MainCIFixSignature, "public.pr_fallback_main_ci_signature", "%v", err)
+		}
+	}
 }
 
 type planningGrantCheckoutKind int
@@ -1272,7 +1422,6 @@ func checkWave1DirectMainTransitionGitDiff(root string, findings *[]Finding) {
 	if !checkWave1PriorPublicationTag(root, findings) || !checkWave1V3PublicationTag(root, findings) {
 		return
 	}
-
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
 	if err != nil || !sha1Pattern.MatchString(strings.TrimSpace(string(headOutput))) {
 		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_head", "HEAD must resolve to one exact commit")
@@ -1360,6 +1509,21 @@ func checkWave1PRFallbackGitDiff(root string, findings *[]Finding) {
 	if !checkWave1PriorPublicationTag(root, findings) || !checkWave1V3PublicationTag(root, findings) {
 		return
 	}
+	mainCIFixActive := false
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(wave1MainCIFixPath))); err == nil {
+		mainCIFixActive = true
+		before := len(*findings)
+		checkWave1MainCIFixAddendum(root, findings)
+		if len(*findings) != before {
+			return
+		}
+		if !checkWave1PriorTransitionTag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_state", "main-CI correction addendum state cannot be established")
+		return
+	}
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
 	if err != nil || !sha1Pattern.MatchString(strings.TrimSpace(string(headOutput))) {
 		addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_head", "HEAD must resolve to one exact commit")
@@ -1375,7 +1539,19 @@ func checkWave1PRFallbackGitDiff(root string, findings *[]Finding) {
 		historyEnd = checkout.secondParent
 	}
 	if checkout.kind != planningGrantLocalBranch {
-		tagTarget, tagOK := checkWave1TransitionTag(root, historyEnd, findings)
+		tagName := wave1TransitionTag
+		tagMessage := wave1TransitionTagMessage
+		if mainCIFixActive {
+			tagName = wave1SuccessorTransitionTag
+			tagMessage = wave1SuccessorTagMessage
+		}
+		expectedTarget := historyEnd
+		requireDistinct := false
+		if checkout.kind == planningGrantMainSquash {
+			expectedTarget = ""
+			requireDistinct = true
+		}
+		tagTarget, tagOK := checkWave1TransitionTag(root, tagName, tagMessage, expectedTarget, head, requireDistinct, findings)
 		if !tagOK {
 			return
 		}
@@ -1404,6 +1580,14 @@ func checkWave1PRFallbackGitDiff(root string, findings *[]Finding) {
 	fallbackAuthorized := make(map[string]bool, len(wave1PRFallbackSequences["addendum.authorizedPaths"]))
 	for _, path := range wave1PRFallbackSequences["addendum.authorizedPaths"] {
 		fallbackAuthorized[path] = true
+	}
+	correctionAuthorized := make(map[string]bool, len(wave1MainCIFixSequences["addendum.authorizedPaths"]))
+	for _, path := range wave1MainCIFixSequences["addendum.authorizedPaths"] {
+		correctionAuthorized[path] = true
+	}
+	if mainCIFixActive && len(commits) > 3 {
+		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_commit_count", "main-CI correction permits exactly one successor commit")
+		return
 	}
 	previous := wave1PublishedMain
 	for index, commit := range commits {
@@ -1434,6 +1618,13 @@ func checkWave1PRFallbackGitDiff(root string, findings *[]Finding) {
 				addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_first_commit", "the rejected signed transition tree must remain unchanged")
 				return
 			}
+		} else if index == 1 && mainCIFixActive {
+			if commit.id != wave1TransitionReviewedHead {
+				addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_reviewed_head", "the reviewed changes-requested head must remain the exact second feature commit")
+				return
+			}
+		} else if index >= 2 && mainCIFixActive {
+			authorized = correctionAuthorized
 		}
 		if err != nil || !planningGrantPathsAllowed(normalized, authorized) {
 			addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_scope", "a fallback commit includes a path outside its signed authorization phase")
@@ -1452,7 +1643,11 @@ func checkWave1PRFallbackGitDiff(root string, findings *[]Finding) {
 		return
 	}
 	paths, err := normalizedPlanningGrantGitPaths(tracked, untracked)
-	if err != nil || !planningGrantPathsAllowed(paths, fallbackAuthorized) {
+	liveAuthorized := fallbackAuthorized
+	if mainCIFixActive {
+		liveAuthorized = correctionAuthorized
+	}
+	if err != nil || !planningGrantPathsAllowed(paths, liveAuthorized) {
 		addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_scope", "current changes include a path outside the signed PR fallback")
 	}
 }
@@ -1532,9 +1727,8 @@ func checkWave1PRFallbackCheckout(root, head string, findings *[]Finding) (plann
 			addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_event", "protected-main event does not bind the exact fallback squash")
 			return planningGrantCheckout{}, false
 		}
-		parents, err := planningGrantCommitParents(root, head)
-		if err != nil || len(parents) != 1 || parents[0] != wave1PublishedMain {
-			addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_topology", "protected main must contain one exact squash commit over the signed base")
+		parents, ok := checkWave1MainSquashTopology(root, head, findings)
+		if !ok {
 			return planningGrantCheckout{}, false
 		}
 		return planningGrantCheckout{kind: planningGrantMainSquash, expectedHead: head, firstParent: parents[0]}, true
@@ -1544,8 +1738,47 @@ func checkWave1PRFallbackCheckout(root, head string, findings *[]Finding) (plann
 	}
 }
 
-func checkWave1TransitionTag(root, expectedCommit string, findings *[]Finding) (string, bool) {
+func checkWave1MainSquashTopology(root, head string, findings *[]Finding) ([]string, bool) {
+	parents, err := planningGrantCommitParents(root, head)
+	if err != nil || len(parents) != 1 || parents[0] != wave1PublishedMain {
+		addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_topology", "protected main must contain one exact squash commit over the signed base")
+		return nil, false
+	}
+	return parents, true
+}
+
+func checkWave1PriorTransitionTag(root string, findings *[]Finding) bool {
 	ref := "refs/tags/" + wave1TransitionTag
+	tagObject, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(tagObject)) != wave1TransitionTagObject {
+		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_v1_tag", "the signed v1 transition tag object must remain unchanged")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", wave1TransitionTagObject)
+	if err != nil {
+		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_v1_tag", "the signed v1 transition tag cannot be read")
+		return false
+	}
+	publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, wave1PlanningGrantKey, "public.pr_fallback_v1_tag", "v1 transition tag requires the pinned genesis key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, wave1TransitionTag, wave1TransitionTagMessage)
+	if err != nil || target != wave1TransitionReviewedHead {
+		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_v1_tag", "the signed v1 transition tag target must remain unchanged")
+		return false
+	}
+	tree, err := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if err != nil || strings.TrimSpace(string(tree)) != wave1TransitionReviewedTree {
+		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_v1_tag", "the signed v1 transition tag tree must remain unchanged")
+		return false
+	}
+	return true
+}
+
+func checkWave1TransitionTag(root, tagName, tagMessage, expectedTarget, expectedTreeCommit string, requireDistinct bool, findings *[]Finding) (string, bool) {
+	ref := "refs/tags/" + tagName
 	tagObject, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
 	if err != nil {
 		addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_tag", "canonical CI requires the signed transition tag")
@@ -1561,17 +1794,21 @@ func checkWave1TransitionTag(root, expectedCommit string, findings *[]Finding) (
 		addFinding(findings, wave1PlanningGrantKey, "public.pr_fallback_tag", "transition tag requires the pinned genesis key")
 		return "", false
 	}
-	target, err := verifyPinnedPlanningGrantTag(object, publicKey, wave1TransitionTag, wave1TransitionTagMessage)
-	if err != nil || target != expectedCommit {
-		addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_tag", "signed transition tag must target the immutable fallback head")
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, tagName, tagMessage)
+	if err != nil || expectedTarget != "" && target != expectedTarget {
+		addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_tag", "signed transition tag must target the current reviewed feature head")
 		return "", false
 	}
-	if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", wave1PublishedMain, target); err != nil {
-		addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_tag", "signed transition tag target must descend from the verified publication base")
+	if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", wave1TransitionReviewedHead, target); err != nil {
+		addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_tag", "signed transition tag target must preserve the reviewed fallback history")
+		return "", false
+	}
+	if requireDistinct && target == expectedTreeCommit {
+		addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_tag", "squash-main commit must remain distinct from the reviewed feature head")
 		return "", false
 	}
 	targetTree, targetErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
-	expectedTree, expectedErr := planningGrantGitOutput(root, "rev-parse", "--verify", expectedCommit+"^{tree}")
+	expectedTree, expectedErr := planningGrantGitOutput(root, "rev-parse", "--verify", expectedTreeCommit+"^{tree}")
 	if targetErr != nil || expectedErr != nil || strings.TrimSpace(string(targetTree)) != strings.TrimSpace(string(expectedTree)) {
 		addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_tag", "signed transition tag tree must equal the reviewed fallback tree")
 		return "", false
