@@ -1,0 +1,466 @@
+/*
+FactoryDocSync:
+docs:
+- docs/features/F-001-doctrine-foundation.md
+- docs/design-docs/mars-provenance.md
+- docs/code-documentation-map.md
+*/
+
+package doctrine
+
+import (
+	"bufio"
+	"bytes"
+	"fmt"
+	"io/fs"
+	"net/mail"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"unicode/utf8"
+)
+
+var (
+	highConfidenceSecrets = []*regexp.Regexp{
+		regexp.MustCompile(`\bgh[pousr]_[A-Za-z0-9]{30,}\b`),
+		regexp.MustCompile(`\bgithub_pat_[A-Za-z0-9_]{40,}\b`),
+		regexp.MustCompile(`\bsk-[A-Za-z0-9_-]{24,}\b`),
+		regexp.MustCompile(`\bAKIA[0-9A-Z]{16}\b`),
+		regexp.MustCompile(`(?i)\bbearer\s+[A-Za-z0-9._~+/=-]{24,}`),
+		regexp.MustCompile(`-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----`),
+	}
+	emailPattern       = regexp.MustCompile(`[A-Za-z0-9.!#$%&'*+/=?^_` + "`" + `{|}~-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}`)
+	remoteImagePattern = regexp.MustCompile(`!\[[^\]]*\]\(\s*https?://`)
+	privateIPv4Pattern = regexp.MustCompile(`\b(?:10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2})\b`)
+	hostFieldPattern   = regexp.MustCompile(`(?i)\b(?:host(?:name)?|machine[_-]?id|trace[_-]?backend(?:[_-]?url)?)\s*[:=]\s*["']?([A-Za-z0-9._:/-]+)`)
+	unsafeMarkup       = regexp.MustCompile(`(?i)(<\s*(?:script|iframe|object|embed|foreignObject)\b|\bon(?:error|load|click)\s*=|javascript\s*:|data\s*:\s*text/html)`)
+	workflowAction     = regexp.MustCompile(`(?m)^\s*-?\s*uses:\s*([^\s#]+)`)
+	workflowWrite      = regexp.MustCompile(`(?im)^\s*[a-z][a-z0-9_-]*\s*:\s*write\s*$`)
+	workflowReadOnly   = regexp.MustCompile(`(?m)^permissions:\s*\n(?:[ \t]+[^\n]+\n)*?[ \t]+contents:\s*read\s*$`)
+	containerReference = regexp.MustCompile(`(?:docker://|ghcr\.io/|docker\.io/)[A-Za-z0-9._/@:-]+`)
+	containerDigest    = regexp.MustCompile(`@sha256:[0-9a-f]{64}$`)
+)
+
+var forbiddenBasenames = map[string]bool{
+	".ds_store":           true,
+	"cookies":             true,
+	"cookies.sqlite":      true,
+	"credentials":         true,
+	"credentials.json":    true,
+	"id_rsa":              true,
+	"id_ed25519":          true,
+	"known_hosts":         true,
+	"login data":          true,
+	"web data":            true,
+	"local state":         true,
+	"keychain-export.txt": true,
+}
+
+var forbiddenExtensions = map[string]bool{
+	".cast":            true,
+	".cer":             true,
+	".crt":             true,
+	".db":              true,
+	".kdbx":            true,
+	".key":             true,
+	".mobileprovision": true,
+	".p12":             true,
+	".pem":             true,
+	".pfx":             true,
+	".sqlite":          true,
+	".sqlite3":         true,
+}
+
+// CheckPublic enforces the public-from-first-commit content boundary. It
+// reports repository-relative findings and never emits matched secret bytes.
+func CheckPublic(repo string) ([]Finding, error) {
+	root, err := repositoryRoot(repo)
+	if err != nil {
+		return nil, err
+	}
+	var findings []Finding
+	checkRequiredPublicMetadata(root, &findings)
+	checkSymlinks(root, &findings)
+	declarations := loadGeneratedDeclarations(root, &findings)
+	paths, err := walkPublicRepository(root)
+	if err != nil {
+		return nil, err
+	}
+	for _, path := range paths {
+		checkPublicPath(path, &findings)
+		checkH001Scope(path, &findings)
+		data, err := readAuditedFile(root, path)
+		if err != nil {
+			addFinding(&findings, path, "public.read", "%v", err)
+			continue
+		}
+		checkPublicContent(root, path, data, &findings)
+		if isGeneratedPath(path) && path != ".harness/generated/generated-files.json" {
+			if _, ok := declarations[path]; !ok {
+				addFinding(&findings, path, "public.generated_undeclared", "generated file needs a source and reproducible command declaration")
+			}
+		}
+	}
+	for path := range declarations {
+		if !repoFileExists(root, path) {
+			addFinding(&findings, ".harness/generated/generated-files.json", "public.generated_missing", "declaration names missing file %s", path)
+		}
+	}
+	sortFindings(findings)
+	return findings, nil
+}
+
+func checkH001Scope(path string, findings *[]Finding) {
+	for _, prefix := range []string{".github/", ".harness/", "cmd/mars3/", "docs/", "internal/doctrine/"} {
+		if strings.HasPrefix(path, prefix) {
+			return
+		}
+	}
+	for _, allowed := range []string{
+		".gitattributes", ".gitignore", "AGENTS.md", "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "LICENSE", "Makefile", "NOTICE", "README.md", "SECURITY.md", "THIRD_PARTY_NOTICES", "go.mod", "go.sum",
+	} {
+		if path == allowed {
+			return
+		}
+	}
+	addFinding(findings, path, "public.h001_scope", "path is outside H-001's exclusive doctrine-foundation scope")
+}
+
+func checkRequiredPublicMetadata(root string, findings *[]Finding) {
+	required := []string{
+		"LICENSE", "NOTICE", "THIRD_PARTY_NOTICES", "README.md", "SECURITY.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "AGENTS.md",
+		".github/pull_request_template.md", ".github/dependabot.yml", ".github/ISSUE_TEMPLATE/config.yml", ".github/ISSUE_TEMPLATE/bug-report.yml",
+		".github/ISSUE_TEMPLATE/foundation-finding.yml", ".github/workflows/foundation-quality.yml",
+		".harness/genesis.yaml", ".harness/genesis.yaml.sig", ".harness/manifest.yaml", ".harness/docsync.yaml",
+		".harness/claims/H-001.yaml", ".harness/claims/H-001.yaml.sig",
+		".harness/generated/genesis-effect-chain.json", ".harness/generated/generated-files.json", ".harness/generated/mars/source-manifest.json",
+		"docs/goals/active.md", "docs/product-decisions/PD-001-public-first.md", "docs/product-decisions/PD-002-git-beads-authority.md",
+		"docs/product-decisions/PD-003-provider-neutral.md", "docs/product-specs/foundation.md", "docs/features/F-001-doctrine-foundation.md",
+		"docs/exec-plans/active/current-operating-plan.md", "docs/design-docs/ADR-002-trace-spine.md", "docs/design-docs/ADR-003-rule-of-two.md",
+	}
+	for _, path := range required {
+		if !repoFileExists(root, path) {
+			addFinding(findings, path, "public.metadata_missing", "required public license or provenance metadata is missing")
+		}
+	}
+	if data, err := readRepoFile(root, "LICENSE"); err == nil && !bytes.Contains(data, []byte("Apache License")) {
+		addFinding(findings, "LICENSE", "public.license", "LICENSE must contain the Apache License")
+	}
+	for _, path := range []string{"NOTICE", "THIRD_PARTY_NOTICES", "SECURITY.md", "CONTRIBUTING.md"} {
+		if data, err := readRepoFile(root, path); err == nil && len(bytes.TrimSpace(data)) < 40 {
+			addFinding(findings, path, "public.metadata_empty", "required public governance metadata is incomplete")
+		}
+	}
+}
+
+func checkSymlinks(root string, findings *[]Finding) {
+	_ = filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return nil
+		}
+		relative, relErr := filepath.Rel(root, path)
+		if relErr != nil {
+			return nil
+		}
+		relative = cleanPublicPath(relative)
+		if entry.IsDir() && filepath.Base(relative) == ".git" {
+			return filepath.SkipDir
+		}
+		if entry.Type()&os.ModeSymlink != 0 {
+			addFinding(findings, relative, "public.symlink", "symbolic links are prohibited in the public foundation")
+		}
+		return nil
+	})
+}
+
+func checkPublicPath(path string, findings *[]Finding) {
+	lower := strings.ToLower(path)
+	base := strings.ToLower(filepath.Base(path))
+	extension := strings.ToLower(filepath.Ext(path))
+	if strings.HasPrefix(base, ".env") || forbiddenBasenames[base] || forbiddenExtensions[extension] {
+		addFinding(findings, path, "public.forbidden_file", "file type or name is prohibited")
+	}
+	for _, segment := range strings.Split(lower, "/") {
+		switch segment {
+		case ".beads", ".dolt", "browser-profile", "browser-profiles", "keychain", "object-store", "postgres-data", "temporal-data", "kubernetes-secrets":
+			addFinding(findings, path, "public.forbidden_state", "local authority, credential, or runtime state is prohibited")
+			return
+		}
+	}
+}
+
+func checkPublicContent(root, path string, data []byte, findings *[]Finding) {
+	if !utf8.Valid(data) || bytes.IndexByte(data, 0) >= 0 {
+		addFinding(findings, path, "public.h001_binary", "binary and unscannable content is prohibited during H-001")
+		return
+	}
+	content := string(data)
+	for _, pattern := range highConfidenceSecrets {
+		if pattern.MatchString(content) {
+			addFinding(findings, path, "public.secret", "high-confidence secret material detected; matched bytes are redacted")
+			break
+		}
+	}
+	if containsDeveloperPath(content) {
+		addFinding(findings, path, "public.developer_path", "absolute developer or machine-specific path detected")
+	}
+	checkPublicIdentity(path, content, findings)
+	checkProhibitedRawFields(path, content, findings)
+	checkMachineMetadata(path, content, findings)
+	if isFixturePath(path) {
+		checkSyntheticFixture(path, content, findings)
+	}
+	if isMarkupPath(path) && unsafeMarkup.MatchString(content) {
+		addFinding(findings, path, "public.unsafe_markup", "unsafe executable markup detected")
+	}
+	if isFixturePath(path) && strings.EqualFold(filepath.Ext(path), ".md") {
+		if remoteImagePattern.MatchString(content) {
+			addFinding(findings, path, "public.remote_image_fixture", "remote images are prohibited in Markdown fixtures")
+		}
+		if hasExecutableFence(content) {
+			addFinding(findings, path, "public.executable_markdown", "executable shell fences are prohibited in Markdown fixtures")
+		}
+	}
+	if strings.HasPrefix(path, ".github/workflows/") && (strings.HasSuffix(path, ".yaml") || strings.HasSuffix(path, ".yml")) {
+		checkWorkflow(path, content, findings)
+	}
+	if strings.EqualFold(filepath.Ext(path), ".md") {
+		if info, err := os.Stat(filepath.Join(root, filepath.FromSlash(path))); err == nil && info.Mode().Perm()&0o111 != 0 {
+			addFinding(findings, path, "public.executable_markdown", "Markdown files must not be executable")
+		}
+	}
+}
+
+func checkMachineMetadata(path, content string, findings *[]Finding) {
+	if privateIPv4Pattern.MatchString(content) {
+		addFinding(findings, path, "public.private_host", "repository text contains private network metadata")
+	}
+	switch strings.ToLower(filepath.Ext(path)) {
+	case ".json", ".jsonc", ".md", ".toml", ".txt", ".yaml", ".yml":
+	default:
+		return
+	}
+	for _, match := range hostFieldPattern.FindAllStringSubmatch(content, -1) {
+		if !syntheticHostValue(match[1]) {
+			addFinding(findings, path, "public.host_metadata", "repository text contains identifying host or backend metadata")
+			return
+		}
+	}
+}
+
+func checkPublicIdentity(path, content string, findings *[]Finding) {
+	for _, candidate := range emailPattern.FindAllString(content, -1) {
+		address, err := mail.ParseAddress(candidate)
+		if err != nil {
+			continue
+		}
+		parts := strings.SplitN(address.Address, "@", 2)
+		if len(parts) != 2 || !isReservedDomain(strings.ToLower(parts[1])) {
+			addFinding(findings, path, "public.identity", "repository text contains a non-synthetic email identity")
+			return
+		}
+	}
+}
+
+func checkProhibitedRawFields(path, content string, findings *[]Finding) {
+	lower := strings.ToLower(content)
+	for _, field := range []string{"raw_prompt", "rawprompt", "raw_completion", "rawcompletion", "chain_of_thought", "chainofthought", "tool_payload", "toolpayload", "provider_session_state", "providersessionstate", "cookie", "session_token"} {
+		fieldPattern := regexp.MustCompile(`(?m)["']?` + regexp.QuoteMeta(field) + `["']?\s*[:=]`)
+		if fieldPattern.MatchString(lower) {
+			addFinding(findings, path, "public.raw_payload", "repository text contains a prohibited raw payload field")
+			return
+		}
+	}
+}
+
+func containsDeveloperPath(content string) bool {
+	boundary := `(?:^|[\s"'` + "`" + `(=])`
+	unixHome := regexp.MustCompile(boundary + `/` + `(?:Users|home)` + `/[A-Za-z0-9._-]+(?:/|\b)`)
+	macTemp := regexp.MustCompile(boundary + `/` + `(?:private/)?var/folders/[A-Za-z0-9._/-]+`)
+	windowsHome := regexp.MustCompile(`(?i)` + boundary + `[A-Z]:\\` + `Users\\[A-Za-z0-9._-]+\\`)
+	return unixHome.MatchString(content) || macTemp.MatchString(content) || windowsHome.MatchString(content)
+}
+
+func isFixturePath(path string) bool {
+	lower := "/" + strings.ToLower(path) + "/"
+	for _, marker := range []string{"/fixture/", "/fixtures/", "/testdata/", "/samples/"} {
+		if strings.Contains(lower, marker) {
+			return true
+		}
+	}
+	return false
+}
+
+func isEvidencePath(path string) bool {
+	lower := "/" + strings.ToLower(path) + "/"
+	base := strings.ToLower(filepath.Base(path))
+	return strings.Contains(lower, "/evidence/") || strings.Contains(lower, "/traces/") || strings.Contains(lower, "/reports/") || strings.HasPrefix(base, "evidence.") || strings.Contains(base, "-evidence.")
+}
+
+func checkSyntheticFixture(path, content string, findings *[]Finding) {
+	for _, candidate := range emailPattern.FindAllString(content, -1) {
+		address, err := mail.ParseAddress(candidate)
+		if err != nil {
+			continue
+		}
+		domain := strings.ToLower(strings.SplitN(address.Address, "@", 2)[1])
+		if !isReservedDomain(domain) {
+			addFinding(findings, path, "public.fixture_identity", "fixture email must use an RFC-reserved synthetic domain")
+			break
+		}
+	}
+	if privateIPv4Pattern.MatchString(content) {
+		addFinding(findings, path, "public.fixture_host", "fixture contains private network metadata")
+	}
+	for _, match := range hostFieldPattern.FindAllStringSubmatch(content, -1) {
+		value := strings.Trim(match[1], "\"'")
+		if !syntheticHostValue(value) {
+			addFinding(findings, path, "public.fixture_host", "fixture host metadata must use a reserved synthetic value")
+			break
+		}
+	}
+}
+
+func isReservedDomain(domain string) bool {
+	return domain == "example.com" || domain == "example.net" || domain == "example.org" || domain == "localhost" || strings.HasSuffix(domain, ".test") || strings.HasSuffix(domain, ".invalid") || strings.HasSuffix(domain, ".example")
+}
+
+func syntheticHostValue(value string) bool {
+	value = strings.ToLower(strings.TrimSpace(value))
+	value = strings.TrimPrefix(strings.TrimPrefix(value, "https://"), "http://")
+	host := strings.SplitN(value, "/", 2)[0]
+	host = strings.SplitN(host, ":", 2)[0]
+	return host == "localhost" || host == "127.0.0.1" || host == "::1" || host == "example.com" || strings.HasSuffix(host, ".test") || strings.HasSuffix(host, ".invalid") || strings.HasSuffix(host, ".example")
+}
+
+func checkEvidenceContent(path, content string, findings *[]Finding) {
+	for _, match := range hostFieldPattern.FindAllStringSubmatch(content, -1) {
+		if !syntheticHostValue(match[1]) {
+			addFinding(findings, path, "public.host_metadata", "evidence contains identifying host or backend metadata")
+			break
+		}
+	}
+}
+
+func isMarkupPath(path string) bool {
+	switch strings.ToLower(filepath.Ext(path)) {
+	case ".html", ".htm", ".svg":
+		return true
+	default:
+		return false
+	}
+}
+
+func hasExecutableFence(content string) bool {
+	fence := regexp.MustCompile("(?im)^```(?:ba)?sh|^```zsh|^```powershell|^```cmd(?:$|\\s)")
+	return fence.MatchString(content)
+}
+
+func checkWorkflow(path, content string, findings *[]Finding) {
+	if regexp.MustCompile(`(?m)^\s*pull_request_target\s*:`).MatchString(content) {
+		addFinding(findings, path, "public.pull_request_target", "pull_request_target is prohibited")
+	}
+	if regexp.MustCompile(`(?im)^\s*permissions\s*:\s*write-all\s*$`).MatchString(content) {
+		addFinding(findings, path, "public.workflow_permissions", "GitHub Actions permissions must not use write-all")
+	}
+	if workflowWrite.MatchString(content) {
+		addFinding(findings, path, "public.workflow_permissions", "foundation workflows must not request write permissions")
+	}
+	if !workflowReadOnly.MatchString(content) {
+		addFinding(findings, path, "public.workflow_permissions", "workflow must declare top-level contents: read permissions")
+	}
+	if strings.Contains(content, "${{ secrets.") {
+		addFinding(findings, path, "public.workflow_secret", "foundation workflows must not read repository secrets")
+	}
+	for _, match := range workflowAction.FindAllStringSubmatch(content, -1) {
+		reference := strings.Trim(match[1], "\"'")
+		if strings.HasPrefix(reference, "./") {
+			continue
+		}
+		if strings.HasPrefix(reference, "docker://") {
+			if !containerDigest.MatchString(reference) {
+				addFinding(findings, path, "public.unpinned_container", "container action must be pinned to an immutable SHA-256 digest")
+			}
+			continue
+		}
+		at := strings.LastIndex(reference, "@")
+		if at < 0 || !sha1Pattern.MatchString(reference[at+1:]) {
+			addFinding(findings, path, "public.unpinned_action", "third-party action must be pinned to an immutable commit SHA")
+		}
+	}
+	for _, reference := range containerReference.FindAllString(content, -1) {
+		if !containerDigest.MatchString(reference) {
+			addFinding(findings, path, "public.unpinned_container", "workflow container must be pinned to an immutable SHA-256 digest")
+		}
+	}
+}
+
+func allowedBinaryAsset(path string) bool {
+	switch strings.ToLower(filepath.Ext(path)) {
+	case ".gif", ".ico", ".jpeg", ".jpg", ".pdf", ".png", ".webp", ".woff", ".woff2":
+		return true
+	default:
+		return false
+	}
+}
+
+func isGeneratedPath(path string) bool {
+	lower := strings.ToLower(path)
+	return strings.Contains("/"+lower+"/", "/generated/") || strings.Contains(filepath.Base(lower), ".generated.")
+}
+
+type generatedDeclarationManifest struct {
+	SchemaVersion int `json:"schemaVersion"`
+	Files         []struct {
+		Path    string `json:"path"`
+		Source  string `json:"source"`
+		Command string `json:"command"`
+	} `json:"files"`
+}
+
+func loadGeneratedDeclarations(root string, findings *[]Finding) map[string]bool {
+	const path = ".harness/generated/generated-files.json"
+	result := make(map[string]bool)
+	data, err := readRepoFile(root, path)
+	if err != nil {
+		addFinding(findings, path, "public.generated_manifest", "generated-file declaration manifest is required")
+		return result
+	}
+	var manifest generatedDeclarationManifest
+	if err := decodeStrictJSON(data, &manifest); err != nil {
+		addFinding(findings, path, "public.generated_manifest", "%v", err)
+		return result
+	}
+	if manifest.SchemaVersion != 1 {
+		addFinding(findings, path, "public.generated_manifest", "schemaVersion must be 1")
+	}
+	for _, file := range manifest.Files {
+		if !safeRelativePath(file.Path) || !isGeneratedPath(file.Path) || file.Path == path {
+			addFinding(findings, path, "public.generated_path", "generated declaration contains an invalid path")
+			continue
+		}
+		if strings.TrimSpace(file.Source) == "" || strings.TrimSpace(file.Command) == "" {
+			addFinding(findings, path, "public.generated_reproduction", "%s needs both source and command", file.Path)
+			continue
+		}
+		if result[file.Path] {
+			addFinding(findings, path, "public.generated_duplicate", "%s is declared more than once", file.Path)
+		}
+		result[file.Path] = true
+	}
+	return result
+}
+
+func redactCount(label string, count int) string {
+	return fmt.Sprintf("%s (%d redacted matches)", label, count)
+}
+
+func scanLines(content string) []string {
+	var lines []string
+	scanner := bufio.NewScanner(strings.NewReader(content))
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines
+}

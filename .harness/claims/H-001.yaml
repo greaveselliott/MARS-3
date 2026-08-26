@@ -1,0 +1,62 @@
+schemaVersion: 1
+kind: MARS3BootstrapClaimAttestation
+issuedAt: 2026-08-26T01:52:07Z
+authority:
+  system: beads-dolt
+  version: 1.2.2
+  sourceCommit: 6c124203e771433a3550c348771a5b5e27fd3c21
+  doltSourceCommit: 1bf533220ab0
+  ledgerBranch: main
+  ledgerHead: 7l67arkkk8bcis9pp9ns0u8uep1jq4vi
+  claimCheckpoint: vvbleat3bc69avj90ciauegpbfr2o3g6
+claim:
+  bead: M3-H001
+  displayId: H-001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  assignee: foundation-maintainer
+  coordinator: delivery-orchestrator
+  workType: enabler
+  failureOwnership: foundation
+  risk: high
+  dependencyCount: 0
+  goal: G-001
+  scenarios:
+    - F-001-S1
+    - F-001-S2
+    - F-001-S3
+    - F-001-S4
+  productDecisions:
+    - PD-001
+    - PD-002
+  exclusivePaths:
+    - .github/**
+    - AGENTS.md
+    - .harness/**
+    - docs/**
+    - cmd/mars3/**
+    - internal/doctrine/**
+    - go.mod
+    - go.sum
+    - Makefile
+    - README.md
+    - LICENSE
+    - NOTICE
+    - THIRD_PARTY_NOTICES
+    - SECURITY.md
+    - CONTRIBUTING.md
+    - CODE_OF_CONDUCT.md
+    - .gitignore
+    - .gitattributes
+verification:
+  order:
+    - qa-reviewer
+    - security-reviewer
+    - delivery-orchestrator
+  classification: PUBLIC
+  rawAuthorityPayloadIncluded: false
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-claim-attestation
+  detachedSignature: H-001.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

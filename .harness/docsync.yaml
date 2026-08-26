@@ -1,0 +1,66 @@
+schema_version: 1
+marker: FactoryDocSync
+semantic_correctness_claimed: false
+source_extensions:
+  - .go
+  - .ts
+  - .tsx
+  - .js
+  - .jsx
+  - .mjs
+  - .cjs
+  - .jsonc
+  - .yaml
+  - .yml
+  - .html
+  - .css
+  - .scss
+  - .sql
+excluded_prefixes:
+  - .harness/
+prefix_requirements:
+  - prefix: .github/
+    docs:
+      - docs/features/F-001-doctrine-foundation.md
+      - docs/design-docs/ADR-004-pr-first-publication.md
+      - docs/code-documentation-map.md
+  - prefix: cmd/mars3/
+    docs:
+      - docs/features/F-001-doctrine-foundation.md
+      - docs/design-docs/ADR-001-git-beads-authority.md
+      - docs/code-documentation-map.md
+  - prefix: internal/doctrine/
+    docs:
+      - docs/features/F-001-doctrine-foundation.md
+      - docs/design-docs/mars-provenance.md
+      - docs/code-documentation-map.md
+  - prefix: internal/trace/
+    docs:
+      - docs/design-docs/ADR-002-trace-spine.md
+      - docs/code-documentation-map.md
+  - prefix: internal/policy/
+    docs:
+      - docs/design-docs/ADR-003-rule-of-two.md
+      - docs/code-documentation-map.md
+  - prefix: internal/runtime/
+    docs:
+      - docs/design-docs/ADR-005-provider-neutral-runtime.md
+      - docs/code-documentation-map.md
+  - prefix: web/
+    docs:
+      - docs/product-specs/operator-workspace.md
+      - docs/code-documentation-map.md
+  - prefix: electron/
+    docs:
+      - docs/product-specs/operator-workspace.md
+      - docs/code-documentation-map.md
+  - prefix: migrations/
+    docs:
+      - docs/product-specs/foundation.md
+      - docs/design-docs/ADR-003-rule-of-two.md
+      - docs/code-documentation-map.md
+  - prefix: database/
+    docs:
+      - docs/product-specs/foundation.md
+      - docs/design-docs/ADR-003-rule-of-two.md
+      - docs/code-documentation-map.md

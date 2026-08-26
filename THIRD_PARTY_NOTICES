@@ -1,0 +1,55 @@
+# Third-party notices
+
+## MARS operating doctrine
+
+- Project: MARS — https://github.com/greaveselliott/MARS
+- Pinned revision: `f55d129bfc794510ca485bb54fc0a35c7b04a700`
+- License: Apache License, Version 2.0
+- Use: selected high-level operating principles, adapted into original
+  MARS-3 documentation and controls.
+- Provenance: `.harness/generated/mars/source-manifest.json` records each
+  consulted source path, Git blob, adaptation, and explicit exclusion.
+
+MARS Go code, runtime, CLI, queue, dashboard, inference lifecycle, provider
+state, release machinery, product routes, prompts, and interface are excluded.
+
+## Beads work authority
+
+- Project: Beads — https://github.com/gastownhall/beads
+- Version: `v1.2.2`
+- Pinned source revision: `6c124203e771433a3550c348771a5b5e27fd3c21`
+- Embedded Dolt revision: `1bf533220ab0`
+- License: MIT License
+- License Git blob at the pinned source revision:
+  `2a187917a0b9e8ea3ab3db2d9e60649f0e2e4ea5`
+- Use: an external work-authority service during development.
+
+No Beads or Dolt database is committed. MARS-3 does not vendor their source in
+this foundation milestone. Their source and transitive dependency notices
+remain governed by their upstream repositories and licenses.
+
+## CI-only tools
+
+- `actions/checkout` at
+  `11bd71901bbe5b1630ceea73d27597364c9af683` — MIT License.
+- `actions/setup-go` at
+  `d35c59abb061a4a6fb18e82ac0862c26744d6ab5` — MIT License.
+- Gitleaks `v8.18.4`, OCI manifest
+  `sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba` — MIT License,
+  https://github.com/gitleaks/gitleaks.
+
+These tools validate the repository in GitHub Actions. Their source is not
+vendored into, linked into, or distributed as part of the H-001 binary.
+
+## Referenced security work
+
+MARS-3's Rule-of-Two threat model cites Simon Willison's public description of
+the "lethal trifecta" as background. No article text is copied. See
+`docs/design-docs/ADR-003-rule-of-two.md`.
+
+## Supplied tracing context
+
+The trace-spine decision cites the supplied Substack post URL
+`https://substack.com/home/post/p-206409710` as non-normative context. No
+inaccessible article text is copied. The local trace contract is original
+project documentation; see `docs/design-docs/ADR-002-trace-spine.md`.

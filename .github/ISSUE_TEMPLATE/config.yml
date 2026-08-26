@@ -1,0 +1,10 @@
+# FactoryDocSync:
+# docs:
+# - docs/features/F-001-doctrine-foundation.md
+# - docs/design-docs/ADR-004-pr-first-publication.md
+# - docs/code-documentation-map.md
+blank_issues_enabled: false
+contact_links:
+  - name: Report a vulnerability privately
+    url: https://github.com/greaveselliott/MARS-3/security/advisories/new
+    about: Never disclose a suspected security vulnerability in a public issue.

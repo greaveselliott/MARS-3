@@ -1,0 +1,40 @@
+# FactoryDocSync:
+# docs:
+# - docs/features/F-001-doctrine-foundation.md
+# - docs/design-docs/ADR-004-pr-first-publication.md
+# - docs/code-documentation-map.md
+name: Foundation finding
+description: Report a factory, generated-default, doctrine, policy, or runtime finding.
+title: "foundation: "
+labels: [foundation, triage]
+body:
+  - type: dropdown
+    id: ownership
+    attributes:
+      label: Initial failure ownership
+      options:
+        - foundation-owned
+        - mixed-or-unclear
+    validations:
+      required: true
+  - type: textarea
+    id: finding
+    attributes:
+      label: Redacted finding
+      description: State the invariant, evidence hash or opaque trace reference, and impact. Do not paste raw payloads.
+    validations:
+      required: true
+  - type: textarea
+    id: attempts
+    attributes:
+      label: Recovery attempts
+      description: List bounded attempts and normalized failure fingerprints.
+    validations:
+      required: true
+  - type: checkboxes
+    id: disclosure
+    attributes:
+      label: Public disclosure confirmation
+      options:
+        - label: This finding contains only public or redacted synthetic material.
+          required: true
