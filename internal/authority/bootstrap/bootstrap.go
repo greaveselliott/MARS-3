@@ -352,8 +352,8 @@ func workspaceInstanceDigest(workspace, projectID string) (string, error) {
 		return "", err
 	}
 	resolved, err := filepath.EvalSymlinks(absolute)
-	if err != nil || filepath.Clean(resolved) != filepath.Clean(absolute) {
-		return "", errors.New("Beads workspace path must not contain symlink indirection")
+	if err != nil {
+		return "", errors.New("Beads workspace path cannot be resolved")
 	}
 	type entry struct {
 		Path   string `json:"path"`

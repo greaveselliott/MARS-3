@@ -120,14 +120,6 @@ func TestWorkspaceInstanceRejectsAClone(t *testing.T) {
 		}
 	}
 	original, clone := t.TempDir(), t.TempDir()
-	original, err := filepath.EvalSymlinks(original)
-	if err != nil {
-		t.Fatal(err)
-	}
-	clone, err = filepath.EvalSymlinks(clone)
-	if err != nil {
-		t.Fatal(err)
-	}
 	makeWorkspace(original)
 	makeWorkspace(clone)
 	config := doctrine.W001BootstrapGrant{AuthorityProjectID: projectID}

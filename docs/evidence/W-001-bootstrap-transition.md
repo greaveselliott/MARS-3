@@ -206,6 +206,23 @@ direct canonical workspace directories and filesystem identity. The v4 tag is
 not moved or reused; the successor review uses
 `mars3/w001-bootstrap-helper-v5`.
 
+## Preserved v5 first-conformance finding
+
+Signed checkpoint `4c8a35270253fefc6f09cf65541020a0cc1b4ac6`, tree
+`1f1b5e072780b0cf6a90201f7c9b188c6f1bb651`, passed the deterministic
+public gate and all four Docker/Dolt atomicity cases. The non-mutating helper
+then rejected its disposable workspace because macOS presents the temporary
+root through `/var` while resolving that ancestor to `/private/var`. The
+workspace endpoint itself was a direct directory, and no canonical claim or
+other authority effect occurred.
+
+The foundation-owned fingerprint is
+`authority.bootstrap/workspace-ancestor-canonicalization`. The correction
+continues to reject a symlinked workspace endpoint and symlinked database
+components, but hashes the resolved ancestor path so the disposable copy and
+canonical workspace use the same fail-closed instance algorithm. One bounded
+retry is permitted; an equivalent recurrence blocks this attempt.
+
 ## Pending receipt
 
 No claim receipt exists yet. After the authorized effect, append only the
