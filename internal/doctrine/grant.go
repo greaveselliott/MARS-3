@@ -98,8 +98,8 @@ const (
 	w001BootstrapBase               = "37b55b912b20715349bc50e0524c85d4b22f1772"
 	w001BootstrapBaseTree           = "f06864b0802cea793cf7a0c08b60b7e734539a94"
 	w001BootstrapBranch             = "codex/w-001-work-authority"
-	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v3"
-	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v3"
+	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v4"
+	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v4"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the

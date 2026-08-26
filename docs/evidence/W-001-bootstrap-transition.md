@@ -159,8 +159,23 @@ still binds the event's exact feature head and signed base, requires the
 checkout to have those exact two parents, requires the checked-out tree to
 equal the feature tree, and requires the immutable signed review tag to target
 that feature head. Malformed advisory values and every head, parent, tree, or
-tag mismatch continue to fail closed. The v2 tag is not moved or reused; the
-successor review uses `mars3/w001-bootstrap-helper-v3`.
+tag mismatch continue to fail closed. The v2 tag is not moved or reused; that
+correction used `mars3/w001-bootstrap-helper-v3`, preserved below.
+
+## Preserved v3 tag-envelope finding
+
+Signed tag `mars3/w001-bootstrap-helper-v3` remains immutably attached to
+commit `a97b6f90ec5f3b554c00bf6efa723fcef1d60602`, tree
+`2edf3fe18e0183fc0a15e403d82a35d4216a0e23`. GitHub run `32971964972`
+confirmed the stale merge field correction and then failed at
+`public.w001_bootstrap_tag`: the tag used the synthetic Engineer identity,
+while the public tag contract requires
+`MARS-3 Release Manager <release-manager@example.com>`.
+
+The tag signature, target, and message are preserved, but v3 is not an
+accepted release-manager attestation and is never moved or reused. The
+successor review uses `mars3/w001-bootstrap-helper-v4`, created with the exact
+public release-manager identity already enforced by the validator.
 
 ## Pending receipt
 
