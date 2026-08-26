@@ -49,15 +49,14 @@
 | F-001-S1 | passing | QA | doctrine/plan checks and authority inspection |
 | F-001-S2 | passing | QA | offline provenance and refresh-scope tests |
 | F-001-S3 | passing | Security | manifest/trust and mutation-denial tests |
-| F-001-S4 | failing | Security | H-001-E3 workflow-admission findings; E4 validation pending |
+| F-001-S4 | passing | Security | H-001-E4 immutable workflow and public-gate evidence |
 
-The first three `passing` states retain deterministic evidence from H-001-E3,
-but no review verdict carries to a changed commit. F-001-S4 is `failing` after
-Security reproduced a quoted privileged trigger and the Foundation Maintainer
-found a bracket-form secret context. E4 must re-establish deterministic
-evidence before a fresh QA → Security sequence. Passing never means accepted or
-done: release readiness remains blocked until both reviewers accept the same
-immutable containing commit and Beads records reconciliation.
+All four `passing` states record deterministic candidate evidence in H-001-E4,
+including remediation of the E3 privileged-trigger and secret-context findings
+and the later preflight job/effect findings. No earlier review verdict carries
+to this changed commit. Passing never means accepted or done: release readiness
+remains blocked until both reviewers accept the same immutable containing commit
+and Beads records reconciliation.
 
 ### F-001-S1 — One durable delivery route
 

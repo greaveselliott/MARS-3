@@ -1,24 +1,24 @@
 # H-001 validation evidence
 
 **Classification:** PUBLIC
-**Evidence ID:** H-001-E3
-**Status:** Superseded; Security changes requested
-**Opaque trace reference:** `bootstrap-h001-qa-remediation-v3`
+**Evidence ID:** H-001-E4
+**Status:** Candidate; independent QA and Security review pending
+**Opaque trace reference:** `bootstrap-h001-workflow-contract-v5`
 **Recorded:** 2026-08-26
 **Verification owners:** QA Reviewer, then Security Reviewer
 
 This is a redacted evidence manifest, not a raw command log. The immutable
 review target is the Git commit containing this file. The implementation
 checkpoint it verifies is
-`e928a243d3c43e167d673f3c1fd12ec693635620`, based on signed genesis
+`1214ce5f148c6c3253a877e3f8a108c0253c6448`, based on signed genesis
 `8c108460d7c0bb59b80a0b3942dc872a2e05785a`.
 
 ## Bound artifacts
 
 | Artifact | Immutable identifier or SHA-256 |
 | --- | --- |
-| implementation tree | `fc95e3822e9ede96e542f11c300ddf27f09b564d` |
-| validation binary | `7ef04a65ec2041ede8f4c702f30d8e6b0cef6ee6492817782df2730f63fa97db` |
+| implementation tree | `5a387bba8c8affe1a65beb7e2744f81f641f2f50` |
+| validation binary | `766662b93986a3611cd0709e6accf0ae59c09237703b2460bcda0edf84b50861` |
 | MARS source manifest | `1d9e01d5f90ea6335299284befe77798809e381b238472446ae61427070b90b2` |
 | signed claim attestation | `41079a23f6bb4a2a68cec481d2bf474cc53343a084e24406fa63343084fdd8c4` |
 | claim signature | `3727f5e409a70ff5cf901923ad50ec962643be825c7b4c79d06a793395a6e905` |
@@ -45,10 +45,10 @@ row explicitly describes the expected failing canary.
 | static analysis | `go vet ./...` | pass |
 | whitespace | `git diff --check` and `git show --check --oneline --no-renames HEAD` | pass |
 | worktree secrets | `gitleaks detect --no-git --source . --redact --no-banner` | pass |
-| history secrets | `gitleaks detect --source . --redact --no-banner` | pass; six commits scanned at checkpoint |
+| history secrets | `gitleaks detect --source . --redact --no-banner` | pass; nine commits scanned at checkpoint |
 | provenance refresh | `go run ./cmd/mars3 doctrine refresh --repo . --source ../MARS --ref f55d129bfc794510ca485bb54fc0a35c7b04a700` | pass; dry run; 20 files |
 | claim signature | `ssh-keygen -Y verify` with the committed public key and namespace `mars3-claim-attestation` | pass |
-| remote branch | `git ls-remote origin refs/heads/codex/h-001-doctrine-foundation` | exact checkpoint SHA |
+| remote branch | `git ls-remote origin refs/heads/codex/h-001-doctrine-foundation` | implementation checkpoint published; evidence-containing review target is verified after publication and recorded in Beads |
 
 Local source tests used Go 1.26.2. Public CI pins Go 1.24.11 and Gitleaks
 v8.18.4 at OCI manifest
@@ -74,7 +74,7 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
 ## Public CI and repository controls
 
 - GitHub Actions run
-  `https://github.com/greaveselliott/MARS-3/actions/runs/32924305397`
+  `https://github.com/greaveselliott/MARS-3/actions/runs/32927392259`
   completed successfully for the implementation checkpoint.
 - The repository visibility API returned `PUBLIC` with default branch `main`.
 - Active ruleset `21510926` prohibits deletion and non-fast-forward updates,
@@ -83,6 +83,10 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
 - Workflow permissions are `contents: read`; checkout credentials are not
   persisted; fork workflows receive no configured repository secret or write
   permission; every action and container is immutably pinned.
+- GitHub reported that the pinned checkout and Go setup actions still target
+  Node.js 20 and were forced onto Node.js 24. The job passed, no authority was
+  added, and the annotation remains a bounded action-pin maintenance risk; an
+  update requires a new reviewed workflow digest rather than silent drift.
 
 ## Scenario evidence
 
@@ -97,9 +101,12 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
   mutation fixture that enables profile authority is rejected.
 - **F-001-S4:** public, source, vet, whitespace, worktree/history secret, binary
   denial, mutable-container, malformed-DocSync, and workflow checks passed.
-  Regression cases reject inline, indented job-level, duplicate, aliased,
-  flow-nested, escaped, and explicit-key permission declarations while
-  accepting only the canonical top-level `contents: read` block.
+  Structural regressions reject privileged or indirect events, permissions,
+  secret expressions, action references and inputs, and container changes.
+  The independent full-workflow digest additionally rejects disabled or masked
+  gates, runner or shell changes, arbitrary steps, dynamic Docker execution,
+  comments, and any second workflow. An independent preflight replay accepted
+  the bounded contract after all nine prior job/effect mutations failed.
 
 ## Review and remediation history
 
@@ -140,6 +147,11 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
   workflow. These are foundation-owned findings on the same Bead, not a new
   ticket. The subsequent remediation binds the entire CRLF-normalized workflow
   to an independent hard-coded digest while retaining structural diagnostics.
+- Checkpoint `1214ce5f148c6c3253a877e3f8a108c0253c6448` adds that immutable contract,
+  closes case-variant workflow-extension routing, and passed independent
+  preflight plus exact-SHA CI run `32927392259`. Two clean Linux/amd64 builds
+  produced the same validation-binary hash above. No previous QA or Security
+  verdict carries to the immutable commit containing H-001-E4.
 
 FactoryDocSync was checked and remained current. This ticket changed its BDD,
 authority, provenance, trace, security, publication, runtime, and operator
@@ -154,9 +166,12 @@ documentation together with the validation behavior.
   proxy. No production or autonomous authority is claimed.
 - The bootstrap exception remains direct human procedure until W-001 replaces
   it; it is not reusable by a tenant agent.
+- The two pinned GitHub actions have a Node.js 20 deprecation annotation while
+  GitHub currently forces them to Node.js 24. This is not an H-001 authority or
+  correctness failure, but future pin maintenance must update the workflow
+  contract through a new decision and review.
 
-Next executable owner: Foundation Maintainer. The remediation must produce a
-new signed checkpoint, reproducible evidence, and immutable E4 review target.
-Only then does it route to QA Reviewer, followed by Security Reviewer on the
-same commit. The Delivery Orchestrator may reconcile and close M3-H001 only
-after both canonical Beads verdicts and a completed run disposition.
+Next executable owner: QA Reviewer. On `accepted`, the exact same immutable E4
+commit routes to Security Reviewer. The Delivery Orchestrator may reconcile and
+close M3-H001 only after both canonical Beads verdicts and a completed run
+disposition.
