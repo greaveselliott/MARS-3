@@ -23,6 +23,7 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/greaveselliott/MARS-3/internal/doctrine"
@@ -61,24 +62,30 @@ type versionState struct {
 }
 
 type receipt struct {
-	SchemaVersion       int    `json:"schemaVersion"`
-	Kind                string `json:"kind"`
-	Classification      string `json:"classification"`
-	GrantID             string `json:"grantId"`
-	AttemptID           string `json:"attemptId"`
-	IdempotencyKey      string `json:"idempotencyKey"`
-	Bead                string `json:"bead"`
-	BaseCommit          string `json:"baseCommit"`
-	PatchedBinarySHA256 string `json:"patchedBinarySHA256"`
-	DisposableBackend   string `json:"disposableBackend"`
-	DisposableVerified  bool   `json:"disposableVerified"`
-	CanonicalUnchanged  bool   `json:"canonicalUnchangedBeforeEffect"`
-	Mode                string `json:"mode"`
-	Result              string `json:"result"`
-	NativeStatus        string `json:"nativeStatus"`
-	LifecycleState      string `json:"lifecycleState"`
-	LiveLeaseAsserted   bool   `json:"liveLeaseAsserted"`
+	SchemaVersion           int    `json:"schemaVersion"`
+	Kind                    string `json:"kind"`
+	Classification          string `json:"classification"`
+	GrantID                 string `json:"grantId"`
+	AttemptID               string `json:"attemptId"`
+	IdempotencyKey          string `json:"idempotencyKey"`
+	Bead                    string `json:"bead"`
+	BaseCommit              string `json:"baseCommit"`
+	PatchedBinarySHA256     string `json:"patchedBinarySHA256"`
+	WorkspaceInstanceSHA256 string `json:"workspaceInstanceSHA256"`
+	DisposableBackend       string `json:"disposableBackend"`
+	DisposableVerified      bool   `json:"disposableVerified"`
+	CanonicalUnchanged      bool   `json:"canonicalUnchangedBeforeEffect"`
+	Mode                    string `json:"mode"`
+	Result                  string `json:"result"`
+	NativeStatus            string `json:"nativeStatus"`
+	LifecycleState          string `json:"lifecycleState"`
+	LiveLeaseAsserted       bool   `json:"liveLeaseAsserted"`
 }
+
+const (
+	bootstrapGitExecutable = "/usr/bin/git"
+	canonicalRepositoryURL = "https://github.com/greaveselliott/MARS-3.git"
+)
 
 func Run(options Options) error {
 	if options.Stdout == nil {
@@ -125,8 +132,12 @@ func Run(options Options) error {
 			return err
 		}
 	}
-	if err := verifyWorkspace(options.BeadsWorkspace, config); err != nil {
+	workspaceInstance, err := verifyWorkspace(options.BeadsWorkspace, config)
+	if err != nil {
 		return err
+	}
+	if options.Apply && execution.WorkspaceInstanceSHA256 != workspaceInstance {
+		return errors.New("execution authorization does not bind the canonical workspace instance")
 	}
 	if err := verifyOriginalBinary(options.BeadsBinary, config); err != nil {
 		return err
@@ -165,9 +176,14 @@ func Run(options Options) error {
 	result := "conformance-passed-no-canonical-mutation"
 	post := pre
 	if options.Apply {
-		if _, err := doctrine.LoadW001BootstrapExecutionAuthorization(options.Repo, options.ExecutionAuthorization, config); err != nil {
+		freshExecution, err := doctrine.LoadW001BootstrapExecutionAuthorization(options.Repo, options.ExecutionAuthorization, config)
+		if err != nil {
 			return fmt.Errorf("revalidate execution authorization immediately before effect: %w", err)
 		}
+		if err := requireUnchangedExecutionAuthorization(execution, freshExecution); err != nil {
+			return err
+		}
+		execution = freshExecution
 		grantExpiry, err := time.Parse(time.RFC3339, config.ExpiresAt)
 		if err != nil || !time.Now().UTC().Before(grantExpiry) {
 			return errors.New("signed W-001 bootstrap authority expired during conformance")
@@ -175,8 +191,12 @@ func Run(options Options) error {
 		if err := verifyAcceptedMain(options.Repo, execution); err != nil {
 			return err
 		}
-		if err := verifyWorkspace(options.BeadsWorkspace, config); err != nil {
+		freshWorkspaceInstance, err := verifyWorkspace(options.BeadsWorkspace, config)
+		if err != nil {
 			return err
+		}
+		if freshWorkspaceInstance != workspaceInstance || freshWorkspaceInstance != execution.WorkspaceInstanceSHA256 {
+			return errors.New("canonical workspace instance changed during conformance")
 		}
 		fresh, err := readIssue(options.BeadsBinary, options.BeadsWorkspace, config.Bead)
 		if err != nil || verifyPreimage(fresh, config) != nil {
@@ -191,7 +211,13 @@ func Run(options Options) error {
 		if err != nil {
 			return err
 		}
-		command := exec.Command(patchedBinary, "-C", options.BeadsWorkspace, "--actor", config.Assignee, "--json", "batch", "--message", "MARS-3 W-001 signed bootstrap claim")
+		effectWorkspaceInstance, err := verifyWorkspace(options.BeadsWorkspace, config)
+		if err != nil || effectWorkspaceInstance != execution.WorkspaceInstanceSHA256 {
+			return errors.New("canonical workspace instance changed at the effect boundary")
+		}
+		command := exec.Command(patchedBinary, "-C", ".", "--actor", config.Assignee, "--json", "batch", "--message", "MARS-3 W-001 signed bootstrap claim")
+		command.Dir = options.BeadsWorkspace
+		command.Env = beadsCommandEnvironment()
 		command.Stdin = strings.NewReader(script)
 		command.Stdout = options.Stdout
 		command.Stderr = options.Stderr
@@ -216,7 +242,7 @@ func Run(options Options) error {
 	encoded, err := json.Marshal(receipt{
 		SchemaVersion: 1, Kind: "MARS3BootstrapClaimReceipt", Classification: "PUBLIC",
 		GrantID: config.ID, AttemptID: config.AttemptID, IdempotencyKey: config.IdempotencyKey, Bead: config.Bead,
-		BaseCommit: config.BaseCommit, PatchedBinarySHA256: patchedDigest,
+		BaseCommit: config.BaseCommit, PatchedBinarySHA256: patchedDigest, WorkspaceInstanceSHA256: workspaceInstance,
 		DisposableBackend: disposableBackend, DisposableVerified: true, CanonicalUnchanged: true,
 		Mode: mode, Result: result, NativeStatus: post.Status,
 		LifecycleState: lifecycle, LiveLeaseAsserted: false,
@@ -228,7 +254,22 @@ func Run(options Options) error {
 	return err
 }
 
+func requireUnchangedExecutionAuthorization(initial, fresh doctrine.W001BootstrapExecutionAuthorization) error {
+	if initial != fresh {
+		return errors.New("execution authorization changed during conformance")
+	}
+	return nil
+}
+
 func verifyRepository(repo string, config doctrine.W001BootstrapGrant, apply bool) error {
+	metadata, err := os.Lstat(filepath.Join(repo, ".git"))
+	if err != nil || !metadata.IsDir() || metadata.Mode()&os.ModeSymlink != 0 {
+		return errors.New("bootstrap repository requires one direct Git directory")
+	}
+	topLevel, err := gitOutput(repo, "rev-parse", "--show-toplevel")
+	if err != nil || filepath.Clean(strings.TrimSpace(topLevel)) != filepath.Clean(repo) {
+		return errors.New("Git metadata does not resolve to the audited repository root")
+	}
 	head, err := gitOutput(repo, "rev-parse", "HEAD")
 	if err != nil {
 		return fmt.Errorf("resolve repository HEAD: %w", err)
@@ -246,9 +287,9 @@ func verifyRepository(repo string, config doctrine.W001BootstrapGrant, apply boo
 		return errors.New("canonical bootstrap claim executes only from accepted main")
 	}
 	if apply {
-		remoteMain, remoteErr := gitOutput(repo, "rev-parse", "--verify", "refs/remotes/origin/main^{commit}")
-		if remoteErr != nil || strings.TrimSpace(remoteMain) != strings.TrimSpace(head) {
-			return errors.New("canonical bootstrap claim requires HEAD to equal the observed origin/main")
+		remoteMain, remoteErr := gitRemoteMain()
+		if remoteErr != nil || remoteMain != strings.TrimSpace(head) {
+			return errors.New("canonical bootstrap claim requires HEAD to equal authenticated GitHub main")
 		}
 	}
 	if !apply && (err != nil || currentBranch != "main" && currentBranch != config.WorkingBranch) {
@@ -266,10 +307,9 @@ func verifyAcceptedMain(repo string, authorization doctrine.W001BootstrapExecuti
 	if err != nil || strings.TrimSpace(tree) != authorization.MergedTree {
 		return errors.New("accepted main tree does not match the execution authorization")
 	}
-	remote, err := gitOutput(repo, "ls-remote", "--exit-code", "origin", "refs/heads/main")
-	fields := strings.Fields(remote)
-	if err != nil || len(fields) != 2 || fields[0] != authorization.MergedCommit || fields[1] != "refs/heads/main" {
-		return errors.New("authenticated origin/main does not match the execution authorization")
+	remoteMain, err := gitRemoteMain()
+	if err != nil || remoteMain != authorization.MergedCommit {
+		return errors.New("authenticated GitHub main does not match the execution authorization")
 	}
 	target, err := gitOutput(repo, "rev-list", "-n", "1", authorization.ReviewTag)
 	if err != nil || strings.TrimSpace(target) != authorization.ReviewedFeatureCommit {
@@ -282,23 +322,67 @@ func verifyAcceptedMain(repo string, authorization doctrine.W001BootstrapExecuti
 	return nil
 }
 
-func verifyWorkspace(workspace string, config doctrine.W001BootstrapGrant) error {
+func verifyWorkspace(workspace string, config doctrine.W001BootstrapGrant) (string, error) {
 	info, err := os.Lstat(workspace)
 	if err != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
-		return errors.New("Beads workspace must be one direct directory, not an indirect path")
+		return "", errors.New("Beads workspace must be one direct directory, not an indirect path")
 	}
-	data, err := os.ReadFile(filepath.Join(workspace, ".beads", "metadata.json"))
+	metadataPath := filepath.Join(workspace, ".beads", "metadata.json")
+	metadataInfo, err := os.Lstat(metadataPath)
+	if err != nil || !metadataInfo.Mode().IsRegular() || metadataInfo.Mode()&os.ModeSymlink != 0 {
+		return "", errors.New("Beads workspace metadata must be one direct regular file")
+	}
+	data, err := os.ReadFile(metadataPath)
 	if err != nil {
-		return fmt.Errorf("read Beads workspace identity: %w", err)
+		return "", fmt.Errorf("read Beads workspace identity: %w", err)
 	}
 	var metadata struct {
 		ProjectID string `json:"project_id"`
 		Database  string `json:"database"`
 	}
 	if err := json.Unmarshal(data, &metadata); err != nil || metadata.ProjectID != config.AuthorityProjectID || metadata.Database != "dolt" {
-		return errors.New("Beads workspace identity does not match the signed authority project")
+		return "", errors.New("Beads workspace identity does not match the signed authority project")
 	}
-	return nil
+	return workspaceInstanceDigest(workspace, config.AuthorityProjectID)
+}
+
+func workspaceInstanceDigest(workspace, projectID string) (string, error) {
+	absolute, err := filepath.Abs(workspace)
+	if err != nil {
+		return "", err
+	}
+	resolved, err := filepath.EvalSymlinks(absolute)
+	if err != nil || filepath.Clean(resolved) != filepath.Clean(absolute) {
+		return "", errors.New("Beads workspace path must not contain symlink indirection")
+	}
+	type entry struct {
+		Path   string `json:"path"`
+		Device uint64 `json:"device"`
+		Inode  uint64 `json:"inode"`
+	}
+	payload := struct {
+		SchemaVersion int     `json:"schemaVersion"`
+		ProjectID     string  `json:"projectId"`
+		Root          string  `json:"root"`
+		Entries       []entry `json:"entries"`
+	}{SchemaVersion: 1, ProjectID: projectID, Root: filepath.Clean(resolved)}
+	for _, relative := range []string{".", ".beads", ".beads/embeddeddolt", ".beads/embeddeddolt/M3"} {
+		path := filepath.Join(resolved, filepath.FromSlash(relative))
+		info, statErr := os.Lstat(path)
+		if statErr != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+			return "", errors.New("Beads workspace instance path is not one direct directory")
+		}
+		stat, ok := info.Sys().(*syscall.Stat_t)
+		if !ok {
+			return "", errors.New("Beads workspace instance has no stable filesystem identity")
+		}
+		payload.Entries = append(payload.Entries, entry{Path: relative, Device: uint64(stat.Dev), Inode: uint64(stat.Ino)})
+	}
+	encoded, err := json.Marshal(payload)
+	if err != nil {
+		return "", err
+	}
+	return digest(encoded), nil
 }
 
 func verifyOriginalBinary(path string, config doctrine.W001BootstrapGrant) error {
@@ -310,6 +394,7 @@ func verifyOriginalBinary(path string, config doctrine.W001BootstrapGrant) error
 		return errors.New("Beads binary does not match the signed SHA-256")
 	}
 	command := exec.Command(path, "version", "--json")
+	command.Env = beadsCommandEnvironment()
 	output, err := command.Output()
 	if err != nil || !bytes.Contains(output, []byte(config.BeadsSourceCommit)) || !bytes.Contains(output, []byte(`"version": "`+config.BeadsVersion+`"`)) {
 		return errors.New("Beads binary version/source revision does not match the signed grant")
@@ -470,7 +555,7 @@ func verifyDisposableWorkspace(patchedBinary, originalBinary, workspace string, 
 	if err := run(stdout, stderr, "/bin/cp", "-R", resolved, copyRoot); err != nil {
 		return "", fmt.Errorf("copy canonical workspace for conformance: %w", err)
 	}
-	if err := verifyWorkspace(copyRoot, config); err != nil {
+	if _, err := verifyWorkspace(copyRoot, config); err != nil {
 		return "", err
 	}
 	disposablePre, err := readIssue(originalBinary, copyRoot, config.Bead)
@@ -492,7 +577,9 @@ func verifyDisposableWorkspace(patchedBinary, originalBinary, workspace string, 
 	if err != nil {
 		return "", err
 	}
-	command := exec.Command(patchedBinary, "-C", copyRoot, "--actor", config.Assignee, "--json", "batch", "--message", "MARS-3 W-001 disposable bootstrap claim")
+	command := exec.Command(patchedBinary, "-C", ".", "--actor", config.Assignee, "--json", "batch", "--message", "MARS-3 W-001 disposable bootstrap claim")
+	command.Dir = copyRoot
+	command.Env = beadsCommandEnvironment()
 	command.Stdin, command.Stdout, command.Stderr = strings.NewReader(script), stdout, stderr
 	if err := command.Run(); err != nil {
 		return "", fmt.Errorf("disposable canonical-backend claim: %w", err)
@@ -580,6 +667,7 @@ func verifyAtomicityTestResults(output []byte) error {
 
 func readIssue(binary, workspace, id string) (issueRecord, error) {
 	command := exec.Command(binary, "-C", workspace, "show", id, "--json")
+	command.Env = beadsCommandEnvironment()
 	output, err := command.Output()
 	if err != nil {
 		return issueRecord{}, fmt.Errorf("read canonical Bead: %w", err)
@@ -593,6 +681,7 @@ func readIssue(binary, workspace, id string) (issueRecord, error) {
 
 func readBackendMode(binary, workspace string) (string, error) {
 	command := exec.Command(binary, "-C", workspace, "dolt", "status", "--json")
+	command.Env = beadsCommandEnvironment()
 	output, err := command.Output()
 	if err != nil {
 		return "", fmt.Errorf("read Beads backend mode: %w", err)
@@ -608,6 +697,7 @@ func readBackendMode(binary, workspace string) (string, error) {
 
 func readVersionState(binary, workspace string) (versionState, error) {
 	command := exec.Command(binary, "-C", workspace, "vc", "status", "--json")
+	command.Env = beadsCommandEnvironment()
 	output, err := command.Output()
 	if err != nil {
 		return versionState{}, fmt.Errorf("read Beads version state: %w", err)
@@ -768,9 +858,92 @@ func fileDigest(path string) (string, error) {
 }
 
 func gitOutput(repo string, args ...string) (string, error) {
-	command := exec.Command("git", append([]string{"-C", repo}, args...)...)
+	prefix := []string{"-c", "core.fsmonitor=false", "-c", "diff.external=", "-C", repo}
+	command := exec.Command(bootstrapGitExecutable, append(prefix, args...)...)
+	command.Env = bootstrapGitEnvironment()
 	output, err := command.Output()
 	return string(output), err
+}
+
+func gitRemoteMain() (string, error) {
+	directory, err := os.MkdirTemp("", "mars3-w001-remote-")
+	if err != nil {
+		return "", err
+	}
+	defer os.RemoveAll(directory)
+	command := exec.Command(bootstrapGitExecutable, "ls-remote", "--exit-code", canonicalRepositoryURL, "refs/heads/main")
+	command.Dir = directory
+	command.Env = bootstrapGitEnvironment()
+	output, err := command.Output()
+	if err != nil {
+		return "", errors.New("authenticated GitHub main cannot be resolved")
+	}
+	return parseRemoteMain(output)
+}
+
+func parseRemoteMain(output []byte) (string, error) {
+	fields := strings.Fields(string(output))
+	if len(fields) != 2 || fields[1] != "refs/heads/main" || !isLowerHex(fields[0], 40) {
+		return "", errors.New("authenticated GitHub main cannot be resolved")
+	}
+	return fields[0], nil
+}
+
+func isLowerHex(value string, length int) bool {
+	if len(value) != length {
+		return false
+	}
+	for _, character := range value {
+		if character < '0' || character > '9' {
+			if character < 'a' || character > 'f' {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func bootstrapGitEnvironment() []string {
+	environment := make([]string, 0, len(os.Environ())+8)
+	for _, value := range os.Environ() {
+		key := value
+		if separator := strings.IndexByte(value, '='); separator >= 0 {
+			key = value[:separator]
+		}
+		upper := strings.ToUpper(key)
+		if strings.HasPrefix(upper, "GIT_") || strings.HasPrefix(upper, "SSH_") || strings.HasPrefix(upper, "GITLAB_") ||
+			(strings.HasPrefix(upper, "GITHUB_") && upper != "GITHUB_ACTIONS") ||
+			upper == "HTTP_PROXY" || upper == "HTTPS_PROXY" || upper == "ALL_PROXY" || upper == "NO_PROXY" ||
+			upper == "SSL_CERT_FILE" || upper == "SSL_CERT_DIR" || upper == "CURL_CA_BUNDLE" || upper == "XDG_CONFIG_HOME" {
+			continue
+		}
+		environment = append(environment, value)
+	}
+	return append(environment,
+		"GIT_ATTR_NOSYSTEM=1",
+		"GIT_CONFIG_GLOBAL="+os.DevNull,
+		"GIT_CONFIG_NOSYSTEM=1",
+		"GIT_NO_REPLACE_OBJECTS=1",
+		"GIT_OPTIONAL_LOCKS=0",
+		"GIT_TERMINAL_PROMPT=0",
+		"LC_ALL=C",
+	)
+}
+
+func beadsCommandEnvironment() []string {
+	environment := make([]string, 0, len(os.Environ()))
+	for _, value := range os.Environ() {
+		key := value
+		if separator := strings.IndexByte(value, '='); separator >= 0 {
+			key = value[:separator]
+		}
+		upper := strings.ToUpper(key)
+		if strings.HasPrefix(upper, "BEADS_") || strings.HasPrefix(upper, "DOLT_") || strings.HasPrefix(upper, "BD_") || strings.HasPrefix(upper, "GT_") {
+			continue
+		}
+		environment = append(environment, value)
+	}
+	return environment
 }
 
 func run(stdout, stderr io.Writer, name string, args ...string) error {

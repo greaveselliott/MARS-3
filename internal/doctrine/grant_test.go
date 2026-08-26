@@ -106,8 +106,9 @@ func TestW001ExecutionAuthorizationFailsClosedWithoutPinnedSignature(t *testing.
 		QAReviewedCommit: strings.Repeat("3", 40), QADisposition: "accepted",
 		SecurityReviewedCommit: strings.Repeat("3", 40), SecurityDisposition: "accepted",
 		PatchedBinarySHA256: grant.PatchedBinarySHA256, ExpectedMetadataSHA256: grant.ExpectedMetadataSHA256,
-		AllowedEffect: "execute-one-expected-preimage-W-001-CAS-claim",
-		IssuedAt:      issuedAt.Format(time.RFC3339), ExpiresAt: issuedAt.Add(time.Hour).Format(time.RFC3339),
+		WorkspaceInstanceSHA256: strings.Repeat("4", 64),
+		AllowedEffect:           "execute-one-expected-preimage-W-001-CAS-claim",
+		IssuedAt:                issuedAt.Format(time.RFC3339), ExpiresAt: issuedAt.Add(time.Hour).Format(time.RFC3339),
 	}
 	data, err := json.Marshal(authorization)
 	if err != nil {

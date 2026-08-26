@@ -10,8 +10,8 @@ grant:
   baseCommit: 37b55b912b20715349bc50e0524c85d4b22f1772
   baseTree: f06864b0802cea793cf7a0c08b60b7e734539a94
   workingBranch: codex/w-001-work-authority
-  reviewTag: mars3/w001-bootstrap-helper-v4
-  reviewTagMessage: MARS-3 W-001 bootstrap helper tree attestation v4
+  reviewTag: mars3/w001-bootstrap-helper-v5
+  reviewTagMessage: MARS-3 W-001 bootstrap helper tree attestation v5
   signerRole: human-bootstrap-authority
   coordinator: delivery-orchestrator
   failureOwnership: foundation
@@ -131,7 +131,7 @@ toolchain:
   helperCommandPath: cmd/mars3-authority/main.go
   helperCommandSHA256: d8ae9fcf5b04902fa3f2ece3369688ca7abf1e55f0cd4f57a611006a861979ea
   helperLibraryPath: internal/authority/bootstrap/bootstrap.go
-  helperLibrarySHA256: 23c0c6bbfa28525f5f2612173970a8f77ab9d7986805ec9cd8045c02fe9da94a
+  helperLibrarySHA256: 71218a92bbf8e1e8eb4fa0a21dc63d08b5526afabac47eb65bd45876912a3f81
 
 verification:
   order:

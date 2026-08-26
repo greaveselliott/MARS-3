@@ -302,10 +302,15 @@ The reviewed helper tree alone cannot exercise the first transition. After its
 squash merge and protected-main check, a distinct one-hour signed execution
 authorization must bind the actual merged SHA/tree, review tag and feature
 commit, QA and Security accepted commit, exact patched binary, attempt,
-idempotency key, authority project, and signed preimage. Before the effect the
-helper revalidates both expiries, authenticated remote `main`, canonical
-workspace identity, and the complete preimage. A command error is unknown
-acceptance and blocks retry until separately authorized reconciliation.
+idempotency key, authority project, signed preimage, and opaque canonical
+workspace-instance digest. After conformance the helper reloads that exact
+authorization and rejects any field change. Before the effect it revalidates
+both expiries, resolves the fixed public GitHub `main` under a sanitized Git
+environment, rejects ambient Beads/Dolt workspace overrides, and rechecks the
+direct workspace filesystem identity plus complete preimage. A local squash,
+mutable remote, copied workspace, swapped token, or command error cannot be
+accepted; command uncertainty blocks retry until separately authorized
+reconciliation.
 Every later mutation uses the normal live-lease transition above. P-001 and all
 subsequent work receive no equivalent exception.
 

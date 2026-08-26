@@ -98,8 +98,8 @@ const (
 	w001BootstrapBase               = "37b55b912b20715349bc50e0524c85d4b22f1772"
 	w001BootstrapBaseTree           = "f06864b0802cea793cf7a0c08b60b7e734539a94"
 	w001BootstrapBranch             = "codex/w-001-work-authority"
-	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v4"
-	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v4"
+	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v5"
+	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v5"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -155,30 +155,31 @@ type W001BootstrapGrant struct {
 // post-review effect token. It is intentionally external to Git so it can bind
 // the actual protected-main commit and check after the helper is merged.
 type W001BootstrapExecutionAuthorization struct {
-	SchemaVersion          int    `json:"schemaVersion"`
-	Kind                   string `json:"kind"`
-	Classification         string `json:"classification"`
-	GrantID                string `json:"grantId"`
-	Repository             string `json:"repository"`
-	AttemptID              string `json:"attemptId"`
-	IdempotencyKey         string `json:"idempotencyKey"`
-	Bead                   string `json:"bead"`
-	AuthorityProjectID     string `json:"authorityProjectId"`
-	MergedCommit           string `json:"mergedCommit"`
-	MergedTree             string `json:"mergedTree"`
-	ReviewTag              string `json:"reviewTag"`
-	ReviewedFeatureCommit  string `json:"reviewedFeatureCommit"`
-	PullRequest            int    `json:"pullRequest"`
-	ProtectedMainCheckRun  int64  `json:"protectedMainCheckRun"`
-	QAReviewedCommit       string `json:"qaReviewedCommit"`
-	QADisposition          string `json:"qaDisposition"`
-	SecurityReviewedCommit string `json:"securityReviewedCommit"`
-	SecurityDisposition    string `json:"securityDisposition"`
-	PatchedBinarySHA256    string `json:"patchedBinarySHA256"`
-	ExpectedMetadataSHA256 string `json:"expectedMetadataSHA256"`
-	AllowedEffect          string `json:"allowedEffect"`
-	IssuedAt               string `json:"issuedAt"`
-	ExpiresAt              string `json:"expiresAt"`
+	SchemaVersion           int    `json:"schemaVersion"`
+	Kind                    string `json:"kind"`
+	Classification          string `json:"classification"`
+	GrantID                 string `json:"grantId"`
+	Repository              string `json:"repository"`
+	AttemptID               string `json:"attemptId"`
+	IdempotencyKey          string `json:"idempotencyKey"`
+	Bead                    string `json:"bead"`
+	AuthorityProjectID      string `json:"authorityProjectId"`
+	MergedCommit            string `json:"mergedCommit"`
+	MergedTree              string `json:"mergedTree"`
+	ReviewTag               string `json:"reviewTag"`
+	ReviewedFeatureCommit   string `json:"reviewedFeatureCommit"`
+	PullRequest             int    `json:"pullRequest"`
+	ProtectedMainCheckRun   int64  `json:"protectedMainCheckRun"`
+	QAReviewedCommit        string `json:"qaReviewedCommit"`
+	QADisposition           string `json:"qaDisposition"`
+	SecurityReviewedCommit  string `json:"securityReviewedCommit"`
+	SecurityDisposition     string `json:"securityDisposition"`
+	PatchedBinarySHA256     string `json:"patchedBinarySHA256"`
+	ExpectedMetadataSHA256  string `json:"expectedMetadataSHA256"`
+	WorkspaceInstanceSHA256 string `json:"workspaceInstanceSHA256"`
+	AllowedEffect           string `json:"allowedEffect"`
+	IssuedAt                string `json:"issuedAt"`
+	ExpiresAt               string `json:"expiresAt"`
 }
 
 type grantScalarExpectation struct {
@@ -1021,7 +1022,7 @@ var w001BootstrapGrantScalars = []grantScalarExpectation{
 	{path: "toolchain.helperCommandPath", value: "cmd/mars3-authority/main.go"},
 	{path: "toolchain.helperCommandSHA256", value: "d8ae9fcf5b04902fa3f2ece3369688ca7abf1e55f0cd4f57a611006a861979ea"},
 	{path: "toolchain.helperLibraryPath", value: "internal/authority/bootstrap/bootstrap.go"},
-	{path: "toolchain.helperLibrarySHA256", value: "23c0c6bbfa28525f5f2612173970a8f77ab9d7986805ec9cd8045c02fe9da94a"},
+	{path: "toolchain.helperLibrarySHA256", value: "71218a92bbf8e1e8eb4fa0a21dc63d08b5526afabac47eb65bd45876912a3f81"},
 	{path: "verification.publicCommitGateRequired", value: "true"},
 	{path: "verification.immutableCommitReviewRequired", value: "true"},
 	{path: "verification.protectedMainRequiredBeforeClaim", value: "true"},
@@ -1752,6 +1753,7 @@ func LoadW001BootstrapExecutionAuthorization(repo, path string, grant W001Bootst
 		authorization.QADisposition != "accepted" || authorization.SecurityDisposition != "accepted" ||
 		authorization.QAReviewedCommit != authorization.ReviewedFeatureCommit || authorization.SecurityReviewedCommit != authorization.ReviewedFeatureCommit ||
 		authorization.PatchedBinarySHA256 != grant.PatchedBinarySHA256 || authorization.ExpectedMetadataSHA256 != grant.ExpectedMetadataSHA256 ||
+		!sha256Pattern.MatchString(authorization.WorkspaceInstanceSHA256) ||
 		authorization.AllowedEffect != "execute-one-expected-preimage-W-001-CAS-claim" ||
 		!sha1Pattern.MatchString(authorization.MergedCommit) || !sha1Pattern.MatchString(authorization.ReviewedFeatureCommit) ||
 		!sha1Pattern.MatchString(authorization.MergedTree) || authorization.MergedCommit == authorization.ReviewedFeatureCommit {

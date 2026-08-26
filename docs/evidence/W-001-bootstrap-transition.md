@@ -1,6 +1,6 @@
 # W-001 bootstrap claim transition evidence
 
-**Status:** Successor v2 disposable conformance passed; no canonical claim has executed
+**Status:** Successor v5 security hardening pending immutable review; no canonical claim has executed
 **Classification:** PUBLIC
 **Goal:** G-001
 **Decision:** PD-002
@@ -21,8 +21,16 @@ manifest, start gateway implementation, use raw SQL, or execute a two-step
 claim. Publication authority alone cannot execute the claim: `--apply`
 requires a separate, externally supplied, short-lived signed execution
 authorization binding the actual protected-main commit and check plus QA and
-Security acceptance of the immutable reviewed feature commit. Postclaim Git
-reconciliation requires another signed grant.
+Security acceptance of the immutable reviewed feature commit. That
+authorization also binds the opaque canonical-workspace instance digest
+emitted by the dry run. The helper resolves the fixed public GitHub HTTPS
+`main` with caller Git, SSH, proxy, certificate, and user configuration
+removed; mutable remotes and remote-tracking refs are not authority. It rejects
+copied workspaces, ambient Beads/Dolt workspace overrides, and any execution
+authorization whose freshly reloaded fields differ after conformance. It
+rechecks both expiries, the direct workspace filesystem identity, and the
+complete preimage at the effect boundary. Postclaim Git reconciliation
+requires another signed grant.
 
 ## Preimage
 
@@ -87,9 +95,11 @@ version, and leave the canonical workspace unchanged. QA and Security must
 accept the same tagged immutable tree, the
 PR must be squash-merged with exact tree equality, and protected-main CI must
 pass. Only then may the human authority sign a one-hour execution authorization
-binding those exact facts. The helper revalidates the authorization, grant
-expiry, authenticated remote `main`, workspace, and preimage immediately
-before the sole effect.
+binding those exact facts and the opaque canonical-workspace instance digest.
+The helper reloads the exact authorization after conformance, resolves only the
+fixed public GitHub `main` under its sanitized environment, and revalidates the
+grant expiry, workspace instance, and preimage immediately before the sole
+effect.
 
 ## Successor v2 disposable conformance
 
@@ -176,6 +186,25 @@ The tag signature, target, and message are preserved, but v3 is not an
 accepted release-manager attestation and is never moved or reused. The
 successor review uses `mars3/w001-bootstrap-helper-v4`, created with the exact
 public release-manager identity already enforced by the validator.
+
+## Preserved v4 security disposition
+
+Signed tag `mars3/w001-bootstrap-helper-v4` remains immutably attached to
+commit `ef30493cbea8133dcbd88934b8103fc0f5abdaff`, tree
+`3519dde9da164427db05b3410d03f09dc85de6d2`. GitHub run `32972354229`
+passed the complete public gate, and independent QA accepted that exact
+commit. Security requested changes before merge because the helper reused its
+initial execution-authorization object after a fresh signature check, trusted
+caller-controlled Git environment and remote configuration, and identified a
+workspace only by cloneable project metadata.
+
+No merge or canonical mutation followed that disposition. The successor
+reloads and compares the complete signed execution authorization, resolves the
+fixed public GitHub HTTPS endpoint under a sanitized Git environment, removes
+ambient Beads/Dolt workspace overrides, and binds an opaque digest of the
+direct canonical workspace directories and filesystem identity. The v4 tag is
+not moved or reused; the successor review uses
+`mars3/w001-bootstrap-helper-v5`.
 
 ## Pending receipt
 

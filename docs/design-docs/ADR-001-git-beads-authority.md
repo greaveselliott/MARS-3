@@ -126,9 +126,16 @@ authorization signed under `mars3-w001-bootstrap-execution`, valid for at most
 one hour, and bound to the actual squash-merged commit/tree, immutable review
 tag and feature commit, protected-main check run, exact QA and Security
 accepted commit, patched-binary digest, attempt, idempotency key, project, Bead,
-and preimage digest. The helper resolves authenticated remote `main` and
-rechecks both expiries, workspace identity, and preimage immediately before the
-effect. A local branch or mutable remote-tracking ref is never execution proof.
+preimage digest, and an opaque digest of the canonical authority-workspace
+instance. The helper resolves `main` only from the fixed public GitHub HTTPS
+endpoint using the pinned system Git executable with caller Git, SSH, proxy,
+certificate, replace-object, and user-configuration overrides removed. It
+reloads the signed execution authorization after conformance and rejects any
+field change, then rechecks both expiries, the accepted commit, the direct
+workspace directories and filesystem identity, and the Bead preimage at the
+effect boundary. Beads/Dolt workspace overrides are removed from every client
+invocation. A local branch, mutable remote-tracking ref, copied workspace, or
+swapped authorization is never execution proof.
 
 The helper patches the pinned Beads source in a temporary directory and uses
 the native `ClaimIssueInTx` primitive plus metadata and lifecycle-label updates

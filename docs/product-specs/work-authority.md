@@ -139,9 +139,17 @@ available to P-001 or later work.
 The publication grant is not sufficient to execute the claim. After merge,
 protected-main CI, and immutable QA and Security acceptance, a separate
 one-hour human-signed execution authorization must bind the actual accepted
-commit/tree and the reviewed helper digest. The helper must reject locally
-synthesized `main`, stale or missing review/check facts, an expired token,
-workspace/preimage drift, and any run whose acceptance becomes unknown.
+commit/tree, the reviewed helper digest, and an opaque digest of the one
+canonical authority-workspace instance. The helper resolves `main` only from
+the fixed public GitHub HTTPS endpoint under a fail-closed Git environment;
+mutable remotes, remote-tracking refs, caller Git/SSH/proxy configuration, and
+ambient Beads/Dolt workspace configuration are not authority. It reloads and
+byte-for-byte compares the signed authorization after conformance, then
+revalidates both expiries, the accepted commit, workspace instance, and Bead
+preimage at the effect boundary. It must reject locally synthesized `main`, a
+copied or replaced workspace, stale or missing review/check facts, an expired
+or swapped token, workspace/preimage drift, and any run whose acceptance
+becomes unknown.
 
 ADR-001 defines the exact signed-file schema, signer namespace, static effects,
 transition paths, and implementation-path equality rule for that grant. The

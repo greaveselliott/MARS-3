@@ -11,6 +11,10 @@ package bootstrap
 import (
 	"bytes"
 	"encoding/json"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -88,6 +92,114 @@ func TestPostclaimLabelDigestMatchesDeclaredTransition(t *testing.T) {
 	const declared = "3e4e77e20ee7a46dd77c4a9884dee51aa9f0fa9f2445099a0cb457d72cb83bbb"
 	if actual := digestLabels(labels); actual != declared {
 		t.Fatalf("postclaim label digest = %s, want %s", actual, declared)
+	}
+}
+
+func TestExecutionAuthorizationCannotChangeDuringConformance(t *testing.T) {
+	initial := doctrine.W001BootstrapExecutionAuthorization{MergedCommit: strings.Repeat("1", 40), ProtectedMainCheckRun: 17}
+	if err := requireUnchangedExecutionAuthorization(initial, initial); err != nil {
+		t.Fatalf("unchanged authorization was rejected: %v", err)
+	}
+	fresh := initial
+	fresh.ProtectedMainCheckRun++
+	if err := requireUnchangedExecutionAuthorization(initial, fresh); err == nil {
+		t.Fatal("changed authorization was accepted")
+	}
+}
+
+func TestWorkspaceInstanceRejectsAClone(t *testing.T) {
+	const projectID = "11111111-2222-3333-4444-555555555555"
+	makeWorkspace := func(root string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Join(root, ".beads", "embeddeddolt", "M3"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		metadata := []byte(`{"project_id":"` + projectID + `","database":"dolt"}`)
+		if err := os.WriteFile(filepath.Join(root, ".beads", "metadata.json"), metadata, 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	original, clone := t.TempDir(), t.TempDir()
+	original, err := filepath.EvalSymlinks(original)
+	if err != nil {
+		t.Fatal(err)
+	}
+	clone, err = filepath.EvalSymlinks(clone)
+	if err != nil {
+		t.Fatal(err)
+	}
+	makeWorkspace(original)
+	makeWorkspace(clone)
+	config := doctrine.W001BootstrapGrant{AuthorityProjectID: projectID}
+	originalDigest, err := verifyWorkspace(original, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cloneDigest, err := verifyWorkspace(clone, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if originalDigest == cloneDigest {
+		t.Fatal("copied workspace instance was indistinguishable from the canonical instance")
+	}
+}
+
+func TestGitOutputIgnoresAmbientAuthorityOverrides(t *testing.T) {
+	correct, attacker := t.TempDir(), t.TempDir()
+	for _, root := range []string{correct, attacker} {
+		command := exec.Command(bootstrapGitExecutable, "init", "--quiet", root)
+		command.Env = bootstrapGitEnvironment()
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("initialize Git fixture: %v: %s", err, output)
+		}
+	}
+	t.Setenv("GIT_DIR", filepath.Join(attacker, ".git"))
+	t.Setenv("GIT_WORK_TREE", attacker)
+	t.Setenv("GIT_CONFIG_GLOBAL", filepath.Join(attacker, "redirect.gitconfig"))
+	t.Setenv("GIT_NO_REPLACE_OBJECTS", "0")
+	t.Setenv("HTTPS_PROXY", "http://proxy.example.invalid")
+	t.Setenv("SSL_CERT_FILE", filepath.Join(attacker, "ca.pem"))
+	topLevel, err := gitOutput(correct, "rev-parse", "--show-toplevel")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resolvedCorrect, err := filepath.EvalSymlinks(correct)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if filepath.Clean(strings.TrimSpace(topLevel)) != filepath.Clean(resolvedCorrect) {
+		t.Fatalf("ambient Git authority redirected the audited root to %q", strings.TrimSpace(topLevel))
+	}
+}
+
+func TestRemoteMainParserRequiresOneCanonicalLowercaseSHA(t *testing.T) {
+	valid := strings.Repeat("a", 40)
+	resolved, err := parseRemoteMain([]byte(valid + "\trefs/heads/main\n"))
+	if err != nil || resolved != valid {
+		t.Fatalf("valid remote main was rejected: %q: %v", resolved, err)
+	}
+	for _, invalid := range []string{
+		strings.Repeat("A", 40) + "\trefs/heads/main\n",
+		strings.Repeat("z", 40) + "\trefs/heads/main\n",
+		strings.Repeat("a", 39) + "\trefs/heads/main\n",
+		valid + "\trefs/heads/other\n",
+		valid + "\trefs/heads/main\n" + valid + "\trefs/heads/main\n",
+	} {
+		if _, err := parseRemoteMain([]byte(invalid)); err == nil {
+			t.Fatalf("non-canonical remote main was accepted: %q", invalid)
+		}
+	}
+}
+
+func TestBeadsCommandEnvironmentRemovesAmbientWorkspaceOverrides(t *testing.T) {
+	for _, key := range []string{"BEADS_DIR", "BEADS_DB", "DOLT_HOST", "BD_CONFIG", "GT_ROOT"} {
+		t.Setenv(key, "attacker-controlled")
+	}
+	for _, value := range beadsCommandEnvironment() {
+		key := strings.ToUpper(strings.SplitN(value, "=", 2)[0])
+		if strings.HasPrefix(key, "BEADS_") || strings.HasPrefix(key, "DOLT_") || strings.HasPrefix(key, "BD_") || strings.HasPrefix(key, "GT_") {
+			t.Fatalf("ambient Beads override %q survived sanitization", key)
+		}
 	}
 }
 
