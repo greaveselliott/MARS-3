@@ -595,6 +595,84 @@ func writeW001PostclaimPRFixFixture(t *testing.T, grant, signature, publicKey []
 	return root
 }
 
+func TestW001PostclaimChronoFixAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001PostclaimChronoFix(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed postclaim chronology correction was rejected: %v", findings)
+	}
+}
+
+func TestW001PostclaimChronoFixFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(w001PostclaimChronoFixPath)
+	signature := read(w001PostclaimChronoFixSig)
+	publicKey := read(wave1PlanningGrantKey)
+	materials := map[string][]byte{
+		w001PostclaimPRFixPath:              read(w001PostclaimPRFixPath),
+		w001PostclaimPRFixSig:               read(w001PostclaimPRFixSig),
+		"docs/evidence/W-001-validation.md": read("docs/evidence/W-001-validation.md"),
+	}
+
+	t.Run("signed chronology tamper", func(t *testing.T) {
+		tampered := bytes.Replace(grant, []byte("v5EffectsAuthorizedByV5: false"), []byte("v5EffectsAuthorizedByV5: true"), 1)
+		root := writeW001PostclaimChronoFixFixture(t, tampered, signature, publicKey, materials)
+		var findings []Finding
+		checkW001PostclaimChronoFix(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_chronology_value") || !findingCodePresent(findings, "public.w001_postclaim_chronology_signature") {
+			t.Fatalf("tampered chronology disposition was accepted: %v", findings)
+		}
+	})
+
+	t.Run("current evidence tamper", func(t *testing.T) {
+		tampered := clonePlanningGrantMaterials(materials)
+		const path = "docs/evidence/W-001-validation.md"
+		tampered[path] = bytes.Replace(tampered[path], []byte("grant-effective-after-governed-effects"), []byte("missing-chronology-fingerprint"), 1)
+		root := writeW001PostclaimChronoFixFixture(t, grant, signature, publicKey, tampered)
+		var findings []Finding
+		checkW001PostclaimChronoFix(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_chronology_material") || !findingCodePresent(findings, "public.w001_postclaim_chronology_evidence") {
+			t.Fatalf("tampered chronology evidence was accepted: %v", findings)
+		}
+	})
+
+	t.Run("historical phase chronology must remain pre-effective", func(t *testing.T) {
+		document := parseStrictGrant(grant, w001PostclaimChronoFixScalars, w001PostclaimChronoFixSequences,
+			[]string{"grant", "finding", "chronology", "publication", "materials", "verification", "integrity"})
+		document.scalars["chronology.v5CommitAt"] = []string{"2026-08-27T00:00:01Z"}
+		issued, err := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var findings []Finding
+		checkW001PostclaimChronology(repo, document, issued, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_chronology_record") {
+			t.Fatalf("false historical chronology was accepted: %v", findings)
+		}
+	})
+}
+
+func writeW001PostclaimChronoFixFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
+	t.Helper()
+	root := t.TempDir()
+	writePlanningGrantTestFile(t, root, w001PostclaimChronoFixPath, grant)
+	writePlanningGrantTestFile(t, root, w001PostclaimChronoFixSig, signature)
+	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+	for path, data := range materials {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	return root
+}
+
 func clonePlanningGrantMaterials(materials map[string][]byte) map[string][]byte {
 	cloned := make(map[string][]byte, len(materials))
 	for path, data := range materials {
@@ -763,6 +841,54 @@ func TestW001PostclaimPRBindingGitDiffIsFenced(t *testing.T) {
 	})
 }
 
+func TestW001PostclaimChronologyGitDiffIsFenced(t *testing.T) {
+	t.Run("exact dirty correction passes", func(t *testing.T) {
+		root := writeW001PostclaimChronologyGitFixture(t)
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if len(findings) != 0 {
+			t.Fatalf("authorized chronology correction was rejected: %v", findings)
+		}
+	})
+
+	t.Run("unauthorized correction path fails", func(t *testing.T) {
+		root := writeW001PostclaimChronologyGitFixture(t)
+		writePlanningGrantTestFile(t, root, "internal/authority/escape.go", []byte("package authority\n"))
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_scope") {
+			t.Fatalf("unauthorized chronology path was accepted: %v", findings)
+		}
+	})
+
+	t.Run("missing prior v5 tag fails", func(t *testing.T) {
+		root := writeW001PostclaimChronologyGitFixture(t)
+		runPlanningGrantTestGit(t, root, "tag", "-d", w001PostclaimPRFixTag)
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_chronology_v5_tag") {
+			t.Fatalf("missing immutable v5 tag was accepted: %v", findings)
+		}
+	})
+
+	t.Run("pre-effective v6 target fails", func(t *testing.T) {
+		root := writeW001PostclaimChronologyGitFixture(t)
+		runPlanningGrantTestGit(t, root, "-c", "user.name=Synthetic Release Manager", "-c", "user.email=release-manager@example.com", "tag", "-a", "-m", w001PostclaimChronoFixTagMsg, w001PostclaimChronoFixTag, w001PostclaimChronoFixBase)
+		grant, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(w001PostclaimChronoFixPath)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		document := parseStrictGrant(grant, w001PostclaimChronoFixScalars, w001PostclaimChronoFixSequences,
+			[]string{"grant", "finding", "chronology", "publication", "materials", "verification", "integrity"})
+		issued, _ := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+		var findings []Finding
+		checkW001PostclaimChronology(root, document, issued, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_chronology_effect") {
+			t.Fatalf("pre-effective v6 target was accepted: %v", findings)
+		}
+	})
+}
+
 func writeW001PostclaimGitFixture(t *testing.T) string {
 	t.Helper()
 	t.Setenv("GITHUB_ACTIONS", "")
@@ -852,6 +978,31 @@ func writeW001PostclaimPRBindingGitFixture(t *testing.T) string {
 		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+tag+":refs/tags/"+tag)
 	}
 	for _, path := range w001PostclaimPRFixSequences["grant.authorizedPaths"] {
+		data, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	return root
+}
+
+func writeW001PostclaimChronologyGitFixture(t *testing.T) string {
+	t.Helper()
+	t.Setenv("GITHUB_ACTIONS", "")
+	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	disablePlanningGrantTestGitMaintenance(t, root)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimChronoFixBase)
+	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
+	for _, tag := range []string{w001PostclaimReviewTag, w001PostclaimCIFixReviewTag, w001PostclaimSecurityFixTag, w001PostclaimHookFixTag, w001PostclaimPRFixTag} {
+		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+tag+":refs/tags/"+tag)
+	}
+	for _, path := range w001PostclaimChronoFixSequences["grant.authorizedPaths"] {
 		data, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(path)))
 		if err != nil {
 			t.Fatal(err)

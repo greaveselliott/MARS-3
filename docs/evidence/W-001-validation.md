@@ -3,7 +3,7 @@
 **Classification:** PUBLIC
 **Work authority:** M3-W001
 **Failure ownership:** foundation
-**Correction grant:** `W-001-postclaim-pr-binding-v5`
+**Correction grant:** `W-001-postclaim-chronology-correction-v6`
 **Current disposition:** changes-requested pending fresh immutable QA and Security review
 
 ## Superseded Security disposition
@@ -105,6 +105,30 @@ active publication vehicle for the successor reviewed tree. This additive
 correction does not rewrite v1 through v4, move any retained tag, alter the
 canonical M3 postimage, or grant a lease or implementation capability.
 
+## v6 publication-authority chronology correction
+
+Security subsequently found that the v4 and v5 signed grants were not yet
+effective when their governed public Git effects occurred. This is recorded as
+the foundation-owned failure fingerprint
+`grant-effective-after-governed-effects`, not retroactively relabelled as
+authorized:
+
+- v1 through v3 have `issuedAt` timestamps no later than their governed
+  commits and signed tags.
+- v4 declares `2026-08-26T23:45:00Z`, while its commit and tag were created at
+  `2026-08-26T22:59:53Z` and `2026-08-26T23:00:29Z`; its exact-head PR run
+  began at `2026-08-26T23:15:21Z`.
+- v5 declares `2026-08-27T00:00:00Z`, while its commit and tag were created at
+  `2026-08-26T23:38:40Z` and `2026-08-26T23:38:54Z`; its exact-head PR run
+  began at `2026-08-26T23:40:36Z`.
+
+The v4 and v5 commit, tag, CI, QA, and Security records remain immutable
+historical evidence, but their grants do not authorize those pre-effective
+publication effects. The already-effective v6 grant compensates by publishing
+the complete reviewed tree through a new signed commit, tag, PR #8 run, and
+protected-main merge path. It changes no helper, patch, Bead, lease, runtime,
+workflow, or repository control.
+
 ## Reproducible verification
 
 Commands run from the repository root use only synthetic identities and
@@ -157,7 +181,7 @@ This composition preserves the previously reviewed patch bytes and prevents
 the correction grant from silently rebinding unrelated historical changes.
 
 The exact generated patches, helper, tests, signed correction grants, retained
-v1 through v4 tags, public commit gates, and independent dispositions are
+v1 through v5 tags, public commit gates, and independent dispositions are
 bound by their immutable reviewed Git trees. Until both QA and Security accept
-the signed v5 tree, PR #8 must remain unmerged and no delivery lease or
+the signed v6 tree, PR #8 must remain unmerged and no delivery lease or
 implementation right exists.
