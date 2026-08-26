@@ -14,7 +14,9 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -92,11 +94,12 @@ const (
 	w001BootstrapGrantPath          = ".harness/grants/W-001-bootstrap.yaml"
 	w001BootstrapGrantSignature     = ".harness/grants/W-001-bootstrap.yaml.sig"
 	w001BootstrapGrantNamespace     = "mars3-w001-bootstrap-grant"
+	w001BootstrapExecutionNamespace = "mars3-w001-bootstrap-execution"
 	w001BootstrapBase               = "37b55b912b20715349bc50e0524c85d4b22f1772"
 	w001BootstrapBaseTree           = "f06864b0802cea793cf7a0c08b60b7e734539a94"
 	w001BootstrapBranch             = "codex/w-001-work-authority"
-	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v1"
-	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v1"
+	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v2"
+	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v2"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -141,9 +144,41 @@ type W001BootstrapGrant struct {
 	GoArch                      string
 	ICUFormula                  string
 	DoltTestImage               string
-	RyukTestImage               string
 	PatchPath                   string
 	PatchSHA256                 string
+	PatchedBinarySHA256         string
+	GoBinarySHA256              string
+	ReviewTag                   string
+}
+
+// W001BootstrapExecutionAuthorization is a short-lived, independently signed
+// post-review effect token. It is intentionally external to Git so it can bind
+// the actual protected-main commit and check after the helper is merged.
+type W001BootstrapExecutionAuthorization struct {
+	SchemaVersion          int    `json:"schemaVersion"`
+	Kind                   string `json:"kind"`
+	Classification         string `json:"classification"`
+	GrantID                string `json:"grantId"`
+	Repository             string `json:"repository"`
+	AttemptID              string `json:"attemptId"`
+	IdempotencyKey         string `json:"idempotencyKey"`
+	Bead                   string `json:"bead"`
+	AuthorityProjectID     string `json:"authorityProjectId"`
+	MergedCommit           string `json:"mergedCommit"`
+	MergedTree             string `json:"mergedTree"`
+	ReviewTag              string `json:"reviewTag"`
+	ReviewedFeatureCommit  string `json:"reviewedFeatureCommit"`
+	PullRequest            int    `json:"pullRequest"`
+	ProtectedMainCheckRun  int64  `json:"protectedMainCheckRun"`
+	QAReviewedCommit       string `json:"qaReviewedCommit"`
+	QADisposition          string `json:"qaDisposition"`
+	SecurityReviewedCommit string `json:"securityReviewedCommit"`
+	SecurityDisposition    string `json:"securityDisposition"`
+	PatchedBinarySHA256    string `json:"patchedBinarySHA256"`
+	ExpectedMetadataSHA256 string `json:"expectedMetadataSHA256"`
+	AllowedEffect          string `json:"allowedEffect"`
+	IssuedAt               string `json:"issuedAt"`
+	ExpiresAt              string `json:"expiresAt"`
 }
 
 type grantScalarExpectation struct {
@@ -975,21 +1010,24 @@ var w001BootstrapGrantScalars = []grantScalarExpectation{
 	{path: "toolchain.goVersion", value: "go1.26.2"},
 	{path: "toolchain.goOS", value: "darwin"},
 	{path: "toolchain.goArch", value: "arm64"},
+	{path: "toolchain.goBinarySHA256", value: "005640c7ff93028cb704283b0f737f2db3faf8b51b2561170c769b83905da646"},
 	{path: "toolchain.cgoEnabled", value: "false"},
 	{path: "toolchain.icuFormula", value: "icu4c@78 78.2"},
 	{path: "toolchain.doltTestImage", value: "dolthub/dolt-sql-server@sha256:6b651663c5024d98a98a4db7226a5e85f90a9344c78fee85617c0fb4a30c6e64"},
-	{path: "toolchain.ryukTestImage", value: "testcontainers/ryuk@sha256:31b31269d06603366cbfd0284708dcd2e281e8a4188e53fce3d3304439d0df3d"},
+	{path: "toolchain.ryukDisabled", value: "true"},
 	{path: "toolchain.patchPath", value: "internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch"},
-	{path: "toolchain.patchSHA256", value: "dadfbfde1350659dc28079f82979eb9ad145e10a6f0fd40f0af4948fa9d81d62"},
+	{path: "toolchain.patchSHA256", value: "a21560d7ceb3ef530920a0277f77b4b8c8d67d0dbd6d0c2b3d8321365851d34b"},
+	{path: "toolchain.patchedBinarySHA256", value: "3620a5517b9e3becb066c553b4e7bf2370714f93c04f40082cbc0c49d072821c"},
 	{path: "toolchain.helperCommandPath", value: "cmd/mars3-authority/main.go"},
-	{path: "toolchain.helperCommandSHA256", value: "efd8e92cd30114374b0cdcce2680f12ac944cee4fcc3d84042244e486147d538"},
+	{path: "toolchain.helperCommandSHA256", value: "d8ae9fcf5b04902fa3f2ece3369688ca7abf1e55f0cd4f57a611006a861979ea"},
 	{path: "toolchain.helperLibraryPath", value: "internal/authority/bootstrap/bootstrap.go"},
-	{path: "toolchain.helperLibrarySHA256", value: "7385fe6317e450711789e85ac424a6b66831d271a0980b6ab50b5ceaf1427ce5"},
+	{path: "toolchain.helperLibrarySHA256", value: "acf5feca6c0147c1766690f056cf3c9621d3e3ae39aec638be4d7e1d855edf46"},
 	{path: "verification.publicCommitGateRequired", value: "true"},
 	{path: "verification.immutableCommitReviewRequired", value: "true"},
 	{path: "verification.protectedMainRequiredBeforeClaim", value: "true"},
 	{path: "verification.externalStateReadbackRequired", value: "true"},
 	{path: "verification.disposableAtomicityConformanceRequired", value: "true"},
+	{path: "verification.postReviewExecutionAuthorizationRequired", value: "true"},
 	{path: "integrity.signatureFormat", value: "openssh"},
 	{path: "integrity.signatureNamespace", value: w001BootstrapGrantNamespace},
 	{path: "integrity.detachedSignature", value: "W-001-bootstrap.yaml.sig"},
@@ -1032,6 +1070,7 @@ var w001BootstrapGrantSequences = map[string][]string{
 	},
 	"grant.prohibitedEffects": {
 		"execute-claim-before-helper-merge-protected-main-success-QA-and-Security-acceptance",
+		"execute-claim-without-a-separate-signed-short-lived-post-review-authorization",
 		"use-raw-SQL-hidden-code-or-a-two-transaction-claim",
 		"mutate-another-Bead-dependency-or-authority-project",
 		"issue-or-assert-a-live-lease-before-verified-gateway-issuance",
@@ -1656,9 +1695,69 @@ func LoadW001BootstrapGrant(repo string) (W001BootstrapGrant, error) {
 		BeadsBinarySHA256: scalarValue(document, "toolchain.beadsBinarySHA256"),
 		DoltModule:        scalarValue(document, "toolchain.doltModule"), DoltModuleSHA256: scalarValue(document, "toolchain.doltModuleSHA256"),
 		GoVersion: scalarValue(document, "toolchain.goVersion"), GoOS: scalarValue(document, "toolchain.goOS"), GoArch: scalarValue(document, "toolchain.goArch"),
-		ICUFormula: scalarValue(document, "toolchain.icuFormula"), DoltTestImage: scalarValue(document, "toolchain.doltTestImage"), RyukTestImage: scalarValue(document, "toolchain.ryukTestImage"),
+		ICUFormula: scalarValue(document, "toolchain.icuFormula"), DoltTestImage: scalarValue(document, "toolchain.doltTestImage"),
 		PatchPath: scalarValue(document, "toolchain.patchPath"), PatchSHA256: scalarValue(document, "toolchain.patchSHA256"),
+		PatchedBinarySHA256: scalarValue(document, "toolchain.patchedBinarySHA256"), GoBinarySHA256: scalarValue(document, "toolchain.goBinarySHA256"),
+		ReviewTag: scalarValue(document, "grant.reviewTag"),
 	}, nil
+}
+
+// LoadW001BootstrapExecutionAuthorization verifies the separately signed,
+// short-lived authorization that can exist only after protected-main review.
+func LoadW001BootstrapExecutionAuthorization(repo, path string, grant W001BootstrapGrant) (W001BootstrapExecutionAuthorization, error) {
+	root, err := repositoryRoot(repo)
+	if err != nil {
+		return W001BootstrapExecutionAuthorization{}, err
+	}
+	if path == "" || filepath.Ext(path) != ".json" {
+		return W001BootstrapExecutionAuthorization{}, errors.New("execution authorization must be one explicit JSON file")
+	}
+	for _, candidate := range []string{path, path + ".sig"} {
+		info, statErr := os.Lstat(candidate)
+		if statErr != nil || !info.Mode().IsRegular() {
+			return W001BootstrapExecutionAuthorization{}, errors.New("execution authorization and detached signature must be regular files")
+		}
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return W001BootstrapExecutionAuthorization{}, err
+	}
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	var authorization W001BootstrapExecutionAuthorization
+	if err := decoder.Decode(&authorization); err != nil {
+		return W001BootstrapExecutionAuthorization{}, fmt.Errorf("decode execution authorization: %w", err)
+	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+		return W001BootstrapExecutionAuthorization{}, errors.New("execution authorization must contain exactly one JSON object")
+	}
+	signature, err := os.ReadFile(path + ".sig")
+	if err != nil {
+		return W001BootstrapExecutionAuthorization{}, err
+	}
+	publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest || verifySSHSig(data, signature, publicKey, w001BootstrapExecutionNamespace) != nil {
+		return W001BootstrapExecutionAuthorization{}, errors.New("execution authorization signature is invalid")
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, authorization.IssuedAt)
+	expiresAt, expiryErr := time.Parse(time.RFC3339, authorization.ExpiresAt)
+	now := time.Now().UTC()
+	if issueErr != nil || expiryErr != nil || expiresAt.Sub(issuedAt) <= 0 || expiresAt.Sub(issuedAt) > time.Hour || now.Before(issuedAt.Add(-5*time.Minute)) || !now.Before(expiresAt) {
+		return W001BootstrapExecutionAuthorization{}, errors.New("execution authorization is outside its signed one-hour validity window")
+	}
+	if authorization.SchemaVersion != 1 || authorization.Kind != "MARS3W001BootstrapExecutionAuthorization" || authorization.Classification != "PUBLIC" ||
+		authorization.GrantID != grant.ID || authorization.Repository != planningGrantRepository || authorization.AttemptID != grant.AttemptID ||
+		authorization.IdempotencyKey != grant.IdempotencyKey || authorization.Bead != grant.Bead || authorization.AuthorityProjectID != grant.AuthorityProjectID ||
+		authorization.ReviewTag != grant.ReviewTag || authorization.PullRequest != 6 || authorization.ProtectedMainCheckRun <= 0 ||
+		authorization.QADisposition != "accepted" || authorization.SecurityDisposition != "accepted" ||
+		authorization.QAReviewedCommit != authorization.ReviewedFeatureCommit || authorization.SecurityReviewedCommit != authorization.ReviewedFeatureCommit ||
+		authorization.PatchedBinarySHA256 != grant.PatchedBinarySHA256 || authorization.ExpectedMetadataSHA256 != grant.ExpectedMetadataSHA256 ||
+		authorization.AllowedEffect != "execute-one-expected-preimage-W-001-CAS-claim" ||
+		!sha1Pattern.MatchString(authorization.MergedCommit) || !sha1Pattern.MatchString(authorization.ReviewedFeatureCommit) ||
+		!sha1Pattern.MatchString(authorization.MergedTree) || authorization.MergedCommit == authorization.ReviewedFeatureCommit {
+		return W001BootstrapExecutionAuthorization{}, errors.New("execution authorization does not match the exact post-review claim contract")
+	}
+	return authorization, nil
 }
 
 type planningGrantCheckoutKind int
@@ -2048,7 +2147,7 @@ func w001BootstrapGitHubCheckout(root, head, branch string, findings *[]Finding)
 			os.Getenv("GITHUB_BASE_REF") != "main" || event.PullRequest == nil || event.PullRequest.Head.Ref != w001BootstrapBranch ||
 			event.PullRequest.Base.Ref != "main" || event.PullRequest.Base.SHA != w001BootstrapBase ||
 			!sha1Pattern.MatchString(event.PullRequest.Head.SHA) ||
-			(event.PullRequest.MergeCommitSHA != "" && !sha1Pattern.MatchString(event.PullRequest.MergeCommitSHA)) {
+			event.PullRequest.MergeCommitSHA != head {
 			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_event", "pull-request event does not bind the signed branch and base")
 			return "", false, false
 		}
@@ -2060,6 +2159,12 @@ func w001BootstrapGitHubCheckout(root, head, branch string, findings *[]Finding)
 		parents, err := planningGrantCommitParents(root, head)
 		if err != nil || len(parents) != 2 || parents[0] != w001BootstrapBase || parents[1] != event.PullRequest.Head.SHA {
 			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_pr_topology", "pull-request checkout must be the exact two-parent synthetic merge")
+			return "", false, false
+		}
+		mergeTree, mergeErr := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, featureErr := planningGrantGitOutput(root, "rev-parse", "--verify", event.PullRequest.Head.SHA+"^{tree}")
+		if mergeErr != nil || featureErr != nil || strings.TrimSpace(string(mergeTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_pr_tree", "pull-request synthetic merge tree must equal the reviewed feature tree")
 			return "", false, false
 		}
 		return event.PullRequest.Head.SHA, true, false

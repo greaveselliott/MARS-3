@@ -136,6 +136,13 @@ service without pretending that its not-yet-built lease exists. None of these
 grants authorizes production or destructive effects, is transferable, or is
 available to P-001 or later work.
 
+The publication grant is not sufficient to execute the claim. After merge,
+protected-main CI, and immutable QA and Security acceptance, a separate
+one-hour human-signed execution authorization must bind the actual accepted
+commit/tree and the reviewed helper digest. The helper must reject locally
+synthesized `main`, stale or missing review/check facts, an expired token,
+workspace/preimage drift, and any run whose acceptance becomes unknown.
+
 ADR-001 defines the exact signed-file schema, signer namespace, static effects,
 transition paths, and implementation-path equality rule for that grant. The
 delivery phase cannot begin from prose alone: the signed grant, pinned-state

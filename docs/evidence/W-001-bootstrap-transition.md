@@ -18,7 +18,11 @@ tree, disposable conformance, one expected-preimage atomic claim of M3-W001,
 and one bounded claim receipt. It grants no live lease or implementation
 capability. It cannot mutate P-001 or another Bead, reconcile the plan or
 manifest, start gateway implementation, use raw SQL, or execute a two-step
-claim. Postclaim Git reconciliation requires a new signed grant.
+claim. Publication authority alone cannot execute the claim: `--apply`
+requires a separate, externally supplied, short-lived signed execution
+authorization binding the actual protected-main commit and check plus QA and
+Security acceptance of the immutable reviewed feature commit. Postclaim Git
+reconciliation requires another signed grant.
 
 ## Preimage
 
@@ -55,6 +59,11 @@ primitive and applies metadata plus lifecycle-label changes inside the same
 outer Dolt transaction. Any stale status, owner, timestamps, metadata, labels,
 or dependency precondition rolls the entire transaction back.
 
+The helper verifies that a successful embedded-workspace claim advances the
+Dolt version commit. A command error is an unknown-acceptance blocker: it is
+never converted into idempotent success, and no retry is allowed until the
+issue, working set, and history are reconciled under new authority.
+
 ## Required verification before claim
 
 The immutable reviewed commit must pass:
@@ -70,11 +79,17 @@ git diff --check
 gitleaks git --redact --no-banner
 ```
 
-Disposable conformance must prove one winner and complete rollback on a stale
-precondition. QA and Security must accept the same tagged immutable tree, the
+Disposable conformance must exercise successful transition, stale-precondition
+rollback, rollback after a later operation fails, and concurrent one-winner
+contention. The built patched binary must then claim a disposable copy of the
+canonical workspace through its actual `embedded` backend, publish a new Dolt
+version, and leave the canonical workspace unchanged. QA and Security must
+accept the same tagged immutable tree, the
 PR must be squash-merged with exact tree equality, and protected-main CI must
-pass. Only then may the helper run once with `--apply` from a clean checkout
-whose HEAD equals observed `origin/main`.
+pass. Only then may the human authority sign a one-hour execution authorization
+binding those exact facts. The helper revalidates the authorization, grant
+expiry, authenticated remote `main`, workspace, and preimage immediately
+before the sole effect.
 
 ## Pending receipt
 
@@ -83,7 +98,7 @@ public-safe helper receipt, the independently read-back postimage hashes, and
 the opaque Beads trace/comment reference. Do not include local paths, raw
 database content, terminal recordings, credentials, or provider state.
 
-## Dry-run checkpoint
+## Superseded v1 dry-run checkpoint
 
 The signed helper was executed without `--apply` from clean commit
 `e0ab3109aea538b1b883e2642da80358691f8268`. It rebuilt the pinned Beads source
@@ -98,6 +113,13 @@ The temporary patched binary SHA-256 was
 The bounded result was `conformance-passed-no-canonical-mutation`; independent
 readback remained native `open`, lifecycle `backlog`, and
 `liveLeaseAsserted: false`.
+
+This checkpoint and tag `mars3/w001-bootstrap-helper-v1` are preserved as
+historical evidence but are not accepted: they did not exercise the canonical
+embedded backend, a post-claim failure, or contention. The v1 tag is immutable
+and is not moved or reused. Successor v2 evidence must bind the four-test suite,
+the disposable embedded-workspace claim, the exact Go executable and patched
+binary hashes, and the short-lived post-review execution boundary.
 
 Repository-relative verification command shape:
 

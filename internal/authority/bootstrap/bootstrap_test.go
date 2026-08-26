@@ -9,12 +9,37 @@ docs:
 package bootstrap
 
 import (
+	"bytes"
 	"encoding/json"
 	"testing"
 	"time"
 
 	"github.com/greaveselliott/MARS-3/internal/doctrine"
 )
+
+func TestVerifyAtomicityTestResultsRequiresEveryExecutedCase(t *testing.T) {
+	tests := []string{
+		"TestBatchBootstrapClaimIsOneAtomicTransition",
+		"TestBatchBootstrapClaimPreconditionFailureRollsBack",
+		"TestBatchBootstrapClaimPostClaimFailureRollsBack",
+		"TestBatchBootstrapClaimContentionHasOneWinner",
+	}
+	var output bytes.Buffer
+	for _, name := range tests {
+		encoded, err := json.Marshal(map[string]string{"Action": "pass", "Test": name})
+		if err != nil {
+			t.Fatal(err)
+		}
+		output.Write(encoded)
+		output.WriteByte('\n')
+	}
+	if err := verifyAtomicityTestResults(output.Bytes()); err != nil {
+		t.Fatalf("complete atomicity suite was rejected: %v", err)
+	}
+	if err := verifyAtomicityTestResults(bytes.Replace(output.Bytes(), []byte(`"Action":"pass","Test":"TestBatchBootstrapClaimContentionHasOneWinner"`), []byte(`"Action":"skip","Test":"TestBatchBootstrapClaimContentionHasOneWinner"`), 1)); err == nil {
+		t.Fatal("skipped contention case was accepted")
+	}
+}
 
 func TestVerifyPreimageBindsDependencyAndLineage(t *testing.T) {
 	metadata := json.RawMessage(`{"contractPublicationRequired":true,"coordinator":"delivery-orchestrator","displayId":"W-001","exclusivePaths":["internal/authority/**","cmd/mars3-authority/**","api/authority/**","database/authority/**","deploy/authority/**","docs/evidence/W-001-validation.md","go.mod","go.sum","Makefile","NOTICE","THIRD_PARTY_NOTICES"],"failureOwnership":"foundation","featureId":"F-002","goalIds":["G-001"],"lifecycleState":"backlog","productDecisionIds":["PD-002"],"publicDisclosure":true,"risk":"critical","scenarioIds":["F-002-S1","F-002-S2","F-002-S3","F-002-S4","F-002-S5","F-002-S6"],"schemaVersion":1,"verificationOrder":["qa","security-reviewer","delivery-orchestrator"],"workType":"enabler"}`)

@@ -29,13 +29,14 @@ import (
 )
 
 type Options struct {
-	Repo           string
-	BeadsSource    string
-	BeadsWorkspace string
-	BeadsBinary    string
-	Apply          bool
-	Stdout         io.Writer
-	Stderr         io.Writer
+	Repo                   string
+	BeadsSource            string
+	BeadsWorkspace         string
+	BeadsBinary            string
+	ExecutionAuthorization string
+	Apply                  bool
+	Stdout                 io.Writer
+	Stderr                 io.Writer
 }
 
 type issueRecord struct {
@@ -54,6 +55,11 @@ type issueRecord struct {
 	} `json:"dependencies"`
 }
 
+type versionState struct {
+	Branch string `json:"branch"`
+	Commit string `json:"commit"`
+}
+
 type receipt struct {
 	SchemaVersion       int    `json:"schemaVersion"`
 	Kind                string `json:"kind"`
@@ -64,6 +70,9 @@ type receipt struct {
 	Bead                string `json:"bead"`
 	BaseCommit          string `json:"baseCommit"`
 	PatchedBinarySHA256 string `json:"patchedBinarySHA256"`
+	DisposableBackend   string `json:"disposableBackend"`
+	DisposableVerified  bool   `json:"disposableVerified"`
+	CanonicalUnchanged  bool   `json:"canonicalUnchangedBeforeEffect"`
 	Mode                string `json:"mode"`
 	Result              string `json:"result"`
 	NativeStatus        string `json:"nativeStatus"`
@@ -103,6 +112,19 @@ func Run(options Options) error {
 	if err := verifyRepository(options.Repo, config, options.Apply); err != nil {
 		return err
 	}
+	var execution doctrine.W001BootstrapExecutionAuthorization
+	if options.Apply {
+		if options.ExecutionAuthorization == "" {
+			return errors.New("--execution-authorization is required for the canonical claim")
+		}
+		execution, err = doctrine.LoadW001BootstrapExecutionAuthorization(options.Repo, options.ExecutionAuthorization, config)
+		if err != nil {
+			return err
+		}
+		if err := verifyAcceptedMain(options.Repo, execution); err != nil {
+			return err
+		}
+	}
 	if err := verifyWorkspace(options.BeadsWorkspace, config); err != nil {
 		return err
 	}
@@ -116,12 +138,8 @@ func Run(options Options) error {
 	if err != nil {
 		return err
 	}
-	alreadyApplied := false
 	if err := verifyPreimage(pre, config); err != nil {
-		if !options.Apply || verifyPostimage(pre, config) != nil {
-			return err
-		}
-		alreadyApplied = true
+		return err
 	}
 
 	patchedBinary, patchedDigest, cleanup, err := buildPatchedBinary(options.Repo, options.BeadsSource, config, options.Stdout, options.Stderr)
@@ -131,13 +149,45 @@ func Run(options Options) error {
 	if err != nil {
 		return err
 	}
+	if patchedDigest != config.PatchedBinarySHA256 {
+		return errors.New("patched Beads binary does not match the signed SHA-256")
+	}
+	disposableBackend, err := verifyDisposableWorkspace(patchedBinary, options.BeadsBinary, options.BeadsWorkspace, pre, config, options.Stdout, options.Stderr)
+	if err != nil {
+		return err
+	}
+	canonicalBeforeEffect, err := readIssue(options.BeadsBinary, options.BeadsWorkspace, config.Bead)
+	if err != nil || verifyPreimage(canonicalBeforeEffect, config) != nil {
+		return errors.New("canonical Bead changed during disposable conformance")
+	}
 
 	mode := "dry-run"
 	result := "conformance-passed-no-canonical-mutation"
 	post := pre
-	if options.Apply && !alreadyApplied {
+	if options.Apply {
+		if _, err := doctrine.LoadW001BootstrapExecutionAuthorization(options.Repo, options.ExecutionAuthorization, config); err != nil {
+			return fmt.Errorf("revalidate execution authorization immediately before effect: %w", err)
+		}
+		grantExpiry, err := time.Parse(time.RFC3339, config.ExpiresAt)
+		if err != nil || !time.Now().UTC().Before(grantExpiry) {
+			return errors.New("signed W-001 bootstrap authority expired during conformance")
+		}
+		if err := verifyAcceptedMain(options.Repo, execution); err != nil {
+			return err
+		}
+		if err := verifyWorkspace(options.BeadsWorkspace, config); err != nil {
+			return err
+		}
+		fresh, err := readIssue(options.BeadsBinary, options.BeadsWorkspace, config.Bead)
+		if err != nil || verifyPreimage(fresh, config) != nil {
+			return errors.New("canonical Bead preimage changed before the authorized effect")
+		}
+		beforeVersion, err := readVersionState(options.BeadsBinary, options.BeadsWorkspace)
+		if err != nil {
+			return err
+		}
 		mode = "apply"
-		script, err := claimScript(pre, config)
+		script, err := claimScript(fresh, config)
 		if err != nil {
 			return err
 		}
@@ -146,7 +196,7 @@ func Run(options Options) error {
 		command.Stdout = options.Stdout
 		command.Stderr = options.Stderr
 		if err := command.Run(); err != nil {
-			return fmt.Errorf("atomic bootstrap claim failed: %w", err)
+			return fmt.Errorf("atomic bootstrap claim failed with unknown acceptance; do not retry until canonical issue and Dolt history are reconciled: %w", err)
 		}
 		post, err = readIssue(options.BeadsBinary, options.BeadsWorkspace, config.Bead)
 		if err != nil {
@@ -155,10 +205,11 @@ func Run(options Options) error {
 		if err := verifyPostimage(post, config); err != nil {
 			return err
 		}
+		afterVersion, err := readVersionState(options.BeadsBinary, options.BeadsWorkspace)
+		if err != nil || afterVersion.Commit == beforeVersion.Commit {
+			return errors.New("canonical claim lacks a verified new Dolt version commit; block and reconcile before retry")
+		}
 		result = "canonical-claim-verified"
-	} else if options.Apply {
-		mode = "apply"
-		result = "canonical-claim-already-verified"
 	}
 
 	lifecycle := metadataString(post.Metadata, "lifecycleState")
@@ -166,6 +217,7 @@ func Run(options Options) error {
 		SchemaVersion: 1, Kind: "MARS3BootstrapClaimReceipt", Classification: "PUBLIC",
 		GrantID: config.ID, AttemptID: config.AttemptID, IdempotencyKey: config.IdempotencyKey, Bead: config.Bead,
 		BaseCommit: config.BaseCommit, PatchedBinarySHA256: patchedDigest,
+		DisposableBackend: disposableBackend, DisposableVerified: true, CanonicalUnchanged: true,
 		Mode: mode, Result: result, NativeStatus: post.Status,
 		LifecycleState: lifecycle, LiveLeaseAsserted: false,
 	})
@@ -205,7 +257,36 @@ func verifyRepository(repo string, config doctrine.W001BootstrapGrant, apply boo
 	return nil
 }
 
+func verifyAcceptedMain(repo string, authorization doctrine.W001BootstrapExecutionAuthorization) error {
+	head, err := gitOutput(repo, "rev-parse", "HEAD")
+	if err != nil || strings.TrimSpace(head) != authorization.MergedCommit {
+		return errors.New("execution authorization does not bind the checked-out main commit")
+	}
+	tree, err := gitOutput(repo, "rev-parse", "HEAD^{tree}")
+	if err != nil || strings.TrimSpace(tree) != authorization.MergedTree {
+		return errors.New("accepted main tree does not match the execution authorization")
+	}
+	remote, err := gitOutput(repo, "ls-remote", "--exit-code", "origin", "refs/heads/main")
+	fields := strings.Fields(remote)
+	if err != nil || len(fields) != 2 || fields[0] != authorization.MergedCommit || fields[1] != "refs/heads/main" {
+		return errors.New("authenticated origin/main does not match the execution authorization")
+	}
+	target, err := gitOutput(repo, "rev-list", "-n", "1", authorization.ReviewTag)
+	if err != nil || strings.TrimSpace(target) != authorization.ReviewedFeatureCommit {
+		return errors.New("execution authorization does not bind the immutable reviewed feature tag")
+	}
+	reviewedTree, err := gitOutput(repo, "rev-parse", authorization.ReviewedFeatureCommit+"^{tree}")
+	if err != nil || strings.TrimSpace(reviewedTree) != authorization.MergedTree {
+		return errors.New("reviewed feature and accepted main trees differ")
+	}
+	return nil
+}
+
 func verifyWorkspace(workspace string, config doctrine.W001BootstrapGrant) error {
+	info, err := os.Lstat(workspace)
+	if err != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+		return errors.New("Beads workspace must be one direct directory, not an indirect path")
+	}
 	data, err := os.ReadFile(filepath.Join(workspace, ".beads", "metadata.json"))
 	if err != nil {
 		return fmt.Errorf("read Beads workspace identity: %w", err)
@@ -282,13 +363,24 @@ func buildPatchedBinary(repo, source string, config doctrine.W001BootstrapGrant,
 	if err := run(stdout, stderr, "git", "-C", checkout, "apply", "--unidiff-zero", patch); err != nil {
 		return "", "", cleanup, fmt.Errorf("apply bootstrap patch: %w", err)
 	}
+	goBinary, baseEnv, err := verifiedGoEnvironment(config, temporary)
+	if err != nil {
+		return "", "", cleanup, err
+	}
 	icuPrefix, err := verifyConformanceDependencies(config)
 	if err != nil {
 		return "", "", cleanup, err
 	}
-	test := exec.Command("go", "test", "-json", "./cmd/bd", "-run", "^TestBatchBootstrapClaim", "-count=1")
+	test := exec.Command(goBinary, "test", "-json", "./cmd/bd", "-run", "^TestBatchBootstrapClaim", "-count=1")
 	test.Dir = checkout
-	test.Env = append(os.Environ(), "GOTOOLCHAIN=local", "CGO_ENABLED=1", "CGO_CPPFLAGS=-I"+filepath.Join(icuPrefix, "include"), "CGO_LDFLAGS=-L"+filepath.Join(icuPrefix, "lib"))
+	test.Env = append(append([]string(nil), baseEnv...),
+		"CGO_ENABLED=1", "CC=/usr/bin/clang", "CXX=/usr/bin/clang++",
+		"CGO_CPPFLAGS=-I"+filepath.Join(icuPrefix, "include"),
+		"CGO_LDFLAGS=-L"+filepath.Join(icuPrefix, "lib"),
+		"DOCKER_HOST=unix:///var/run/docker.sock",
+		"TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock",
+		"TESTCONTAINERS_RYUK_DISABLED=true",
+	)
 	var testOutput bytes.Buffer
 	test.Stdout, test.Stderr = io.MultiWriter(stdout, &testOutput), stderr
 	if err := test.Run(); err != nil {
@@ -298,9 +390,9 @@ func buildPatchedBinary(repo, source string, config doctrine.W001BootstrapGrant,
 		return "", "", cleanup, err
 	}
 	binary := filepath.Join(temporary, "bd-w001-bootstrap")
-	build := exec.Command("go", "build", "-trimpath", "-o", binary, "./cmd/bd")
+	build := exec.Command(goBinary, "build", "-trimpath", "-buildvcs=false", "-o", binary, "./cmd/bd")
 	build.Dir = checkout
-	build.Env = append(os.Environ(), "GOTOOLCHAIN=local", "CGO_ENABLED=0")
+	build.Env = append(append([]string(nil), baseEnv...), "CGO_ENABLED=0")
 	build.Stdout, build.Stderr = stdout, stderr
 	if err := build.Run(); err != nil {
 		return "", "", cleanup, fmt.Errorf("build patched Beads binary: %w", err)
@@ -312,12 +404,112 @@ func buildPatchedBinary(repo, source string, config doctrine.W001BootstrapGrant,
 	return binary, digest, cleanup, nil
 }
 
+func verifiedGoEnvironment(config doctrine.W001BootstrapGrant, temporary string) (string, []string, error) {
+	goBinary, err := exec.LookPath("go")
+	if err != nil {
+		return "", nil, errors.New("pinned Go executable is unavailable")
+	}
+	goBinary, err = filepath.EvalSymlinks(goBinary)
+	if err != nil || !filepath.IsAbs(goBinary) {
+		return "", nil, errors.New("pinned Go executable cannot be resolved")
+	}
+	if binaryDigest, err := fileDigest(goBinary); err != nil || binaryDigest != config.GoBinarySHA256 {
+		return "", nil, errors.New("Go executable does not match the signed SHA-256")
+	}
+	moduleCommand := exec.Command(goBinary, "env", "GOMODCACHE")
+	moduleCommand.Env = []string{"HOME=" + os.Getenv("HOME"), "PATH=" + filepath.Dir(goBinary) + ":/usr/bin:/bin", "GOENV=off", "GOWORK=off", "GOTOOLCHAIN=local"}
+	moduleOutput, err := moduleCommand.Output()
+	moduleCache := strings.TrimSpace(string(moduleOutput))
+	if err != nil || !filepath.IsAbs(moduleCache) {
+		return "", nil, errors.New("local Go module cache cannot be resolved")
+	}
+	resolvedModuleCache, err := filepath.EvalSymlinks(moduleCache)
+	if err != nil || !filepath.IsAbs(resolvedModuleCache) {
+		return "", nil, errors.New("local Go module cache cannot be resolved without indirection")
+	}
+	home := filepath.Join(temporary, "home")
+	cache := filepath.Join(temporary, "gocache")
+	for _, path := range []string{home, cache} {
+		if err := os.MkdirAll(path, 0o700); err != nil {
+			return "", nil, err
+		}
+	}
+	environment := []string{
+		"HOME=" + home,
+		"PATH=" + filepath.Dir(goBinary) + ":/usr/bin:/bin:/opt/homebrew/bin",
+		"TMPDIR=" + temporary,
+		"GOCACHE=" + cache,
+		"GOMODCACHE=" + resolvedModuleCache,
+		"GOPATH=" + filepath.Join(temporary, "gopath"),
+		"GOENV=off",
+		"GOFLAGS=-mod=readonly",
+		"GOWORK=off",
+		"GOTOOLCHAIN=local",
+		"GOPROXY=off",
+		"GOSUMDB=off",
+	}
+	return goBinary, environment, nil
+}
+
+func verifyDisposableWorkspace(patchedBinary, originalBinary, workspace string, canonical issueRecord, config doctrine.W001BootstrapGrant, stdout, stderr io.Writer) (string, error) {
+	resolved, err := filepath.EvalSymlinks(workspace)
+	info, statErr := os.Lstat(workspace)
+	if err != nil || statErr != nil || !info.IsDir() || resolved == "" {
+		return "", errors.New("canonical Beads workspace must be one resolved directory")
+	}
+	temporary, err := os.MkdirTemp("", "mars3-w001-disposable-")
+	if err != nil {
+		return "", err
+	}
+	defer os.RemoveAll(temporary)
+	copyRoot := filepath.Join(temporary, "workspace")
+	if err := run(stdout, stderr, "/bin/cp", "-R", resolved, copyRoot); err != nil {
+		return "", fmt.Errorf("copy canonical workspace for conformance: %w", err)
+	}
+	if err := verifyWorkspace(copyRoot, config); err != nil {
+		return "", err
+	}
+	disposablePre, err := readIssue(originalBinary, copyRoot, config.Bead)
+	if err != nil || verifyPreimage(disposablePre, config) != nil {
+		return "", errors.New("disposable workspace does not preserve the signed preimage")
+	}
+	if digestIssue(disposablePre) != digestIssue(canonical) {
+		return "", errors.New("disposable and canonical issue preimages differ")
+	}
+	backend, err := readBackendMode(originalBinary, copyRoot)
+	if err != nil || backend != "embedded" {
+		return "", errors.New("disposable workspace did not select the canonical embedded backend")
+	}
+	beforeVersion, err := readVersionState(originalBinary, copyRoot)
+	if err != nil {
+		return "", err
+	}
+	script, err := claimScript(disposablePre, config)
+	if err != nil {
+		return "", err
+	}
+	command := exec.Command(patchedBinary, "-C", copyRoot, "--actor", config.Assignee, "--json", "batch", "--message", "MARS-3 W-001 disposable bootstrap claim")
+	command.Stdin, command.Stdout, command.Stderr = strings.NewReader(script), stdout, stderr
+	if err := command.Run(); err != nil {
+		return "", fmt.Errorf("disposable canonical-backend claim: %w", err)
+	}
+	post, err := readIssue(originalBinary, copyRoot, config.Bead)
+	if err != nil || verifyPostimage(post, config) != nil {
+		return "", errors.New("disposable claim postimage is invalid")
+	}
+	afterVersion, err := readVersionState(originalBinary, copyRoot)
+	if err != nil || afterVersion.Commit == beforeVersion.Commit {
+		return "", errors.New("disposable claim did not publish one Dolt version commit")
+	}
+	return backend, nil
+}
+
 func verifyConformanceDependencies(config doctrine.W001BootstrapGrant) (string, error) {
 	formula, err := exec.Command("brew", "list", "--versions", "icu4c@78").Output()
 	if err != nil || strings.TrimSpace(string(formula)) != config.ICUFormula {
 		return "", errors.New("local ICU formula does not match the signed conformance toolchain")
 	}
-	prefix, err := exec.Command("brew", "--prefix", "icu4c").Output()
+	prefix, err := exec.Command("brew", "--prefix", "icu4c@78").Output()
 	icuPrefix := strings.TrimSpace(string(prefix))
 	if err != nil || !filepath.IsAbs(icuPrefix) {
 		return "", errors.New("local ICU prefix cannot be resolved")
@@ -325,6 +517,9 @@ func verifyConformanceDependencies(config doctrine.W001BootstrapGrant) (string, 
 	resolvedPrefix, err := filepath.EvalSymlinks(icuPrefix)
 	if err != nil || !filepath.IsAbs(resolvedPrefix) {
 		return "", errors.New("local ICU installation root cannot be resolved")
+	}
+	if filepath.Base(resolvedPrefix) != "78.2" || filepath.Base(filepath.Dir(resolvedPrefix)) != "icu4c@78" {
+		return "", errors.New("local ICU installation root does not match the signed versioned formula")
 	}
 	for _, path := range []string{filepath.Join(icuPrefix, "include", "unicode", "regex.h"), filepath.Join(icuPrefix, "lib", "libicuuc.dylib")} {
 		resolved, resolveErr := filepath.EvalSymlinks(path)
@@ -334,13 +529,10 @@ func verifyConformanceDependencies(config doctrine.W001BootstrapGrant) (string, 
 			return "", errors.New("local ICU conformance material is missing or indirect")
 		}
 	}
-	for tag, expected := range map[string]string{
-		"dolthub/dolt-sql-server:2.1.0": config.DoltTestImage,
-		"testcontainers/ryuk:0.13.0":    config.RyukTestImage,
-	} {
-		output, inspectErr := exec.Command("docker", "image", "inspect", tag, "--format", "{{json .RepoDigests}}").Output()
+	for _, expected := range []string{config.DoltTestImage} {
+		output, inspectErr := exec.Command("docker", "image", "inspect", expected, "--format", "{{json .RepoDigests}}").Output()
 		if inspectErr != nil || !bytes.Contains(output, []byte(`"`+expected+`"`)) {
-			return "", fmt.Errorf("pinned disposable test image is unavailable: %s", tag)
+			return "", fmt.Errorf("pinned disposable test image is unavailable: %s", expected)
 		}
 	}
 	return icuPrefix, nil
@@ -350,6 +542,8 @@ func verifyAtomicityTestResults(output []byte) error {
 	wanted := map[string]bool{
 		"TestBatchBootstrapClaimIsOneAtomicTransition":        false,
 		"TestBatchBootstrapClaimPreconditionFailureRollsBack": false,
+		"TestBatchBootstrapClaimPostClaimFailureRollsBack":    false,
+		"TestBatchBootstrapClaimContentionHasOneWinner":       false,
 	}
 	for _, line := range bytes.Split(output, []byte("\n")) {
 		var event struct {
@@ -388,6 +582,39 @@ func readIssue(binary, workspace, id string) (issueRecord, error) {
 		return issueRecord{}, errors.New("canonical Bead read must return exactly one record")
 	}
 	return issues[0], nil
+}
+
+func readBackendMode(binary, workspace string) (string, error) {
+	command := exec.Command(binary, "-C", workspace, "dolt", "status", "--json")
+	output, err := command.Output()
+	if err != nil {
+		return "", fmt.Errorf("read Beads backend mode: %w", err)
+	}
+	var status struct {
+		Mode string `json:"mode"`
+	}
+	if json.Unmarshal(output, &status) != nil || status.Mode == "" {
+		return "", errors.New("Beads backend mode is invalid")
+	}
+	return status.Mode, nil
+}
+
+func readVersionState(binary, workspace string) (versionState, error) {
+	command := exec.Command(binary, "-C", workspace, "vc", "status", "--json")
+	output, err := command.Output()
+	if err != nil {
+		return versionState{}, fmt.Errorf("read Beads version state: %w", err)
+	}
+	var state versionState
+	if json.Unmarshal(output, &state) != nil || state.Branch != "main" || state.Commit == "" {
+		return versionState{}, errors.New("Beads version state is invalid or not on main")
+	}
+	return state, nil
+}
+
+func digestIssue(issue issueRecord) string {
+	encoded, _ := json.Marshal(issue)
+	return digest(encoded)
 }
 
 func verifyPreimage(issue issueRecord, config doctrine.W001BootstrapGrant) error {

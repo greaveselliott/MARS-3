@@ -120,12 +120,31 @@ The strict document contains exactly:
   production/destructive effects, autonomous mutation, trust escalation,
   credentials, and provider or customer data.
 
+Publication and execution are separate authority moments. The bootstrap grant
+can publish a reviewed helper but `--apply` also requires an external JSON
+authorization signed under `mars3-w001-bootstrap-execution`, valid for at most
+one hour, and bound to the actual squash-merged commit/tree, immutable review
+tag and feature commit, protected-main check run, exact QA and Security
+accepted commit, patched-binary digest, attempt, idempotency key, project, Bead,
+and preimage digest. The helper resolves authenticated remote `main` and
+rechecks both expiries, workspace identity, and preimage immediately before the
+effect. A local branch or mutable remote-tracking ref is never execution proof.
+
 The helper patches the pinned Beads source in a temporary directory and uses
 the native `ClaimIssueInTx` primitive plus metadata and lifecycle-label updates
 inside one outer Dolt transaction. The pinned v1.2.2 `update --claim
 --metadata` route is not used because it commits those effects in separate
 transactions; `batch` without this reviewed patch has no claim CAS. Raw SQL and
 hidden local code are prohibited.
+
+Conformance pins the Go executable and reproducible patched-binary digests,
+uses an isolated allowlisted Go environment with network module resolution
+disabled, resolves versioned ICU `icu4c@78`, disables Ryuk, and starts Dolt by
+the signed image digest. It runs success, stale rollback, post-claim-operation
+rollback, and concurrent one-winner cases, then executes the built binary
+against a disposable copy of the canonical embedded workspace. Success
+requires a verified new Dolt version commit. Any command error is unknown
+acceptance and blocks retry pending separately authorized reconciliation.
 
 Unknown fields, YAML aliases/anchors/tags/flow syntax, duplicate keys,
 unresolved paths, changed signed bytes, signer drift, stale expected version or

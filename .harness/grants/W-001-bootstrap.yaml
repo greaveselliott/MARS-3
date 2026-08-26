@@ -10,8 +10,8 @@ grant:
   baseCommit: 37b55b912b20715349bc50e0524c85d4b22f1772
   baseTree: f06864b0802cea793cf7a0c08b60b7e734539a94
   workingBranch: codex/w-001-work-authority
-  reviewTag: mars3/w001-bootstrap-helper-v1
-  reviewTagMessage: MARS-3 W-001 bootstrap helper tree attestation v1
+  reviewTag: mars3/w001-bootstrap-helper-v2
+  reviewTagMessage: MARS-3 W-001 bootstrap helper tree attestation v2
   signerRole: human-bootstrap-authority
   coordinator: delivery-orchestrator
   failureOwnership: foundation
@@ -65,6 +65,7 @@ grant:
     - THIRD_PARTY_NOTICES
   prohibitedEffects:
     - execute-claim-before-helper-merge-protected-main-success-QA-and-Security-acceptance
+    - execute-claim-without-a-separate-signed-short-lived-post-review-authorization
     - use-raw-SQL-hidden-code-or-a-two-transaction-claim
     - mutate-another-Bead-dependency-or-authority-project
     - issue-or-assert-a-live-lease-before-verified-gateway-issuance
@@ -119,16 +120,18 @@ toolchain:
   goVersion: go1.26.2
   goOS: darwin
   goArch: arm64
+  goBinarySHA256: 005640c7ff93028cb704283b0f737f2db3faf8b51b2561170c769b83905da646
   cgoEnabled: false
   icuFormula: icu4c@78 78.2
   doltTestImage: dolthub/dolt-sql-server@sha256:6b651663c5024d98a98a4db7226a5e85f90a9344c78fee85617c0fb4a30c6e64
-  ryukTestImage: testcontainers/ryuk@sha256:31b31269d06603366cbfd0284708dcd2e281e8a4188e53fce3d3304439d0df3d
+  ryukDisabled: true
   patchPath: internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch
-  patchSHA256: dadfbfde1350659dc28079f82979eb9ad145e10a6f0fd40f0af4948fa9d81d62
+  patchSHA256: a21560d7ceb3ef530920a0277f77b4b8c8d67d0dbd6d0c2b3d8321365851d34b
+  patchedBinarySHA256: 3620a5517b9e3becb066c553b4e7bf2370714f93c04f40082cbc0c49d072821c
   helperCommandPath: cmd/mars3-authority/main.go
-  helperCommandSHA256: efd8e92cd30114374b0cdcce2680f12ac944cee4fcc3d84042244e486147d538
+  helperCommandSHA256: d8ae9fcf5b04902fa3f2ece3369688ca7abf1e55f0cd4f57a611006a861979ea
   helperLibraryPath: internal/authority/bootstrap/bootstrap.go
-  helperLibrarySHA256: 7385fe6317e450711789e85ac424a6b66831d271a0980b6ab50b5ceaf1427ce5
+  helperLibrarySHA256: acf5feca6c0147c1766690f056cf3c9621d3e3ae39aec638be4d7e1d855edf46
 
 verification:
   order:
@@ -140,6 +143,7 @@ verification:
   protectedMainRequiredBeforeClaim: true
   externalStateReadbackRequired: true
   disposableAtomicityConformanceRequired: true
+  postReviewExecutionAuthorizationRequired: true
 
 integrity:
   signatureFormat: openssh

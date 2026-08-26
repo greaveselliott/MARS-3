@@ -156,7 +156,7 @@ index a9255b24..b6dac54d 100644
 +}
 +
 diff --git a/cmd/bd/batch_embedded_test.go b/cmd/bd/batch_embedded_test.go
-index aa9d89be..817e032a 100644
+index aa9d89be..6b6bf6ad 100644
 --- a/cmd/bd/batch_embedded_test.go
 +++ b/cmd/bd/batch_embedded_test.go
 @@ -6,0 +7,3 @@ import (
@@ -167,7 +167,7 @@ index aa9d89be..817e032a 100644
 +	"sort"
 @@ -9,0 +14 @@ import (
 +	"time"
-@@ -14,0 +20,116 @@ import (
+@@ -14,0 +20,206 @@ import (
 +func bootstrapClaimScript(t *testing.T, st storage.DoltStorage, ctx context.Context, id, updatedAt string) string {
 +	t.Helper()
 +	issue, err := st.GetIssue(ctx, id)
@@ -282,6 +282,96 @@ index aa9d89be..817e032a 100644
 +	if err := json.Unmarshal(got.Metadata, &metadata); err != nil || metadata["lifecycleState"] != "backlog" {
 +		t.Fatalf("failed claim mutated metadata = %s, err=%v", got.Metadata, err)
 +	}
++	labels, err := st.GetLabels(ctx, issue.ID)
++	if err != nil {
++		t.Fatalf("GetLabels after failure: %v", err)
++	}
++	sort.Strings(labels)
++	if strings.Join(labels, ",") != "backlog" {
++		t.Fatalf("failed claim mutated labels = %v", labels)
++	}
++}
++
++func TestBatchBootstrapClaimPostClaimFailureRollsBack(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	tmpDir := t.TempDir()
++	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	ctx := context.Background()
++	issue := seedBootstrapClaimFixture(t, st, ctx)
++	script := bootstrapClaimScript(t, st, ctx, issue.ID, issue.UpdatedAt.UTC().Format(time.RFC3339)) +
++		"dep add tbc-DOES-NOT-EXIST tbc-ALSO-MISSING\n"
++	if err := runBatchScriptInTx(t, ctx, st, script); err == nil {
++		t.Fatal("expected the operation after bootstrap claim to fail")
++	}
++	got, err := st.GetIssue(ctx, issue.ID)
++	if err != nil {
++		t.Fatalf("GetIssue after post-claim failure: %v", err)
++	}
++	if got.Status != types.StatusOpen || got.Assignee != "bootstrap-engineer" {
++		t.Fatalf("post-claim failure mutated state to %s/%s", got.Status, got.Assignee)
++	}
++	var metadata map[string]interface{}
++	if err := json.Unmarshal(got.Metadata, &metadata); err != nil || metadata["lifecycleState"] != "backlog" {
++		t.Fatalf("post-claim failure mutated metadata = %s, err=%v", got.Metadata, err)
++	}
++	labels, err := st.GetLabels(ctx, issue.ID)
++	if err != nil {
++		t.Fatalf("GetLabels after post-claim failure: %v", err)
++	}
++	sort.Strings(labels)
++	if strings.Join(labels, ",") != "backlog" {
++		t.Fatalf("post-claim failure mutated labels = %v", labels)
++	}
++}
++
++func TestBatchBootstrapClaimContentionHasOneWinner(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	tmpDir := t.TempDir()
++	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	ctx := context.Background()
++	issue := seedBootstrapClaimFixture(t, st, ctx)
++	script := bootstrapClaimScript(t, st, ctx, issue.ID, issue.UpdatedAt.UTC().Format(time.RFC3339))
++
++	start := make(chan struct{})
++	results := make(chan error, 2)
++	for range 2 {
++		go func() {
++			<-start
++			results <- runBatchScriptInTx(t, ctx, st, script)
++		}()
++	}
++	close(start)
++	winners := 0
++	for range 2 {
++		if err := <-results; err == nil {
++			winners++
++		}
++	}
++	if winners != 1 {
++		t.Fatalf("concurrent bootstrap claims produced %d winners, want exactly one", winners)
++	}
++	got, err := st.GetIssue(ctx, issue.ID)
++	if err != nil {
++		t.Fatalf("GetIssue after contention: %v", err)
++	}
++	if got.Status != types.StatusInProgress || metadataStringForTest(got.Metadata, "lifecycleState") != "in-progress" {
++		t.Fatalf("contention postimage = %s/%s, want in_progress/in-progress", got.Status, metadataStringForTest(got.Metadata, "lifecycleState"))
++	}
++}
++
++func metadataStringForTest(data json.RawMessage, key string) string {
++	var values map[string]interface{}
++	if json.Unmarshal(data, &values) != nil {
++		return ""
++	}
++	value, _ := values[key].(string)
++	return value
 +}
 +
 diff --git a/internal/storage/dolt/transaction.go b/internal/storage/dolt/transaction.go
@@ -315,3 +405,10 @@ index 663b94a5..0cdf571d 100644
 +	return err
 +}
 +
+diff --git a/internal/testutil/testdoltcommon.go b/internal/testutil/testdoltcommon.go
+index 476f0285..953f65c3 100644
+--- a/internal/testutil/testdoltcommon.go
++++ b/internal/testutil/testdoltcommon.go
+@@ -14 +14 @@ import (
+-const DoltDockerImage = "dolthub/dolt-sql-server:2.1.0"
++const DoltDockerImage = "dolthub/dolt-sql-server@sha256:6b651663c5024d98a98a4db7226a5e85f90a9344c78fee85617c0fb4a30c6e64"

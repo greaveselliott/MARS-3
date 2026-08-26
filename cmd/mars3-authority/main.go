@@ -18,7 +18,7 @@ import (
 )
 
 const usage = `usage:
-  mars3-authority bootstrap-claim --repo <path> --beads-source <path> --beads-workspace <path> --beads-binary <path> [--apply]`
+  mars3-authority bootstrap-claim --repo <path> --beads-source <path> --beads-workspace <path> --beads-binary <path> [--execution-authorization <path> --apply]`
 
 func main() {
 	if err := run(os.Args[1:]); err != nil {
@@ -37,6 +37,7 @@ func run(args []string) error {
 	beadsSource := flags.String("beads-source", "", "clean local Beads checkout at the signed revision")
 	beadsWorkspace := flags.String("beads-workspace", "", "external canonical Beads workspace")
 	beadsBinary := flags.String("beads-binary", "", "pinned unmodified Beads binary")
+	executionAuthorization := flags.String("execution-authorization", "", "external signed post-review execution authorization")
 	apply := flags.Bool("apply", false, "execute the one canonical claim after all checks")
 	if err := flags.Parse(args[1:]); err != nil {
 		return err
@@ -46,6 +47,7 @@ func run(args []string) error {
 	}
 	return bootstrap.Run(bootstrap.Options{
 		Repo: *repo, BeadsSource: *beadsSource, BeadsWorkspace: *beadsWorkspace,
-		BeadsBinary: *beadsBinary, Apply: *apply, Stdout: os.Stdout, Stderr: os.Stderr,
+		BeadsBinary: *beadsBinary, ExecutionAuthorization: *executionAuthorization,
+		Apply: *apply, Stdout: os.Stdout, Stderr: os.Stderr,
 	})
 }

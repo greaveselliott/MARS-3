@@ -297,6 +297,15 @@ grant may authorize building the gateway without falsely asserting that its
 not-yet-built lease exists. The sequence is not transferable or autonomous,
 cannot authorize production/destructive effects, and its delivery exception
 becomes unusable as soon as self-host conformance is accepted.
+
+The reviewed helper tree alone cannot exercise the first transition. After its
+squash merge and protected-main check, a distinct one-hour signed execution
+authorization must bind the actual merged SHA/tree, review tag and feature
+commit, QA and Security accepted commit, exact patched binary, attempt,
+idempotency key, authority project, and signed preimage. Before the effect the
+helper revalidates both expiries, authenticated remote `main`, canonical
+workspace identity, and the complete preimage. A command error is unknown
+acceptance and blocks retry until separately authorized reconciliation.
 Every later mutation uses the normal live-lease transition above. P-001 and all
 subsequent work receive no equivalent exception.
 

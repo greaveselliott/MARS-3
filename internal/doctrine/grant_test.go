@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 const wave1PlanningGrantFirstCommitFixture = "fc9f6641d0f739a401a4f7be3bc0ee575df1310a"
@@ -87,6 +88,41 @@ func TestW001BootstrapGrantRejectsTampering(t *testing.T) {
 			t.Fatalf("tampered helper bytes were not rejected: %v", findings)
 		}
 	})
+}
+
+func TestW001ExecutionAuthorizationFailsClosedWithoutPinnedSignature(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	grant, err := LoadW001BootstrapGrant(repo)
+	if err != nil {
+		t.Skipf("bootstrap grant is being re-signed in this fixture: %v", err)
+	}
+	issuedAt := time.Now().UTC().Truncate(time.Second)
+	authorization := W001BootstrapExecutionAuthorization{
+		SchemaVersion: 1, Kind: "MARS3W001BootstrapExecutionAuthorization", Classification: "PUBLIC",
+		GrantID: grant.ID, Repository: planningGrantRepository, AttemptID: grant.AttemptID, IdempotencyKey: grant.IdempotencyKey,
+		Bead: grant.Bead, AuthorityProjectID: grant.AuthorityProjectID,
+		MergedCommit: strings.Repeat("1", 40), MergedTree: strings.Repeat("2", 40), ReviewTag: grant.ReviewTag,
+		ReviewedFeatureCommit: strings.Repeat("3", 40), PullRequest: 6, ProtectedMainCheckRun: 1,
+		QAReviewedCommit: strings.Repeat("3", 40), QADisposition: "accepted",
+		SecurityReviewedCommit: strings.Repeat("3", 40), SecurityDisposition: "accepted",
+		PatchedBinarySHA256: grant.PatchedBinarySHA256, ExpectedMetadataSHA256: grant.ExpectedMetadataSHA256,
+		AllowedEffect: "execute-one-expected-preimage-W-001-CAS-claim",
+		IssuedAt:      issuedAt.Format(time.RFC3339), ExpiresAt: issuedAt.Add(time.Hour).Format(time.RFC3339),
+	}
+	data, err := json.Marshal(authorization)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "execution.json")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path+".sig", []byte("not a signature\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadW001BootstrapExecutionAuthorization(repo, path, grant); err == nil {
+		t.Fatal("unsigned execution authorization was accepted")
+	}
 }
 
 func scalarPathFromGrant(t *testing.T, grant []byte, key string) string {
