@@ -81,6 +81,83 @@ func scalar(values map[string]string, names ...string) string {
 	return ""
 }
 
+// yamlStringSequence extracts one scalar sequence from the deliberately small,
+// data-only YAML subset used by signed harness attestations. It fails closed on
+// duplicate declarations, inline collections, nested values, or empty items.
+func yamlStringSequence(data []byte, dottedPath string) (items []string, found, valid bool) {
+	if strings.TrimSpace(dottedPath) == "" {
+		return nil, false, false
+	}
+
+	valid = true
+	activeIndent := -1
+	itemIndent := -1
+	var stack []yamlContext
+	for _, line := range strings.Split(string(data), "\n") {
+		raw := strings.TrimRight(line, " \t\r")
+		trimmed := strings.TrimSpace(raw)
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		indent := len(raw) - len(strings.TrimLeft(raw, " "))
+
+		if activeIndent >= 0 {
+			if indent <= activeIndent {
+				activeIndent = -1
+			} else {
+				if !strings.HasPrefix(trimmed, "-") {
+					valid = false
+					continue
+				}
+				if itemIndent < 0 {
+					itemIndent = indent
+				} else if indent != itemIndent {
+					valid = false
+					continue
+				}
+				value := strings.TrimSpace(strings.TrimPrefix(trimmed, "-"))
+				value = trimYAMLScalar(value)
+				if value == "" || strings.ContainsAny(value, "[]{}") {
+					valid = false
+					continue
+				}
+				items = append(items, value)
+				continue
+			}
+		}
+
+		if strings.HasPrefix(trimmed, "-") {
+			continue
+		}
+		colon := strings.Index(trimmed, ":")
+		if colon < 1 {
+			continue
+		}
+		key := strings.TrimSpace(trimmed[:colon])
+		value := trimYAMLScalar(trimmed[colon+1:])
+		for len(stack) > 0 && stack[len(stack)-1].indent >= indent {
+			stack = stack[:len(stack)-1]
+		}
+		path := make([]string, 0, len(stack)+1)
+		for _, context := range stack {
+			path = append(path, context.key)
+		}
+		path = append(path, key)
+		if strings.Join(path, ".") == dottedPath {
+			if found || value != "" {
+				valid = false
+			}
+			found = true
+			activeIndent = indent
+			itemIndent = -1
+		}
+		if value == "" {
+			stack = append(stack, yamlContext{indent: indent, key: key})
+		}
+	}
+	return items, found, valid
+}
+
 func normalizeKey(value string) string {
 	value = strings.ToLower(value)
 	value = strings.ReplaceAll(value, "-", "")

@@ -38,6 +38,13 @@ equal the Git lineage selected by the active plan. A missing link is an
 authority reconciliation failure: Git may describe product intent, but it may
 not silently supplement an incomplete canonical work definition.
 
+Review routing uses executable identifiers, not display names. Every entry in
+the Beads `verificationOrder` and signed claim `verification.order` must be the
+exact ID of a declared role or of a profile whose `principal_id` resolves to a
+declared role. The two ordered lists must agree. An alias such as
+`qa-reviewer` is not routable when the registry declares only `qa`, even if a
+human can infer the intended reviewer.
+
 M3-H001 is the bootstrap exception: a signed charter records the effect that
 created and claimed the work item before the gateway existed. The exception is
 non-autonomous and limited to H-001's claim, public-safe lifecycle/evidence/
@@ -64,6 +71,9 @@ renewals pass through the typed gateway, with live leases stored in PostgreSQL.
 - A claim attestation must bind the same goal, feature, product decisions, and
   scenarios as the canonical Bead and Git plan; doctrine validation rejects an
   omitted or divergent lineage link.
+- A claim attestation's verification order must resolve entry-by-entry against
+  the executable role/profile registry; missing, duplicate, malformed, or
+  undeclared reviewer identities fail closed.
 - No Markdown ticket lifecycle tree is created.
 - Chat and database projections cannot be the only record of a material
   product decision.

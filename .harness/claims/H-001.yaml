@@ -1,14 +1,14 @@
 schemaVersion: 1
 kind: MARS3BootstrapClaimAttestation
-issuedAt: 2026-08-26T04:00:44Z
+issuedAt: 2026-08-26T04:21:49Z
 authority:
   system: beads-dolt
   version: 1.2.2
   sourceCommit: 6c124203e771433a3550c348771a5b5e27fd3c21
   doltSourceCommit: 1bf533220ab0
   ledgerBranch: main
-  ledgerHead: icj9j2a6h0nsrb3q9705nm6tgt75kr3p
-  claimCheckpoint: pgi99ie4dpqvutoiv59b8ca8stmk466i
+  ledgerHead: blsidb8htct7d687cijiqcp51488jqo5
+  claimCheckpoint: kvofc5q57reond5aki5pgdcgfog8u7dr
 claim:
   bead: M3-H001
   displayId: H-001
@@ -52,7 +52,7 @@ claim:
     - .gitattributes
 verification:
   order:
-    - qa-reviewer
+    - qa
     - security-reviewer
     - delivery-orchestrator
   classification: PUBLIC

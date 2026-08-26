@@ -82,6 +82,7 @@ func CheckDoctrine(repo string) ([]Finding, error) {
 	checkBootstrapClaimAttestation(root, &findings)
 	checkMARSProvenance(root, &findings)
 	checkRoleManifest(root, &findings)
+	checkClaimVerificationOrder(root, &findings)
 	sortFindings(findings)
 	return findings, nil
 }
@@ -102,8 +103,8 @@ func checkBootstrapClaimAttestation(root string, findings *[]Finding) {
 		"authority.sourceCommit":                   beadsCommit,
 		"authority.doltSourceCommit":               doltCommit,
 		"authority.ledgerBranch":                   "main",
-		"authority.ledgerHead":                     "icj9j2a6h0nsrb3q9705nm6tgt75kr3p",
-		"authority.claimCheckpoint":                "pgi99ie4dpqvutoiv59b8ca8stmk466i",
+		"authority.ledgerHead":                     "blsidb8htct7d687cijiqcp51488jqo5",
+		"authority.claimCheckpoint":                "kvofc5q57reond5aki5pgdcgfog8u7dr",
 		"claim.bead":                               "M3-H001",
 		"claim.displayId":                          "H-001",
 		"claim.nativeStatus":                       "in_progress",
@@ -131,7 +132,6 @@ func checkBootstrapClaimAttestation(root string, findings *[]Finding) {
 	for _, required := range []string{
 		"F-001-S1", "F-001-S2", "F-001-S3", "F-001-S4", "PD-001", "PD-002", "PD-003",
 		".github/**", "AGENTS.md", ".harness/**", "docs/**", "cmd/mars3/**", "internal/doctrine/**",
-		"qa-reviewer", "security-reviewer", "delivery-orchestrator",
 	} {
 		if !strings.Contains(string(data), "- "+required) {
 			addFinding(findings, path, "doctrine.claim_attestation_scope", "signed claim attestation must include %s", required)
@@ -146,6 +146,62 @@ func checkBootstrapClaimAttestation(root string, findings *[]Finding) {
 	if err := verifySSHSig(data, signature, publicKey, "mars3-claim-attestation"); err != nil {
 		addFinding(findings, path, "doctrine.claim_attestation_signature", "%v", err)
 	}
+}
+
+func checkClaimVerificationOrder(root string, findings *[]Finding) {
+	const (
+		claimPath    = ".harness/claims/H-001.yaml"
+		manifestPath = ".harness/manifest.yaml"
+	)
+	claim, claimErr := readRepoFile(root, claimPath)
+	manifest, manifestErr := readRepoFile(root, manifestPath)
+	if claimErr != nil || manifestErr != nil {
+		return
+	}
+	checkClaimVerificationOrderData(claimPath, claim, manifest, findings)
+}
+
+func checkClaimVerificationOrderData(claimPath string, claim, manifest []byte, findings *[]Finding) {
+	order, found, valid := yamlStringSequence(claim, "verification.order")
+	if !found || !valid || len(order) == 0 {
+		addFinding(findings, claimPath, "doctrine.claim_verification_order", "verification.order must be one non-empty scalar sequence")
+		return
+	}
+
+	executable := executableIdentityRegistry(manifest)
+	seen := make(map[string]bool, len(order))
+	for position, identity := range order {
+		if seen[identity] {
+			addFinding(findings, claimPath, "doctrine.claim_verifier_duplicate", "verification.order entry %q is duplicated", identity)
+			continue
+		}
+		seen[identity] = true
+		if !executable[identity] {
+			addFinding(findings, claimPath, "doctrine.claim_verifier_unroutable", "verification.order entry %d (%q) is not declared in the executable role/profile registry", position+1, identity)
+		}
+	}
+}
+
+func executableIdentityRegistry(manifest []byte) map[string]bool {
+	principals := make(map[string]bool)
+	for _, section := range []string{"roles", "foundation_roles"} {
+		for _, role := range parseRoleDeclarations(manifest, section) {
+			if role.id != "" {
+				principals[role.id] = true
+			}
+		}
+	}
+
+	executable := make(map[string]bool, len(principals))
+	for principal := range principals {
+		executable[principal] = true
+	}
+	for _, profile := range parseRoleDeclarations(manifest, "profiles") {
+		if profile.id != "" && profile.principalID != "" && principals[profile.principalID] {
+			executable[profile.id] = true
+		}
+	}
+	return executable
 }
 
 func checkGenesis(root string, findings *[]Finding) {

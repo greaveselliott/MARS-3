@@ -262,6 +262,137 @@ func TestClaimAttestationRequiresCompleteWorkLineage(t *testing.T) {
 	}
 }
 
+func TestClaimAttestationRequiresCurrentAuthorityBinding(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	claim, err := os.ReadFile(filepath.Join(repo, ".harness", "claims", "H-001.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	signature, err := os.ReadFile(filepath.Join(repo, ".harness", "claims", "H-001.yaml.sig"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	publicKey, err := os.ReadFile(filepath.Join(repo, ".harness", "keys", "genesis-signing-key.pub"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases := []struct {
+		name    string
+		current string
+		stale   string
+	}{
+		{name: "ledger head", current: "blsidb8htct7d687cijiqcp51488jqo5", stale: "icj9j2a6h0nsrb3q9705nm6tgt75kr3p"},
+		{name: "claim checkpoint", current: "kvofc5q57reond5aki5pgdcgfog8u7dr", stale: "pgi99ie4dpqvutoiv59b8ca8stmk466i"},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			root := t.TempDir()
+			if err := os.MkdirAll(filepath.Join(root, ".harness", "claims"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.MkdirAll(filepath.Join(root, ".harness", "keys"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			staleClaim := []byte(strings.Replace(string(claim), testCase.current, testCase.stale, 1))
+			if bytesEqual(staleClaim, claim) {
+				t.Fatalf("claim does not contain current %s", testCase.name)
+			}
+			if err := os.WriteFile(filepath.Join(root, ".harness", "claims", "H-001.yaml"), staleClaim, 0o644); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(root, ".harness", "claims", "H-001.yaml.sig"), signature, 0o644); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(root, ".harness", "keys", "genesis-signing-key.pub"), publicKey, 0o644); err != nil {
+				t.Fatal(err)
+			}
+			var findings []Finding
+			checkBootstrapClaimAttestation(root, &findings)
+			if !findingCodePresent(findings, "doctrine.claim_attestation_value") {
+				t.Fatalf("stale %s was accepted: %v", testCase.name, findings)
+			}
+		})
+	}
+}
+
+func TestClaimVerificationOrderReferencesExecutableRegistry(t *testing.T) {
+	manifest := []byte(`roles:
+  - id: qa
+  - id: security-reviewer
+  - id: delivery-orchestrator
+profiles:
+  - id: qa
+    principal_id: qa
+  - id: security-reviewer
+    principal_id: security-reviewer
+  - id: delivery-orchestrator
+    principal_id: delivery-orchestrator
+`)
+	claim := []byte(`verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+`)
+	var findings []Finding
+	checkClaimVerificationOrderData(".harness/claims/H-001.yaml", claim, manifest, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("declared verification principals were rejected: %v", findings)
+	}
+}
+
+func TestClaimVerificationOrderRejectsUnroutableOrMalformedEntries(t *testing.T) {
+	manifest := []byte(`roles:
+  - id: qa
+  - id: security-reviewer
+profiles:
+  - id: qa
+    principal_id: qa
+  - id: security-reviewer
+    principal_id: security-reviewer
+`)
+	cases := []struct {
+		name        string
+		claim       string
+		findingCode string
+	}{
+		{
+			name:        "undeclared reviewer alias",
+			claim:       "verification:\n  order:\n    - qa-reviewer\n    - security-reviewer\n",
+			findingCode: "doctrine.claim_verifier_unroutable",
+		},
+		{
+			name:        "duplicate reviewer",
+			claim:       "verification:\n  order:\n    - qa\n    - qa\n",
+			findingCode: "doctrine.claim_verifier_duplicate",
+		},
+		{
+			name:        "inline sequence",
+			claim:       "verification:\n  order: [qa, security-reviewer]\n",
+			findingCode: "doctrine.claim_verification_order",
+		},
+		{
+			name:        "nested mapping",
+			claim:       "verification:\n  order:\n    reviewer: qa\n",
+			findingCode: "doctrine.claim_verification_order",
+		},
+		{
+			name:        "nested sequence",
+			claim:       "verification:\n  order:\n    - qa\n      - security-reviewer\n",
+			findingCode: "doctrine.claim_verification_order",
+		},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var findings []Finding
+			checkClaimVerificationOrderData(".harness/claims/H-001.yaml", []byte(testCase.claim), manifest, &findings)
+			if !findingCodePresent(findings, testCase.findingCode) {
+				t.Fatalf("verification order bypass was accepted; wanted %s, got %v", testCase.findingCode, findings)
+			}
+		})
+	}
+}
+
 func TestWorkflowRejectsMutableContainerReference(t *testing.T) {
 	var findings []Finding
 	checkWorkflow(".github/workflows/test.yml", "permissions:\n  contents: read\nsteps:\n  - run: docker run docker.io/example/tool:latest\n", &findings)

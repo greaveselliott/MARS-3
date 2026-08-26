@@ -22,6 +22,9 @@
    Security review, and Orchestrator reconciliation.
 7. Trace-spine and Rule-of-Two artifacts are declared contracts in H-001;
    runtime enforcement remains explicitly scheduled for T-001 and S-001.
+8. Verification-order entries are executable identity IDs. Each must resolve
+   to a declared role or to a profile backed by a declared principal; display
+   labels and undeclared aliases never grant routing authority.
 
 ## Step-by-step behavior
 
@@ -30,8 +33,9 @@
 2. The authorized bootstrap operator verifies the signed external M3-H001
    claim with the pinned Beads client and supplies its public-safe identity,
    state, owner, goal, feature, applicable product decisions, scenarios, and
-   exclusive paths. Those links must equal Git's active lineage. No W-001
-   gateway or lease enforcement is claimed by H-001.
+   exclusive paths. Its ordered reviewer IDs must equal the canonical Bead and
+   resolve through the executable registry. Those links must equal Git's active
+   lineage. No W-001 gateway or lease enforcement is claimed by H-001.
 3. The Foundation Maintainer changes only authorized doctrine and validation
    paths and emits public-safe evidence.
 4. Validation checks authority uniqueness, provenance, trust defaults,
@@ -47,17 +51,20 @@
 
 | Scenario | State | Verification owner | Required evidence |
 | --- | --- | --- | --- |
-| F-001-S1 | passing | QA | H-001-E5 typed Beads lineage and signed claim evidence |
+| F-001-S1 | passing | QA | corrected typed Beads lineage, signed claim, and executable-reviewer registry tests |
 | F-001-S2 | passing | QA | offline provenance and refresh-scope tests |
 | F-001-S3 | passing | Security | manifest/trust and mutation-denial tests |
 | F-001-S4 | passing | Security | H-001-E4 immutable workflow and public-gate evidence |
 
-All four scenarios have deterministic H-001-E5 candidate evidence. The same
-Bead now carries typed `featureId: F-001` and all three product decisions, and
-the fresh signed attestation plus omission tests bind that lineage offline. No
-earlier review verdict carries to a changed commit. Passing never means
-accepted or done: release readiness remains blocked until both reviewers accept
-the same immutable containing commit and Beads records reconciliation.
+All four scenarios pass deterministically at the current implementation
+checkpoint. The same Bead carries typed `featureId: F-001`, all three product
+decisions, and the exact routable order `qa → security-reviewer →
+delivery-orchestrator`. The fresh signed attestation plus negative omission,
+stale-binding, duplicate, malformed, and undeclared-reviewer tests bind that
+contract offline. H-001-E5 received `changes-requested`; no earlier verdict
+carries to a changed commit. Passing never means accepted or done: release
+readiness remains blocked until both reviewers accept the same immutable
+containing commit and Beads records reconciliation.
 
 ### F-001-S1 — One durable delivery route
 
@@ -66,9 +73,11 @@ the same immutable containing commit and Beads records reconciliation.
 **And** the authorized bootstrap verifier confirms the external M3-H001 claim
 **And** the Bead and signed claim explicitly match Git's goal, product
 decisions, feature, and scenario identifiers
+**And** every ordered verification identity is an executable registry ID
 **When** the operator runs doctrine and plan checks
 **Then** Git exposes G-001 → decisions/spec → F-001 → one active plan
 **And** the plan points to M3-H001 without becoming ticket authority
+**And** an undeclared reviewer alias is rejected as unroutable
 **And** no Markdown ticket lifecycle shadow system exists.
 
 ### F-001-S2 — Offline doctrine provenance
