@@ -307,16 +307,40 @@ The bounded v7 correction treats routing as part of authority identity:
   trailing newline, verifies its detached signature, and compares the exact
   payload and signature digests after the long-running conformance step.
 
+Signed v7 code checkpoint
+`b35fd0f154ce959adbe9d57cbf90666d6f5327d3`, tree
+`c05436d75e99109c4ae28e8ae370ff15ab260ff8`, was retained by signed tag object
+`f574145487630f248732cf7108b5edd15660de4e`. From that clean checkpoint, the
+helper rebuilt the exact pinned source and patch, ran all five Docker/Dolt cases
+without a skip, claimed only a disposable copy through the actual embedded
+backend, and verified a new disposable Dolt version. Its bounded receipt was
+schema 1, kind `MARS3BootstrapClaimReceipt`, classification `PUBLIC`, grant
+`W-001-bootstrap`, and Bead `M3-W001`; the attempt, replay, and base bindings
+matched the signed grant. It reported patched-binary SHA-256
+`949e1d535e19ecb39e974b90b7321ef1f7f7d6b77c3958d72edb07e78d9def5a`,
+opaque workspace-instance SHA-256
+`4717a2c2b92ab1c0196ed119d7ec760f6c2f9f40ddc52372536e436d7467ee85`,
+backend `embedded`, `disposableVerified: true`,
+`canonicalUnchangedBeforeEffect: true`, `mode: dry-run`, result
+`conformance-passed-no-canonical-mutation`, native status `open`, lifecycle
+`backlog`, and `liveLeaseAsserted: false`.
+
+An immediate independent readback found W-001 and P-001 still
+`open/backlog`, with `workVersion: null`, their original dependency sets, and
+no claim or lease. Their normalized public-safe summaries remain
+`910e3d0b9ba5b3c36755781daffcfbc146341f06c46fcefcb7d714b6310e237f`
+and `c1d3774bc61b39417c68a90714c0811c23ae322d49abfbe166910c8537ba965f`.
+
 The corrected public material binds patch SHA-256
 `50128252828352366ced6560371468a5746c2603ef89ea746a33be8994ffceb6`,
 patched-binary SHA-256
 `949e1d535e19ecb39e974b90b7321ef1f7f7d6b77c3958d72edb07e78d9def5a`,
 and helper-library SHA-256
 `d039c787f73e98f059937242e068d76c12753cc9accedc025bf619e1fa63c0fd`.
-The signed successor tag is `mars3/w001-bootstrap-helper-v7`; its exact commit,
-tree, public run, and independent dispositions remain pending until the new
-immutable subject is published and reviewed. No claim is authorized by this
-correction itself.
+The evidence-only successor uses `mars3/w001-bootstrap-helper-v8`; its exact
+commit, tree, public run, and independent dispositions remain pending until the
+new immutable subject is published and reviewed. The v7 tag is immutable and is
+not moved. No claim is authorized by this correction or dry run.
 
 ## Pending receipt
 
