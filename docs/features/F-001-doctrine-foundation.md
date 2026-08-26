@@ -47,18 +47,17 @@
 
 | Scenario | State | Verification owner | Required evidence |
 | --- | --- | --- | --- |
-| F-001-S1 | failing | QA | H-001-E4 found incomplete canonical Beads lineage; E5 pending |
+| F-001-S1 | passing | QA | H-001-E5 typed Beads lineage and signed claim evidence |
 | F-001-S2 | passing | QA | offline provenance and refresh-scope tests |
 | F-001-S3 | passing | Security | manifest/trust and mutation-denial tests |
 | F-001-S4 | passing | Security | H-001-E4 immutable workflow and public-gate evidence |
 
-F-001-S1 is `failing` after QA found that Beads omitted `featureId: F-001` and
-`PD-003` while Git claimed both links. The same Bead has been reopened and its
-canonical metadata corrected; E5 must bind a fresh signed attestation and
-evidence before the scenario can pass again. No earlier review verdict carries
-to a changed commit. Passing never means accepted or done: release readiness
-remains blocked until both reviewers accept the same immutable containing
-commit and Beads records reconciliation.
+All four scenarios have deterministic H-001-E5 candidate evidence. The same
+Bead now carries typed `featureId: F-001` and all three product decisions, and
+the fresh signed attestation plus omission tests bind that lineage offline. No
+earlier review verdict carries to a changed commit. Passing never means
+accepted or done: release readiness remains blocked until both reviewers accept
+the same immutable containing commit and Beads records reconciliation.
 
 ### F-001-S1 — One durable delivery route
 

@@ -1,33 +1,34 @@
 # H-001 validation evidence
 
 **Classification:** PUBLIC
-**Evidence ID:** H-001-E4
-**Status:** Superseded; QA changes requested
-**Opaque trace reference:** `bootstrap-h001-workflow-contract-v5`
+**Evidence ID:** H-001-E5
+**Status:** Candidate; independent QA and Security review pending
+**Opaque trace reference:** `bootstrap-h001-authority-lineage-v6`
 **Recorded:** 2026-08-26
 **Verification owners:** QA Reviewer, then Security Reviewer
 
 This is a redacted evidence manifest, not a raw command log. The immutable
 review target is the Git commit containing this file. The implementation
 checkpoint it verifies is
-`1214ce5f148c6c3253a877e3f8a108c0253c6448`, based on signed genesis
+`1b6045e6bb7bf0c5ff2e75281c98bdf3fde71385`, based on signed genesis
 `8c108460d7c0bb59b80a0b3942dc872a2e05785a`.
 
 ## Bound artifacts
 
 | Artifact | Immutable identifier or SHA-256 |
 | --- | --- |
-| implementation tree | `5a387bba8c8affe1a65beb7e2744f81f641f2f50` |
-| validation binary | `766662b93986a3611cd0709e6accf0ae59c09237703b2460bcda0edf84b50861` |
+| implementation tree | `b665e62edaede7281b27ad960df5e363774e550d` |
+| validation binary | `86873542ce8b40a1c111b4f485935fd6be3ff641a6f1d5ef5be12cd6663f6ba1` |
 | MARS source manifest | `1d9e01d5f90ea6335299284befe77798809e381b238472446ae61427070b90b2` |
-| signed claim attestation | `41079a23f6bb4a2a68cec481d2bf474cc53343a084e24406fa63343084fdd8c4` |
-| claim signature | `3727f5e409a70ff5cf901923ad50ec962643be825c7b4c79d06a793395a6e905` |
+| signed claim attestation | `355efe1818342e11af6a0bc5f5c8919a4b1264ca57be614e46d8cc475274a3c0` |
+| claim signature | `4db4d102980dc7bcf9fe1f7c6d6289ddf31fae916ed33336828630bbbbdb9a07` |
 | harness manifest | `58ad0c48a2f3677c183d1f6689d6893e0b9bbe508417fee3bf60a9451286230a` |
-| Beads claim checkpoint | `vvbleat3bc69avj90ciauegpbfr2o3g6` |
-| signed attestation ledger head | `7l67arkkk8bcis9pp9ns0u8uep1jq4vi` |
+| Beads claim checkpoint | `pgi99ie4dpqvutoiv59b8ca8stmk466i` |
+| signed attestation ledger head | `icj9j2a6h0nsrb3q9705nm6tgt75kr3p` |
 
 The signed attestation records M3-H001 as `in-progress`, owned by
-`foundation-maintainer`, with zero dependencies and the complete exclusive
+`foundation-maintainer`, with zero dependencies, feature F-001, product
+decisions PD-001/PD-002/PD-003, all four scenarios, and the complete exclusive
 path set. Later lifecycle and review mutations remain canonical only in Beads.
 
 ## Reproducible checks
@@ -45,7 +46,7 @@ row explicitly describes the expected failing canary.
 | static analysis | `go vet ./...` | pass |
 | whitespace | `git diff --check` and `git show --check --oneline --no-renames HEAD` | pass |
 | worktree secrets | `gitleaks detect --no-git --source . --redact --no-banner` | pass |
-| history secrets | `gitleaks detect --source . --redact --no-banner` | pass; nine commits scanned at checkpoint |
+| history secrets | `gitleaks detect --source . --redact --no-banner` | pass; eleven commits scanned at checkpoint |
 | provenance refresh | `go run ./cmd/mars3 doctrine refresh --repo . --source ../MARS --ref f55d129bfc794510ca485bb54fc0a35c7b04a700` | pass; dry run; 20 files |
 | claim signature | `ssh-keygen -Y verify` with the committed public key and namespace `mars3-claim-attestation` | pass |
 | remote branch | `git ls-remote origin refs/heads/codex/h-001-doctrine-foundation` | implementation checkpoint published; evidence-containing review target is verified after publication and recorded in Beads |
@@ -74,7 +75,7 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
 ## Public CI and repository controls
 
 - GitHub Actions run
-  `https://github.com/greaveselliott/MARS-3/actions/runs/32927392259`
+  `https://github.com/greaveselliott/MARS-3/actions/runs/32928891241`
   completed successfully for the implementation checkpoint.
 - The repository visibility API returned `PUBLIC` with default branch `main`.
 - Active ruleset `21510926` prohibits deletion and non-fast-forward updates,
@@ -90,9 +91,10 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
 
 ## Scenario evidence
 
-- **F-001-S1:** the plan checker proved one canonical active plan, explicit
-  goal/decision/spec/BDD links, one current Bead, dependency order, and no Git
-  ticket-lifecycle shadow tree.
+- **F-001-S1:** the plan checker proved one canonical active plan and no Git
+  ticket-lifecycle shadow tree. The pinned Beads client and signed claim prove
+  the same canonical work definition explicitly links G-001, F-001,
+  PD-001/PD-002/PD-003, and F-001-S1 through F-001-S4 with zero dependencies.
 - **F-001-S2:** doctrine check and the exact-checkout dry run proved the MARS
   commit, all 20 required source blobs, attribution, exclusions, signed
   genesis, signed claim, and generated-manifest-only refresh scope.
@@ -162,6 +164,12 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
   attestation binds claim checkpoint `pgi99ie4dpqvutoiv59b8ca8stmk466i` to
   ledger head `icj9j2a6h0nsrb3q9705nm6tgt75kr3p`. E4 remains historical and
   no verdict carries to E5.
+- Checkpoint `1b6045e6bb7bf0c5ff2e75281c98bdf3fde71385` adds the complete typed
+  lineage to Beads and its signed public attestation, makes feature and PD-003
+  mandatory in offline doctrine validation, and includes negative omission
+  tests. Exact-SHA CI run `32928891241` passed, and two clean Linux/amd64 builds
+  reproduced the validation-binary hash above. No prior verdict carries to the
+  immutable commit containing H-001-E5.
 
 FactoryDocSync was checked and remained current. This ticket changed its BDD,
 authority, provenance, trace, security, publication, runtime, and operator
@@ -181,8 +189,7 @@ documentation together with the validation behavior.
   correctness failure, but future pin maintenance must update the workflow
   contract through a new decision and review.
 
-Next executable owner: Foundation Maintainer. The corrected Beads lineage and
-signed claim must produce a new implementation checkpoint, reproducible
-evidence, and immutable E5 target before QA reruns. Security remains gated. The
-Delivery Orchestrator may reconcile and close M3-H001 only after both canonical
-Beads verdicts and a completed run disposition.
+Next executable owner: QA Reviewer. On `accepted`, the exact same immutable E5
+commit routes to Security Reviewer. The Delivery Orchestrator may reconcile and
+close M3-H001 only after both canonical Beads verdicts and a completed run
+disposition.
