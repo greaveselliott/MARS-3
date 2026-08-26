@@ -1021,7 +1021,7 @@ var w001BootstrapGrantScalars = []grantScalarExpectation{
 	{path: "toolchain.helperCommandPath", value: "cmd/mars3-authority/main.go"},
 	{path: "toolchain.helperCommandSHA256", value: "d8ae9fcf5b04902fa3f2ece3369688ca7abf1e55f0cd4f57a611006a861979ea"},
 	{path: "toolchain.helperLibraryPath", value: "internal/authority/bootstrap/bootstrap.go"},
-	{path: "toolchain.helperLibrarySHA256", value: "e771d7994b325f75d9244f558d9b5604cfe7c81052d5cd1a28c7463503bedb20"},
+	{path: "toolchain.helperLibrarySHA256", value: "ab353846b1d52fbe4d47a30b5ef68f1375d44a7a9ee0d08d6032b0d89615a736"},
 	{path: "verification.publicCommitGateRequired", value: "true"},
 	{path: "verification.immutableCommitReviewRequired", value: "true"},
 	{path: "verification.protectedMainRequiredBeforeClaim", value: "true"},

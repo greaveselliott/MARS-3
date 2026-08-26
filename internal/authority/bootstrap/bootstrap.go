@@ -498,8 +498,11 @@ func verifyDisposableWorkspace(patchedBinary, originalBinary, workspace string, 
 		return "", fmt.Errorf("disposable canonical-backend claim: %w", err)
 	}
 	post, err := readIssue(originalBinary, copyRoot, config.Bead)
-	if err != nil || verifyPostimage(post, config) != nil {
-		return "", errors.New("disposable claim postimage is invalid")
+	if err != nil {
+		return "", fmt.Errorf("read disposable claim postimage: %w", err)
+	}
+	if err := verifyPostimage(post, config); err != nil {
+		return "", fmt.Errorf("disposable claim postimage is invalid: %w", err)
 	}
 	afterVersion, err := readVersionState(originalBinary, copyRoot)
 	if err != nil || afterVersion.Commit == beforeVersion.Commit {
