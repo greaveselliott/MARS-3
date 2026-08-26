@@ -1,24 +1,24 @@
 # H-001 validation evidence
 
 **Classification:** PUBLIC
-**Evidence ID:** H-001-E2
-**Status:** Superseded after QA `changes-requested`; not acceptance evidence
-**Opaque trace reference:** `bootstrap-h001-security-remediation-v2`
+**Evidence ID:** H-001-E3
+**Status:** Candidate; independent QA and Security review pending
+**Opaque trace reference:** `bootstrap-h001-qa-remediation-v3`
 **Recorded:** 2026-08-26
 **Verification owners:** QA Reviewer, then Security Reviewer
 
 This is a redacted evidence manifest, not a raw command log. The immutable
 review target is the Git commit containing this file. The implementation
 checkpoint it verifies is
-`880e24fa3fdc55d3eec5b9780ef153022c3aa3c4`, based on signed genesis
+`e928a243d3c43e167d673f3c1fd12ec693635620`, based on signed genesis
 `8c108460d7c0bb59b80a0b3942dc872a2e05785a`.
 
 ## Bound artifacts
 
 | Artifact | Immutable identifier or SHA-256 |
 | --- | --- |
-| implementation tree | `7f616dc63064eedbff6d6f846fdf0ac2df2ba05d` |
-| validation binary | `31a7661149c5261d03893ad49b63586f31306af1727f20dd126d8491db70c9e5` |
+| implementation tree | `fc95e3822e9ede96e542f11c300ddf27f09b564d` |
+| validation binary | `7ef04a65ec2041ede8f4c702f30d8e6b0cef6ee6492817782df2730f63fa97db` |
 | MARS source manifest | `1d9e01d5f90ea6335299284befe77798809e381b238472446ae61427070b90b2` |
 | signed claim attestation | `41079a23f6bb4a2a68cec481d2bf474cc53343a084e24406fa63343084fdd8c4` |
 | claim signature | `3727f5e409a70ff5cf901923ad50ec962643be825c7b4c79d06a793395a6e905` |
@@ -45,7 +45,7 @@ row explicitly describes the expected failing canary.
 | static analysis | `go vet ./...` | pass |
 | whitespace | `git diff --check` and `git show --check --oneline --no-renames HEAD` | pass |
 | worktree secrets | `gitleaks detect --no-git --source . --redact --no-banner` | pass |
-| history secrets | `gitleaks detect --source . --redact --no-banner` | pass; four commits scanned at checkpoint |
+| history secrets | `gitleaks detect --source . --redact --no-banner` | pass; six commits scanned at checkpoint |
 | provenance refresh | `go run ./cmd/mars3 doctrine refresh --repo . --source ../MARS --ref f55d129bfc794510ca485bb54fc0a35c7b04a700` | pass; dry run; 20 files |
 | claim signature | `ssh-keygen -Y verify` with the committed public key and namespace `mars3-claim-attestation` | pass |
 | remote branch | `git ls-remote origin refs/heads/codex/h-001-doctrine-foundation` | exact checkpoint SHA |
@@ -57,10 +57,24 @@ The Gitleaks detection canary failed with exit 1 as required before either
 repository scan was trusted. A newer source-built candidate that returned zero
 for the same canary was rejected and is not part of the gate.
 
+## Reproducible validation binary
+
+The bound binary is a static `linux/amd64` artifact built with the local Go
+toolchain fixed at `go1.26.2`. From a clean checkout of the implementation
+checkpoint, run this repository-relative command:
+
+```text
+GOTOOLCHAIN=local CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -buildvcs=false -ldflags=-buildid= -o ../mars3-h001-linux-amd64 ./cmd/mars3
+```
+
+Two rebuilds with distinct empty Go build and temporary caches produced the
+same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
+`GOOS=linux`, `GOARCH=amd64`, `GOAMD64=v1`, `-trimpath=true`, and no VCS stamp.
+
 ## Public CI and repository controls
 
 - GitHub Actions run
-  `https://github.com/greaveselliott/MARS-3/actions/runs/32923192961`
+  `https://github.com/greaveselliott/MARS-3/actions/runs/32924305397`
   completed successfully for the implementation checkpoint.
 - The repository visibility API returned `PUBLIC` with default branch `main`.
 - Active ruleset `21510926` prohibits deletion and non-fast-forward updates,
@@ -104,6 +118,11 @@ for the same canary was rejected and is not part of the gate.
   that the recorded validation-binary hash lacked a reproducible build tuple
   and did not match two clean checkpoint rebuilds. M3-H001 reopened on the same
   branch for a third candidate; H-001-E2 must not be used as acceptance proof.
+- Checkpoint `e928a243d3c43e167d673f3c1fd12ec693635620` rejects structural YAML
+  anchors and aliases before permission evaluation and includes the exact
+  alias-key regression. H-001-E3 also replaces the underspecified binary hash
+  with the reproducible recipe and matching rebuilds above. No prior review
+  verdict carries forward to the immutable commit containing H-001-E3.
 
 FactoryDocSync was checked and remained current. This ticket changed its BDD,
 authority, provenance, trace, security, publication, runtime, and operator
@@ -119,7 +138,7 @@ documentation together with the validation behavior.
 - The bootstrap exception remains direct human procedure until W-001 replaces
   it; it is not reusable by a tenant agent.
 
-Next executable owner: Foundation Maintainer, limited to the two QA-requested
-corrections. A replacement evidence manifest must bind an explicitly versioned,
-cross-compiled, path-independent build recipe and route a new immutable commit
-through fresh QA → Security review.
+Next executable owner: QA Reviewer. On `accepted`, the same immutable commit
+routes to Security Reviewer. The Delivery Orchestrator may reconcile and close
+M3-H001 only after both canonical Beads verdicts and a completed run
+disposition.

@@ -51,7 +51,7 @@
 | F-001-S3 | passing | Security | manifest/trust and mutation-denial tests |
 | F-001-S4 | passing | Security | public-check, secret scan, source tests, vet, diff check |
 
-`passing` records deterministic candidate evidence in H-001-E2. It does not
+`passing` records deterministic candidate evidence in H-001-E3. It does not
 mean accepted or done: release readiness remains blocked until QA and Security
 accept the same immutable containing commit and Beads records reconciliation.
 
