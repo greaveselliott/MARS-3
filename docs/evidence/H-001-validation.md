@@ -1,23 +1,23 @@
 # H-001 validation evidence
 
 **Classification:** PUBLIC
-**Evidence ID:** H-001-E1
-**Opaque trace reference:** `bootstrap-h001-evidence-v1`
+**Evidence ID:** H-001-E2
+**Opaque trace reference:** `bootstrap-h001-security-remediation-v2`
 **Recorded:** 2026-08-26
 **Verification owners:** QA Reviewer, then Security Reviewer
 
 This is a redacted evidence manifest, not a raw command log. The immutable
 review target is the Git commit containing this file. The implementation
 checkpoint it verifies is
-`760b10a97b6d97cd6ec3aa25d5151df2ef1ea374`, based on signed genesis
+`880e24fa3fdc55d3eec5b9780ef153022c3aa3c4`, based on signed genesis
 `8c108460d7c0bb59b80a0b3942dc872a2e05785a`.
 
 ## Bound artifacts
 
 | Artifact | Immutable identifier or SHA-256 |
 | --- | --- |
-| implementation tree | `ce8a15908d1aba3a680963bd0e20c1ba55468ea7` |
-| validation binary | `6484d1dff326713c65187973ab122e22fbe43b76d19582a8e8d06a141496393d` |
+| implementation tree | `7f616dc63064eedbff6d6f846fdf0ac2df2ba05d` |
+| validation binary | `31a7661149c5261d03893ad49b63586f31306af1727f20dd126d8491db70c9e5` |
 | MARS source manifest | `1d9e01d5f90ea6335299284befe77798809e381b238472446ae61427070b90b2` |
 | signed claim attestation | `41079a23f6bb4a2a68cec481d2bf474cc53343a084e24406fa63343084fdd8c4` |
 | claim signature | `3727f5e409a70ff5cf901923ad50ec962643be825c7b4c79d06a793395a6e905` |
@@ -44,7 +44,7 @@ row explicitly describes the expected failing canary.
 | static analysis | `go vet ./...` | pass |
 | whitespace | `git diff --check` and `git show --check --oneline --no-renames HEAD` | pass |
 | worktree secrets | `gitleaks detect --no-git --source . --redact --no-banner` | pass |
-| history secrets | `gitleaks detect --source . --redact --no-banner` | pass; two commits scanned at checkpoint |
+| history secrets | `gitleaks detect --source . --redact --no-banner` | pass; four commits scanned at checkpoint |
 | provenance refresh | `go run ./cmd/mars3 doctrine refresh --repo . --source ../MARS --ref f55d129bfc794510ca485bb54fc0a35c7b04a700` | pass; dry run; 20 files |
 | claim signature | `ssh-keygen -Y verify` with the committed public key and namespace `mars3-claim-attestation` | pass |
 | remote branch | `git ls-remote origin refs/heads/codex/h-001-doctrine-foundation` | exact checkpoint SHA |
@@ -59,7 +59,7 @@ for the same canary was rejected and is not part of the gate.
 ## Public CI and repository controls
 
 - GitHub Actions run
-  `https://github.com/greaveselliott/MARS-3/actions/runs/32920916672`
+  `https://github.com/greaveselliott/MARS-3/actions/runs/32923192961`
   completed successfully for the implementation checkpoint.
 - The repository visibility API returned `PUBLIC` with default branch `main`.
 - Active ruleset `21510926` prohibits deletion and non-fast-forward updates,
@@ -82,6 +82,22 @@ for the same canary was rejected and is not part of the gate.
   mutation fixture that enables profile authority is rejected.
 - **F-001-S4:** public, source, vet, whitespace, worktree/history secret, binary
   denial, mutable-container, malformed-DocSync, and workflow checks passed.
+  Regression cases reject inline, indented job-level, duplicate, aliased,
+  flow-nested, escaped, and explicit-key permission declarations while
+  accepting only the canonical top-level `contents: read` block.
+
+## Review and remediation history
+
+- QA accepted prior target
+  `54d778c2961cb69ed147deccc6fe8a32b6af2d73` after its deterministic and
+  negative checks passed.
+- Security returned `changes-requested` for that target after reproducing a
+  job-level inline `permissions: { contents: write }` declaration that the
+  earlier regex gate missed. M3-H001 reopened on the same branch and Bead.
+- Checkpoint `880e24fa3fdc55d3eec5b9780ef153022c3aa3c4` replaces regex inference with
+  the fail-closed permission structure described above. Prior review verdicts
+  do not carry forward; the immutable commit containing H-001-E2 must complete
+  a fresh QA → Security review sequence.
 
 FactoryDocSync was checked and remained current. This ticket changed its BDD,
 authority, provenance, trace, security, publication, runtime, and operator

@@ -2,17 +2,17 @@
 
 **Updated:** 2026-08-26
 **Owner:** Delivery Orchestrator
-**Current release readiness:** Not releasable; H-001 Security remediation in progress
+**Current release readiness:** Not releasable; H-001 replacement target awaiting independent review
 
 This ledger is evidence-backed. A missing result is `pending`, not an inferred
 pass and not a numeric score.
 
 | Feature/scenario | Mode | Failure ownership | Evidence state | Review state |
 | --- | --- | --- | --- | --- |
-| F-001-S1 authority route | doctrine-foundation | foundation | H-001-E1: deterministic checks passed | prior target accepted by QA; replacement target pending |
-| F-001-S2 provenance | doctrine-foundation | foundation | H-001-E1: 20-source offline refresh passed | prior target accepted by QA; replacement target pending |
-| F-001-S3 trust defaults | security-review | foundation | H-001-E1: profile mutation denial passed | replacement target pending QA then Security |
-| F-001-S4 public safety | security-review | foundation | inline workflow-permission bypass reproduced and corrected with negative tests | Security changes requested on prior target; replacement target pending |
+| F-001-S1 authority route | doctrine-foundation | foundation | H-001-E2: deterministic checks passed | replacement target pending QA |
+| F-001-S2 provenance | doctrine-foundation | foundation | H-001-E2: 20-source offline refresh passed | replacement target pending QA |
+| F-001-S3 trust defaults | security-review | foundation | H-001-E2: profile mutation denial passed | replacement target pending QA then Security |
+| F-001-S4 public safety | security-review | foundation | H-001-E2: workflow escalation bypass corrected; public CI passed | replacement target pending QA then Security |
 
 ## Release gate
 
