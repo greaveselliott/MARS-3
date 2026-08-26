@@ -392,7 +392,11 @@ func buildPatchedBinary(repo, source string, config doctrine.W001BootstrapGrant,
 	binary := filepath.Join(temporary, "bd-w001-bootstrap")
 	build := exec.Command(goBinary, "build", "-trimpath", "-buildvcs=false", "-o", binary, "./cmd/bd")
 	build.Dir = checkout
-	build.Env = append(append([]string(nil), baseEnv...), "CGO_ENABLED=0")
+	build.Env = append(append([]string(nil), baseEnv...),
+		"CGO_ENABLED=1", "CC=/usr/bin/clang", "CXX=/usr/bin/clang++",
+		"CGO_CPPFLAGS=-I"+filepath.Join(icuPrefix, "include"),
+		"CGO_LDFLAGS=-L"+filepath.Join(icuPrefix, "lib"),
+	)
 	build.Stdout, build.Stderr = stdout, stderr
 	if err := build.Run(); err != nil {
 		return "", "", cleanup, fmt.Errorf("build patched Beads binary: %w", err)

@@ -121,17 +121,17 @@ toolchain:
   goOS: darwin
   goArch: arm64
   goBinarySHA256: 005640c7ff93028cb704283b0f737f2db3faf8b51b2561170c769b83905da646
-  cgoEnabled: false
+  cgoEnabled: true
   icuFormula: icu4c@78 78.2
   doltTestImage: dolthub/dolt-sql-server@sha256:6b651663c5024d98a98a4db7226a5e85f90a9344c78fee85617c0fb4a30c6e64
   ryukDisabled: true
   patchPath: internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch
   patchSHA256: a21560d7ceb3ef530920a0277f77b4b8c8d67d0dbd6d0c2b3d8321365851d34b
-  patchedBinarySHA256: 3620a5517b9e3becb066c553b4e7bf2370714f93c04f40082cbc0c49d072821c
+  patchedBinarySHA256: b5ed129fddb299732d44a76fd0aa82695dfe7770e5cf122fbec671f79cdd6e69
   helperCommandPath: cmd/mars3-authority/main.go
   helperCommandSHA256: d8ae9fcf5b04902fa3f2ece3369688ca7abf1e55f0cd4f57a611006a861979ea
   helperLibraryPath: internal/authority/bootstrap/bootstrap.go
-  helperLibrarySHA256: acf5feca6c0147c1766690f056cf3c9621d3e3ae39aec638be4d7e1d855edf46
+  helperLibrarySHA256: e771d7994b325f75d9244f558d9b5604cfe7c81052d5cd1a28c7463503bedb20
 
 verification:
   order:
