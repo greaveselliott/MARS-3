@@ -51,20 +51,20 @@
 
 | Scenario | State | Verification owner | Required evidence |
 | --- | --- | --- | --- |
-| F-001-S1 | passing | QA | corrected typed Beads lineage, signed claim, and executable-reviewer registry tests |
+| F-001-S1 | passing | QA | H-001-E6 typed Beads lineage, signed claim, and executable-reviewer registry tests |
 | F-001-S2 | passing | QA | offline provenance and refresh-scope tests |
 | F-001-S3 | passing | Security | manifest/trust and mutation-denial tests |
-| F-001-S4 | passing | Security | H-001-E4 immutable workflow and public-gate evidence |
+| F-001-S4 | passing | Security | H-001-E6 immutable workflow and public-gate evidence |
 
-All four scenarios pass deterministically at the current implementation
-checkpoint. The same Bead carries typed `featureId: F-001`, all three product
-decisions, and the exact routable order `qa → security-reviewer →
-delivery-orchestrator`. The fresh signed attestation plus negative omission,
-stale-binding, duplicate, malformed, and undeclared-reviewer tests bind that
-contract offline. H-001-E5 received `changes-requested`; no earlier verdict
-carries to a changed commit. Passing never means accepted or done: release
-readiness remains blocked until both reviewers accept the same immutable
-containing commit and Beads records reconciliation.
+All four scenarios have deterministic H-001-E6 candidate evidence. The same
+Bead carries typed `featureId: F-001`, all three product decisions, and the
+exact routable order `qa → security-reviewer → delivery-orchestrator`. The
+fresh signed attestation plus negative omission, stale-binding, duplicate,
+malformed, and undeclared-reviewer tests bind that contract offline. H-001-E5
+received `changes-requested`; no earlier verdict carries to a changed commit.
+Passing never means accepted or done: release readiness remains blocked until
+both reviewers accept the same immutable containing commit and Beads records
+reconciliation.
 
 ### F-001-S1 — One durable delivery route
 
