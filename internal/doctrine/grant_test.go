@@ -1166,6 +1166,7 @@ func writePlanningGrantGitFixture(t *testing.T) string {
 	}
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1V3AddendumBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--detach", "FETCH_HEAD")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+wave1PriorPublicationTag+":refs/tags/"+wave1PriorPublicationTag)
@@ -1174,6 +1175,16 @@ func writePlanningGrantGitFixture(t *testing.T) string {
 
 	writePlanningGrantCurrentFiles(t, root)
 	return root
+}
+
+func TestPlanningGrantGitFixtureDisablesAutoMaintenance(t *testing.T) {
+	root := writePlanningGrantGitFixture(t)
+	if value := planningGrantTestGitOutput(t, root, "config", "--local", "--get", "maintenance.auto"); value != "false" {
+		t.Fatalf("disposable planning fixture enabled Git maintenance: %q", value)
+	}
+	if value := planningGrantTestGitOutput(t, root, "config", "--local", "--get", "gc.auto"); value != "0" {
+		t.Fatalf("disposable planning fixture enabled Git auto-GC: %q", value)
+	}
 }
 
 func writePlanningGrantCurrentFiles(t *testing.T, root string) {

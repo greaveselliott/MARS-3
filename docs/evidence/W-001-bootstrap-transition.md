@@ -1,6 +1,6 @@
 # W-001 bootstrap claim transition evidence
 
-**Status:** Successor v5 disposable conformance passed; immutable review pending; no canonical claim has executed
+**Status:** Successor v6 public-CI stabilization pending; no canonical claim has executed
 **Classification:** PUBLIC
 **Goal:** G-001
 **Decision:** PD-002
@@ -254,6 +254,30 @@ P-001 remained `open/backlog`, with `workVersion: null` and closed/done H-001
 plus open/backlog W-001; its normalized summary SHA-256 was
 `c1d3774bc61b39417c68a90714c0811c23ae322d49abfbe166910c8537ba965f`.
 No claim, lease, plan transition, or other canonical mutation occurred.
+
+## Preserved v5 public-CI finding
+
+Signed tag object `6443af6a22a49b2d46bcc2215ca78ad9b17ee0b2`
+for `mars3/w001-bootstrap-helper-v5` remains immutably attached to commit
+`ac43a21d7e344c03aa41e626a7c1f55ae02ee9a3`, tree
+`9685f47ae1b92e5e678cf0ed710c4e04dc336890`. Public pull-request run
+`32997852398`, job `98271649495`, passed build, doctrine, plan, DocSync, and
+public checks, then failed in `Test and vet`. The exact failure was
+`TestWave1PlanningGrantBindsCheckoutAndCommitHistory/malformed pull request
+event merge SHA fails`: Go's `t.TempDir` cleanup observed a nonempty disposable
+Git directory after the assertion. Later steps were skipped. No rerun, review,
+merge, or canonical effect followed.
+
+This is a recurrence of the foundation-owned
+`go-test-tempdir-cleanup-git-pack-race` fingerprint after a meaningful accepted
+fixture-stabilization change. The earlier correction disabled repository-local
+maintenance in two fixture constructors, but the failing
+`writePlanningGrantGitFixture` constructor did not apply it. The bounded
+correction sets only `maintenance.auto=false` and `gc.auto=0` immediately after
+`git init` in that disposable repository and asserts both local values. It does
+not mutate developer or production Git configuration. The v5 tag is not moved
+or reused; the single successor attempt uses
+`mars3/w001-bootstrap-helper-v6` and an entirely fresh public run.
 
 ## Pending receipt
 
