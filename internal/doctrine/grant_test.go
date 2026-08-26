@@ -312,6 +312,112 @@ func TestW001PostclaimCIFixRejectsTampering(t *testing.T) {
 	}
 }
 
+func TestW001PostclaimSecurityFixAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001PostclaimSecurityFix(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed postclaim Security correction was rejected: %v", findings)
+	}
+	grant, err := LoadW001BootstrapGrant(repo)
+	if err != nil {
+		t.Fatalf("valid Security correction was not projected into the bootstrap helper: %v", err)
+	}
+	if grant.PatchSHA256 != w001PostclaimSecurityBasePatchSHA || grant.CorrectionPatchPath != w001PostclaimSecurityPatchPath ||
+		grant.CorrectionPatchSHA256 != w001PostclaimSecurityPatchSHA || grant.PatchedBinarySHA256 != w001PostclaimSecurityBinarySHA {
+		t.Fatalf("bootstrap helper did not bind the exact two-layer Security correction: %+v", grant)
+	}
+}
+
+func TestW001PostclaimSecurityFixFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(w001PostclaimSecurityFixPath)
+	signature := read(w001PostclaimSecurityFixSig)
+	publicKey := read(wave1PlanningGrantKey)
+	materials := map[string][]byte{
+		w001PostclaimCIFixPath:                                         read(w001PostclaimCIFixPath),
+		w001PostclaimCIFixSignature:                                    read(w001PostclaimCIFixSignature),
+		"docs/evidence/W-001-validation.md":                            read("docs/evidence/W-001-validation.md"),
+		"internal/authority/bootstrap/bootstrap.go":                    read("internal/authority/bootstrap/bootstrap.go"),
+		"internal/authority/bootstrap/bootstrap_test.go":               read("internal/authority/bootstrap/bootstrap_test.go"),
+		"internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch": read("internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch"),
+		w001PostclaimSecurityPatchPath:                                 read(w001PostclaimSecurityPatchPath),
+	}
+
+	t.Run("signed grant tamper", func(t *testing.T) {
+		tampered := bytes.Replace(grant, []byte("canonicalWorkMutationAllowed: false"), []byte("canonicalWorkMutationAllowed: true"), 1)
+		root := writeW001PostclaimSecurityFixture(t, tampered, signature, publicKey, materials)
+		var findings []Finding
+		checkW001PostclaimSecurityFix(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_security_value") || !findingCodePresent(findings, "public.w001_postclaim_security_signature") {
+			t.Fatalf("tampered Security-correction grant was accepted: %v", findings)
+		}
+	})
+
+	t.Run("security patch material tamper", func(t *testing.T) {
+		tampered := clonePlanningGrantMaterials(materials)
+		tampered[w001PostclaimSecurityPatchPath] = append(tampered[w001PostclaimSecurityPatchPath], []byte("\nunauthorized drift\n")...)
+		root := writeW001PostclaimSecurityFixture(t, grant, signature, publicKey, tampered)
+		var findings []Finding
+		checkW001PostclaimSecurityFix(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_security_material") {
+			t.Fatalf("tampered Security-correction patch was accepted: %v", findings)
+		}
+	})
+
+	t.Run("helper material tamper", func(t *testing.T) {
+		tampered := clonePlanningGrantMaterials(materials)
+		const path = "internal/authority/bootstrap/bootstrap.go"
+		tampered[path] = append(tampered[path], []byte("\n// unauthorized drift\n")...)
+		root := writeW001PostclaimSecurityFixture(t, grant, signature, publicKey, tampered)
+		var findings []Finding
+		checkW001PostclaimSecurityFix(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_security_material") {
+			t.Fatalf("tampered Security-correction helper was accepted: %v", findings)
+		}
+	})
+
+	t.Run("supersession evidence removed", func(t *testing.T) {
+		tampered := clonePlanningGrantMaterials(materials)
+		const path = "docs/evidence/W-001-validation.md"
+		tampered[path] = bytes.Replace(tampered[path], []byte("**Current disposition:** changes-requested"), []byte("**Current disposition:** accepted"), 1)
+		root := writeW001PostclaimSecurityFixture(t, grant, signature, publicKey, tampered)
+		var findings []Finding
+		checkW001PostclaimSecurityFix(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_security_evidence") {
+			t.Fatalf("Security supersession evidence was not required: %v", findings)
+		}
+	})
+}
+
+func writeW001PostclaimSecurityFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
+	t.Helper()
+	root := t.TempDir()
+	writePlanningGrantTestFile(t, root, w001PostclaimSecurityFixPath, grant)
+	writePlanningGrantTestFile(t, root, w001PostclaimSecurityFixSig, signature)
+	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+	for path, data := range materials {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	return root
+}
+
+func clonePlanningGrantMaterials(materials map[string][]byte) map[string][]byte {
+	cloned := make(map[string][]byte, len(materials))
+	for path, data := range materials {
+		cloned[path] = append([]byte(nil), data...)
+	}
+	return cloned
+}
+
 func TestW001PostclaimGitDiffIsFenced(t *testing.T) {
 	t.Run("repository fixture ignores inherited GitHub runner identity", func(t *testing.T) {
 		t.Setenv("GITHUB_ACTIONS", "true")
@@ -379,6 +485,37 @@ func TestW001PostclaimGitDiffIsFenced(t *testing.T) {
 	})
 }
 
+func TestW001PostclaimSecurityGitDiffIsFenced(t *testing.T) {
+	t.Run("exact dirty correction passes", func(t *testing.T) {
+		root := writeW001PostclaimSecurityGitFixture(t)
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if len(findings) != 0 {
+			t.Fatalf("authorized Security correction was rejected: %v", findings)
+		}
+	})
+
+	t.Run("unauthorized correction path fails", func(t *testing.T) {
+		root := writeW001PostclaimSecurityGitFixture(t)
+		writePlanningGrantTestFile(t, root, "internal/authority/escape.go", []byte("package authority\n"))
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_scope") {
+			t.Fatalf("unauthorized Security-correction path was accepted: %v", findings)
+		}
+	})
+
+	t.Run("missing prior v2 tag fails", func(t *testing.T) {
+		root := writeW001PostclaimSecurityGitFixture(t)
+		runPlanningGrantTestGit(t, root, "tag", "-d", w001PostclaimCIFixReviewTag)
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_security_v2_tag") {
+			t.Fatalf("missing immutable v2 tag was accepted: %v", findings)
+		}
+	})
+}
+
 func writeW001PostclaimGitFixture(t *testing.T) string {
 	t.Helper()
 	t.Setenv("GITHUB_ACTIONS", "")
@@ -393,6 +530,31 @@ func writeW001PostclaimGitFixture(t *testing.T) string {
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+w001PostclaimReviewTag+":refs/tags/"+w001PostclaimReviewTag)
 	for _, path := range w001PostclaimCIFixSequences["addendum.authorizedPaths"] {
+		data, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	return root
+}
+
+func writeW001PostclaimSecurityGitFixture(t *testing.T) string {
+	t.Helper()
+	t.Setenv("GITHUB_ACTIONS", "")
+	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	disablePlanningGrantTestGitMaintenance(t, root)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimSecurityFixBase)
+	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
+	for _, tag := range []string{w001PostclaimReviewTag, w001PostclaimCIFixReviewTag} {
+		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+tag+":refs/tags/"+tag)
+	}
+	for _, path := range w001PostclaimSecurityFixSequences["grant.authorizedPaths"] {
 		data, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(path)))
 		if err != nil {
 			t.Fatal(err)

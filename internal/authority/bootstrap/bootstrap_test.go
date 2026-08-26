@@ -28,6 +28,9 @@ func TestVerifyAtomicityTestResultsRequiresEveryExecutedCase(t *testing.T) {
 		"TestBatchBootstrapClaimPostClaimFailureRollsBack",
 		"TestBatchBootstrapClaimContentionHasOneWinner",
 		"TestBatchBootstrapClaimRedirectAtTransactionBoundaryFailsClosed",
+		"TestBatchBootstrapClaimSelectorSpliceFailsClosed",
+		"TestBatchBootstrapClaimSharedServerConfigFailsClosed",
+		"TestBatchBootstrapClaimServerTransactionFailsBeforeRead",
 	}
 	var output bytes.Buffer
 	for _, name := range tests {
@@ -119,6 +122,9 @@ func TestWorkspaceInstanceRejectsAClone(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(root, ".beads", "metadata.json"), metadata, 0o600); err != nil {
 			t.Fatal(err)
 		}
+		if err := os.WriteFile(filepath.Join(root, ".beads", "config.yaml"), []byte("# public synthetic bootstrap fixture\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
 	}
 	original, clone := t.TempDir(), t.TempDir()
 	makeWorkspace(original)
@@ -147,6 +153,9 @@ func TestVerifyWorkspaceRejectsRedirectInEveryForm(t *testing.T) {
 		}
 		metadata := []byte(`{"database":"dolt","backend":"dolt","dolt_mode":"embedded","dolt_database":"M3","project_id":"` + projectID + `"}`)
 		if err := os.WriteFile(filepath.Join(root, ".beads", "metadata.json"), metadata, 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(root, ".beads", "config.yaml"), []byte("# public synthetic bootstrap fixture\n"), 0o600); err != nil {
 			t.Fatal(err)
 		}
 		return root
@@ -192,6 +201,9 @@ func TestEffectBoundaryRejectsRedirectInsertedAfterIdentityBinding(t *testing.T)
 	if err := os.WriteFile(filepath.Join(root, ".beads", "metadata.json"), metadata, 0o600); err != nil {
 		t.Fatal(err)
 	}
+	if err := os.WriteFile(filepath.Join(root, ".beads", "config.yaml"), []byte("# public synthetic bootstrap fixture\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	config := doctrine.W001BootstrapGrant{AuthorityProjectID: projectID}
 	bound, err := verifyWorkspace(root, config)
 	if err != nil || bound == "" {
@@ -202,6 +214,84 @@ func TestEffectBoundaryRejectsRedirectInsertedAfterIdentityBinding(t *testing.T)
 	}
 	if current, err := verifyWorkspace(root, config); err == nil || current == bound {
 		t.Fatal("redirect inserted immediately before effect preserved authority")
+	}
+}
+
+func TestVerifyWorkspaceRejectsEnvironmentSelectorInEveryForm(t *testing.T) {
+	const projectID = "11111111-2222-3333-4444-555555555555"
+	for _, form := range []string{"regular", "directory", "symlink", "broken-symlink"} {
+		t.Run(form, func(t *testing.T) {
+			root := t.TempDir()
+			if err := os.MkdirAll(filepath.Join(root, ".beads", "embeddeddolt", "M3"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			metadata := []byte(`{"database":"dolt","backend":"dolt","dolt_mode":"embedded","dolt_database":"M3","project_id":"` + projectID + `"}`)
+			if err := os.WriteFile(filepath.Join(root, ".beads", "metadata.json"), metadata, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(root, ".beads", "config.yaml"), []byte("# public synthetic bootstrap fixture\n"), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			selector := filepath.Join(root, ".beads", ".env")
+			switch form {
+			case "regular":
+				if err := os.WriteFile(selector, []byte("BEADS_DOLT_SERVER_DATABASE=M3_SPLICE\n"), 0o600); err != nil {
+					t.Fatal(err)
+				}
+			case "directory":
+				if err := os.Mkdir(selector, 0o700); err != nil {
+					t.Fatal(err)
+				}
+			case "symlink":
+				if err := os.Symlink(filepath.Join(root, ".beads", "metadata.json"), selector); err != nil {
+					t.Fatal(err)
+				}
+			case "broken-symlink":
+				if err := os.Symlink(filepath.Join(root, "missing"), selector); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if _, err := verifyWorkspace(root, doctrine.W001BootstrapGrant{AuthorityProjectID: projectID}); err == nil {
+				t.Fatalf("%s environment selector was accepted", form)
+			}
+		})
+	}
+}
+
+func TestWorkspaceInstanceBindsCommentsOnlyConfigContent(t *testing.T) {
+	const projectID = "11111111-2222-3333-4444-555555555555"
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, ".beads", "embeddeddolt", "M3"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	metadata := []byte(`{"database":"dolt","backend":"dolt","dolt_mode":"embedded","dolt_database":"M3","project_id":"` + projectID + `"}`)
+	if err := os.WriteFile(filepath.Join(root, ".beads", "metadata.json"), metadata, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	configPath := filepath.Join(root, ".beads", "config.yaml")
+	if err := os.WriteFile(configPath, []byte("# first public synthetic config\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	config := doctrine.W001BootstrapGrant{AuthorityProjectID: projectID}
+	before, err := verifyWorkspace(root, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(configPath, []byte("# changed public synthetic config\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	after, err := verifyWorkspace(root, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if before == after {
+		t.Fatal("config content change preserved the workspace authority digest")
+	}
+	if err := os.WriteFile(configPath, []byte("dolt:\n  shared-server: true\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := verifyWorkspace(root, config); err == nil {
+		t.Fatal("active shared-server config was accepted")
 	}
 }
 
@@ -260,6 +350,37 @@ func TestBeadsCommandEnvironmentRemovesAmbientWorkspaceOverrides(t *testing.T) {
 		key := strings.ToUpper(strings.SplitN(value, "=", 2)[0])
 		if strings.HasPrefix(key, "BEADS_") || strings.HasPrefix(key, "DOLT_") || strings.HasPrefix(key, "BD_") || strings.HasPrefix(key, "GT_") || strings.HasPrefix(key, "MARS3_W001_BOOTSTRAP_") {
 			t.Fatalf("ambient Beads override %q survived sanitization", key)
+		}
+	}
+}
+
+func TestDirectBeadsCommandEnvironmentPinsWorkspaceAndDatabase(t *testing.T) {
+	root := t.TempDir()
+	for _, key := range []string{"BEADS_DIR", "BEADS_DOLT_SERVER_DATABASE", "BEADS_DOLT_SERVER_MODE", "BEADS_DOLT_SHARED_SERVER"} {
+		t.Setenv(key, "attacker-controlled")
+	}
+	environment, resolved, err := directBeadsCommandEnvironment(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]string{
+		"BEADS_DIR":                  filepath.Join(resolved, ".beads"),
+		"BEADS_DOLT_SERVER_DATABASE": "M3",
+		"BEADS_DOLT_SERVER_MODE":     "0",
+		"BEADS_DOLT_SHARED_SERVER":   "0",
+	}
+	got := make(map[string]string)
+	for _, value := range environment {
+		parts := strings.SplitN(value, "=", 2)
+		if len(parts) == 2 {
+			if _, tracked := want[parts[0]]; tracked {
+				got[parts[0]] = parts[1]
+			}
+		}
+	}
+	for key, expected := range want {
+		if got[key] != expected {
+			t.Fatalf("%s = %q, want %q", key, got[key], expected)
 		}
 	}
 }

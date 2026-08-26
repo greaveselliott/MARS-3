@@ -1,0 +1,132 @@
+schemaVersion: 1
+kind: MARS3W001PostclaimSecurityCorrectionGrant
+
+grant:
+  id: W-001-postclaim-security-correction-v3
+  classification: PUBLIC
+  issuedAt: 2026-08-26T21:21:01Z
+  expiresAt: 2026-08-28T21:21:01Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 20542d8e696abe0a71b6ec3ceb23f042919fbc04
+  baseTree: 499ea91f5002b32d57d6f20b4ca3ea07dbdc73f5
+  workingBranch: codex/w-001-postclaim-reconciliation
+  reviewTag: mars3/w001-postclaim-reconciliation-v3
+  reviewTagMessage: MARS-3 W-001 postclaim reconciliation tree attestation v3
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  purpose: correct the superseded W-001 helper Security disposition and bind effective direct embedded M3 authority without mutating canonical work
+  bead: M3-W001
+  displayId: W-001
+  priorAddendum: W-001-postclaim-ci-stabilization-v2
+  priorAddendumSHA256: 526f73a4200fc294bb8cf5ad82bb4e12f6259d1490a8c98316da1ddb44edabef
+  priorAddendumSignatureSHA256: 4ad7b094a2328eedd0f24ae671e28a5797026b7bb8f14d89cab4829cc70d244d
+  priorReviewTag: mars3/w001-postclaim-reconciliation-v2
+  priorReviewTagObject: 684ba6c536e8e8d4c33b587da9e7d05893168958
+  priorReviewTagTarget: 20542d8e696abe0a71b6ec3ceb23f042919fbc04
+  successfulRun: 33013185662
+  successfulJob: 98324496309
+  autonomousMutation: false
+  liveLeaseAsserted: false
+  implementationAllowed: false
+  canonicalWorkMutationAllowed: false
+  allowedEffects:
+    - create-and-verify-this-signed-Security-correction-grant
+    - record-the-additive-Security-changes-requested-and-supersession-evidence
+    - reject-or-bind-Beads-selector-files-and-force-effective-direct-embedded-M3
+    - require-same-transaction-embedded-M3-authority-before-any-bootstrap-read-or-write
+    - remove-server-transaction-bootstrap-claim-capability
+    - add-alternate-database-server-backend-and-configuration-race-regressions
+    - edit-only-the-exact-authorized-Git-paths
+    - preserve-the-observed-canonical-M3-postimage-as-effect-evidence-not-helper-acceptance
+    - create-pinned-signer-correction-commits-and-one-signed-v3-review-tag
+    - push-the-existing-review-branch-and-v3-tag-and-rerun-the-ready-PR
+    - obtain-fresh-independent-QA-and-Security-review-before-squash-merge
+  authorizedPaths:
+    - .harness/grants/W-001-postclaim-security-correction-v3.yaml
+    - .harness/grants/W-001-postclaim-security-correction-v3.yaml.sig
+    - docs/evidence/W-001-validation.md
+    - internal/authority/bootstrap/bootstrap.go
+    - internal/authority/bootstrap/bootstrap_test.go
+    - internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch
+    - internal/authority/bootstrap/beads-v1.2.2-effective-db-security.patch
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - prior-v1-and-v2-grants-signatures-tags-runs-and-history-remain-immutable
+    - prior-helper-Security-acceptance-is-explicitly-superseded
+    - actual-canonical-M3-postimage-remains-valid-effect-evidence-only
+    - helper-selection-and-transaction-authority-both-require-direct-embedded-M3
+    - selector-file-or-effective-database-change-fails-before-authority-state-mutation
+    - server-backed-transactions-cannot-implement-bootstrap-claim-authority
+    - every-correction-commit-and-current-change-stays-inside-the-signed-path-set
+    - every-correction-commit-and-v3-review-tag-use-the-pinned-signer
+    - reviewed-v3-tree-equals-the-protected-main-squash-tree
+    - no-Beads-lease-implementation-production-or-policy-effect-is-created
+  prohibitedEffects:
+    - mutate-any-Bead-Dolt-row-dependency-label-comment-or-history
+    - execute-or-replay-the-canonical-W-001-bootstrap-claim
+    - issue-assert-renew-release-or-revoke-a-live-lease
+    - begin-gateway-runtime-platform-or-product-implementation
+    - edit-plan-manifest-feature-product-goal-or-scenario-contracts
+    - move-delete-or-reuse-any-existing-review-tag
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+    - credentials-provider-session-customer-data-or-raw-payloads
+
+finding:
+  helperFeatureCommit: 663d19bf190f9e3bd27edc96ee08acaa6778c853
+  helperFeatureTree: bbfa7f59f7bd29c1a0546ffcb77dd8fa4982ef6d
+  affectedPostclaimHead: 20542d8e696abe0a71b6ec3ceb23f042919fbc04
+  affectedPostclaimTree: 499ea91f5002b32d57d6f20b4ca3ea07dbdc73f5
+  priorSecurityDisposition: accepted
+  currentSecurityDisposition: changes-requested
+  priorSecurityAcceptanceStatus: superseded
+  failureFingerprint: bootstrap-effective-database-selector-splice
+  failureClass: foundation-owned
+  findingScope: helper-admission-and-transaction-authority
+
+canonicalEffect:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  assignee: work-authority-engineer
+  updatedAt: 2026-08-26T20:23:37Z
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  claimReceiptSHA256: 04cef4e421a34e0908d392fc794181db3ddb754a134e34599fa41a520c78d126
+  doltCommit: 67hmen0cmq0he08n7ujlqpcsmmi94fhb
+  independentlyReadBackFromM3: true
+  alternateDatabaseUseObservedInCanonicalEffect: false
+  liveLeaseAsserted: false
+
+materials:
+  helperLibraryPath: internal/authority/bootstrap/bootstrap.go
+  helperLibrarySHA256: 21ff880af1135db6c13ad6dcfac621e9231fee8e635ca7d47e5fcc5c39314f25
+  helperTestPath: internal/authority/bootstrap/bootstrap_test.go
+  helperTestSHA256: 0221972a39c14108719b80a23448f9c42f2b9417a3d4ea3dc4f5c1b2975a0f33
+  basePatchPath: internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch
+  basePatchSHA256: 50128252828352366ced6560371468a5746c2603ef89ea746a33be8994ffceb6
+  securityPatchPath: internal/authority/bootstrap/beads-v1.2.2-effective-db-security.patch
+  securityPatchSHA256: d48b398a8688d337192ab030c69fd9df0809f72051da7850ff2fdbad5e322d45
+  patchedBinarySHA256: 8d13927671519fd74470820a72c6ff069589655e338649f31db7e654b2b36c00
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-postclaim-security-correction-v3
+  detachedSignature: W-001-postclaim-security-correction-v3.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
