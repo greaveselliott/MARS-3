@@ -29,8 +29,9 @@
    plan from Git.
 2. The authorized bootstrap operator verifies the signed external M3-H001
    claim with the pinned Beads client and supplies its public-safe identity,
-   state, owner, and exclusive paths. No W-001 gateway or lease enforcement is
-   claimed by H-001.
+   state, owner, goal, feature, applicable product decisions, scenarios, and
+   exclusive paths. Those links must equal Git's active lineage. No W-001
+   gateway or lease enforcement is claimed by H-001.
 3. The Foundation Maintainer changes only authorized doctrine and validation
    paths and emits public-safe evidence.
 4. Validation checks authority uniqueness, provenance, trust defaults,
@@ -46,23 +47,26 @@
 
 | Scenario | State | Verification owner | Required evidence |
 | --- | --- | --- | --- |
-| F-001-S1 | passing | QA | doctrine/plan checks and authority inspection |
+| F-001-S1 | failing | QA | H-001-E4 found incomplete canonical Beads lineage; E5 pending |
 | F-001-S2 | passing | QA | offline provenance and refresh-scope tests |
 | F-001-S3 | passing | Security | manifest/trust and mutation-denial tests |
 | F-001-S4 | passing | Security | H-001-E4 immutable workflow and public-gate evidence |
 
-All four `passing` states record deterministic candidate evidence in H-001-E4,
-including remediation of the E3 privileged-trigger and secret-context findings
-and the later preflight job/effect findings. No earlier review verdict carries
-to this changed commit. Passing never means accepted or done: release readiness
-remains blocked until both reviewers accept the same immutable containing commit
-and Beads records reconciliation.
+F-001-S1 is `failing` after QA found that Beads omitted `featureId: F-001` and
+`PD-003` while Git claimed both links. The same Bead has been reopened and its
+canonical metadata corrected; E5 must bind a fresh signed attestation and
+evidence before the scenario can pass again. No earlier review verdict carries
+to a changed commit. Passing never means accepted or done: release readiness
+remains blocked until both reviewers accept the same immutable containing
+commit and Beads records reconciliation.
 
 ### F-001-S1 — One durable delivery route
 
 **Given** a fresh public clone with no operational database
 **And** the immutable genesis charter links to M3-H001
 **And** the authorized bootstrap verifier confirms the external M3-H001 claim
+**And** the Bead and signed claim explicitly match Git's goal, product
+decisions, feature, and scenario identifiers
 **When** the operator runs doctrine and plan checks
 **Then** Git exposes G-001 → decisions/spec → F-001 → one active plan
 **And** the plan points to M3-H001 without becoming ticket authority

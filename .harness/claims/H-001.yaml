@@ -1,14 +1,14 @@
 schemaVersion: 1
 kind: MARS3BootstrapClaimAttestation
-issuedAt: 2026-08-26T01:52:07Z
+issuedAt: 2026-08-26T04:00:44Z
 authority:
   system: beads-dolt
   version: 1.2.2
   sourceCommit: 6c124203e771433a3550c348771a5b5e27fd3c21
   doltSourceCommit: 1bf533220ab0
   ledgerBranch: main
-  ledgerHead: 7l67arkkk8bcis9pp9ns0u8uep1jq4vi
-  claimCheckpoint: vvbleat3bc69avj90ciauegpbfr2o3g6
+  ledgerHead: icj9j2a6h0nsrb3q9705nm6tgt75kr3p
+  claimCheckpoint: pgi99ie4dpqvutoiv59b8ca8stmk466i
 claim:
   bead: M3-H001
   displayId: H-001
@@ -21,6 +21,7 @@ claim:
   risk: high
   dependencyCount: 0
   goal: G-001
+  feature: F-001
   scenarios:
     - F-001-S1
     - F-001-S2
@@ -29,6 +30,7 @@ claim:
   productDecisions:
     - PD-001
     - PD-002
+    - PD-003
   exclusivePaths:
     - .github/**
     - AGENTS.md

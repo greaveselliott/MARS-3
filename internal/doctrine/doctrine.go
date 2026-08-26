@@ -2,6 +2,7 @@
 FactoryDocSync:
 docs:
 - docs/features/F-001-doctrine-foundation.md
+- docs/design-docs/ADR-001-git-beads-authority.md
 - docs/design-docs/mars-provenance.md
 - docs/code-documentation-map.md
 */
@@ -101,8 +102,8 @@ func checkBootstrapClaimAttestation(root string, findings *[]Finding) {
 		"authority.sourceCommit":                   beadsCommit,
 		"authority.doltSourceCommit":               doltCommit,
 		"authority.ledgerBranch":                   "main",
-		"authority.ledgerHead":                     "7l67arkkk8bcis9pp9ns0u8uep1jq4vi",
-		"authority.claimCheckpoint":                "vvbleat3bc69avj90ciauegpbfr2o3g6",
+		"authority.ledgerHead":                     "icj9j2a6h0nsrb3q9705nm6tgt75kr3p",
+		"authority.claimCheckpoint":                "pgi99ie4dpqvutoiv59b8ca8stmk466i",
 		"claim.bead":                               "M3-H001",
 		"claim.displayId":                          "H-001",
 		"claim.nativeStatus":                       "in_progress",
@@ -114,6 +115,7 @@ func checkBootstrapClaimAttestation(root string, findings *[]Finding) {
 		"claim.risk":                               "high",
 		"claim.dependencyCount":                    "0",
 		"claim.goal":                               "G-001",
+		"claim.feature":                            "F-001",
 		"verification.classification":              "PUBLIC",
 		"verification.rawAuthorityPayloadIncluded": "false",
 		"integrity.signatureFormat":                "openssh",
@@ -127,7 +129,7 @@ func checkBootstrapClaimAttestation(root string, findings *[]Finding) {
 		}
 	}
 	for _, required := range []string{
-		"F-001-S1", "F-001-S2", "F-001-S3", "F-001-S4", "PD-001", "PD-002",
+		"F-001-S1", "F-001-S2", "F-001-S3", "F-001-S4", "PD-001", "PD-002", "PD-003",
 		".github/**", "AGENTS.md", ".harness/**", "docs/**", "cmd/mars3/**", "internal/doctrine/**",
 		"qa-reviewer", "security-reviewer", "delivery-orchestrator",
 	} {

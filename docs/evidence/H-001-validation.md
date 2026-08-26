@@ -2,7 +2,7 @@
 
 **Classification:** PUBLIC
 **Evidence ID:** H-001-E4
-**Status:** Candidate; independent QA and Security review pending
+**Status:** Superseded; QA changes requested
 **Opaque trace reference:** `bootstrap-h001-workflow-contract-v5`
 **Recorded:** 2026-08-26
 **Verification owners:** QA Reviewer, then Security Reviewer
@@ -152,6 +152,16 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
   preflight plus exact-SHA CI run `32927392259`. Two clean Linux/amd64 builds
   produced the same validation-binary hash above. No previous QA or Security
   verdict carries to the immutable commit containing H-001-E4.
+- QA returned `changes-requested` for immutable H-001-E4 target
+  `ed2671993fb6552d8d1e3a087288aa6eee9f562e`: the authoritative Bead and its
+  signed public claim omitted `featureId: F-001` and applicable decision
+  `PD-003`, while Git's plan and feature contract claimed both. The normalized
+  fingerprint is `authority.lineage/bead-missing-feature-and-pd003`. M3-H001
+  reopened on the same branch; Security did not start. The canonical metadata
+  now includes the typed feature and all three decision IDs, and a fresh signed
+  attestation binds claim checkpoint `pgi99ie4dpqvutoiv59b8ca8stmk466i` to
+  ledger head `icj9j2a6h0nsrb3q9705nm6tgt75kr3p`. E4 remains historical and
+  no verdict carries to E5.
 
 FactoryDocSync was checked and remained current. This ticket changed its BDD,
 authority, provenance, trace, security, publication, runtime, and operator
@@ -171,7 +181,8 @@ documentation together with the validation behavior.
   correctness failure, but future pin maintenance must update the workflow
   contract through a new decision and review.
 
-Next executable owner: QA Reviewer. On `accepted`, the exact same immutable E4
-commit routes to Security Reviewer. The Delivery Orchestrator may reconcile and
-close M3-H001 only after both canonical Beads verdicts and a completed run
-disposition.
+Next executable owner: Foundation Maintainer. The corrected Beads lineage and
+signed claim must produce a new implementation checkpoint, reproducible
+evidence, and immutable E5 target before QA reruns. Security remains gated. The
+Delivery Orchestrator may reconcile and close M3-H001 only after both canonical
+Beads verdicts and a completed run disposition.

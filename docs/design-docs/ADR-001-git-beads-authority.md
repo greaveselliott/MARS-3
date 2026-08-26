@@ -32,6 +32,12 @@ The stable join is `{tenant, project, bead, attempt, epoch, base_sha,
 commit_sha, trace_ref, review_verdict, run_disposition}`. Operational views are
 projections and can be rebuilt. They are never authoritative writes.
 
+Every Beads work definition also carries explicit `goalIds`, `featureId`,
+applicable `productDecisionIds`, and `scenarioIds`. Those identifiers must
+equal the Git lineage selected by the active plan. A missing link is an
+authority reconciliation failure: Git may describe product intent, but it may
+not silently supplement an incomplete canonical work definition.
+
 M3-H001 is the bootstrap exception: a signed charter records the effect that
 created and claimed the work item before the gateway existed. The exception is
 non-autonomous and limited to H-001's claim, public-safe lifecycle/evidence/
@@ -55,6 +61,9 @@ renewals pass through the typed gateway, with live leases stored in PostgreSQL.
   review verdict, run disposition, or lifecycle transition.
 - The active Git plan can name current Bead identifiers and expected evidence,
   but it cannot set ownership or lifecycle state.
+- A claim attestation must bind the same goal, feature, product decisions, and
+  scenarios as the canonical Bead and Git plan; doctrine validation rejects an
+  omitted or divergent lineage link.
 - No Markdown ticket lifecycle tree is created.
 - Chat and database projections cannot be the only record of a material
   product decision.

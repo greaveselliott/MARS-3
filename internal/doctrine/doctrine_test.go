@@ -213,6 +213,55 @@ func TestPublicCheckRejectsBinaryDuringFoundation(t *testing.T) {
 	}
 }
 
+func TestClaimAttestationRequiresCompleteWorkLineage(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	claim, err := os.ReadFile(filepath.Join(repo, ".harness", "claims", "H-001.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	signature, err := os.ReadFile(filepath.Join(repo, ".harness", "claims", "H-001.yaml.sig"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	publicKey, err := os.ReadFile(filepath.Join(repo, ".harness", "keys", "genesis-signing-key.pub"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases := []struct {
+		name        string
+		claim       []byte
+		findingCode string
+	}{
+		{name: "missing feature", claim: []byte(strings.Replace(string(claim), "  feature: F-001\n", "", 1)), findingCode: "doctrine.claim_attestation_value"},
+		{name: "missing product decision", claim: []byte(strings.Replace(string(claim), "    - PD-003\n", "", 1)), findingCode: "doctrine.claim_attestation_scope"},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			root := t.TempDir()
+			if err := os.MkdirAll(filepath.Join(root, ".harness", "claims"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.MkdirAll(filepath.Join(root, ".harness", "keys"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(root, ".harness", "claims", "H-001.yaml"), testCase.claim, 0o644); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(root, ".harness", "claims", "H-001.yaml.sig"), signature, 0o644); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(root, ".harness", "keys", "genesis-signing-key.pub"), publicKey, 0o644); err != nil {
+				t.Fatal(err)
+			}
+			var findings []Finding
+			checkBootstrapClaimAttestation(root, &findings)
+			if !findingCodePresent(findings, testCase.findingCode) {
+				t.Fatalf("incomplete claim lineage was accepted: %v", findings)
+			}
+		})
+	}
+}
+
 func TestWorkflowRejectsMutableContainerReference(t *testing.T) {
 	var findings []Finding
 	checkWorkflow(".github/workflows/test.yml", "permissions:\n  contents: read\nsteps:\n  - run: docker run docker.io/example/tool:latest\n", &findings)
