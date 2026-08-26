@@ -221,6 +221,103 @@ func TestWorkflowRejectsMutableContainerReference(t *testing.T) {
 	}
 }
 
+func TestWorkflowPermissionsAcceptsExactTopLevelReadOnly(t *testing.T) {
+	content := `name: test
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          printf '%s\n' 'permissions: { contents: write }'
+`
+	var findings []Finding
+	checkWorkflow(".github/workflows/test.yml", content, &findings)
+	if findingCodePresent(findings, "public.workflow_permissions") {
+		t.Fatalf("exact top-level read-only permissions were rejected: %v", findings)
+	}
+}
+
+func TestWorkflowPermissionsRejectsInlineMapping(t *testing.T) {
+	for _, declaration := range []string{
+		"permissions: { contents: write }",
+		`permissions: {"contents": "write"}`,
+		"permissions: { contents: read }",
+		"permissions: &read-only",
+		"permissions: *read-only",
+		"permissions:\n\tcontents: read",
+	} {
+		t.Run(declaration, func(t *testing.T) {
+			var findings []Finding
+			checkWorkflow(".github/workflows/test.yml", declaration+"\njobs: {}\n", &findings)
+			if !findingCodePresent(findings, "public.workflow_permissions") {
+				t.Fatalf("inline permission mapping was accepted: %s", declaration)
+			}
+		})
+	}
+}
+
+func TestWorkflowPermissionsRejectsJobLevelDeclaration(t *testing.T) {
+	for _, declaration := range []string{
+		"    permissions:\n      contents: write",
+		"    permissions: { contents: write }",
+		"    'permissions':\n      contents: read",
+		"    test: { permissions: { contents: write }, runs-on: ubuntu-latest }",
+	} {
+		t.Run(declaration, func(t *testing.T) {
+			content := "permissions:\n  contents: read\njobs:\n  test:\n" + declaration + "\n    runs-on: ubuntu-latest\n"
+			var findings []Finding
+			checkWorkflow(".github/workflows/test.yml", content, &findings)
+			if !findingCodePresent(findings, "public.workflow_permissions") {
+				t.Fatalf("job-level permission declaration was accepted:\n%s", content)
+			}
+		})
+	}
+}
+
+func TestWorkflowPermissionsRejectsDuplicateTopLevelDeclarations(t *testing.T) {
+	content := "permissions:\n  contents: read\npermissions:\n  contents: read\njobs: {}\n"
+	var findings []Finding
+	checkWorkflow(".github/workflows/test.yml", content, &findings)
+	if !findingCodePresent(findings, "public.workflow_permissions") {
+		t.Fatalf("duplicate top-level permission declarations were accepted: %v", findings)
+	}
+}
+
+func TestWorkflowPermissionsRejectsFlowStyleAndEscapedKeys(t *testing.T) {
+	for _, jobs := range []string{
+		`jobs: { test: { permissions: { contents: write }, runs-on: ubuntu-latest } }`,
+		`jobs: { test: { "permissio\u006es": { contents: write }, runs-on: ubuntu-latest } }`,
+		`jobs: { test: { "\u0070ermissions": { contents: write }, runs-on: ubuntu-latest } }`,
+	} {
+		t.Run(jobs, func(t *testing.T) {
+			content := "permissions:\n  contents: read\n" + jobs + "\n"
+			var findings []Finding
+			checkWorkflow(".github/workflows/test.yml", content, &findings)
+			if !findingCodePresent(findings, "public.workflow_permissions") {
+				t.Fatalf("flow-style or escaped permission key was accepted:\n%s", content)
+			}
+		})
+	}
+}
+
+func TestWorkflowPermissionsRejectsExplicitMappingKeys(t *testing.T) {
+	for _, declaration := range []string{
+		"    ? permissions\n    : { contents: write }",
+		"    - ? permissions\n      : { contents: write }",
+	} {
+		t.Run(declaration, func(t *testing.T) {
+			content := "permissions:\n  contents: read\njobs:\n  test:\n" + declaration + "\n"
+			var findings []Finding
+			checkWorkflow(".github/workflows/test.yml", content, &findings)
+			if !findingCodePresent(findings, "public.workflow_permissions") {
+				t.Fatalf("explicit YAML permission key was accepted:\n%s", content)
+			}
+		})
+	}
+}
+
 func findingCodePresent(findings []Finding, code string) bool {
 	for _, finding := range findings {
 		if finding.Code == code {

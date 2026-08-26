@@ -2,6 +2,7 @@
 FactoryDocSync:
 docs:
 - docs/features/F-001-doctrine-foundation.md
+- docs/design-docs/ADR-004-pr-first-publication.md
 - docs/design-docs/mars-provenance.md
 - docs/code-documentation-map.md
 */
@@ -17,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -36,8 +38,6 @@ var (
 	hostFieldPattern   = regexp.MustCompile(`(?i)\b(?:host(?:name)?|machine[_-]?id|trace[_-]?backend(?:[_-]?url)?)\s*[:=]\s*["']?([A-Za-z0-9._:/-]+)`)
 	unsafeMarkup       = regexp.MustCompile(`(?i)(<\s*(?:script|iframe|object|embed|foreignObject)\b|\bon(?:error|load|click)\s*=|javascript\s*:|data\s*:\s*text/html)`)
 	workflowAction     = regexp.MustCompile(`(?m)^\s*-?\s*uses:\s*([^\s#]+)`)
-	workflowWrite      = regexp.MustCompile(`(?im)^\s*[a-z][a-z0-9_-]*\s*:\s*write\s*$`)
-	workflowReadOnly   = regexp.MustCompile(`(?m)^permissions:\s*\n(?:[ \t]+[^\n]+\n)*?[ \t]+contents:\s*read\s*$`)
 	containerReference = regexp.MustCompile(`(?:docker://|ghcr\.io/|docker\.io/)[A-Za-z0-9._/@:-]+`)
 	containerDigest    = regexp.MustCompile(`@sha256:[0-9a-f]{64}$`)
 )
@@ -361,14 +361,8 @@ func checkWorkflow(path, content string, findings *[]Finding) {
 	if regexp.MustCompile(`(?m)^\s*pull_request_target\s*:`).MatchString(content) {
 		addFinding(findings, path, "public.pull_request_target", "pull_request_target is prohibited")
 	}
-	if regexp.MustCompile(`(?im)^\s*permissions\s*:\s*write-all\s*$`).MatchString(content) {
-		addFinding(findings, path, "public.workflow_permissions", "GitHub Actions permissions must not use write-all")
-	}
-	if workflowWrite.MatchString(content) {
-		addFinding(findings, path, "public.workflow_permissions", "foundation workflows must not request write permissions")
-	}
-	if !workflowReadOnly.MatchString(content) {
-		addFinding(findings, path, "public.workflow_permissions", "workflow must declare top-level contents: read permissions")
+	for _, message := range checkWorkflowPermissions(content) {
+		addFinding(findings, path, "public.workflow_permissions", "%s", message)
 	}
 	if strings.Contains(content, "${{ secrets.") {
 		addFinding(findings, path, "public.workflow_secret", "foundation workflows must not read repository secrets")
@@ -394,6 +388,257 @@ func checkWorkflow(path, content string, findings *[]Finding) {
 			addFinding(findings, path, "public.unpinned_container", "workflow container must be pinned to an immutable SHA-256 digest")
 		}
 	}
+}
+
+// checkWorkflowPermissions accepts one deliberately small GitHub Actions
+// permission shape:
+//
+// permissions:
+//
+//	contents: read
+//
+// Permission flow mappings, aliases, extra scopes, duplicate declarations,
+// and job-level overrides fail closed. This is intentionally narrower than a
+// general YAML parser: H-001 needs a mechanically obvious read-only token and
+// must not accept a YAML spelling whose authority is hard to audit.
+func checkWorkflowPermissions(content string) []string {
+	lines := strings.Split(content, "\n")
+	var messages []string
+	topLevelDeclarations := 0
+	blockScalarIndent := -1
+
+	for index := 0; index < len(lines); index++ {
+		raw := strings.TrimSuffix(lines[index], "\r")
+		if strings.TrimSpace(raw) == "" || strings.HasPrefix(strings.TrimSpace(raw), "#") {
+			continue
+		}
+
+		indent, structural, validIndent := workflowYAMLLine(raw)
+		if !validIndent {
+			messages = append(messages, fmt.Sprintf("line %d uses a tab in YAML indentation", index+1))
+			continue
+		}
+		if blockScalarIndent >= 0 {
+			if indent > blockScalarIndent {
+				continue
+			}
+			blockScalarIndent = -1
+		}
+
+		key, value, mapping := workflowYAMLMapping(structural)
+		if mapping && workflowYAMLBlockScalar(value) {
+			blockScalarIndent = indent
+		}
+		if workflowYAMLExplicitKey(structural) {
+			messages = append(messages, fmt.Sprintf("line %d uses a YAML explicit mapping key, which foundation workflows prohibit", index+1))
+			continue
+		}
+		permissionKeys := workflowYAMLPermissionKeyCount(structural)
+		if permissionKeys == 0 {
+			continue
+		}
+		if !mapping || key != "permissions" {
+			messages = append(messages, fmt.Sprintf("line %d declares permissions inside an inline mapping", index+1))
+			continue
+		}
+		if indent != 0 {
+			messages = append(messages, fmt.Sprintf("line %d declares job-level or nested permissions", index+1))
+			continue
+		}
+
+		topLevelDeclarations++
+		if value != "" {
+			messages = append(messages, fmt.Sprintf("line %d must use a block mapping containing only contents: read", index+1))
+			continue
+		}
+
+		contentsRead := 0
+		for childIndex := index + 1; childIndex < len(lines); childIndex++ {
+			childRaw := strings.TrimSuffix(lines[childIndex], "\r")
+			if strings.TrimSpace(childRaw) == "" || strings.HasPrefix(strings.TrimSpace(childRaw), "#") {
+				continue
+			}
+			childIndent, childStructural, childIndentValid := workflowYAMLLine(childRaw)
+			if !childIndentValid {
+				messages = append(messages, fmt.Sprintf("line %d uses a tab in YAML indentation", childIndex+1))
+				continue
+			}
+			if childIndent == 0 {
+				break
+			}
+			childKey, childValue, childMapping := workflowYAMLMapping(childStructural)
+			if childMapping && childKey == "contents" && childValue == "read" {
+				contentsRead++
+				continue
+			}
+			messages = append(messages, fmt.Sprintf("line %d adds a permission other than contents: read", childIndex+1))
+		}
+		if contentsRead != 1 {
+			messages = append(messages, fmt.Sprintf("line %d must contain exactly one contents: read entry", index+1))
+		}
+	}
+
+	if topLevelDeclarations == 0 {
+		messages = append(messages, "workflow must declare top-level contents: read permissions")
+	} else if topLevelDeclarations != 1 {
+		messages = append(messages, "workflow must declare top-level permissions exactly once")
+	}
+	return messages
+}
+
+func workflowYAMLExplicitKey(line string) bool {
+	line = strings.TrimSpace(line)
+	if strings.HasPrefix(line, "? ") || line == "?" {
+		return true
+	}
+	if !strings.HasPrefix(line, "-") {
+		return false
+	}
+	line = strings.TrimSpace(strings.TrimPrefix(line, "-"))
+	return strings.HasPrefix(line, "? ") || line == "?"
+}
+
+func workflowYAMLLine(raw string) (int, string, bool) {
+	indent := 0
+	for indent < len(raw) {
+		switch raw[indent] {
+		case ' ':
+			indent++
+		case '\t':
+			return indent, "", false
+		default:
+			return indent, strings.TrimSpace(stripWorkflowYAMLComment(raw[indent:])), true
+		}
+	}
+	return indent, "", true
+}
+
+func workflowYAMLMapping(line string) (string, string, bool) {
+	colon := workflowYAMLColon(line)
+	if colon < 0 {
+		return "", "", false
+	}
+	key := strings.TrimSpace(line[:colon])
+	if len(key) >= 2 && ((key[0] == '\'' && key[len(key)-1] == '\'') || (key[0] == '"' && key[len(key)-1] == '"')) {
+		key = key[1 : len(key)-1]
+	}
+	return key, strings.TrimSpace(line[colon+1:]), key != ""
+}
+
+func workflowYAMLColon(line string) int {
+	var quote byte
+	for index := 0; index < len(line); index++ {
+		character := line[index]
+		if quote != 0 {
+			if character == quote && (index == 0 || line[index-1] != '\\') {
+				quote = 0
+			}
+			continue
+		}
+		if character == '\'' || character == '"' {
+			quote = character
+			continue
+		}
+		if character == ':' {
+			return index
+		}
+	}
+	return -1
+}
+
+func workflowYAMLPermissionKeyCount(line string) int {
+	count := 0
+	var quote byte
+	for index := 0; index < len(line); index++ {
+		character := line[index]
+		if quote != 0 {
+			if character == quote && (index == 0 || line[index-1] != '\\') {
+				quote = 0
+			}
+			continue
+		}
+		if character == '\'' || character == '"' {
+			quote = character
+			continue
+		}
+		if character == ':' && workflowYAMLKeyBeforeColon(line, index) == "permissions" {
+			count++
+		}
+	}
+	return count
+}
+
+func workflowYAMLKeyBeforeColon(line string, colon int) string {
+	end := colon - 1
+	for end >= 0 && (line[end] == ' ' || line[end] == '\t') {
+		end--
+	}
+	if end < 0 {
+		return ""
+	}
+	if line[end] == '\'' || line[end] == '"' {
+		quote := line[end]
+		for start := end - 1; start >= 0; start-- {
+			if line[start] == quote && (start == 0 || line[start-1] != '\\') {
+				key := line[start : end+1]
+				if quote == '"' {
+					decoded, err := strconv.Unquote(key)
+					if err == nil {
+						return decoded
+					}
+				}
+				return line[start+1 : end]
+			}
+		}
+		return ""
+	}
+	start := end
+	for start >= 0 {
+		character := line[start]
+		if (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '_' || character == '-' {
+			start--
+			continue
+		}
+		break
+	}
+	return line[start+1 : end+1]
+}
+
+func stripWorkflowYAMLComment(line string) string {
+	var quote byte
+	for index := 0; index < len(line); index++ {
+		character := line[index]
+		if quote != 0 {
+			if character == quote && (index == 0 || line[index-1] != '\\') {
+				quote = 0
+			}
+			continue
+		}
+		if character == '\'' || character == '"' {
+			quote = character
+			continue
+		}
+		if character == '#' && (index == 0 || line[index-1] == ' ' || line[index-1] == '\t') {
+			return strings.TrimSpace(line[:index])
+		}
+	}
+	return strings.TrimSpace(line)
+}
+
+func workflowYAMLBlockScalar(value string) bool {
+	if value == "" {
+		return false
+	}
+	first := value[0]
+	if first != '|' && first != '>' {
+		return false
+	}
+	for _, character := range value[1:] {
+		if character != '+' && character != '-' && (character < '1' || character > '9') {
+			return false
+		}
+	}
+	return true
 }
 
 func allowedBinaryAsset(path string) bool {

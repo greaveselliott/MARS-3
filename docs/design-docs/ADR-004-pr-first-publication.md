@@ -31,6 +31,15 @@ Fork pull requests receive neither repository secrets nor a write token.
 `pull_request_target` is prohibited. Workflow permissions default to read-only,
 and third-party actions are pinned to immutable commit SHAs.
 
+For the H-001 foundation workflow, read-only is a fail-closed syntax contract,
+not an inferred default. The workflow must contain exactly one column-zero,
+multiline `permissions` mapping whose sole entry is `contents: read`.
+Job-level permission declarations, inline mappings, duplicate declarations,
+anchors or aliases, explicit YAML mapping keys, and additional scopes are
+rejected. A later workflow that genuinely needs another permission requires a
+dedicated product or architecture decision and a narrower admission rule; it
+cannot weaken this foundation gate in place.
+
 H-001 pins Go 1.24.11 in CI and uses Gitleaks v8.18.4 by immutable OCI digest.
 The scanner must first reject a synthetic canary, then scan both the worktree
 and complete history. A newer release that fails that canary is not qualified

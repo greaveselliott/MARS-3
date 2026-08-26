@@ -94,6 +94,9 @@ mutation
 identity, local metadata, raw-payload fields, unsafe fixtures, binaries during
 H-001, missing license or provenance, undeclared generated files, and stale
 documentation links
+**And** workflow admission rejects inline, nested, duplicated, aliased, or
+otherwise non-canonical permission declarations instead of inferring that the
+effective GitHub token remains read-only
 **And** deterministic tests, vet, diff checks, and secret history scan pass
 **And** independent human QA and Security review the same immutable commit for
 semantic or unrecognized disclosure risks that pattern checks cannot prove.
