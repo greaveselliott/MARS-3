@@ -1,24 +1,24 @@
 # H-001 validation evidence
 
 **Classification:** PUBLIC
-**Evidence ID:** H-001-E6
-**Status:** Superseded; QA changes-requested, Security did not start
-**Opaque trace reference:** `bootstrap-h001-verifier-routing-v7`
+**Evidence ID:** H-001-E7
+**Status:** Candidate; independent QA and Security review pending
+**Opaque trace reference:** `bootstrap-h001-exact-review-chain-v8`
 **Recorded:** 2026-08-26
 **Verification owners:** QA Reviewer, then Security Reviewer
 
 This is a redacted evidence manifest, not a raw command log. The immutable
 review target is the Git commit containing this file. The implementation
 checkpoint it verifies is
-`29bd4a9552d6912b599c1b1f8b16dd9184827cbb`, based on signed genesis
+`a6330ffe49670b4c3dafa0c47d9450086efaf46e`, based on signed genesis
 `8c108460d7c0bb59b80a0b3942dc872a2e05785a`.
 
 ## Bound artifacts
 
 | Artifact | Immutable identifier or SHA-256 |
 | --- | --- |
-| implementation tree | `ab680ae38b8b852f45b688f6d4445f4d3f900358` |
-| validation binary | `ee62d616464baea92193c35edc11c678b6dceb3921010bcaa603555216a67830` |
+| implementation tree | `66dddf0b6748c476ed3f2bd891c255dfc0e31f24` |
+| validation binary | `75fc945ba6ca8faeadd4cfe8ebeebba5f468da1623c5a5b6dd86a7bb29a97ddb` |
 | MARS source manifest | `1d9e01d5f90ea6335299284befe77798809e381b238472446ae61427070b90b2` |
 | signed claim attestation | `7058d80dd31d260e76fbb4c9416c7e60ab10004f1e288f2cbad7d7fd2278a782` |
 | claim signature | `d121933e5d4ab0009f332a8e0e7ee4ea550599a10a5a0d9259d761bd46d42ed1` |
@@ -48,7 +48,7 @@ row explicitly describes the expected failing canary.
 | static analysis | `go vet ./...` | pass |
 | whitespace | `git diff --check` and `git show --check --oneline --no-renames HEAD` | pass |
 | worktree secrets | `gitleaks detect --no-git --source . --redact --no-banner` | pass |
-| history secrets | `gitleaks detect --source . --redact --no-banner` | pass; thirteen commits scanned at checkpoint |
+| history secrets | `gitleaks detect --source . --redact --no-banner` | pass; fifteen commits scanned at checkpoint |
 | provenance refresh | `go run ./cmd/mars3 doctrine refresh --repo . --source ../MARS --ref f55d129bfc794510ca485bb54fc0a35c7b04a700` | pass; dry run; 20 files |
 | claim signature | `ssh-keygen -Y verify` with the committed public key and namespace `mars3-claim-attestation` | pass |
 | remote branch | `git ls-remote origin refs/heads/codex/h-001-doctrine-foundation` | implementation checkpoint published; evidence-containing review target is verified after publication and recorded in Beads |
@@ -77,7 +77,7 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
 ## Public CI and repository controls
 
 - GitHub Actions run
-  `https://github.com/greaveselliott/MARS-3/actions/runs/32930252268`
+  `https://github.com/greaveselliott/MARS-3/actions/runs/32931207441`
   completed successfully for the implementation checkpoint.
 - The repository visibility API returned `PUBLIC` with default branch `main`.
 - Active ruleset `21510926` prohibits deletion and non-fast-forward updates,
@@ -98,8 +98,10 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
   the same canonical work definition explicitly links G-001, F-001,
   PD-001/PD-002/PD-003, and F-001-S1 through F-001-S4 with zero dependencies.
   The validator resolves each ordered reviewer against the executable
-  role/profile registry and rejects the prior `qa-reviewer` alias, duplicates,
-  malformed sequences, undeclared identities, and stale authority bindings.
+  role/profile registry, requires exact equality to `qa → security-reviewer →
+  delivery-orchestrator`, and rejects the prior `qa-reviewer` alias,
+  incomplete/reordered/extra chains, duplicates, malformed sequences,
+  undeclared identities, and stale authority bindings.
 - **F-001-S2:** doctrine check and the exact-checkout dry run proved the MARS
   commit, all 20 required source blobs, attribution, exclusions, signed
   genesis, signed claim, and generated-manifest-only refresh scope.
@@ -199,6 +201,14 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
   in F-001 and ADR-001. The normalized fingerprint is
   `H001-VERIFICATION-ORDER-NOT-EXACT`; M3-H001 reopened on the same Bead and
   branch, Security did not start, and no E6 verdict carries forward.
+- Signed remediation checkpoint
+  `a6330ffe49670b4c3dafa0c47d9450086efaf46e` compares the parsed verification
+  sequence exactly with `qa → security-reviewer → delivery-orchestrator` while
+  retaining registry and duplicate checks. It adds negative cases for an
+  incomplete chain, a reordered chain, and an extra but otherwise routable
+  reviewer. Exact-SHA CI run `32931207441` passed, and two clean Linux/amd64
+  builds reproduced the validation-binary hash above. No prior verdict carries
+  to the immutable commit containing H-001-E7.
 
 FactoryDocSync was checked and remained current. This ticket changed its BDD,
 authority, provenance, trace, security, publication, runtime, and operator
@@ -218,9 +228,7 @@ documentation together with the validation behavior.
   correctness failure, but future pin maintenance must update the workflow
   contract through a new decision and review.
 
-Next executable owner: Foundation Maintainer, limited to recording the exact
-ordered-chain correction, a fresh immutable checkpoint, and replacement
-evidence. That evidence then routes to principal `qa`; only an accepted exact
-commit can route onward to `security-reviewer`. The Delivery Orchestrator may
-reconcile and close M3-H001 only after both canonical Beads verdicts and a
-completed run disposition.
+Next executable owner: QA principal `qa`. On `accepted`, the exact same
+immutable H-001-E7 commit routes to `security-reviewer`. The Delivery
+Orchestrator may reconcile and close M3-H001 only after both canonical Beads
+verdicts and a completed run disposition.
