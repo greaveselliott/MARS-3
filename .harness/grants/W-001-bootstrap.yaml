@@ -128,7 +128,7 @@ toolchain:
   helperCommandPath: cmd/mars3-authority/main.go
   helperCommandSHA256: efd8e92cd30114374b0cdcce2680f12ac944cee4fcc3d84042244e486147d538
   helperLibraryPath: internal/authority/bootstrap/bootstrap.go
-  helperLibrarySHA256: 557c087c59a1661e0bf630ae573097164acfd0da53e17d8b90ba255f9065adcd
+  helperLibrarySHA256: 7385fe6317e450711789e85ac424a6b66831d271a0980b6ab50b5ceaf1427ce5
 
 verification:
   order:

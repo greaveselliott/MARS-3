@@ -322,11 +322,15 @@ func verifyConformanceDependencies(config doctrine.W001BootstrapGrant) (string, 
 	if err != nil || !filepath.IsAbs(icuPrefix) {
 		return "", errors.New("local ICU prefix cannot be resolved")
 	}
+	resolvedPrefix, err := filepath.EvalSymlinks(icuPrefix)
+	if err != nil || !filepath.IsAbs(resolvedPrefix) {
+		return "", errors.New("local ICU installation root cannot be resolved")
+	}
 	for _, path := range []string{filepath.Join(icuPrefix, "include", "unicode", "regex.h"), filepath.Join(icuPrefix, "lib", "libicuuc.dylib")} {
 		resolved, resolveErr := filepath.EvalSymlinks(path)
 		info, statErr := os.Stat(path)
 		if resolveErr != nil || statErr != nil || !info.Mode().IsRegular() ||
-			!strings.HasPrefix(resolved, filepath.Clean(icuPrefix)+string(filepath.Separator)) {
+			!strings.HasPrefix(resolved, filepath.Clean(resolvedPrefix)+string(filepath.Separator)) {
 			return "", errors.New("local ICU conformance material is missing or indirect")
 		}
 	}
