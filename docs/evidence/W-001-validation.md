@@ -3,7 +3,7 @@
 **Classification:** PUBLIC
 **Work authority:** M3-W001
 **Failure ownership:** foundation
-**Correction grant:** `W-001-postclaim-hook-isolation-v4`
+**Correction grant:** `W-001-postclaim-pr-binding-v5`
 **Current disposition:** changes-requested pending fresh immutable QA and Security review
 
 ## Superseded Security disposition
@@ -90,6 +90,21 @@ v3 Git tree, while current bytes are validated from the signed v4 grant. Both
 checks are mandatory; neither check substitutes for the other or grants an
 operational effect.
 
+## v5 publication-vehicle correction
+
+Independent QA and Security reviewed v4 head
+`d890a96014f79438d36bde3c8967664163e9d961`, tree
+`3d3252b0559e664203521af2e85d0d87cdb9fcd1`, and the successful exact-head
+pull-request run `33022606025` / job `98356474178`. Both requested changes
+because the v4 evidence still named PR #7 as the merge vehicle after that PR
+had been closed without merging. The normalized foundation-owned failure
+fingerprint is `stale-publication-vehicle-binding`.
+
+PR #7 remains closed and unmerged historical evidence. PR #8 is the sole
+active publication vehicle for the successor reviewed tree. This additive
+correction does not rewrite v1 through v4, move any retained tag, alter the
+canonical M3 postimage, or grant a lease or implementation capability.
+
 ## Reproducible verification
 
 Commands run from the repository root use only synthetic identities and
@@ -141,7 +156,8 @@ SHA-256, `22042fc0844ab7700417d917c386f2eab4bab5dd6a6404be091cbd5edbe9e154`.
 This composition preserves the previously reviewed patch bytes and prevents
 the correction grant from silently rebinding unrelated historical changes.
 
-The exact generated patches, helper, tests, signed correction grant, signed v4
-tag, public commit gate, and independent dispositions are bound by the final
-reviewed Git tree. Until both QA and Security accept that immutable tree, PR #7
-must remain unmerged and no delivery lease or implementation right exists.
+The exact generated patches, helper, tests, signed correction grants, retained
+v1 through v4 tags, public commit gates, and independent dispositions are
+bound by their immutable reviewed Git trees. Until both QA and Security accept
+the signed v5 tree, PR #8 must remain unmerged and no delivery lease or
+implementation right exists.

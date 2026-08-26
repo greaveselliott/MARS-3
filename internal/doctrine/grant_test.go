@@ -524,6 +524,77 @@ func writeW001PostclaimHookFixture(t *testing.T, grant, signature, publicKey []b
 	return root
 }
 
+func TestW001PostclaimPRFixAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001PostclaimPRFix(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed postclaim publication binding was rejected: %v", findings)
+	}
+}
+
+func TestW001PostclaimPRFixFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(w001PostclaimPRFixPath)
+	signature := read(w001PostclaimPRFixSig)
+	publicKey := read(wave1PlanningGrantKey)
+	materials := map[string][]byte{
+		w001PostclaimHookFixPath:            read(w001PostclaimHookFixPath),
+		w001PostclaimHookFixSig:             read(w001PostclaimHookFixSig),
+		"docs/evidence/W-001-validation.md": read("docs/evidence/W-001-validation.md"),
+	}
+
+	t.Run("signed active PR tamper", func(t *testing.T) {
+		tampered := bytes.Replace(grant, []byte("activePullRequest: 8"), []byte("activePullRequest: 7"), 1)
+		root := writeW001PostclaimPRFixFixture(t, tampered, signature, publicKey, materials)
+		var findings []Finding
+		checkW001PostclaimPRFix(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_pr_binding_value") || !findingCodePresent(findings, "public.w001_postclaim_pr_binding_signature") {
+			t.Fatalf("tampered active PR binding was accepted: %v", findings)
+		}
+	})
+
+	t.Run("stale PR evidence", func(t *testing.T) {
+		tampered := clonePlanningGrantMaterials(materials)
+		const path = "docs/evidence/W-001-validation.md"
+		tampered[path] = bytes.Replace(tampered[path], []byte("PR #8 is the sole\nactive publication vehicle"), []byte("PR #7 is the sole\nactive publication vehicle"), 1)
+		root := writeW001PostclaimPRFixFixture(t, grant, signature, publicKey, tampered)
+		var findings []Finding
+		checkW001PostclaimPRFix(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_pr_binding_material") || !findingCodePresent(findings, "public.w001_postclaim_pr_binding_evidence") {
+			t.Fatalf("stale publication evidence was accepted: %v", findings)
+		}
+	})
+
+	t.Run("pull request event number", func(t *testing.T) {
+		root := t.TempDir()
+		writePlanningGrantTestFile(t, root, w001PostclaimPRFixPath, grant)
+		if w001PostclaimPullRequestNumberAllowed(root, 7) || !w001PostclaimPullRequestNumberAllowed(root, 8) {
+			t.Fatal("signed active PR number was not enforced")
+		}
+	})
+}
+
+func writeW001PostclaimPRFixFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
+	t.Helper()
+	root := t.TempDir()
+	writePlanningGrantTestFile(t, root, w001PostclaimPRFixPath, grant)
+	writePlanningGrantTestFile(t, root, w001PostclaimPRFixSig, signature)
+	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+	for path, data := range materials {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	return root
+}
+
 func clonePlanningGrantMaterials(materials map[string][]byte) map[string][]byte {
 	cloned := make(map[string][]byte, len(materials))
 	for path, data := range materials {
@@ -661,6 +732,37 @@ func TestW001PostclaimHookGitDiffIsFenced(t *testing.T) {
 	})
 }
 
+func TestW001PostclaimPRBindingGitDiffIsFenced(t *testing.T) {
+	t.Run("exact dirty correction passes", func(t *testing.T) {
+		root := writeW001PostclaimPRBindingGitFixture(t)
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if len(findings) != 0 {
+			t.Fatalf("authorized PR-binding correction was rejected: %v", findings)
+		}
+	})
+
+	t.Run("unauthorized correction path fails", func(t *testing.T) {
+		root := writeW001PostclaimPRBindingGitFixture(t)
+		writePlanningGrantTestFile(t, root, "internal/authority/escape.go", []byte("package authority\n"))
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_scope") {
+			t.Fatalf("unauthorized PR-binding path was accepted: %v", findings)
+		}
+	})
+
+	t.Run("missing prior v4 tag fails", func(t *testing.T) {
+		root := writeW001PostclaimPRBindingGitFixture(t)
+		runPlanningGrantTestGit(t, root, "tag", "-d", w001PostclaimHookFixTag)
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_pr_binding_v4_tag") {
+			t.Fatalf("missing immutable v4 tag was accepted: %v", findings)
+		}
+	})
+}
+
 func writeW001PostclaimGitFixture(t *testing.T) string {
 	t.Helper()
 	t.Setenv("GITHUB_ACTIONS", "")
@@ -725,6 +827,31 @@ func writeW001PostclaimHookGitFixture(t *testing.T) string {
 		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+tag+":refs/tags/"+tag)
 	}
 	for _, path := range w001PostclaimHookFixSequences["grant.authorizedPaths"] {
+		data, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	return root
+}
+
+func writeW001PostclaimPRBindingGitFixture(t *testing.T) string {
+	t.Helper()
+	t.Setenv("GITHUB_ACTIONS", "")
+	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	disablePlanningGrantTestGitMaintenance(t, root)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimPRFixBase)
+	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
+	for _, tag := range []string{w001PostclaimReviewTag, w001PostclaimCIFixReviewTag, w001PostclaimSecurityFixTag, w001PostclaimHookFixTag} {
+		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+tag+":refs/tags/"+tag)
+	}
+	for _, path := range w001PostclaimPRFixSequences["grant.authorizedPaths"] {
 		data, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(path)))
 		if err != nil {
 			t.Fatal(err)

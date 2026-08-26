@@ -1,0 +1,116 @@
+schemaVersion: 1
+kind: MARS3W001PostclaimPRBindingGrant
+
+grant:
+  id: W-001-postclaim-pr-binding-v5
+  classification: PUBLIC
+  issuedAt: 2026-08-27T00:00:00Z
+  expiresAt: 2026-08-29T00:00:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: d890a96014f79438d36bde3c8967664163e9d961
+  baseTree: 3d3252b0559e664203521af2e85d0d87cdb9fcd1
+  workingBranch: codex/w-001-postclaim-reconciliation
+  reviewTag: mars3/w001-postclaim-reconciliation-v5
+  reviewTagMessage: MARS-3 W-001 postclaim reconciliation tree attestation v5
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  purpose: bind the active PR 8 publication vehicle after PR 7 closed without merging
+  bead: M3-W001
+  displayId: W-001
+  priorGrant: W-001-postclaim-hook-isolation-v4
+  priorGrantSHA256: f0c9d5cd782350bdfefae0070b756eca1f481350cb585588a2774f06c0d6be72
+  priorGrantSignatureSHA256: da013f87d13e3572ef3b2c4883ec93fdcc71f4189d6854d63aee91908d70a6f9
+  priorReviewTag: mars3/w001-postclaim-reconciliation-v4
+  priorReviewTagObject: d50d55bfe49d159979dbee26122319978a7ae612
+  priorReviewTagTarget: d890a96014f79438d36bde3c8967664163e9d961
+  successfulRun: 33022606025
+  successfulJob: 98356474178
+  activePullRequest: 8
+  closedPullRequest: 7
+  qaDisposition: changes-requested
+  securityDisposition: changes-requested
+  autonomousMutation: false
+  liveLeaseAsserted: false
+  implementationAllowed: false
+  canonicalWorkMutationAllowed: false
+  allowedEffects:
+    - create-and-verify-this-signed-publication-binding-grant
+    - preserve-v1-through-v4-grants-signatures-tags-runs-and-review-history
+    - record-PR-7-as-closed-unmerged-historical-evidence
+    - bind-PR-8-as-the-sole-active-publication-vehicle
+    - bind-the-successful-v4-exact-head-pull-request-run-and-job
+    - edit-only-the-exact-authorized-Git-paths
+    - create-pinned-signer-correction-commits-and-one-signed-v5-review-tag
+    - push-the-existing-review-branch-and-v5-tag-and-rerun-PR-8
+    - obtain-fresh-independent-QA-and-Security-review-before-squash-merge
+  authorizedPaths:
+    - .harness/grants/W-001-postclaim-pr-binding-v5.yaml
+    - .harness/grants/W-001-postclaim-pr-binding-v5.yaml.sig
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v4-head-tree-grant-signature-tag-and-successful-run-remain-immutable
+    - PR-7-remains-closed-and-unmerged-historical-evidence
+    - PR-8-is-the-only-current-review-and-merge-vehicle
+    - historical-v3-and-v4-material-bindings-remain-distinct-and-mandatory
+    - every-correction-commit-and-current-change-stays-inside-the-signed-path-set
+    - every-correction-commit-and-v5-review-tag-use-the-pinned-signer
+    - reviewed-v5-tree-equals-the-protected-main-squash-tree
+    - no-Beads-lease-implementation-production-or-policy-effect-is-created
+  prohibitedEffects:
+    - mutate-any-Bead-Dolt-row-dependency-label-comment-or-history
+    - execute-or-replay-the-canonical-W-001-bootstrap-claim
+    - execute-any-workspace-hook-or-plugin
+    - issue-assert-renew-release-or-revoke-a-live-lease
+    - begin-gateway-runtime-platform-or-product-implementation
+    - edit-plan-manifest-feature-product-goal-or-scenario-contracts
+    - reopen-merge-or-mutate-PR-7
+    - move-delete-or-reuse-any-existing-review-tag
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+    - credentials-provider-session-customer-data-or-raw-payloads
+
+finding:
+  affectedPostclaimHead: d890a96014f79438d36bde3c8967664163e9d961
+  affectedPostclaimTree: 3d3252b0559e664203521af2e85d0d87cdb9fcd1
+  qaDisposition: changes-requested
+  securityDisposition: changes-requested
+  failureFingerprint: stale-publication-vehicle-binding
+  failureClass: foundation-owned
+  findingScope: public-evidence-publication-identity
+  canonicalWorkspaceAffected: false
+
+publication:
+  repository: greaveselliott/MARS-3
+  baseCommit: adfd64feb565fb703a3568122cc032d4d1a450f5
+  closedPullRequest: 7
+  closedPullRequestMerged: false
+  activePullRequest: 8
+  activePullRequestHead: d890a96014f79438d36bde3c8967664163e9d961
+  activePullRequestTree: 3d3252b0559e664203521af2e85d0d87cdb9fcd1
+  successfulRun: 33022606025
+  successfulJob: 98356474178
+
+materials:
+  validationEvidencePath: docs/evidence/W-001-validation.md
+  validationEvidenceSHA256: 630a4f450701efaf40a7afce59e69c6722a9551a71e755df22b5b924016702c4
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-postclaim-pr-binding-v5
+  detachedSignature: W-001-postclaim-pr-binding-v5.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
