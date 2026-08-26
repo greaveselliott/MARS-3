@@ -1,0 +1,84 @@
+schemaVersion: 1
+kind: MARS3PRFallbackAddendum
+
+addendum:
+  id: WAVE-1-pr-fallback-addendum
+  classification: PUBLIC
+  issuedAt: 2026-08-26T08:40:31Z
+  expiresAt: 2026-08-29T08:40:31Z
+  baseCommit: 265b0b78a19d0ac50611c360f4614ed24d1cfcd7
+  baseTree: 87dc32acce9c767f01f94aae25936665e26650ab
+  repository: greaveselliott/MARS-3
+  workingBranch: codex/w-001-bootstrap-transition
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  sourceDirective: if-using-prs-validate-and-merge-them-promptly
+  purpose: route the signed W-001 transition gate through the repository-required pull-request check without weakening protected main
+  priorGrant: WAVE-1-direct-main-transition
+  priorGrantSHA256: 0e8a8179c8fb44d6a23421955bdfb74878cc7cb21cbb32b8b589a2fa9e99e4ba
+  priorGrantSignatureSHA256: 93ab5b024bc859eea7d5a3adc026cfd87636c6160cfee07b99fc8f8e8f4d3555
+  rejectedDirectCommit: 0602a7e2036f53d2d7b9da10b406d27f87621196
+  rejectedDirectTree: 69d9ab152f5b0a243855ddf613192c662b52306b
+  rejectedDirectParent: 265b0b78a19d0ac50611c360f4614ed24d1cfcd7
+  failureFingerprint: github-rules-direct-main-requires-pr
+  rulesetId: 21510926
+  retryDirectPush: false
+  mergeMode: squash
+  transitionTag: mars3/w001-transition-v1
+  transitionTagMessage: MARS-3 W-001 transition tree attestation v1
+  autonomousMutation: false
+  canonicalWorkMutationAllowed: false
+  githubPolicyMutationAllowed: false
+  secretScannerExceptionAllowed: false
+  allowedEffects:
+    - create-exact-working-branch-at-rejected-direct-commit
+    - edit-listed-public-paths
+    - create-pinned-signer-correction-commit
+    - create-and-push-one-pinned-signer-transition-tag
+    - push-working-branch
+    - open-one-ready-pull-request
+    - run-required-public-commit-gate
+    - squash-merge-promptly-after-qa-and-security-acceptance
+    - append-public-safe-fallback-intent-and-receipt
+  authorizedPaths:
+    - .harness/grants/WAVE-1-pr-fallback-addendum.yaml
+    - .harness/grants/WAVE-1-pr-fallback-addendum.yaml.sig
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - preserve-the-rejected-signed-commit-exactly
+    - verify-every-feature-commit-with-the-pinned-signer
+    - require-exact-base-head-event-and-two-parent-PR-topology
+    - require-signed-transition-tag-tree-equal-reviewed-and-squash-main-trees
+    - require-public-gate-on-PR-and-protected-main
+    - do-not-retry-the-rejected-direct-push
+  prohibitedEffects:
+    - authorize-the-rejected-effect-retroactively
+    - retry-direct-main-push
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - move-or-delete-existing-publication-tags
+    - create-or-move-any-tag-other-than-the-transition-tag
+    - mutate-any-bead-work-field-or-dependency
+    - claim-or-transition-bead
+    - issue-or-assert-live-lease
+    - runtime-or-platform-implementation
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  externalStateReadbackRequired: true
+  protectedMainUnchangedUntilMerge: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-pr-fallback-addendum
+  detachedSignature: WAVE-1-pr-fallback-addendum.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

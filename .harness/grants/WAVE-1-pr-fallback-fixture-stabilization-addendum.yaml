@@ -1,0 +1,90 @@
+schemaVersion: 1
+kind: MARS3PRFallbackFixtureStabilizationAddendum
+
+addendum:
+  id: WAVE-1-pr-fallback-fixture-stabilization-addendum
+  classification: PUBLIC
+  issuedAt: 2026-08-26T09:53:55Z
+  expiresAt: 2026-08-29T09:53:55Z
+  baseCommit: b9ca75dfe42001a9632d8c752e2ddb80624fa4ae
+  baseTree: f8af794a23f67fec73af71328dc6aeae0fa9e104
+  publicationBaseCommit: 265b0b78a19d0ac50611c360f4614ed24d1cfcd7
+  publicationBaseTree: 87dc32acce9c767f01f94aae25936665e26650ab
+  repository: greaveselliott/MARS-3
+  workingBranch: codex/w-001-bootstrap-transition
+  pullRequest: 5
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  sourceDirective: authorised
+  purpose: disable Git auto-maintenance only inside disposable test repositories to eliminate post-assertion cleanup races
+  priorAddendum: WAVE-1-pr-fallback-main-ci-addendum
+  priorAddendumSHA256: 8880fd546cf70fff39a02ba2851a74414f892a06741ae41f17a40532044bc130
+  priorAddendumSignatureSHA256: b757aa7fef86ec8f4f6e417f795e02d97a6ee1a0fa5f2edfd39f8d51efee4256
+  blockedDispositionComment: 01a03d7d-5f5a-70e2-8ca2-93e1c76e3c02
+  failedRun: 32955169341
+  failedAttempts: 1,2
+  failureFingerprint: go-test-tempdir-cleanup-git-pack-race
+  priorTransitionTag: mars3/w001-transition-v2
+  priorTransitionTagObject: cd7d6daeea77041167b5aa3763952b47b4ad09c0
+  priorTransitionTagTarget: b9ca75dfe42001a9632d8c752e2ddb80624fa4ae
+  priorTransitionTagTree: f8af794a23f67fec73af71328dc6aeae0fa9e104
+  successorTransitionTag: mars3/w001-transition-v3
+  successorTransitionTagMessage: MARS-3 W-001 transition tree attestation v3
+  mergeMode: squash
+  autonomousMutation: false
+  canonicalWorkMutationAllowed: false
+  githubPolicyMutationAllowed: false
+  secretScannerExceptionAllowed: false
+  allowedEffects:
+    - edit-listed-public-paths
+    - create-one-pinned-signer-fixture-stabilization-commit
+    - preserve-v1-and-v2-transition-tags-exactly
+    - create-and-push-one-pinned-signer-v3-transition-tag
+    - update-existing-pull-request
+    - run-one-fresh-public-commit-gate
+    - squash-merge-promptly-after-fresh-qa-and-security-acceptance
+    - append-public-safe-stabilization-intent-and-receipt
+  authorizedPaths:
+    - .harness/grants/WAVE-1-pr-fallback-fixture-stabilization-addendum.yaml
+    - .harness/grants/WAVE-1-pr-fallback-fixture-stabilization-addendum.yaml.sig
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - preserve-b9ca75d-and-v2-tag-as-immutable-history
+    - verify-every-feature-commit-with-the-pinned-signer
+    - disable-git-auto-maintenance-only-in-disposable-test-repositories
+    - require-v3-tag-target-equal-current-reviewed-feature-head-on-pull-request
+    - require-v3-tag-tree-equal-pull-request-and-squash-main-trees
+    - require-exact-base-head-event-and-topology
+    - require-fresh-public-gate-and-immutable-reviews
+  prohibitedEffects:
+    - rerun-the-exhausted-failed-workflow
+    - mutate-production-or-developer-git-configuration
+    - move-or-delete-v1-or-v2-transition-tags
+    - retry-direct-main-push
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - create-or-move-any-tag-other-than-the-v3-transition-tag
+    - mutate-any-bead-work-field-or-dependency
+    - claim-or-transition-bead
+    - issue-or-assert-live-lease
+    - runtime-or-platform-implementation
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  externalStateReadbackRequired: true
+  protectedMainUnchangedUntilMerge: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-pr-fallback-fixture-stabilization-addendum
+  detachedSignature: WAVE-1-pr-fallback-fixture-stabilization-addendum.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
