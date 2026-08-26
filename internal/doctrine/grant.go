@@ -47,8 +47,17 @@ const (
 	wave1AddendumNamespace          = "mars3-ci-recovery-addendum"
 	wave1AddendumBase               = "a22cfe6fada6f2bc787742eae50bca28cec80c89"
 	wave1AddendumBaseTree           = "3c5befaefab37a8d0a2e3a8af2efd6e1eb1d8cae"
-	wave1PublicationTag             = "mars3/wave1-contract-publication-v2"
-	wave1PublicationTagMessage      = "MARS-3 Wave-1 contract-publication tree attestation v2"
+	wave1V2PublicationTag           = "mars3/wave1-contract-publication-v2"
+	wave1V2PublicationTagMessage    = "MARS-3 Wave-1 contract-publication tree attestation v2"
+	wave1V2PublicationTagObject     = "e334356519188fc0906549515ae57fbffa646829"
+	wave1V3AddendumPath             = ".harness/grants/WAVE-1-ci-recovery-addendum-v3.yaml"
+	wave1V3AddendumSignature        = ".harness/grants/WAVE-1-ci-recovery-addendum-v3.yaml.sig"
+	wave1V3AddendumNamespace        = "mars3-ci-recovery-addendum-v3"
+	wave1V3AddendumBase             = "412a9b857265af250ee40d36d0a6c127714e4ec9"
+	wave1V3AddendumBaseTree         = "8c7f3ccac3e31d0e8b45431934cd95a91e448c0f"
+	wave1V3ObservedStaleMerge       = "fff2bea9bffa9400d3ecfc147b7338849ecfbbb0"
+	wave1PublicationTag             = "mars3/wave1-contract-publication-v3"
+	wave1PublicationTagMessage      = "MARS-3 Wave-1 contract-publication tree attestation v3"
 )
 
 type grantScalarExpectation struct {
@@ -304,8 +313,8 @@ var wave1AddendumScalars = []grantScalarExpectation{
 	{path: "addendum.failureFingerprint", value: "public.planning_grant_branch-github-pr-null-merge-commit-sha"},
 	{path: "addendum.rootCause", value: "pull-request-event-merge-commit-sha-was-null"},
 	{path: "addendum.correctionInvariant", value: "nullable-event-field-requires-github-sha-event-base-head-and-exact-two-parent-git-topology"},
-	{path: "addendum.successorTag", value: wave1PublicationTag},
-	{path: "addendum.successorTagMessage", value: wave1PublicationTagMessage},
+	{path: "addendum.successorTag", value: wave1V2PublicationTag},
+	{path: "addendum.successorTagMessage", value: wave1V2PublicationTagMessage},
 	{path: "addendum.v1TagImmutable", value: "true"},
 	{path: "addendum.autonomousMutation", value: "false"},
 	{path: "addendum.implementationClaimed", value: "false"},
@@ -358,6 +367,109 @@ var wave1AddendumSequences = map[string][]string{
 		"create-or-move-any-tag-other-than-v2",
 		"accept-nonempty-mismatched-event-merge-sha",
 		"use-nullable-merge-sha-rule-outside-pull-request-ci",
+		"mutate-workflow-ruleset-or-repository-settings",
+		"add-secret-scanner-ignore-or-allowlist",
+		"mutate-any-bead-work-field-or-dependency",
+		"claim-or-transition-bead",
+		"issue-or-assert-live-lease",
+		"runtime-or-platform-implementation",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var wave1V3AddendumScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3CIRecoveryAddendumV3"},
+	{path: "addendum.id", value: "WAVE-1-ci-recovery-addendum-v3"},
+	{path: "addendum.classification", value: "PUBLIC"},
+	{path: "addendum.issuedAt", value: "2026-08-26T07:56:09Z"},
+	{path: "addendum.expiresAt", value: "2026-08-29T07:56:09Z"},
+	{path: "addendum.baseCommit", value: wave1V3AddendumBase},
+	{path: "addendum.baseTree", value: wave1V3AddendumBaseTree},
+	{path: "addendum.workingBranch", value: wave1PlanningGrantBranch},
+	{path: "addendum.signerRole", value: "human-bootstrap-authority"},
+	{path: "addendum.coordinator", value: "delivery-orchestrator"},
+	{path: "addendum.failureOwnership", value: "foundation"},
+	{path: "addendum.purpose", value: "prospectively admit advisory stale GitHub pull-request merge metadata without weakening canonical checkout and topology controls"},
+	{path: "addendum.retroactiveAuthorization", value: "false"},
+	{path: "addendum.priorHead", value: wave1V3AddendumBase},
+	{path: "addendum.priorTree", value: wave1V3AddendumBaseTree},
+	{path: "addendum.v1Tag", value: wave1PriorPublicationTag},
+	{path: "addendum.v1TagObject", value: wave1PriorPublicationTagObject},
+	{path: "addendum.v1TagTarget", value: wave1AddendumBase},
+	{path: "addendum.v2Tag", value: wave1V2PublicationTag},
+	{path: "addendum.v2TagObject", value: wave1V2PublicationTagObject},
+	{path: "addendum.v2TagTarget", value: wave1V3AddendumBase},
+	{path: "addendum.failedRunId", value: "32943782330"},
+	{path: "addendum.failedRunAttempts", value: "2"},
+	{path: "addendum.finalFailedJobId", value: "98101129557"},
+	{path: "addendum.observedCheckout", value: "3ffd69c107f1492883b65a67678f7239602299a4"},
+	{path: "addendum.observedBase", value: wave1PlanningGrantBase},
+	{path: "addendum.observedHead", value: wave1V3AddendumBase},
+	{path: "addendum.observedStalePayloadMerge", value: wave1V3ObservedStaleMerge},
+	{path: "addendum.failureFingerprint", value: "public.planning_grant_branch-github-pr-stale-nonempty-merge-commit-sha"},
+	{path: "addendum.rootCause", value: "pull-request-event-payload-retained-the-prior-test-merge-identity-after-the-head-advanced"},
+	{path: "addendum.correctionInvariant", value: "payload-merge-identity-is-advisory-while-github-sha-event-base-head-signed-tree-and-exact-two-parent-topology-remain-authoritative"},
+	{path: "addendum.successorTag", value: wave1PublicationTag},
+	{path: "addendum.successorTagMessage", value: wave1PublicationTagMessage},
+	{path: "addendum.v1TagImmutable", value: "true"},
+	{path: "addendum.v2TagImmutable", value: "true"},
+	{path: "addendum.autonomousMutation", value: "false"},
+	{path: "addendum.implementationClaimed", value: "false"},
+	{path: "addendum.liveLeaseAsserted", value: "false"},
+	{path: "addendum.canonicalWorkMutationAllowed", value: "false"},
+	{path: "addendum.githubPolicyMutationAllowed", value: "false"},
+	{path: "addendum.secretScannerExceptionAllowed", value: "false"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.failedAttemptsPreserved", value: "true"},
+	{path: "verification.externalStateReadbackRequired", value: "true"},
+	{path: "verification.rawRunnerPayloadIncluded", value: "false"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: wave1V3AddendumNamespace},
+	{path: "integrity.detachedSignature", value: "WAVE-1-ci-recovery-addendum-v3.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var wave1V3AddendumSequences = map[string][]string{
+	"addendum.allowedEffects": {
+		"edit-listed-public-paths",
+		"run-public-commit-gate",
+		"create-pinned-signer-git-commits",
+		"create-and-push-one-pinned-signer-v3-tag",
+		"push-working-branch",
+		"update-existing-pull-request",
+		"append-public-safe-recovery-intent-and-receipt",
+	},
+	"addendum.authorizedPaths": {
+		wave1V3AddendumPath,
+		wave1V3AddendumSignature,
+		"docs/evidence/WAVE-1-contract-publication.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"addendum.requiredCorrectionProperties": {
+		"treat-optional-payload-merge-sha-as-advisory-only-in-pull-request-ci",
+		"accept-absent-null-current-or-stale-lowercase-forty-hex-payload-merge-sha",
+		"reject-malformed-nonempty-payload-merge-identity",
+		"require-github-sha-equals-checked-out-merge",
+		"require-event-base-and-head-equal-git-merge-parents-in-order",
+		"retain-hosted-runner-workflow-job-repository-workspace-and-workflow-digest-facts",
+		"retain-signed-feature-history-phase-specific-path-and-publication-tree-validation",
+		"enforce-v3-addendum-only-paths-after-the-v2-target",
+		"preserve-v1-and-v2-tags-and-record-all-failed-attempts",
+		"require-v3-tag-tree-equal-updated-review-and-squash-main-trees",
+	},
+	"addendum.prohibitedEffects": {
+		"authorize-prior-effects-retroactively",
+		"move-or-delete-v1-or-v2-tag",
+		"create-or-move-any-tag-other-than-v3",
+		"use-advisory-merge-identity-rule-outside-pull-request-ci",
+		"accept-malformed-payload-merge-identity",
+		"weaken-github-sha-event-base-head-or-exact-two-parent-topology-validation",
 		"mutate-workflow-ruleset-or-repository-settings",
 		"add-secret-scanner-ignore-or-allowlist",
 		"mutate-any-bead-work-field-or-dependency",
@@ -575,6 +687,55 @@ func checkWave1CIRecoveryAddendum(root string, findings *[]Finding) {
 			addFinding(findings, wave1AddendumSignature, "public.ci_recovery_addendum_signature", "%v", err)
 		}
 	}
+	checkWave1V3CIRecoveryAddendum(root, findings)
+}
+
+func checkWave1V3CIRecoveryAddendum(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, wave1V3AddendumPath)
+	if err != nil {
+		addFinding(findings, wave1V3AddendumPath, "public.ci_recovery_v3_addendum_missing", "signed Wave-1 v3 CI recovery addendum is required after the preserved stale-merge failure")
+		return
+	}
+	document := parseStrictGrant(data, wave1V3AddendumScalars, wave1V3AddendumSequences, []string{"addendum", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, wave1V3AddendumPath, "public.ci_recovery_v3_addendum_schema", "%s", message)
+	}
+	for _, expected := range wave1V3AddendumScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, wave1V3AddendumPath, "public.ci_recovery_v3_addendum_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, wave1V3AddendumPath, "public.ci_recovery_v3_addendum_value", "%s does not match the signed v3 CI recovery contract", expected.path)
+		}
+	}
+	for path, expected := range wave1V3AddendumSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, wave1V3AddendumPath, "public.ci_recovery_v3_addendum_sequence", "%s must equal the exact ordered v3 CI recovery contract", path)
+		}
+	}
+	for _, section := range []string{"addendum", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, wave1V3AddendumPath, "public.ci_recovery_v3_addendum_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+
+	signature, signatureErr := readRepoFile(root, wave1V3AddendumSignature)
+	if signatureErr != nil {
+		addFinding(findings, wave1V3AddendumSignature, "public.ci_recovery_v3_addendum_signature_missing", "detached v3 CI recovery addendum signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.ci_recovery_v3_addendum_key", "v3 CI recovery addendum must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, wave1V3AddendumNamespace); err != nil {
+			addFinding(findings, wave1V3AddendumSignature, "public.ci_recovery_v3_addendum_signature", "%v", err)
+		}
+	}
 }
 
 type planningGrantCheckoutKind int
@@ -689,8 +850,8 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 			historyEnd = tagTarget
 		}
 	}
-	if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", wave1AddendumBase, historyEnd); err != nil {
-		addFinding(findings, wave1AddendumPath, "public.ci_recovery_addendum_ancestry", "the exact CI recovery base must be an ancestor of the effective publication history")
+	if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", wave1V3AddendumBase, historyEnd); err != nil {
+		addFinding(findings, wave1V3AddendumPath, "public.ci_recovery_v3_addendum_ancestry", "the exact v3 CI recovery base must be an ancestor of the effective publication history")
 		return
 	}
 	commits, err := planningGrantCommitRange(root, historyEnd)
@@ -722,6 +883,10 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 	for _, path := range wave1AddendumSequences["addendum.authorizedPaths"] {
 		addendumAuthorized[path] = true
 	}
+	v3AddendumAuthorized := make(map[string]bool, len(wave1V3AddendumSequences["addendum.authorizedPaths"]))
+	for _, path := range wave1V3AddendumSequences["addendum.authorizedPaths"] {
+		v3AddendumAuthorized[path] = true
+	}
 
 	signatureFailure := false
 	for _, commit := range commits {
@@ -744,10 +909,12 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 			addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_paths", "per-commit contract-publication paths are not canonical safe repository-relative names")
 			return
 		}
-		authorized := addendumAuthorized
+		authorized := v3AddendumAuthorized
 		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", commit.id, wave1AddendumBase); err == nil {
 			authorized = legacyAuthorized
-		} else if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", wave1AddendumBase, commit.id); err != nil {
+		} else if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", commit.id, wave1V3AddendumBase); err == nil {
+			authorized = addendumAuthorized
+		} else if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", wave1V3AddendumBase, commit.id); err != nil {
 			addFinding(findings, wave1AddendumPath, "public.ci_recovery_addendum_ancestry", "contract-publication history diverges from the exact CI recovery base")
 			return
 		}
@@ -775,8 +942,8 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_paths", "contract-publication paths are not canonical safe repository-relative names")
 		return
 	}
-	if !planningGrantPathsAllowed(paths, addendumAuthorized) {
-		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_scope", "current CI recovery changes include a path outside the signed addendum")
+	if !planningGrantPathsAllowed(paths, v3AddendumAuthorized) {
+		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_scope", "current v3 CI recovery changes include a path outside the signed v3 addendum")
 		return
 	}
 }
@@ -805,6 +972,22 @@ func checkWave1PriorPublicationTag(root string, findings *[]Finding) bool {
 	tree, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{}^{tree}")
 	if err != nil || strings.TrimSpace(string(tree)) != wave1AddendumBaseTree {
 		addFinding(findings, wave1AddendumPath, "public.prior_publication_tag", "the preserved failed v1 publication tag tree must remain unchanged")
+		return false
+	}
+	v2Ref := "refs/tags/" + wave1V2PublicationTag
+	v2Object, err := planningGrantGitOutput(root, "rev-parse", "--verify", v2Ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(v2Object)) != wave1V2PublicationTagObject {
+		addFinding(findings, wave1V3AddendumPath, "public.prior_v2_publication_tag", "the preserved failed v2 publication tag must resolve to its exact immutable object")
+		return false
+	}
+	v2Target, err := planningGrantGitOutput(root, "rev-parse", "--verify", v2Ref+"^{}")
+	if err != nil || strings.TrimSpace(string(v2Target)) != wave1V3AddendumBase {
+		addFinding(findings, wave1V3AddendumPath, "public.prior_v2_publication_tag", "the preserved failed v2 publication tag target must remain unchanged")
+		return false
+	}
+	v2Tree, err := planningGrantGitOutput(root, "rev-parse", "--verify", v2Ref+"^{}^{tree}")
+	if err != nil || strings.TrimSpace(string(v2Tree)) != wave1V3AddendumBaseTree {
+		addFinding(findings, wave1V3AddendumPath, "public.prior_v2_publication_tag", "the preserved failed v2 publication tag tree must remain unchanged")
 		return false
 	}
 	return true
@@ -885,7 +1068,7 @@ func planningGrantGitHubCheckout(root, head, branch string) (planningGrantChecko
 			os.Getenv("GITHUB_BASE_REF") != "main" || event.PullRequest == nil ||
 			event.PullRequest.Head.Ref != wave1PlanningGrantBranch ||
 			event.PullRequest.Base.Ref != "main" ||
-			(event.PullRequest.MergeCommitSHA != "" && event.PullRequest.MergeCommitSHA != head) ||
+			(event.PullRequest.MergeCommitSHA != "" && !sha1Pattern.MatchString(event.PullRequest.MergeCommitSHA)) ||
 			!sha1Pattern.MatchString(event.PullRequest.Head.SHA) ||
 			!sha1Pattern.MatchString(event.PullRequest.Base.SHA) {
 			return planningGrantCheckout{}, false
