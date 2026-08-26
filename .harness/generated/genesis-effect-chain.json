@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "sha256",
+  "canonicalEvent": "sequence|occurredAt|operation|phase|resource|classification|previousHash",
+  "events": [
+    {
+      "sequence": 1,
+      "occurredAt": "2026-08-26T00:43:55Z",
+      "operation": "repository.create",
+      "phase": "intent",
+      "resource": "greaveselliott/MARS-3",
+      "classification": "PUBLIC",
+      "previousHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "hash": "55e55ba665b42d0178f3fbc2a85cf6786ed417a351114df6588f3300c4994faf"
+    },
+    {
+      "sequence": 2,
+      "occurredAt": "2026-08-26T00:44:05Z",
+      "operation": "repository.create",
+      "phase": "receipt",
+      "resource": "greaveselliott/MARS-3",
+      "classification": "PUBLIC",
+      "previousHash": "55e55ba665b42d0178f3fbc2a85cf6786ed417a351114df6588f3300c4994faf",
+      "hash": "71dcdf4ca80379b5749583199dde4fb0b9ec19a5396eb2364fb0f4492b97cee6"
+    }
+  ],
+  "rootHash": "71dcdf4ca80379b5749583199dde4fb0b9ec19a5396eb2364fb0f4492b97cee6"
+}

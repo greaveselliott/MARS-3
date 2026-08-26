@@ -1,0 +1,39 @@
+schemaVersion: 1
+kind: MARS3GenesisCharter
+project:
+  name: MARS-3
+  repository: https://github.com/greaveselliott/MARS-3
+  visibility: public
+  license: Apache-2.0
+authority:
+  system: beads-dolt
+  issue: M3-H001
+  sourceCommit: 6c124203e771433a3550c348771a5b5e27fd3c21
+  version: 1.2.2
+  doltSourceCommit: 1bf533220ab0
+  bootstrapMode: embedded-single-writer
+doctrine:
+  marsRepository: https://github.com/greaveselliott/MARS
+  marsCommit: f55d129bfc794510ca485bb54fc0a35c7b04a700
+plan:
+  goal: G-001
+  scenarios:
+    - F-001-S1
+    - F-001-S2
+    - F-001-S3
+    - F-001-S4
+  currentTicket: H-001
+  owner: foundation-maintainer
+  coordinator: delivery-orchestrator
+  workingBranch: codex/h-001-doctrine-foundation
+security:
+  publicFromFirstCommit: true
+  autonomousMutation: false
+  effectiveTrust: observer
+  rawSecretsPermitted: false
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-genesis
+  signerFingerprint: SHA256:i5VSHF257DhXJ5l/9oOUGHnT2mrqgXYSMryQHRsSBx8
+  detachedSignature: genesis.yaml.sig
+  publicKey: keys/genesis-signing-key.pub

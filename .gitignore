@@ -1,0 +1,29 @@
+# Credentials and local configuration
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+*.mobileprovision
+
+# Authority and runtime state
+.beads/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+data/
+artifacts/
+traces/
+sessions/
+
+# Build and editor output
+bin/
+dist/
+coverage/
+tmp/
+*.log
+.DS_Store
+.idea/
+.vscode/
