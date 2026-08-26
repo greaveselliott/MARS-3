@@ -22,6 +22,66 @@ import (
 
 const wave1PlanningGrantFirstCommitFixture = "fc9f6641d0f739a401a4f7be3bc0ee575df1310a"
 
+func TestWave1DirectMainTransitionAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkWave1DirectMainTransitionGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed direct-main transition was rejected: %v", findings)
+	}
+}
+
+func TestWave1DirectMainTransitionRejectsTampering(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(wave1DirectMainGrantPath)
+	signature := read(wave1DirectMainGrantSignature)
+	publicKey := read(wave1PlanningGrantKey)
+
+	for _, testCase := range []struct {
+		name string
+		old  string
+		new  string
+		code string
+	}{
+		{name: "branch", old: "workingBranch: main", new: "workingBranch: codex/escape", code: "public.direct_main_transition_value"},
+		{name: "authority", old: "canonicalWorkMutationAllowed: false", new: "canonicalWorkMutationAllowed: true", code: "public.direct_main_transition_value"},
+		{name: "scope", old: "    - internal/doctrine/grant_test.go", new: "    - internal/runtime/escape.go", code: "public.direct_main_transition_sequence"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
+			root := t.TempDir()
+			writePlanningGrantTestFile(t, root, wave1DirectMainGrantPath, tampered)
+			writePlanningGrantTestFile(t, root, wave1DirectMainGrantSignature, signature)
+			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+			var findings []Finding
+			checkWave1DirectMainTransitionGrant(root, &findings)
+			if !findingCodePresent(findings, testCase.code) || !findingCodePresent(findings, "public.direct_main_transition_signature") {
+				t.Fatalf("tampered transition was not rejected by contract and signature: %v", findings)
+			}
+		})
+	}
+}
+
+func TestWave1DirectMainTransitionAcceptsCurrentMainCheckout(t *testing.T) {
+	if os.Getenv("GITHUB_ACTIONS") == "true" {
+		t.Skip("the top-level public gate exercises canonical GitHub push facts")
+	}
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkWave1DirectMainTransitionGitDiff(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("current signed direct-main transition checkout was rejected: %v", findings)
+	}
+}
+
 func TestWave1PlanningGrantAcceptsPinnedSignedContract(t *testing.T) {
 	grant, signature, publicKey := loadPlanningGrantFixture(t)
 	root := writePlanningGrantFixture(t, grant, signature, publicKey)

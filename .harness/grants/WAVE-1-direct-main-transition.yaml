@@ -1,0 +1,77 @@
+schemaVersion: 1
+kind: MARS3DirectMainTransitionGrant
+
+grant:
+  id: WAVE-1-direct-main-transition
+  classification: PUBLIC
+  issuedAt: 2026-08-26T08:30:17Z
+  expiresAt: 2026-08-29T08:30:17Z
+  baseCommit: 265b0b78a19d0ac50611c360f4614ed24d1cfcd7
+  baseTree: 87dc32acce9c767f01f94aae25936665e26650ab
+  repository: greaveselliott/MARS-3
+  workingBranch: main
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  sourceDirective: commit-small-semantic-changes-directly-to-main-frequently
+  purpose: prepare fail-closed admission for the separately signed W-001 bootstrap grant without claiming or implementing W-001
+  priorPublicationTag: mars3/wave1-contract-publication-v3
+  priorPublicationTagObject: b53728e3a57e6dc0d57151aa7f0bed8e44aaaa2f
+  priorPublicationTagTarget: 7e6b765c284788442553d40792db0afb128c4872
+  priorPublicationTree: 87dc32acce9c767f01f94aae25936665e26650ab
+  successorGrant: W-001-bootstrap
+  autonomousMutation: false
+  implementationClaimed: false
+  liveLeaseAsserted: false
+  canonicalWorkMutationAllowed: false
+  githubPolicyMutationAllowed: false
+  secretScannerExceptionAllowed: false
+  allowedEffects:
+    - edit-listed-public-paths
+    - create-pinned-signer-direct-main-commits
+    - push-protected-main
+    - run-public-commit-gate-after-every-commit
+    - prepare-separately-signed-W001-bootstrap-grant
+    - append-public-safe-transition-intent-and-receipt
+  authorizedPaths:
+    - .harness/grants/WAVE-1-direct-main-transition.yaml
+    - .harness/grants/WAVE-1-direct-main-transition.yaml.sig
+    - .harness/grants/W-001-bootstrap.yaml
+    - .harness/grants/W-001-bootstrap.yaml.sig
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - every-post-publication-commit-is-linear-and-pinned-signer-verified
+    - every-protected-main-push-binds-event-before-after-and-first-parent
+    - every-commit-and-worktree-path-is-inside-the-active-signed-authority
+    - contract-publication-remains-backlog-unclaimed-until-the-successor-grant-and-claim-receipt-validate
+    - v1-v2-v3-publication-tags-remain-immutable
+    - no-transition-gap-is-selected-by-mutable-plan-text
+  prohibitedEffects:
+    - authorize-prior-effects-retroactively
+    - move-or-delete-v1-v2-or-v3-publication-tag
+    - create-or-move-another-publication-tag
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - mutate-any-bead-work-field-or-dependency
+    - claim-or-transition-bead
+    - issue-or-assert-live-lease
+    - runtime-or-platform-implementation
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequiredAfterEveryCommit: true
+  directMainPushRequired: true
+  exactBaseAndTreeRequired: true
+  externalStateReadbackRequired: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-direct-main-transition
+  detachedSignature: WAVE-1-direct-main-transition.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

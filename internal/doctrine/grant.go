@@ -58,6 +58,11 @@ const (
 	wave1V3ObservedStaleMerge       = "fff2bea9bffa9400d3ecfc147b7338849ecfbbb0"
 	wave1PublicationTag             = "mars3/wave1-contract-publication-v3"
 	wave1PublicationTagMessage      = "MARS-3 Wave-1 contract-publication tree attestation v3"
+	wave1PublishedMain              = "265b0b78a19d0ac50611c360f4614ed24d1cfcd7"
+	wave1PublishedTree              = "87dc32acce9c767f01f94aae25936665e26650ab"
+	wave1DirectMainGrantPath        = ".harness/grants/WAVE-1-direct-main-transition.yaml"
+	wave1DirectMainGrantSignature   = ".harness/grants/WAVE-1-direct-main-transition.yaml.sig"
+	wave1DirectMainGrantNamespace   = "mars3-direct-main-transition"
 )
 
 type grantScalarExpectation struct {
@@ -87,6 +92,84 @@ var wave1PlanningGrantScalars = []grantScalarExpectation{
 	{path: "integrity.signatureNamespace", value: wave1PlanningGrantNamespace},
 	{path: "integrity.detachedSignature", value: "WAVE-1-contract-publication.yaml.sig"},
 	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var wave1DirectMainGrantScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3DirectMainTransitionGrant"},
+	{path: "grant.id", value: "WAVE-1-direct-main-transition"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-26T08:30:17Z"},
+	{path: "grant.expiresAt", value: "2026-08-29T08:30:17Z"},
+	{path: "grant.baseCommit", value: wave1PublishedMain},
+	{path: "grant.baseTree", value: wave1PublishedTree},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.workingBranch", value: "main"},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.sourceDirective", value: "commit-small-semantic-changes-directly-to-main-frequently"},
+	{path: "grant.purpose", value: "prepare fail-closed admission for the separately signed W-001 bootstrap grant without claiming or implementing W-001"},
+	{path: "grant.priorPublicationTag", value: wave1PublicationTag},
+	{path: "grant.priorPublicationTagObject", value: "b53728e3a57e6dc0d57151aa7f0bed8e44aaaa2f"},
+	{path: "grant.priorPublicationTagTarget", value: "7e6b765c284788442553d40792db0afb128c4872"},
+	{path: "grant.priorPublicationTree", value: wave1PublishedTree},
+	{path: "grant.successorGrant", value: "W-001-bootstrap"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.implementationClaimed", value: "false"},
+	{path: "grant.liveLeaseAsserted", value: "false"},
+	{path: "grant.canonicalWorkMutationAllowed", value: "false"},
+	{path: "grant.githubPolicyMutationAllowed", value: "false"},
+	{path: "grant.secretScannerExceptionAllowed", value: "false"},
+	{path: "verification.publicCommitGateRequiredAfterEveryCommit", value: "true"},
+	{path: "verification.directMainPushRequired", value: "true"},
+	{path: "verification.exactBaseAndTreeRequired", value: "true"},
+	{path: "verification.externalStateReadbackRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: wave1DirectMainGrantNamespace},
+	{path: "integrity.detachedSignature", value: "WAVE-1-direct-main-transition.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var wave1DirectMainGrantSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"edit-listed-public-paths",
+		"create-pinned-signer-direct-main-commits",
+		"push-protected-main",
+		"run-public-commit-gate-after-every-commit",
+		"prepare-separately-signed-W001-bootstrap-grant",
+		"append-public-safe-transition-intent-and-receipt",
+	},
+	"grant.authorizedPaths": {
+		wave1DirectMainGrantPath,
+		wave1DirectMainGrantSignature,
+		".harness/grants/W-001-bootstrap.yaml",
+		".harness/grants/W-001-bootstrap.yaml.sig",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"every-post-publication-commit-is-linear-and-pinned-signer-verified",
+		"every-protected-main-push-binds-event-before-after-and-first-parent",
+		"every-commit-and-worktree-path-is-inside-the-active-signed-authority",
+		"contract-publication-remains-backlog-unclaimed-until-the-successor-grant-and-claim-receipt-validate",
+		"v1-v2-v3-publication-tags-remain-immutable",
+		"no-transition-gap-is-selected-by-mutable-plan-text",
+	},
+	"grant.prohibitedEffects": {
+		"authorize-prior-effects-retroactively",
+		"move-or-delete-v1-v2-or-v3-publication-tag",
+		"create-or-move-another-publication-tag",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"mutate-any-bead-work-field-or-dependency",
+		"claim-or-transition-bead",
+		"issue-or-assert-live-lease",
+		"runtime-or-platform-implementation",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
 var wave1PlanningGrantSequences = map[string][]string{
@@ -736,6 +819,59 @@ func checkWave1V3CIRecoveryAddendum(root string, findings *[]Finding) {
 			addFinding(findings, wave1V3AddendumSignature, "public.ci_recovery_v3_addendum_signature", "%v", err)
 		}
 	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(wave1DirectMainGrantPath))); err == nil {
+		checkWave1DirectMainTransitionGrant(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_state", "direct-main transition grant state cannot be established")
+	}
+}
+
+func checkWave1DirectMainTransitionGrant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, wave1DirectMainGrantPath)
+	if err != nil {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_missing", "signed direct-main transition grant is required")
+		return
+	}
+	document := parseStrictGrant(data, wave1DirectMainGrantScalars, wave1DirectMainGrantSequences, []string{"grant", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_schema", "%s", message)
+	}
+	for _, expected := range wave1DirectMainGrantScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_value", "%s does not match the signed transition contract", expected.path)
+		}
+	}
+	for path, expected := range wave1DirectMainGrantSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_sequence", "%s must equal the exact ordered transition contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+
+	signature, signatureErr := readRepoFile(root, wave1DirectMainGrantSignature)
+	if signatureErr != nil {
+		addFinding(findings, wave1DirectMainGrantSignature, "public.direct_main_transition_signature_missing", "detached direct-main transition signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.direct_main_transition_key", "direct-main transition must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, wave1DirectMainGrantNamespace); err != nil {
+			addFinding(findings, wave1DirectMainGrantSignature, "public.direct_main_transition_signature", "%v", err)
+		}
+	}
 }
 
 type planningGrantCheckoutKind int
@@ -793,6 +929,13 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 	}
 	if metadata.Mode()&os.ModeSymlink != 0 || (!metadata.IsDir() && !metadata.Mode().IsRegular()) {
 		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_git", "repository Git metadata is not a regular directory or worktree pointer")
+		return
+	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(wave1DirectMainGrantPath))); err == nil {
+		checkWave1DirectMainTransitionGitDiff(root, findings)
+		return
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_state", "direct-main transition grant state cannot be established")
 		return
 	}
 
@@ -946,6 +1089,208 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_scope", "current v3 CI recovery changes include a path outside the signed v3 addendum")
 		return
 	}
+}
+
+func checkWave1DirectMainTransitionGitDiff(root string, findings *[]Finding) {
+	plan, err := readRepoFile(root, canonicalActivePlan)
+	if err != nil {
+		addFinding(findings, canonicalActivePlan, "public.direct_main_transition_phase", "active plan phase cannot be established")
+		return
+	}
+	phaseMatches := planPhaseLine.FindAllSubmatch(plan, -1)
+	if len(phaseMatches) != 1 || string(phaseMatches[0][1]) != planPhaseContractPublication {
+		addFinding(findings, canonicalActivePlan, "public.direct_main_transition_phase", "transition authority permits preparation only while the canonical Bead remains backlog and unclaimed")
+		return
+	}
+
+	resolvedBase, err := planningGrantGitOutput(root, "rev-parse", "--verify", wave1PublishedMain+"^{commit}")
+	if err != nil || strings.TrimSpace(string(resolvedBase)) != wave1PublishedMain {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_base", "the exact verified publication commit must resolve locally")
+		return
+	}
+	baseTree, err := planningGrantGitOutput(root, "rev-parse", "--verify", wave1PublishedMain+"^{tree}")
+	if err != nil || strings.TrimSpace(string(baseTree)) != wave1PublishedTree {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_base_tree", "the verified publication base tree does not match the signed transition")
+		return
+	}
+	if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", wave1PublishedMain, "HEAD"); err != nil {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_ancestry", "the verified publication commit must be an ancestor of HEAD")
+		return
+	}
+	if !checkWave1PriorPublicationTag(root, findings) || !checkWave1V3PublicationTag(root, findings) {
+		return
+	}
+
+	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
+	if err != nil || !sha1Pattern.MatchString(strings.TrimSpace(string(headOutput))) {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_head", "HEAD must resolve to one exact commit")
+		return
+	}
+	head := strings.TrimSpace(string(headOutput))
+	if !checkWave1DirectMainCheckout(root, head, findings) {
+		return
+	}
+
+	commits, err := planningGrantCommitRangeFrom(root, wave1PublishedMain, head)
+	if err != nil {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_history", "post-publication commit ancestry cannot be enumerated")
+		return
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.direct_main_transition_commit_signature", "post-publication commits require the pinned genesis signer")
+		return
+	}
+	authorized := make(map[string]bool, len(wave1DirectMainGrantSequences["grant.authorizedPaths"]))
+	for _, path := range wave1DirectMainGrantSequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	previous := wave1PublishedMain
+	for _, commit := range commits {
+		if len(commit.parents) != 1 || commit.parents[0] != previous {
+			addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_topology", "post-publication main history must be a contiguous one-parent chain")
+			return
+		}
+		object, err := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+		if err != nil || verifyPlanningGrantCommit(object, publicKey) != nil {
+			addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_commit_signature", "every post-publication commit must carry the pinned SSH signature")
+			return
+		}
+		paths, err := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
+		if err != nil {
+			addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_paths", "post-publication commit paths cannot be enumerated")
+			return
+		}
+		normalized, err := normalizedPlanningGrantGitPaths(paths)
+		if err != nil || !planningGrantPathsAllowed(normalized, authorized) {
+			addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_scope", "a post-publication commit includes a path outside the signed transition authority")
+			return
+		}
+		previous = commit.id
+	}
+
+	tracked, err := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
+	if err != nil {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_paths", "current index and worktree paths cannot be enumerated")
+		return
+	}
+	untracked, err := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
+	if err != nil {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_paths", "untracked transition paths cannot be enumerated")
+		return
+	}
+	paths, err := normalizedPlanningGrantGitPaths(tracked, untracked)
+	if err != nil || !planningGrantPathsAllowed(paths, authorized) {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_scope", "current changes include a path outside the signed transition authority")
+	}
+}
+
+func checkWave1V3PublicationTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + wave1PublicationTag
+	tagObject, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(tagObject)) != "b53728e3a57e6dc0d57151aa7f0bed8e44aaaa2f" {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_v3_tag", "the signed v3 publication tag object must remain unchanged")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", strings.TrimSpace(string(tagObject)))
+	if err != nil {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_v3_tag", "the signed v3 publication tag cannot be read")
+		return false
+	}
+	publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, wave1PlanningGrantKey, "public.direct_main_transition_v3_tag", "the signed v3 publication tag requires the pinned genesis key")
+		return false
+	}
+	target, err := verifyPlanningGrantTag(object, publicKey)
+	if err != nil || target != "7e6b765c284788442553d40792db0afb128c4872" {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_v3_tag", "the signed v3 publication tag target must remain unchanged")
+		return false
+	}
+	tree, err := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if err != nil || strings.TrimSpace(string(tree)) != wave1PublishedTree {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_v3_tag", "the signed v3 publication tree must remain unchanged")
+		return false
+	}
+	return true
+}
+
+func checkWave1DirectMainCheckout(root, head string, findings *[]Finding) bool {
+	branchOutput, branchErr := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
+	branch := strings.TrimSpace(string(branchOutput))
+	if os.Getenv("GITHUB_ACTIONS") != "true" {
+		if branchErr != nil || branch != "main" {
+			addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_branch", "local transition work must use the exact main branch")
+			return false
+		}
+		return true
+	}
+	if branchErr == nil && branch != "main" || branchErr != nil && branch != "" {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_branch", "protected-main CI branch state is ambiguous")
+		return false
+	}
+	if os.Getenv("CI") != "true" || os.Getenv("RUNNER_ENVIRONMENT") != "github-hosted" ||
+		os.Getenv("GITHUB_REPOSITORY") != planningGrantRepository || os.Getenv("GITHUB_WORKFLOW") != planningGrantWorkflow ||
+		os.Getenv("GITHUB_JOB") != planningGrantWorkflowJob || os.Getenv("GITHUB_SHA") != head ||
+		os.Getenv("GITHUB_EVENT_NAME") != "push" || os.Getenv("GITHUB_REF") != "refs/heads/main" ||
+		os.Getenv("GITHUB_REF_PROTECTED") != "true" || os.Getenv("GITHUB_HEAD_REF") != "" || os.Getenv("GITHUB_BASE_REF") != "" ||
+		!samePlanningGrantRepositoryRoot(root, os.Getenv("GITHUB_WORKSPACE")) {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_runner", "protected-main CI lacks canonical immutable runner facts")
+		return false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ID")); !ok {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_runner", "protected-main CI run ID is invalid")
+		return false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ATTEMPT")); !ok {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_runner", "protected-main CI attempt is invalid")
+		return false
+	}
+	workflowRef := os.Getenv("GITHUB_WORKFLOW_REF")
+	if workflowRef != planningGrantRepository+"/"+planningGrantWorkflowPath+"@refs/heads/main" {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_runner", "protected-main workflow ref is not canonical")
+		return false
+	}
+	workflow, err := readRepoFile(root, planningGrantWorkflowPath)
+	if err != nil || fileSHA256(workflow) != canonicalFoundationWorkflowSHA256 {
+		addFinding(findings, planningGrantWorkflowPath, "public.direct_main_transition_workflow", "protected-main workflow bytes do not match the pinned digest")
+		return false
+	}
+	event, ok := readPlanningGrantGitHubEvent(os.Getenv("GITHUB_EVENT_PATH"))
+	if !ok || event.Repository.FullName != planningGrantRepository || event.Ref != "refs/heads/main" || event.After != head ||
+		event.HeadCommit == nil || event.HeadCommit.ID != head || event.PullRequest != nil {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_event", "protected-main event does not bind the exact pushed commit")
+		return false
+	}
+	parents, err := planningGrantCommitParents(root, head)
+	if err != nil || len(parents) != 1 || event.Before != parents[0] {
+		addFinding(findings, wave1DirectMainGrantPath, "public.direct_main_transition_event", "protected-main event before SHA must equal the pushed commit's sole parent")
+		return false
+	}
+	return true
+}
+
+func planningGrantCommitRangeFrom(root, base, end string) ([]planningGrantCommit, error) {
+	output, err := planningGrantGitOutput(root, "rev-list", "--no-abbrev-commit", "--reverse", "--topo-order", "--parents", base+".."+end)
+	if err != nil {
+		return nil, err
+	}
+	var commits []planningGrantCommit
+	for _, line := range strings.Split(strings.TrimSpace(string(output)), "\n") {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		fields := strings.Fields(line)
+		if len(fields) != 2 || !sha1Pattern.MatchString(fields[0]) || !sha1Pattern.MatchString(fields[1]) {
+			return nil, fmt.Errorf("post-publication history is not a linear commit chain")
+		}
+		commits = append(commits, planningGrantCommit{id: fields[0], parents: []string{fields[1]}})
+	}
+	return commits, nil
 }
 
 func planningGrantPathsAllowed(paths []string, authorized map[string]bool) bool {
