@@ -100,6 +100,14 @@ const (
 	w001BootstrapBranch             = "codex/w-001-work-authority"
 	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v9"
 	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v9"
+	w001PostclaimGrantPath          = ".harness/grants/W-001-postclaim-reconciliation.yaml"
+	w001PostclaimGrantSignature     = ".harness/grants/W-001-postclaim-reconciliation.yaml.sig"
+	w001PostclaimGrantNamespace     = "mars3-w001-postclaim-reconciliation"
+	w001PostclaimBase               = "adfd64feb565fb703a3568122cc032d4d1a450f5"
+	w001PostclaimBaseTree           = "bbfa7f59f7bd29c1a0546ffcb77dd8fa4982ef6d"
+	w001PostclaimBranch             = "codex/w-001-postclaim-reconciliation"
+	w001PostclaimReviewTag          = "mars3/w001-postclaim-reconciliation-v1"
+	w001PostclaimReviewTagMessage   = "MARS-3 W-001 postclaim reconciliation tree attestation v1"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -1089,6 +1097,123 @@ var w001BootstrapGrantSequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001PostclaimGrantScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001PostclaimReconciliationGrant"},
+	{path: "grant.id", value: "W-001-postclaim-reconciliation"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-26T20:33:58Z"},
+	{path: "grant.expiresAt", value: "2026-08-28T20:33:58Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001PostclaimBase},
+	{path: "grant.baseTree", value: w001PostclaimBaseTree},
+	{path: "grant.workingBranch", value: w001PostclaimBranch},
+	{path: "grant.reviewTag", value: w001PostclaimReviewTag},
+	{path: "grant.reviewTagMessage", value: w001PostclaimReviewTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "reconcile the verified canonical W-001 claim into Git without a lease or implementation authority"},
+	{path: "grant.bead", value: "M3-W001"},
+	{path: "grant.displayId", value: "W-001"},
+	{path: "grant.priorGrant", value: "W-001-bootstrap"},
+	{path: "grant.priorGrantSHA256", value: "37b4b0df773fa6bace2a06af34ff546e12c9e2f42eb8bb5865f1b9405727e34d"},
+	{path: "grant.priorGrantSignatureSHA256", value: "eeba6098de123f4d9d47c33d4349015775591511784d6c29b709ed1d45927e15"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.liveLeaseAsserted", value: "false"},
+	{path: "grant.implementationAllowed", value: "false"},
+	{path: "claim.attemptId", value: "w001-bootstrap-3135f1d1-b0d4-4956-9fc9-1852310bfd77"},
+	{path: "claim.replayReferenceSHA256", value: "321df42aa6cd67c3ae42b687b16927d81fc19b42e124819bd266b84b22c2d1a0"},
+	{path: "claim.executionAuthorizationPayloadSHA256", value: "2a2428537a5e42ed6f69afaa42771b9b404705e5593b554129c6ce45f5aec297"},
+	{path: "claim.executionAuthorizationSignatureSHA256", value: "d7bc5a1c824bde6ee72d755660afccaad569840b2db29971bf3b8b087540ce5c"},
+	{path: "claim.receiptSHA256", value: "04cef4e421a34e0908d392fc794181db3ddb754a134e34599fa41a520c78d126"},
+	{path: "claim.previousDoltCommit", value: "mm6m0b4655k5gpt5eren5cfkgvjtabsm"},
+	{path: "claim.doltCommit", value: "67hmen0cmq0he08n7ujlqpcsmmi94fhb"},
+	{path: "claim.nativeStatus", value: "in_progress"},
+	{path: "claim.lifecycleState", value: "in-progress"},
+	{path: "claim.claimed", value: "true"},
+	{path: "claim.updatedAt", value: "2026-08-26T20:23:37Z"},
+	{path: "claim.metadataSHA256", value: "3a0bbed5ca93acf77d04eedfad6bcaa16a9701f3e6da3f8669eb9928f6d09139"},
+	{path: "claim.labelsSHA256", value: "3e4e77e20ee7a46dd77c4a9884dee51aa9f0fa9f2445099a0cb457d72cb83bbb"},
+	{path: "claim.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "claim.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "claim.issueMutationSequence", value: "1"},
+	{path: "claim.dependencyGraphRevision", value: "1"},
+	{path: "claim.liveLeaseAsserted", value: "false"},
+	{path: "publication.helperFeatureCommit", value: "663d19bf190f9e3bd27edc96ee08acaa6778c853"},
+	{path: "publication.helperFeatureTree", value: w001PostclaimBaseTree},
+	{path: "publication.helperReviewTag", value: w001BootstrapReviewTag},
+	{path: "publication.helperReviewTagObject", value: "6409b5daecb472b415dec60b96b12bfffa3a4cd0"},
+	{path: "publication.helperPullRequest", value: "6"},
+	{path: "publication.helperPullRequestRun", value: "33005091777"},
+	{path: "publication.mergedCommit", value: w001PostclaimBase},
+	{path: "publication.mergedTree", value: w001PostclaimBaseTree},
+	{path: "publication.protectedMainRun", value: "33006386000"},
+	{path: "publication.qaReviewedCommit", value: "663d19bf190f9e3bd27edc96ee08acaa6778c853"},
+	{path: "publication.qaDisposition", value: "accepted"},
+	{path: "publication.securityReviewedCommit", value: "663d19bf190f9e3bd27edc96ee08acaa6778c853"},
+	{path: "publication.securityDisposition", value: "accepted"},
+	{path: "postimage.manifestSHA256", value: "ee37f6262e714aa1f853fe7b81ce9b50a1d299482dde905262e80cbb133d13e6"},
+	{path: "postimage.activePlanSHA256", value: "d5ac48639cd8bd98ce57e1f0f91ddd4c358498eddb45c8255c0ca67ab56abbbc"},
+	{path: "postimage.evidenceSHA256", value: "93dd425ef42e6c929a97d20e08b9d75c339b45303975162cc863dad3764dc1a0"},
+	{path: "postimage.planPhase", value: "delivery"},
+	{path: "postimage.currentBeadState", value: "in-progress"},
+	{path: "postimage.currentBeadClaimed", value: "true"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001PostclaimGrantNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-postclaim-reconciliation.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001PostclaimGrantSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"create-and-verify-this-signed-postclaim-grant",
+		"edit-the-exact-authorized-Git-paths",
+		"bind-the-exact-canonical-claim-receipt-digest-and-bounded-public-summary",
+		"reconcile-the-active-plan-to-delivery-and-W-001-in-progress",
+		"reconcile-the-manifest-to-claimed-in-progress-delivery",
+		"create-pinned-signer-commits-and-one-signed-review-tag",
+		"push-one-review-branch-and-tag-and-open-one-ready-PR",
+		"run-public-gates-and-obtain-independent-QA-and-Security-review",
+		"squash-merge-promptly-with-reviewed-tree-equality",
+	},
+	"grant.authorizedPaths": {
+		w001PostclaimGrantPath,
+		w001PostclaimGrantSignature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-bootstrap-transition.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"canonical-Beads-state-remains-the-work-authority",
+		"claim-receipt-binds-the-signed-execution-authorization-and-accepted-helper",
+		"plan-and-manifest-postimages-exactly-match-the-signed-digests",
+		"every-commit-and-current-change-stays-inside-the-signed-path-set",
+		"every-feature-commit-and-review-tag-use-the-pinned-signer",
+		"reviewed-feature-tree-equals-the-protected-main-squash-tree",
+		"no-live-lease-or-implementation-authority-is-created",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-any-Bead-Dolt-row-dependency-label-comment-or-history",
+		"issue-assert-renew-release-or-revoke-a-live-lease",
+		"edit-gateway-runtime-platform-or-product-implementation",
+		"change-feature-contract-product-decision-goal-or-scenario-schedule",
+		"move-delete-or-reuse-any-existing-review-tag",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+		"credentials-provider-session-customer-data-or-raw-payloads",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -1651,6 +1776,116 @@ func checkW001BootstrapGrant(root string, findings *[]Finding) {
 			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_work_version", "postimage metadata must carry the exact bootstrap WorkVersion")
 		}
 	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimGrantPath))); err == nil {
+		checkW001PostclaimGrant(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_state", "W-001 postclaim reconciliation state cannot be established")
+	}
+}
+
+func checkW001PostclaimGrant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001PostclaimGrantPath)
+	if err != nil {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_missing", "signed W-001 postclaim reconciliation grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001PostclaimGrantScalars, w001PostclaimGrantSequences,
+		[]string{"grant", "claim", "publication", "postimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_schema", "%s", message)
+	}
+	for _, expected := range w001PostclaimGrantScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_value", "%s does not match the signed postclaim contract", expected.path)
+		}
+	}
+	for path, expected := range w001PostclaimGrantSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_sequence", "%s must equal the exact ordered postclaim contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "claim", "publication", "postimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_expiry", "postclaim grant must use one RFC3339 interval no longer than 72 hours")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001PostclaimGrantSignature)
+	if signatureErr != nil {
+		addFinding(findings, w001PostclaimGrantSignature, "public.w001_postclaim_signature_missing", "detached postclaim reconciliation signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_postclaim_key", "postclaim reconciliation must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001PostclaimGrantNamespace); err != nil {
+			addFinding(findings, w001PostclaimGrantSignature, "public.w001_postclaim_signature", "%v", err)
+		}
+	}
+
+	for _, binding := range []struct {
+		path    string
+		digest  string
+		code    string
+		message string
+	}{
+		{w001BootstrapGrantPath, scalarValue(document, "grant.priorGrantSHA256"), "public.w001_postclaim_prior_grant", "prior bootstrap grant"},
+		{w001BootstrapGrantSignature, scalarValue(document, "grant.priorGrantSignatureSHA256"), "public.w001_postclaim_prior_grant", "prior bootstrap signature"},
+		{".harness/manifest.yaml", scalarValue(document, "postimage.manifestSHA256"), "public.w001_postclaim_postimage", "manifest postimage"},
+		{canonicalActivePlan, scalarValue(document, "postimage.activePlanSHA256"), "public.w001_postclaim_postimage", "active-plan postimage"},
+		{"docs/evidence/W-001-bootstrap-transition.md", scalarValue(document, "postimage.evidenceSHA256"), "public.w001_postclaim_postimage", "claim-evidence postimage"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, binding.code, "%s must match its exact signed SHA-256", binding.message)
+		}
+	}
+
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-bootstrap-transition.md")
+	receiptDigest, receiptErr := extractW001ClaimReceiptDigest(evidence)
+	if evidenceErr != nil || receiptErr != nil || receiptDigest != scalarValue(document, "claim.receiptSHA256") {
+		addFinding(findings, "docs/evidence/W-001-bootstrap-transition.md", "public.w001_postclaim_receipt", "canonical claim receipt must be bound by one exact public SHA-256 reference")
+	}
+}
+
+func extractW001ClaimReceiptDigest(evidence []byte) (string, error) {
+	const heading = "## Canonical claim receipt\n"
+	sectionStart := bytes.Index(evidence, []byte(heading))
+	if sectionStart < 0 || bytes.Count(evidence, []byte(heading)) != 1 {
+		return "", errors.New("canonical claim receipt section is missing or duplicated")
+	}
+	section := evidence[sectionStart+len(heading):]
+	if next := bytes.Index(section, []byte("\n## ")); next >= 0 {
+		section = section[:next]
+	}
+	const prefix = "- Receipt SHA-256: `"
+	start := bytes.Index(section, []byte(prefix))
+	if start < 0 || bytes.Count(section, []byte(prefix)) != 1 {
+		return "", errors.New("canonical claim receipt digest is missing or duplicated")
+	}
+	digestStart := start + len(prefix)
+	digestEnd := bytes.IndexByte(section[digestStart:], '`')
+	if digestEnd < 0 {
+		return "", errors.New("canonical claim receipt digest is not closed")
+	}
+	digest := string(section[digestStart : digestStart+digestEnd])
+	if !sha256Pattern.MatchString(digest) {
+		return "", errors.New("canonical claim receipt digest must be lowercase SHA-256")
+	}
+	return digest, nil
 }
 
 func scalarValue(document strictPlanningGrant, path string) string {
@@ -2006,10 +2241,237 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 	}
 }
 
+func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
+	base, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimBase+"^{commit}")
+	if err != nil || strings.TrimSpace(string(base)) != w001PostclaimBase {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_base", "exact accepted helper squash must resolve locally")
+		return
+	}
+	baseTree, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimBase+"^{tree}")
+	if err != nil || strings.TrimSpace(string(baseTree)) != w001PostclaimBaseTree {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_base", "accepted helper squash tree must match the signed base tree")
+		return
+	}
+	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
+	head := strings.TrimSpace(string(headOutput))
+	if err != nil || !sha1Pattern.MatchString(head) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_git", "HEAD must resolve to one exact commit")
+		return
+	}
+	branchOutput, branchErr := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
+	branch := strings.TrimSpace(string(branchOutput))
+	featureHead := head
+	requireTag := false
+	mainTreeCheck := false
+	switch {
+	case branchErr == nil && branch == w001PostclaimBranch && os.Getenv("GITHUB_ACTIONS") != "true":
+		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001PostclaimBase, head); err != nil {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_ancestry", "local reconciliation must descend from the exact accepted helper squash")
+			return
+		}
+	case branchErr == nil && branch == "main" && os.Getenv("GITHUB_ACTIONS") != "true":
+		requireTag, mainTreeCheck = true, true
+	case os.Getenv("GITHUB_ACTIONS") == "true":
+		featureHead, requireTag, mainTreeCheck = w001PostclaimGitHubCheckout(root, head, branch, findings)
+		if featureHead == "" {
+			return
+		}
+	default:
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_branch", "postclaim reconciliation requires its signed branch or accepted main")
+		return
+	}
+
+	if requireTag {
+		expected := featureHead
+		if mainTreeCheck {
+			expected = ""
+		}
+		target, ok := checkW001PostclaimReviewTag(root, expected, findings)
+		if !ok {
+			return
+		}
+		featureHead = target
+	}
+	if mainTreeCheck {
+		parents, err := planningGrantCommitParents(root, head)
+		if err != nil || len(parents) != 1 || parents[0] != w001PostclaimBase {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_main_topology", "accepted reconciliation must be one squash commit over the signed base")
+			return
+		}
+		mainTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", featureHead+"^{tree}")
+		if strings.TrimSpace(string(mainTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_main_tree", "accepted reconciliation tree must equal the signed reviewed feature tree")
+			return
+		}
+	}
+
+	if featureHead != w001PostclaimBase {
+		commits, err := planningGrantCommitRangeFrom(root, w001PostclaimBase, featureHead)
+		if err != nil || len(commits) == 0 {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_history", "reconciliation feature history must be a nonempty linear chain")
+			return
+		}
+		publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+		if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+			addFinding(findings, wave1PlanningGrantKey, "public.w001_postclaim_commit_signature", "reconciliation commits require the pinned genesis signer")
+			return
+		}
+		previous := w001PostclaimBase
+		authorized := w001PostclaimPathSet()
+		for _, commit := range commits {
+			if len(commit.parents) != 1 || commit.parents[0] != previous {
+				addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_topology", "reconciliation feature history must be a contiguous one-parent chain")
+				return
+			}
+			paths, err := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
+			normalized, normalizeErr := normalizedPlanningGrantGitPaths(paths)
+			if err != nil || normalizeErr != nil || !planningGrantPathsAllowed(normalized, authorized) {
+				addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_scope", "a reconciliation commit includes a path outside its signed scope")
+				return
+			}
+			object, err := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+			if err != nil || verifyPlanningGrantCommit(object, publicKey) != nil {
+				addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_commit_signature", "every reconciliation feature commit must carry the pinned SSH signature")
+				return
+			}
+			previous = commit.id
+		}
+	}
+
+	tracked, err := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
+	if err != nil {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_scope", "current tracked reconciliation paths cannot be enumerated")
+		return
+	}
+	untracked, err := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
+	if err != nil {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_scope", "current untracked reconciliation paths cannot be enumerated")
+		return
+	}
+	paths, err := normalizedPlanningGrantGitPaths(tracked, untracked)
+	if err != nil || !planningGrantPathsAllowed(paths, w001PostclaimPathSet()) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_scope", "current changes include a path outside the signed reconciliation scope")
+	}
+}
+
+func w001PostclaimPathSet() map[string]bool {
+	authorized := make(map[string]bool, len(w001PostclaimGrantSequences["grant.authorizedPaths"]))
+	for _, path := range w001PostclaimGrantSequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return authorized
+}
+
+func checkW001PostclaimReviewTag(root, expectedFeatureHead string, findings *[]Finding) (string, bool) {
+	ref := "refs/tags/" + w001PostclaimReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || !sha1Pattern.MatchString(strings.TrimSpace(string(objectID))) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag", "postclaim CI requires the signed immutable review tag")
+		return "", false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", strings.TrimSpace(string(objectID)))
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag", "postclaim review tag cannot be verified with the pinned key")
+		return "", false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001PostclaimReviewTag, w001PostclaimReviewTagMessage)
+	if err != nil {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag", "postclaim review tag must be an exact pinned-signer tree attestation")
+		return "", false
+	}
+	if expectedFeatureHead != "" && expectedFeatureHead != target {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag_target", "postclaim review tag must target the immutable feature head")
+		return "", false
+	}
+	if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001PostclaimBase, target); err != nil || target == w001PostclaimBase {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag_target", "postclaim tag target must preserve nonempty reconciliation history")
+		return "", false
+	}
+	return target, true
+}
+
+func w001PostclaimGitHubCheckout(root, head, branch string, findings *[]Finding) (string, bool, bool) {
+	if os.Getenv("CI") != "true" || os.Getenv("GITHUB_ACTIONS") != "true" || os.Getenv("RUNNER_ENVIRONMENT") != "github-hosted" ||
+		os.Getenv("GITHUB_REPOSITORY") != planningGrantRepository || os.Getenv("GITHUB_WORKFLOW") != planningGrantWorkflow ||
+		os.Getenv("GITHUB_JOB") != planningGrantWorkflowJob || os.Getenv("GITHUB_SHA") != head ||
+		!samePlanningGrantRepositoryRoot(root, os.Getenv("GITHUB_WORKSPACE")) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_runner", "postclaim GitHub checkout lacks canonical runner identity")
+		return "", false, false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ID")); !ok {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_runner", "postclaim GitHub run ID is invalid")
+		return "", false, false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ATTEMPT")); !ok {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_runner", "postclaim GitHub run attempt is invalid")
+		return "", false, false
+	}
+	workflowRef := os.Getenv("GITHUB_WORKFLOW_REF")
+	workflowPrefix := planningGrantRepository + "/" + planningGrantWorkflowPath + "@"
+	workflow, err := readRepoFile(root, planningGrantWorkflowPath)
+	if err != nil || fileSHA256(workflow) != canonicalFoundationWorkflowSHA256 || !strings.HasPrefix(workflowRef, workflowPrefix) {
+		addFinding(findings, planningGrantWorkflowPath, "public.w001_postclaim_workflow", "postclaim CI requires the pinned protected workflow")
+		return "", false, false
+	}
+	event, ok := readPlanningGrantGitHubEvent(os.Getenv("GITHUB_EVENT_PATH"))
+	if !ok || event.Repository.FullName != planningGrantRepository {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_event", "postclaim CI event identity is invalid")
+		return "", false, false
+	}
+	switch os.Getenv("GITHUB_EVENT_NAME") {
+	case "pull_request":
+		ref := os.Getenv("GITHUB_REF")
+		if branch != "" || !validPlanningGrantPullRequestRef(ref) || os.Getenv("GITHUB_HEAD_REF") != w001PostclaimBranch ||
+			os.Getenv("GITHUB_BASE_REF") != "main" || event.PullRequest == nil || event.PullRequest.Head.Ref != w001PostclaimBranch ||
+			event.PullRequest.Base.Ref != "main" || event.PullRequest.Base.SHA != w001PostclaimBase ||
+			!sha1Pattern.MatchString(event.PullRequest.Head.SHA) || !validAdvisoryPullRequestMergeSHA(event.PullRequest.MergeCommitSHA) {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_event", "pull-request event does not bind the signed postclaim branch and base")
+			return "", false, false
+		}
+		workflowSuffix := strings.TrimPrefix(workflowRef, workflowPrefix)
+		if workflowSuffix != ref && workflowSuffix != "refs/heads/main" {
+			addFinding(findings, planningGrantWorkflowPath, "public.w001_postclaim_workflow", "pull-request workflow ref is not canonical")
+			return "", false, false
+		}
+		parents, err := planningGrantCommitParents(root, head)
+		if err != nil || len(parents) != 2 || parents[0] != w001PostclaimBase || parents[1] != event.PullRequest.Head.SHA {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_pr_topology", "pull-request checkout must be the exact two-parent synthetic merge")
+			return "", false, false
+		}
+		mergeTree, mergeErr := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, featureErr := planningGrantGitOutput(root, "rev-parse", "--verify", event.PullRequest.Head.SHA+"^{tree}")
+		if mergeErr != nil || featureErr != nil || strings.TrimSpace(string(mergeTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_pr_tree", "pull-request synthetic merge tree must equal the reviewed feature tree")
+			return "", false, false
+		}
+		return event.PullRequest.Head.SHA, true, false
+	case "push":
+		if branch != "" && branch != "main" || os.Getenv("GITHUB_REF") != "refs/heads/main" || os.Getenv("GITHUB_REF_PROTECTED") != "true" ||
+			os.Getenv("GITHUB_HEAD_REF") != "" || os.Getenv("GITHUB_BASE_REF") != "" || workflowRef != workflowPrefix+"refs/heads/main" ||
+			event.Ref != "refs/heads/main" || event.Before != w001PostclaimBase || event.After != head || event.HeadCommit == nil || event.HeadCommit.ID != head || event.PullRequest != nil {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_event", "protected-main event does not bind the signed reconciliation base and squash")
+			return "", false, false
+		}
+		return head, true, true
+	default:
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_event", "unsupported GitHub event for postclaim reconciliation")
+		return "", false, false
+	}
+}
+
 func checkW001BootstrapGrantGitDiff(root string, findings *[]Finding) {
 	topLevel, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
 	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(topLevel))) {
 		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_git", "Git metadata must resolve to the audited repository root")
+		return
+	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimGrantPath))); err == nil {
+		checkW001PostclaimGrantGitDiff(root, findings)
+		return
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_state", "postclaim reconciliation Git state cannot be established")
 		return
 	}
 	base, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001BootstrapBase+"^{commit}")

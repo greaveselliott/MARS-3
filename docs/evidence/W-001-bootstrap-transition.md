@@ -349,17 +349,53 @@ followed that failed admission.
 
 The bounded identity-only successor uses
 `mars3/w001-bootstrap-helper-v9` with exact tagger
-`MARS-3 Release Manager <release-manager@example.com>`. Its exact commit, tree,
-public run, and independent dispositions remain pending until the new immutable
-subject is published and reviewed. The v7 and v8 tags remain immutable. No
-claim is authorized by this correction or dry run.
+`MARS-3 Release Manager <release-manager@example.com>`. Its reviewed commit is
+`663d19bf190f9e3bd27edc96ee08acaa6778c853`, tree
+`bbfa7f59f7bd29c1a0546ffcb77dd8fa4982ef6d`, and tag object
+`6409b5daecb472b415dec60b96b12bfffa3a4cd0`. Public PR run `33005091777`
+passed, QA and Security accepted that exact subject, and PR #6 squash-merged it
+as `adfd64feb565fb703a3568122cc032d4d1a450f5`. Protected-main run
+`33006386000` passed with exact reviewed-tree equality. The v7 and v8 tags
+remain immutable.
 
-## Pending receipt
+## Canonical claim receipt
 
-No claim receipt exists yet. After the authorized effect, append only the
-public-safe helper receipt, the independently read-back postimage hashes, and
-the opaque Beads trace/comment reference. Do not include local paths, raw
-database content, terminal recordings, credentials, or provider state.
+The human authority issued a canonical one-hour execution authorization under
+namespace `mars3-w001-bootstrap-execution`, with payload SHA-256
+`2a2428537a5e42ed6f69afaa42771b9b404705e5593b554129c6ce45f5aec297`
+and detached-signature SHA-256
+`d7bc5a1c824bde6ee72d755660afccaad569840b2db29971bf3b8b087540ce5c`.
+It bound the accepted main commit and tree, PR #6, protected-main run
+`33006386000`, both exact accepted reviewer dispositions, patched binary
+`949e1d535e19ecb39e974b90b7321ef1f7f7d6b77c3958d72edb07e78d9def5a`,
+the expected preimage, and opaque workspace-instance digest
+`4717a2c2b92ab1c0196ed119d7ec760f6c2f9f40ddc52372536e436d7467ee85`.
+
+The signed helper reran all five Docker/Dolt conformance cases, verified the
+disposable embedded claim, reloaded the exact signed authorization, rechecked
+accepted `main`, the direct embedded store, and the canonical preimage, then
+executed one atomic claim. The full effect receipt remains outside Git; the
+public repository binds it without publishing its replay reference or raw
+payload:
+
+- Receipt SHA-256: `04cef4e421a34e0908d392fc794181db3ddb754a134e34599fa41a520c78d126`.
+- Attempt: `w001-bootstrap-3135f1d1-b0d4-4956-9fc9-1852310bfd77`.
+- Bead and transition: `M3-W001`, `backlog` to `in-progress`.
+- Accepted helper base: `37b55b912b20715349bc50e0524c85d4b22f1772`.
+- Patched binary SHA-256:
+  `949e1d535e19ecb39e974b90b7321ef1f7f7d6b77c3958d72edb07e78d9def5a`.
+- Result: `canonical-claim-verified`; no live lease was asserted.
+
+Independent readback bound the predecessor Dolt commit
+`mm6m0b4655k5gpt5eren5cfkgvjtabsm` and new canonical commit
+`67hmen0cmq0he08n7ujlqpcsmmi94fhb`. W-001 has native status
+`in_progress`, typed lifecycle `in-progress`, issue mutation sequence `1`,
+dependency-graph revision `1`, metadata SHA-256
+`3a0bbed5ca93acf77d04eedfad6bcaa16a9701f3e6da3f8669eb9928f6d09139`,
+and labels SHA-256
+`3e4e77e20ee7a46dd77c4a9884dee51aa9f0fa9f2445099a0cb457d72cb83bbb`.
+P-001 remained `open/backlog`. No lease, implementation, other-Bead mutation,
+credential, raw payload, or production effect occurred.
 
 ## Superseded v1 dry-run checkpoint
 

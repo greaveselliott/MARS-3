@@ -168,6 +168,178 @@ func TestW001ExecutionAuthorizationIdentityIncludesSignedBytes(t *testing.T) {
 	}
 }
 
+func TestW001PostclaimGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001PostclaimGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 postclaim reconciliation grant was rejected: %v", findings)
+	}
+}
+
+func TestW001PostclaimGrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(w001PostclaimGrantPath)
+	signature := read(w001PostclaimGrantSignature)
+	publicKey := read(wave1PlanningGrantKey)
+	materials := map[string][]byte{
+		w001BootstrapGrantPath:                        read(w001BootstrapGrantPath),
+		w001BootstrapGrantSignature:                   read(w001BootstrapGrantSignature),
+		".harness/manifest.yaml":                      read(".harness/manifest.yaml"),
+		canonicalActivePlan:                           read(canonicalActivePlan),
+		"docs/evidence/W-001-bootstrap-transition.md": read("docs/evidence/W-001-bootstrap-transition.md"),
+	}
+
+	for _, testCase := range []struct {
+		name string
+		old  string
+		new  string
+		code string
+	}{
+		{name: "claim", old: "claimed: true", new: "claimed: false", code: "public.w001_postclaim_value"},
+		{name: "lease", old: "implementationAllowed: false", new: "implementationAllowed: true", code: "public.w001_postclaim_value"},
+		{name: "scope", old: "    - internal/doctrine/grant_test.go", new: "    - internal/authority/escape.go", code: "public.w001_postclaim_sequence"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			root := writeW001PostclaimGrantFixture(t, bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1), signature, publicKey, materials)
+			var findings []Finding
+			checkW001PostclaimGrant(root, &findings)
+			if !findingCodePresent(findings, testCase.code) || !findingCodePresent(findings, "public.w001_postclaim_signature") {
+				t.Fatalf("tampered postclaim grant was not rejected by contract and signature: %v", findings)
+			}
+		})
+	}
+
+	t.Run("evidence postimage", func(t *testing.T) {
+		tampered := make(map[string][]byte, len(materials))
+		for path, data := range materials {
+			tampered[path] = append([]byte(nil), data...)
+		}
+		const evidence = "docs/evidence/W-001-bootstrap-transition.md"
+		tampered[evidence] = append(tampered[evidence], []byte("\nunauthorized receipt drift\n")...)
+		root := writeW001PostclaimGrantFixture(t, grant, signature, publicKey, tampered)
+		var findings []Finding
+		checkW001PostclaimGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_postimage") {
+			t.Fatalf("tampered evidence postimage was accepted: %v", findings)
+		}
+	})
+
+	t.Run("duplicate receipt fence", func(t *testing.T) {
+		tampered := make(map[string][]byte, len(materials))
+		for path, data := range materials {
+			tampered[path] = append([]byte(nil), data...)
+		}
+		const evidence = "docs/evidence/W-001-bootstrap-transition.md"
+		const receipt = "- Receipt SHA-256: `04cef4e421a34e0908d392fc794181db3ddb754a134e34599fa41a520c78d126`.\n"
+		tampered[evidence] = bytes.Replace(tampered[evidence], []byte(receipt), []byte(receipt+receipt), 1)
+		root := writeW001PostclaimGrantFixture(t, grant, signature, publicKey, tampered)
+		var findings []Finding
+		checkW001PostclaimGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_receipt") {
+			t.Fatalf("duplicated claim receipt was accepted: %v", findings)
+		}
+	})
+}
+
+func writeW001PostclaimGrantFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
+	t.Helper()
+	root := t.TempDir()
+	writePlanningGrantTestFile(t, root, w001PostclaimGrantPath, grant)
+	writePlanningGrantTestFile(t, root, w001PostclaimGrantSignature, signature)
+	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+	for path, data := range materials {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	return root
+}
+
+func TestW001PostclaimGitDiffIsFenced(t *testing.T) {
+	t.Run("exact dirty reconciliation passes", func(t *testing.T) {
+		root := writeW001PostclaimGitFixture(t)
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if len(findings) != 0 {
+			t.Fatalf("authorized postclaim working tree was rejected: %v", findings)
+		}
+	})
+
+	t.Run("wrong branch fails", func(t *testing.T) {
+		root := writeW001PostclaimGitFixture(t)
+		runPlanningGrantTestGit(t, root, "branch", "-m", "codex/postclaim-copy")
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_branch") {
+			t.Fatalf("wrong postclaim branch was accepted: %v", findings)
+		}
+	})
+
+	t.Run("unauthorized live path fails", func(t *testing.T) {
+		root := writeW001PostclaimGitFixture(t)
+		writePlanningGrantTestFile(t, root, "internal/authority/escape.go", []byte("package authority\n"))
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_scope") {
+			t.Fatalf("unauthorized postclaim path was accepted: %v", findings)
+		}
+	})
+
+	t.Run("unsigned authorized commit fails", func(t *testing.T) {
+		root := writeW001PostclaimGitFixture(t)
+		commitPlanningGrantTestPaths(t, root, "unsigned postclaim reconciliation", w001PostclaimGrantPath)
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_commit_signature") {
+			t.Fatalf("unsigned postclaim commit was accepted: %v", findings)
+		}
+	})
+
+	t.Run("transient unauthorized commit remains visible", func(t *testing.T) {
+		root := writeW001PostclaimGitFixture(t)
+		const unauthorized = "internal/authority/escape.go"
+		writePlanningGrantTestFile(t, root, unauthorized, []byte("package authority\n"))
+		commitPlanningGrantTestPaths(t, root, "add transient postclaim escape", unauthorized)
+		if err := os.Remove(filepath.Join(root, filepath.FromSlash(unauthorized))); err != nil {
+			t.Fatal(err)
+		}
+		commitPlanningGrantTestPaths(t, root, "delete transient postclaim escape", unauthorized)
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if !findingCodePresent(findings, "public.w001_postclaim_scope") {
+			t.Fatalf("transient unauthorized postclaim path was accepted: %v", findings)
+		}
+	})
+}
+
+func writeW001PostclaimGitFixture(t *testing.T) string {
+	t.Helper()
+	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	disablePlanningGrantTestGitMaintenance(t, root)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimBase)
+	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
+	for _, path := range w001PostclaimGrantSequences["grant.authorizedPaths"] {
+		data, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	return root
+}
+
 func scalarPathFromGrant(t *testing.T, grant []byte, key string) string {
 	t.Helper()
 	prefix := "  " + key + ": "
@@ -1240,7 +1412,7 @@ func writePlanningGrantCurrentFiles(t *testing.T, root string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	plan, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(canonicalActivePlan)))
+	plan, err := planningGrantGitOutput(source, "show", wave1V3AddendumBase+":"+canonicalActivePlan)
 	if err != nil {
 		t.Fatal(err)
 	}

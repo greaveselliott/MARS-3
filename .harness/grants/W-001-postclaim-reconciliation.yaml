@@ -1,0 +1,122 @@
+schemaVersion: 1
+kind: MARS3W001PostclaimReconciliationGrant
+
+grant:
+  id: W-001-postclaim-reconciliation
+  classification: PUBLIC
+  issuedAt: 2026-08-26T20:33:58Z
+  expiresAt: 2026-08-28T20:33:58Z
+  repository: greaveselliott/MARS-3
+  baseCommit: adfd64feb565fb703a3568122cc032d4d1a450f5
+  baseTree: bbfa7f59f7bd29c1a0546ffcb77dd8fa4982ef6d
+  workingBranch: codex/w-001-postclaim-reconciliation
+  reviewTag: mars3/w001-postclaim-reconciliation-v1
+  reviewTagMessage: MARS-3 W-001 postclaim reconciliation tree attestation v1
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  purpose: reconcile the verified canonical W-001 claim into Git without a lease or implementation authority
+  bead: M3-W001
+  displayId: W-001
+  priorGrant: W-001-bootstrap
+  priorGrantSHA256: 37b4b0df773fa6bace2a06af34ff546e12c9e2f42eb8bb5865f1b9405727e34d
+  priorGrantSignatureSHA256: eeba6098de123f4d9d47c33d4349015775591511784d6c29b709ed1d45927e15
+  autonomousMutation: false
+  liveLeaseAsserted: false
+  implementationAllowed: false
+  allowedEffects:
+    - create-and-verify-this-signed-postclaim-grant
+    - edit-the-exact-authorized-Git-paths
+    - bind-the-exact-canonical-claim-receipt-digest-and-bounded-public-summary
+    - reconcile-the-active-plan-to-delivery-and-W-001-in-progress
+    - reconcile-the-manifest-to-claimed-in-progress-delivery
+    - create-pinned-signer-commits-and-one-signed-review-tag
+    - push-one-review-branch-and-tag-and-open-one-ready-PR
+    - run-public-gates-and-obtain-independent-QA-and-Security-review
+    - squash-merge-promptly-with-reviewed-tree-equality
+  authorizedPaths:
+    - .harness/grants/W-001-postclaim-reconciliation.yaml
+    - .harness/grants/W-001-postclaim-reconciliation.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-bootstrap-transition.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - canonical-Beads-state-remains-the-work-authority
+    - claim-receipt-binds-the-signed-execution-authorization-and-accepted-helper
+    - plan-and-manifest-postimages-exactly-match-the-signed-digests
+    - every-commit-and-current-change-stays-inside-the-signed-path-set
+    - every-feature-commit-and-review-tag-use-the-pinned-signer
+    - reviewed-feature-tree-equals-the-protected-main-squash-tree
+    - no-live-lease-or-implementation-authority-is-created
+  prohibitedEffects:
+    - mutate-any-Bead-Dolt-row-dependency-label-comment-or-history
+    - issue-assert-renew-release-or-revoke-a-live-lease
+    - edit-gateway-runtime-platform-or-product-implementation
+    - change-feature-contract-product-decision-goal-or-scenario-schedule
+    - move-delete-or-reuse-any-existing-review-tag
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+    - credentials-provider-session-customer-data-or-raw-payloads
+
+claim:
+  attemptId: w001-bootstrap-3135f1d1-b0d4-4956-9fc9-1852310bfd77
+  replayReferenceSHA256: 321df42aa6cd67c3ae42b687b16927d81fc19b42e124819bd266b84b22c2d1a0
+  executionAuthorizationPayloadSHA256: 2a2428537a5e42ed6f69afaa42771b9b404705e5593b554129c6ce45f5aec297
+  executionAuthorizationSignatureSHA256: d7bc5a1c824bde6ee72d755660afccaad569840b2db29971bf3b8b087540ce5c
+  receiptSHA256: 04cef4e421a34e0908d392fc794181db3ddb754a134e34599fa41a520c78d126
+  previousDoltCommit: mm6m0b4655k5gpt5eren5cfkgvjtabsm
+  doltCommit: 67hmen0cmq0he08n7ujlqpcsmmi94fhb
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  claimed: true
+  updatedAt: 2026-08-26T20:23:37Z
+  metadataSHA256: 3a0bbed5ca93acf77d04eedfad6bcaa16a9701f3e6da3f8669eb9928f6d09139
+  labelsSHA256: 3e4e77e20ee7a46dd77c4a9884dee51aa9f0fa9f2445099a0cb457d72cb83bbb
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseAsserted: false
+
+publication:
+  helperFeatureCommit: 663d19bf190f9e3bd27edc96ee08acaa6778c853
+  helperFeatureTree: bbfa7f59f7bd29c1a0546ffcb77dd8fa4982ef6d
+  helperReviewTag: mars3/w001-bootstrap-helper-v9
+  helperReviewTagObject: 6409b5daecb472b415dec60b96b12bfffa3a4cd0
+  helperPullRequest: 6
+  helperPullRequestRun: 33005091777
+  mergedCommit: adfd64feb565fb703a3568122cc032d4d1a450f5
+  mergedTree: bbfa7f59f7bd29c1a0546ffcb77dd8fa4982ef6d
+  protectedMainRun: 33006386000
+  qaReviewedCommit: 663d19bf190f9e3bd27edc96ee08acaa6778c853
+  qaDisposition: accepted
+  securityReviewedCommit: 663d19bf190f9e3bd27edc96ee08acaa6778c853
+  securityDisposition: accepted
+
+postimage:
+  manifestSHA256: ee37f6262e714aa1f853fe7b81ce9b50a1d299482dde905262e80cbb133d13e6
+  activePlanSHA256: d5ac48639cd8bd98ce57e1f0f91ddd4c358498eddb45c8255c0ca67ab56abbbc
+  evidenceSHA256: 93dd425ef42e6c929a97d20e08b9d75c339b45303975162cc863dad3764dc1a0
+  planPhase: delivery
+  currentBeadState: in-progress
+  currentBeadClaimed: true
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-postclaim-reconciliation
+  detachedSignature: W-001-postclaim-reconciliation.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
