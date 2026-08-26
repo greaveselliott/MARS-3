@@ -46,12 +46,14 @@
 
 | Scenario | State | Verification owner | Required evidence |
 | --- | --- | --- | --- |
-| F-001-S1 | failing | QA | doctrine/plan checks and authority inspection |
-| F-001-S2 | failing | QA | offline provenance and refresh-scope tests |
-| F-001-S3 | failing | Security | manifest/trust and mutation-denial tests |
-| F-001-S4 | failing | Security | public-check, secret scan, source tests, vet, diff check |
+| F-001-S1 | passing | QA | doctrine/plan checks and authority inspection |
+| F-001-S2 | passing | QA | offline provenance and refresh-scope tests |
+| F-001-S3 | passing | Security | manifest/trust and mutation-denial tests |
+| F-001-S4 | passing | Security | public-check, secret scan, source tests, vet, diff check |
 
-States remain `failing` until evidence from the reviewed commit is recorded.
+`passing` records deterministic candidate evidence in H-001-E1. It does not
+mean accepted or done: release readiness remains blocked until QA and Security
+accept the same immutable containing commit and Beads records reconciliation.
 
 ### F-001-S1 — One durable delivery route
 

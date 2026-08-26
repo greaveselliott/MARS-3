@@ -48,7 +48,7 @@ accepted safely without all four.
 
 | Wave | Bead | Owner | Depends on | State | Exit evidence |
 | --- | --- | --- | --- | --- | --- |
-| 0 | H-001 Doctrine foundation | Foundation Maintainer | signed genesis | in-progress | public-safe harness, provenance, BDD, plan, validation CLI |
+| 0 | H-001 Doctrine foundation | Foundation Maintainer | signed genesis | in-review | public-safe harness, provenance, BDD, plan, validation CLI |
 | 1 | W-001 Work Authority | Work Authority Engineer | H-001 | backlog | Beads gateway, CAS claims, PostgreSQL lease epochs, direct access denied |
 | 1 | P-001 Local substrate | Platform Engineer | H-001 | backlog | Lima/k3s, OIDC, RLS, Temporal, object storage |
 | 2 | T-001 Trace spine | Trace Engineer | W-001, P-001 | backlog | audit ledger, OTel/Tempo, effect intents and receipts |
