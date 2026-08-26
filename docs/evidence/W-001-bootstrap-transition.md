@@ -1,6 +1,6 @@
 # W-001 bootstrap claim transition evidence
 
-**Status:** Successor v5 security hardening pending immutable review; no canonical claim has executed
+**Status:** Successor v5 disposable conformance passed; immutable review pending; no canonical claim has executed
 **Classification:** PUBLIC
 **Goal:** G-001
 **Decision:** PD-002
@@ -221,7 +221,39 @@ The foundation-owned fingerprint is
 continues to reject a symlinked workspace endpoint and symlinked database
 components, but hashes the resolved ancestor path so the disposable copy and
 canonical workspace use the same fail-closed instance algorithm. One bounded
-retry is permitted; an equivalent recurrence blocks this attempt.
+retry was permitted; an equivalent recurrence would have blocked this attempt.
+
+## Successor v5 disposable conformance
+
+The signed correction checkpoint was
+`e9b73b24461602a20085a9f04003037af7de4c65`, tree
+`e83f544b2841aec73cade86bab225a5518dc4256`. From that clean checkpoint,
+the one bounded retry rebuilt the pinned source and patch, ran all four
+Docker/Dolt atomicity cases without a skip, and executed the patched CLI claim
+against a disposable copy of the canonical `embedded` workspace. The
+disposable postimage and new Dolt version were verified. The public-safe dry
+run receipt bound:
+
+- patched binary SHA-256
+  `8ba8ba8ba97e83582bc552af367e053106a39c20a4c8e0fe8a2580cd17d70475`;
+- helper library SHA-256
+  `16c34ff26fb9b4eac10a455fb3c67856801f78d49f3a789a3dd6f6a22d1c1885`;
+- opaque canonical-workspace instance SHA-256
+  `bc74cc2c9592d027a7d54a19f26c69111f81b023d5c2a6d68d43e7e21095fb8f`;
+- backend `embedded`, `disposableVerified: true`,
+  `canonicalUnchangedBeforeEffect: true`, `mode: dry-run`, result
+  `conformance-passed-no-canonical-mutation`, native status `open`, lifecycle
+  `backlog`, and `liveLeaseAsserted: false`.
+
+An independent post-run read normalized only public-safe ID, status, assignee,
+creation/update timestamps, sorted labels, lifecycle, nullable WorkVersion,
+and dependency ID/status/lifecycle/type. W-001 remained `open/backlog`, with
+`workVersion: null` and only closed/done H-001; its normalized summary SHA-256
+was `910e3d0b9ba5b3c36755781daffcfbc146341f06c46fcefcb7d714b6310e237f`.
+P-001 remained `open/backlog`, with `workVersion: null` and closed/done H-001
+plus open/backlog W-001; its normalized summary SHA-256 was
+`c1d3774bc61b39417c68a90714c0811c23ae322d49abfbe166910c8537ba965f`.
+No claim, lease, plan transition, or other canonical mutation occurred.
 
 ## Pending receipt
 
