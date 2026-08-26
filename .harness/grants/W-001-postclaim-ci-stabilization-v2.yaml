@@ -1,0 +1,76 @@
+schemaVersion: 1
+kind: MARS3W001PostclaimCIStabilizationAddendum
+
+addendum:
+  id: W-001-postclaim-ci-stabilization-v2
+  classification: PUBLIC
+  issuedAt: 2026-08-26T20:53:07Z
+  expiresAt: 2026-08-28T20:53:07Z
+  repository: greaveselliott/MARS-3
+  baseCommit: eda666569de379543a170119ccb7c560478c7346
+  baseTree: b8de9ac4cf26b4561ce26abcf729529f65bd9b9f
+  workingBranch: codex/w-001-postclaim-reconciliation
+  reviewTag: mars3/w001-postclaim-reconciliation-v2
+  reviewTagMessage: MARS-3 W-001 postclaim reconciliation tree attestation v2
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  purpose: isolate repository-local Git fixtures from inherited GitHub runner identity without weakening real checkout admission
+  priorGrant: W-001-postclaim-reconciliation
+  priorGrantSHA256: 7fb4b9e6aa65661bef80887b95225973e556fe8dbc4cf77fb66aaa0f10da5dfe
+  priorGrantSignatureSHA256: 3afc9d46c8c9ea436246d3bd33c2228e0afc1c1c27ceb6ff44114c761e029edd
+  priorReviewTag: mars3/w001-postclaim-reconciliation-v1
+  priorReviewTagObject: 7492f63fd88567a284eff43c670098295824aaf8
+  priorReviewTagTarget: eda666569de379543a170119ccb7c560478c7346
+  failedRun: 33012491197
+  failedJob: 98322099024
+  failureFingerprint: go-test-fixtures-inherited-github-actions-environment
+  allowedEffects:
+    - create-and-verify-this-signed-CI-stabilization-addendum
+    - clear-GitHub-runner-environment-only-inside-repository-local-Git-fixtures
+    - add-the-exact-regression-for-the-preserved-CI-failure
+    - preserve-production-GitHub-checkout-identity-enforcement
+    - create-pinned-signer-correction-commits-and-one-signed-v2-review-tag
+    - push-the-existing-review-branch-and-v2-tag-and-rerun-the-ready-PR
+    - obtain-independent-QA-and-Security-review-before-squash-merge
+  authorizedPaths:
+    - .harness/grants/W-001-postclaim-ci-stabilization-v2.yaml
+    - .harness/grants/W-001-postclaim-ci-stabilization-v2.yaml.sig
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v1-review-tag-object-and-target-remain-immutable
+    - v1-failed-run-remains-public-and-unchanged
+    - fixture-environment-isolation-is-test-only
+    - real-GitHub-checkout-admission-still-requires-canonical-runner-identity
+    - every-correction-commit-and-current-change-stays-inside-the-signed-path-set
+    - every-correction-commit-and-v2-review-tag-use-the-pinned-signer
+    - reviewed-v2-tree-equals-the-protected-main-squash-tree
+    - no-Beads-lease-implementation-production-or-policy-effect-is-created
+  prohibitedEffects:
+    - move-delete-or-reuse-the-v1-review-tag
+    - edit-plan-manifest-evidence-feature-or-product-contracts
+    - mutate-any-Bead-Dolt-row-dependency-label-comment-or-history
+    - issue-assert-renew-release-or-revoke-a-live-lease
+    - edit-gateway-runtime-platform-or-product-implementation
+    - weaken-production-GitHub-runner-event-topology-workflow-or-tag-validation
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+    - credentials-provider-session-customer-data-or-raw-payloads
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-postclaim-ci-stabilization-v2
+  detachedSignature: W-001-postclaim-ci-stabilization-v2.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

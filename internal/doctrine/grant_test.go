@@ -262,7 +262,67 @@ func writeW001PostclaimGrantFixture(t *testing.T, grant, signature, publicKey []
 	return root
 }
 
+func TestW001PostclaimCIFixAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001PostclaimCIFixAddendum(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed postclaim CI-stabilization addendum was rejected: %v", findings)
+	}
+}
+
+func TestW001PostclaimCIFixRejectsTampering(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	addendum := read(w001PostclaimCIFixPath)
+	signature := read(w001PostclaimCIFixSignature)
+	publicKey := read(wave1PlanningGrantKey)
+	priorGrant := read(w001PostclaimGrantPath)
+	priorSignature := read(w001PostclaimGrantSignature)
+
+	for _, testCase := range []struct {
+		name string
+		old  string
+		new  string
+	}{
+		{name: "base", old: w001PostclaimCIFixBase, new: strings.Repeat("0", 40)},
+		{name: "failure", old: "go-test-fixtures-inherited-github-actions-environment", new: "unrelated-failure"},
+		{name: "scope", old: "    - internal/doctrine/grant_test.go", new: "    - internal/authority/escape.go"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			root := t.TempDir()
+			writePlanningGrantTestFile(t, root, w001PostclaimCIFixPath, bytes.Replace(addendum, []byte(testCase.old), []byte(testCase.new), 1))
+			writePlanningGrantTestFile(t, root, w001PostclaimCIFixSignature, signature)
+			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+			writePlanningGrantTestFile(t, root, w001PostclaimGrantPath, priorGrant)
+			writePlanningGrantTestFile(t, root, w001PostclaimGrantSignature, priorSignature)
+			var findings []Finding
+			checkW001PostclaimCIFixAddendum(root, &findings)
+			if !findingCodePresent(findings, "public.w001_postclaim_ci_signature") {
+				t.Fatalf("tampered CI-stabilization addendum retained a valid signature: %v", findings)
+			}
+		})
+	}
+}
+
 func TestW001PostclaimGitDiffIsFenced(t *testing.T) {
+	t.Run("repository fixture ignores inherited GitHub runner identity", func(t *testing.T) {
+		t.Setenv("GITHUB_ACTIONS", "true")
+		root := writeW001PostclaimGitFixture(t)
+		var findings []Finding
+		checkW001PostclaimGrantGitDiff(root, &findings)
+		if len(findings) != 0 {
+			t.Fatalf("fixture-local Git reconciliation inherited ambient runner identity: %v", findings)
+		}
+	})
+
 	t.Run("exact dirty reconciliation passes", func(t *testing.T) {
 		root := writeW001PostclaimGitFixture(t)
 		var findings []Finding
@@ -294,7 +354,7 @@ func TestW001PostclaimGitDiffIsFenced(t *testing.T) {
 
 	t.Run("unsigned authorized commit fails", func(t *testing.T) {
 		root := writeW001PostclaimGitFixture(t)
-		commitPlanningGrantTestPaths(t, root, "unsigned postclaim reconciliation", w001PostclaimGrantPath)
+		commitPlanningGrantTestPaths(t, root, "unsigned postclaim reconciliation", w001PostclaimCIFixPath)
 		var findings []Finding
 		checkW001PostclaimGrantGitDiff(root, &findings)
 		if !findingCodePresent(findings, "public.w001_postclaim_commit_signature") {
@@ -321,6 +381,7 @@ func TestW001PostclaimGitDiffIsFenced(t *testing.T) {
 
 func writeW001PostclaimGitFixture(t *testing.T) string {
 	t.Helper()
+	t.Setenv("GITHUB_ACTIONS", "")
 	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
 	if err != nil {
 		t.Fatal(err)
@@ -328,9 +389,10 @@ func writeW001PostclaimGitFixture(t *testing.T) string {
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	disablePlanningGrantTestGitMaintenance(t, root)
-	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimBase)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimCIFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
-	for _, path := range w001PostclaimGrantSequences["grant.authorizedPaths"] {
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+w001PostclaimReviewTag+":refs/tags/"+w001PostclaimReviewTag)
+	for _, path := range w001PostclaimCIFixSequences["addendum.authorizedPaths"] {
 		data, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(path)))
 		if err != nil {
 			t.Fatal(err)

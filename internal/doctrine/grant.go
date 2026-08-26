@@ -108,6 +108,14 @@ const (
 	w001PostclaimBranch             = "codex/w-001-postclaim-reconciliation"
 	w001PostclaimReviewTag          = "mars3/w001-postclaim-reconciliation-v1"
 	w001PostclaimReviewTagMessage   = "MARS-3 W-001 postclaim reconciliation tree attestation v1"
+	w001PostclaimCIFixPath          = ".harness/grants/W-001-postclaim-ci-stabilization-v2.yaml"
+	w001PostclaimCIFixSignature     = ".harness/grants/W-001-postclaim-ci-stabilization-v2.yaml.sig"
+	w001PostclaimCIFixNamespace     = "mars3-w001-postclaim-ci-stabilization-v2"
+	w001PostclaimCIFixBase          = "eda666569de379543a170119ccb7c560478c7346"
+	w001PostclaimCIFixBaseTree      = "b8de9ac4cf26b4561ce26abcf729529f65bd9b9f"
+	w001PostclaimCIFixReviewTag     = "mars3/w001-postclaim-reconciliation-v2"
+	w001PostclaimCIFixTagMessage    = "MARS-3 W-001 postclaim reconciliation tree attestation v2"
+	w001PostclaimV1TagObject        = "7492f63fd88567a284eff43c670098295824aaf8"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -1214,6 +1222,83 @@ var w001PostclaimGrantSequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001PostclaimCIFixScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001PostclaimCIStabilizationAddendum"},
+	{path: "addendum.id", value: "W-001-postclaim-ci-stabilization-v2"},
+	{path: "addendum.classification", value: "PUBLIC"},
+	{path: "addendum.issuedAt", value: "2026-08-26T20:53:07Z"},
+	{path: "addendum.expiresAt", value: "2026-08-28T20:53:07Z"},
+	{path: "addendum.repository", value: planningGrantRepository},
+	{path: "addendum.baseCommit", value: w001PostclaimCIFixBase},
+	{path: "addendum.baseTree", value: w001PostclaimCIFixBaseTree},
+	{path: "addendum.workingBranch", value: w001PostclaimBranch},
+	{path: "addendum.reviewTag", value: w001PostclaimCIFixReviewTag},
+	{path: "addendum.reviewTagMessage", value: w001PostclaimCIFixTagMessage},
+	{path: "addendum.signerRole", value: "human-bootstrap-authority"},
+	{path: "addendum.coordinator", value: "delivery-orchestrator"},
+	{path: "addendum.failureOwnership", value: "foundation"},
+	{path: "addendum.purpose", value: "isolate repository-local Git fixtures from inherited GitHub runner identity without weakening real checkout admission"},
+	{path: "addendum.priorGrant", value: "W-001-postclaim-reconciliation"},
+	{path: "addendum.priorGrantSHA256", value: "7fb4b9e6aa65661bef80887b95225973e556fe8dbc4cf77fb66aaa0f10da5dfe"},
+	{path: "addendum.priorGrantSignatureSHA256", value: "3afc9d46c8c9ea436246d3bd33c2228e0afc1c1c27ceb6ff44114c761e029edd"},
+	{path: "addendum.priorReviewTag", value: w001PostclaimReviewTag},
+	{path: "addendum.priorReviewTagObject", value: w001PostclaimV1TagObject},
+	{path: "addendum.priorReviewTagTarget", value: w001PostclaimCIFixBase},
+	{path: "addendum.failedRun", value: "33012491197"},
+	{path: "addendum.failedJob", value: "98322099024"},
+	{path: "addendum.failureFingerprint", value: "go-test-fixtures-inherited-github-actions-environment"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001PostclaimCIFixNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-postclaim-ci-stabilization-v2.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001PostclaimCIFixSequences = map[string][]string{
+	"addendum.allowedEffects": {
+		"create-and-verify-this-signed-CI-stabilization-addendum",
+		"clear-GitHub-runner-environment-only-inside-repository-local-Git-fixtures",
+		"add-the-exact-regression-for-the-preserved-CI-failure",
+		"preserve-production-GitHub-checkout-identity-enforcement",
+		"create-pinned-signer-correction-commits-and-one-signed-v2-review-tag",
+		"push-the-existing-review-branch-and-v2-tag-and-rerun-the-ready-PR",
+		"obtain-independent-QA-and-Security-review-before-squash-merge",
+	},
+	"addendum.authorizedPaths": {
+		w001PostclaimCIFixPath,
+		w001PostclaimCIFixSignature,
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"addendum.requiredProperties": {
+		"v1-review-tag-object-and-target-remain-immutable",
+		"v1-failed-run-remains-public-and-unchanged",
+		"fixture-environment-isolation-is-test-only",
+		"real-GitHub-checkout-admission-still-requires-canonical-runner-identity",
+		"every-correction-commit-and-current-change-stays-inside-the-signed-path-set",
+		"every-correction-commit-and-v2-review-tag-use-the-pinned-signer",
+		"reviewed-v2-tree-equals-the-protected-main-squash-tree",
+		"no-Beads-lease-implementation-production-or-policy-effect-is-created",
+	},
+	"addendum.prohibitedEffects": {
+		"move-delete-or-reuse-the-v1-review-tag",
+		"edit-plan-manifest-evidence-feature-or-product-contracts",
+		"mutate-any-Bead-Dolt-row-dependency-label-comment-or-history",
+		"issue-assert-renew-release-or-revoke-a-live-lease",
+		"edit-gateway-runtime-platform-or-product-implementation",
+		"weaken-production-GitHub-runner-event-topology-workflow-or-tag-validation",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+		"credentials-provider-session-customer-data-or-raw-payloads",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -1859,6 +1944,77 @@ func checkW001PostclaimGrant(root string, findings *[]Finding) {
 	if evidenceErr != nil || receiptErr != nil || receiptDigest != scalarValue(document, "claim.receiptSHA256") {
 		addFinding(findings, "docs/evidence/W-001-bootstrap-transition.md", "public.w001_postclaim_receipt", "canonical claim receipt must be bound by one exact public SHA-256 reference")
 	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimCIFixPath))); err == nil {
+		checkW001PostclaimCIFixAddendum(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_state", "postclaim CI-stabilization state cannot be established")
+	}
+}
+
+func checkW001PostclaimCIFixAddendum(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001PostclaimCIFixPath)
+	if err != nil {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_missing", "signed postclaim CI-stabilization addendum is required")
+		return
+	}
+	document := parseStrictGrant(data, w001PostclaimCIFixScalars, w001PostclaimCIFixSequences,
+		[]string{"addendum", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_schema", "%s", message)
+	}
+	for _, expected := range w001PostclaimCIFixScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_value", "%s does not match the signed CI-stabilization contract", expected.path)
+		}
+	}
+	for path, expected := range w001PostclaimCIFixSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_sequence", "%s must equal the exact ordered CI-stabilization contract", path)
+		}
+	}
+	for _, section := range []string{"addendum", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "addendum.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "addendum.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_expiry", "CI-stabilization addendum must use one RFC3339 interval no longer than 72 hours")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001PostclaimCIFixSignature)
+	if signatureErr != nil {
+		addFinding(findings, w001PostclaimCIFixSignature, "public.w001_postclaim_ci_signature_missing", "detached CI-stabilization signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_postclaim_ci_key", "CI stabilization must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001PostclaimCIFixNamespace); err != nil {
+			addFinding(findings, w001PostclaimCIFixSignature, "public.w001_postclaim_ci_signature", "%v", err)
+		}
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001PostclaimGrantPath, scalarValue(document, "addendum.priorGrantSHA256")},
+		{w001PostclaimGrantSignature, scalarValue(document, "addendum.priorGrantSignatureSHA256")},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_postclaim_ci_prior_grant", "prior postclaim grant material must match its exact signed SHA-256")
+		}
+	}
 }
 
 func extractW001ClaimReceiptDigest(evidence []byte) (string, error) {
@@ -2242,6 +2398,13 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 }
 
 func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
+	ciFixActive := false
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimCIFixPath))); err == nil {
+		ciFixActive = true
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_state", "postclaim CI-stabilization Git state cannot be established")
+		return
+	}
 	base, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimBase+"^{commit}")
 	if err != nil || strings.TrimSpace(string(base)) != w001PostclaimBase {
 		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_base", "exact accepted helper squash must resolve locally")
@@ -2251,6 +2414,17 @@ func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
 	if err != nil || strings.TrimSpace(string(baseTree)) != w001PostclaimBaseTree {
 		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_base", "accepted helper squash tree must match the signed base tree")
 		return
+	}
+	if ciFixActive {
+		fixBase, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimCIFixBase+"^{commit}")
+		fixTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimCIFixBase+"^{tree}")
+		if err != nil || treeErr != nil || strings.TrimSpace(string(fixBase)) != w001PostclaimCIFixBase || strings.TrimSpace(string(fixTree)) != w001PostclaimCIFixBaseTree {
+			addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_base", "CI stabilization must descend from the exact preserved failed head and tree")
+			return
+		}
+		if !checkW001PostclaimPriorReviewTag(root, findings) {
+			return
+		}
 	}
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
 	head := strings.TrimSpace(string(headOutput))
@@ -2286,7 +2460,13 @@ func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
 		if mainTreeCheck {
 			expected = ""
 		}
-		target, ok := checkW001PostclaimReviewTag(root, expected, findings)
+		reviewTag := w001PostclaimReviewTag
+		reviewTagMessage := w001PostclaimReviewTagMessage
+		if ciFixActive {
+			reviewTag = w001PostclaimCIFixReviewTag
+			reviewTagMessage = w001PostclaimCIFixTagMessage
+		}
+		target, ok := checkW001PostclaimReviewTag(root, expected, reviewTag, reviewTagMessage, findings)
 		if !ok {
 			return
 		}
@@ -2318,11 +2498,22 @@ func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
 			return
 		}
 		previous := w001PostclaimBase
-		authorized := w001PostclaimPathSet()
+		v1Authorized := w001PostclaimPathSet()
+		fixAuthorized := w001PostclaimCIFixPathSet()
 		for _, commit := range commits {
 			if len(commit.parents) != 1 || commit.parents[0] != previous {
 				addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_topology", "reconciliation feature history must be a contiguous one-parent chain")
 				return
+			}
+			authorized := v1Authorized
+			if ciFixActive {
+				if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", commit.id, w001PostclaimCIFixBase); err != nil {
+					if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001PostclaimCIFixBase, commit.id); err != nil {
+						addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_ancestry", "correction history diverges from the preserved failed head")
+						return
+					}
+					authorized = fixAuthorized
+				}
 			}
 			paths, err := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
 			normalized, normalizeErr := normalizedPlanningGrantGitPaths(paths)
@@ -2350,7 +2541,11 @@ func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
 		return
 	}
 	paths, err := normalizedPlanningGrantGitPaths(tracked, untracked)
-	if err != nil || !planningGrantPathsAllowed(paths, w001PostclaimPathSet()) {
+	currentAuthorized := w001PostclaimPathSet()
+	if ciFixActive {
+		currentAuthorized = w001PostclaimCIFixPathSet()
+	}
+	if err != nil || !planningGrantPathsAllowed(paths, currentAuthorized) {
 		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_scope", "current changes include a path outside the signed reconciliation scope")
 	}
 }
@@ -2363,8 +2558,16 @@ func w001PostclaimPathSet() map[string]bool {
 	return authorized
 }
 
-func checkW001PostclaimReviewTag(root, expectedFeatureHead string, findings *[]Finding) (string, bool) {
-	ref := "refs/tags/" + w001PostclaimReviewTag
+func w001PostclaimCIFixPathSet() map[string]bool {
+	authorized := make(map[string]bool, len(w001PostclaimCIFixSequences["addendum.authorizedPaths"]))
+	for _, path := range w001PostclaimCIFixSequences["addendum.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return authorized
+}
+
+func checkW001PostclaimReviewTag(root, expectedFeatureHead, reviewTag, reviewTagMessage string, findings *[]Finding) (string, bool) {
+	ref := "refs/tags/" + reviewTag
 	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
 	if err != nil || !sha1Pattern.MatchString(strings.TrimSpace(string(objectID))) {
 		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag", "postclaim CI requires the signed immutable review tag")
@@ -2376,7 +2579,7 @@ func checkW001PostclaimReviewTag(root, expectedFeatureHead string, findings *[]F
 		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag", "postclaim review tag cannot be verified with the pinned key")
 		return "", false
 	}
-	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001PostclaimReviewTag, w001PostclaimReviewTagMessage)
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, reviewTag, reviewTagMessage)
 	if err != nil {
 		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag", "postclaim review tag must be an exact pinned-signer tree attestation")
 		return "", false
@@ -2390,6 +2593,27 @@ func checkW001PostclaimReviewTag(root, expectedFeatureHead string, findings *[]F
 		return "", false
 	}
 	return target, true
+}
+
+func checkW001PostclaimPriorReviewTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001PostclaimReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001PostclaimV1TagObject {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_v1_tag", "v1 review tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001PostclaimV1TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_v1_tag", "v1 review tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001PostclaimReviewTag, w001PostclaimReviewTagMessage)
+	if err != nil || target != w001PostclaimCIFixBase {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_v1_tag", "v1 review tag target and signature must remain exact")
+		return false
+	}
+	return true
 }
 
 func w001PostclaimGitHubCheckout(root, head, branch string, findings *[]Finding) (string, bool, bool) {
