@@ -1,0 +1,17 @@
+# FactoryDocSync:
+# docs:
+# - docs/features/F-001-doctrine-foundation.md
+# - docs/design-docs/ADR-004-pr-first-publication.md
+# - docs/code-documentation-map.md
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": ".harness/generated/genesis-effect-chain.json",
+      "source": "immutable bootstrap output from .harness/genesis.yaml and the signed effect receipt; doctrine check verifies but does not regenerate it",
+      "command": "go run ./cmd/mars3 doctrine check --repo ."
+    },
+    {
+      "path": ".harness/generated/mars/source-manifest.json",
+      "source": "a local MARS checkout at f55d129bfc794510ca485bb54fc0a35c7b04a700",
+      "command": "go run ./cmd/mars3 doctrine refresh --repo . --source ../MARS --ref f55d129bfc794510ca485bb54fc0a35c7b04a700 --apply"
+    }
+  ]
+}

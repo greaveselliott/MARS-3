@@ -1,0 +1,40 @@
+# FactoryDocSync:
+# docs:
+# - docs/features/F-001-doctrine-foundation.md
+# - docs/design-docs/ADR-004-pr-first-publication.md
+# - docs/code-documentation-map.md
+name: Bug report
+description: Report reproducible behavior using synthetic, public-safe data.
+title: "bug: "
+labels: [triage]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials, private source, customer data, raw prompts, provider state, private traces, or machine-specific paths.
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed behavior
+      description: Describe the behavior without raw sensitive payloads.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Synthetic reproduction
+      description: Use repository-relative paths and reserved example domains.
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Commit or release
+    validations:
+      required: true
+  - type: checkboxes
+    id: disclosure
+    attributes:
+      label: Public disclosure confirmation
+      options:
+        - label: I verified that this report is safe for immediate public disclosure.
+          required: true

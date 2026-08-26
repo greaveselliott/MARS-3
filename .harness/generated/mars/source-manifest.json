@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "generated": {
+    "source": "local-checkout-only",
+    "command": "go run ./cmd/mars3 doctrine refresh --repo . --source ../MARS --ref f55d129bfc794510ca485bb54fc0a35c7b04a700 --apply"
+  },
+  "upstream": {
+    "repository": "https://github.com/greaveselliott/MARS",
+    "commit": "f55d129bfc794510ca485bb54fc0a35c7b04a700",
+    "license": "Apache-2.0"
+  },
+  "sourceFiles": [
+    {
+      "path": "AGENTS.md",
+      "gitBlob": "cc9dece7266b66d3ae163136c7c7c31115481aa2",
+      "adaptation": "durable repository record, bounded work, evidence, and handoffs -> AGENTS.md and docs/roles/ROLES.md"
+    },
+    {
+      "path": "LICENSE",
+      "gitBlob": "1f7a565fab7b7507e68464305eee73e6908f91f3",
+      "adaptation": "Apache-2.0 attribution -> LICENSE, NOTICE, and THIRD_PARTY_NOTICES"
+    },
+    {
+      "path": "NOTICE",
+      "gitBlob": "aee2de8c658e8a384d96ed97242a1a265a34b81a",
+      "adaptation": "upstream notice attribution -> NOTICE and THIRD_PARTY_NOTICES"
+    },
+    {
+      "path": "docs/design-docs/harness-operating-model.md",
+      "gitBlob": "e54e023ee0ae6cb2b17aeaca3b14f0a961218758",
+      "adaptation": "goal-to-evidence delivery route and truthful lifecycle -> AGENTS.md and the active plan"
+    },
+    {
+      "path": "docs/design-docs/foundation-deployed-harness-architecture.md",
+      "gitBlob": "027f677ba3bc4c3327b19f5dbc9c104cd0afc77d",
+      "adaptation": "foundation versus deployed ownership and generated provenance scope -> docs/design-docs/mars-provenance.md"
+    },
+    {
+      "path": "docs/design-docs/delivery-operating-model.md",
+      "gitBlob": "dcbc923f7f9286d81211ee44e4a2c66be6adfeb6",
+      "adaptation": "walking-skeleton sequencing, bounded work, and prompt publication -> current-operating-plan.md and ADR-004"
+    },
+    {
+      "path": "docs/design-docs/convergence-state-machine.md",
+      "gitBlob": "a185f45960208932c7bbeb40b8160eccd6c3c106",
+      "adaptation": "typed lifecycle, review, run, and release states plus bounded retries -> AGENTS.md and F-001"
+    },
+    {
+      "path": "docs/roles/ROLES.md",
+      "gitBlob": "d65b4dc4b068ee7c5561a021aa82a2d93d34e6b5",
+      "adaptation": "explicit responsibilities, independent review, and handoff ownership -> docs/roles/ROLES.md and .harness/roles"
+    },
+    {
+      "path": "docs/goals/README.md",
+      "gitBlob": "3ba1795b1f0998de2fb6cc56a57783495583d6bf",
+      "adaptation": "measurable active outcomes and priority trade-offs -> docs/goals/active.md"
+    },
+    {
+      "path": "docs/features/README.md",
+      "gitBlob": "34aaa76f85192188fba424d0f647b3a589f61085",
+      "adaptation": "stable BDD scenarios and explicit states -> docs/features/README.md and F-001"
+    },
+    {
+      "path": "docs/exec-plans/README.md",
+      "gitBlob": "90099e42d98629294e4365cfa959f5c380d2fe6e",
+      "adaptation": "one active hypothesis-driven plan -> docs/exec-plans/active/current-operating-plan.md"
+    },
+    {
+      "path": "docs/tickets/README.md",
+      "gitBlob": "c52c63f02d9adc2df21865f587745b2b980e0df5",
+      "adaptation": "bounded work, evidence, handoffs, and typed state records -> Beads authority plus AGENTS.md; Markdown lifecycle excluded"
+    },
+    {
+      "path": "docs/design-docs/documentation-sync-architecture.md",
+      "gitBlob": "4711a8006102c0f69c37590c953a0049ddbb9414",
+      "adaptation": "structural code-document ownership -> .harness/docsync.yaml and FactoryDocSync"
+    },
+    {
+      "path": "docs/design-docs/code-documentation-map.md",
+      "gitBlob": "dd41cdffe4360b0c5460540180d317292081165c",
+      "adaptation": "prefix-scoped required documents -> docs/code-documentation-map.md"
+    },
+    {
+      "path": "docs/design-docs/conversation-as-system-record.md",
+      "gitBlob": "d70f3ea1f8cda9873bd8c05af7fe2c83c6966c02",
+      "adaptation": "durable routing of material chat decisions -> AGENTS.md authority model"
+    },
+    {
+      "path": "docs/design-docs/product-spec-governance.md",
+      "gitBlob": "b6b3aaad84ec2b7b8fcbde08b8471f7ba2d1ce8e",
+      "adaptation": "specification and product-decision ownership -> docs/product-specs and docs/product-decisions"
+    },
+    {
+      "path": "docs/design-docs/dogfood-and-decisions.md",
+      "gitBlob": "76093045582abcb0c7a256bfe9a59b10f01a92be",
+      "adaptation": "independent dogfood and durable decision feedback -> role registry and delivery waves"
+    },
+    {
+      "path": "docs/design-docs/foundation-operating-model.md",
+      "gitBlob": "835e60eb0cf12627de61ff34b6250fcee61a24c2",
+      "adaptation": "foundation-owned doctrine and controlled propagation -> docs/design-docs/mars-provenance.md"
+    },
+    {
+      "path": "docs/design-docs/orchestrated-organization-layer.md",
+      "gitBlob": "3066d1cf36aa01dba2da57dcad5ec22e25fec272",
+      "adaptation": "orchestration as routing infrastructure, not an implementation role -> role registry and active plan"
+    },
+    {
+      "path": "docs/design-docs/guardrails.md",
+      "gitBlob": "bb093d800ef90b53dab0878e2ab7116888fa7ac3",
+      "adaptation": "fail-closed non-negotiable controls -> .harness/guardrails and ADR-003"
+    }
+  ],
+  "generatedScope": [
+    ".harness/generated/mars/source-manifest.json"
+  ],
+  "projectOwnedPaths": [
+    "AGENTS.md",
+    ".harness/manifest.yaml",
+    ".harness/roles/",
+    ".harness/guardrails/",
+    "docs/",
+    "cmd/",
+    "internal/"
+  ],
+  "adaptations": [
+    "Beads and its embedded Dolt engine replace Markdown tickets for mutable work authority",
+    "Git remains the durable authority for product intent, doctrine, code, and reviewed evidence",
+    "pull-request publication is the public default; prompt validated publication remains mandatory",
+    "FactoryDocSync replaces MarsDocSync as a product-neutral structural marker",
+    "agent runtime adapters and model transports replace any single embedded inference lifecycle",
+    "trace-spine and Rule-of-Two controls are original MARS-3 security requirements"
+  ],
+  "sourceOnlyExclusions": [
+    "MARS Go runtime and command-line application",
+    "MARS SQLite queue, dashboard, and inference lifecycle",
+    "MARS model download, provider session, and binary release machinery",
+    "MARS product routes, interface wording, prompts, and application behavior",
+    "MARS GitHub or issue-tracker integration code",
+    "any upstream file not explicitly identified by path and Git blob above"
+  ]
+}

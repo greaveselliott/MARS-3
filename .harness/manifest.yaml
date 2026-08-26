@@ -1,0 +1,217 @@
+schema_version: 1
+project: MARS-3
+visibility: public
+license: Apache-2.0
+default_effective_trust: observer
+autonomous_mutation: disabled
+
+authority:
+  work_definition_system: beads-dolt
+  live_lease_system: postgresql-gateway
+  execution_system: temporal-non-authoritative
+  current_bead: M3-H001
+  durable_product_system: git
+  markdown_ticket_authority: prohibited
+  genesis_is_provenance_only: true
+
+delivery:
+  active_plan: docs/exec-plans/active/current-operating-plan.md
+  feature_root: docs/features
+  decision_root: docs/product-decisions
+  evidence_required: true
+  default_publication: pull-request
+  automatic_retry_limit_per_fingerprint: 1
+
+provenance:
+  mars_repository: https://github.com/greaveselliott/MARS
+  mars_commit: f55d129bfc794510ca485bb54fc0a35c7b04a700
+  mars_license: Apache-2.0
+  generated_manifest: .harness/generated/mars/source-manifest.json
+  refresh_scope:
+    - .harness/generated/mars/source-manifest.json
+
+security:
+  accepted_base_label: public+project-accepted
+  proposed_worktree_label: public+project-proposed
+  external_input_label: external-untrusted
+  rule_of_two: declared
+  trace_spine: declared
+  raw_payload_persistence: prohibited
+  secret_persistence: prohibited
+
+roles:
+  - id: ceo
+    mode: strategy
+    max_trust: contributor
+    effective_trust: observer
+    prompt: .harness/roles/ceo.md
+  - id: coo
+    mode: execution-planning
+    max_trust: contributor
+    effective_trust: observer
+    prompt: .harness/roles/coo.md
+  - id: cto
+    mode: technical-planning
+    max_trust: contributor
+    effective_trust: observer
+    prompt: .harness/roles/cto.md
+  - id: engineer
+    mode: ticket-delivery
+    max_trust: contributor
+    effective_trust: observer
+    prompt: .harness/roles/engineer.md
+  - id: pipeline-fixer
+    mode: pipeline-repair
+    max_trust: contributor
+    effective_trust: observer
+    prompt: .harness/roles/pipeline-fixer.md
+  - id: qa
+    mode: quality-review
+    max_trust: observer
+    effective_trust: observer
+    prompt: .harness/roles/qa.md
+  - id: dogfood
+    mode: dogfood-validation
+    max_trust: observer
+    effective_trust: observer
+    prompt: .harness/roles/dogfood.md
+  - id: security-reviewer
+    mode: security-review
+    max_trust: observer
+    effective_trust: observer
+    prompt: .harness/roles/security-reviewer.md
+  - id: dependency-manager
+    mode: dependency-maintenance
+    max_trust: contributor
+    effective_trust: observer
+    prompt: .harness/roles/dependency-manager.md
+  - id: release-manager
+    mode: release-management
+    max_trust: contributor
+    effective_trust: observer
+    prompt: .harness/roles/release-manager.md
+  - id: janitor
+    mode: ticket-hygiene
+    max_trust: contributor
+    effective_trust: observer
+    prompt: .harness/roles/janitor.md
+  - id: delivery-orchestrator
+    mode: dispatch-routing
+    max_trust: contributor
+    effective_trust: observer
+    prompt: .harness/roles/delivery-orchestrator.md
+
+foundation_roles:
+  - id: foundation-maintainer
+    scope: source-only
+    max_trust: contributor
+    effective_trust: observer
+    prompt: .harness/roles/foundation-maintainer.md
+
+profiles_grant_authority: false
+profiles:
+  - id: delivery-orchestrator
+    principal_id: delivery-orchestrator
+    mode: dispatch-routing
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/delivery-orchestrator.md
+  - id: foundation-maintainer
+    principal_id: foundation-maintainer
+    mode: doctrine-foundation
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/foundation-maintainer.md
+  - id: work-authority-engineer
+    principal_id: engineer
+    mode: authority-gateway
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/work-authority-engineer.md
+  - id: platform-engineer
+    principal_id: engineer
+    mode: substrate-delivery
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/platform-engineer.md
+  - id: trace-engineer
+    principal_id: engineer
+    mode: trace-spine
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/trace-engineer.md
+  - id: security-engineer
+    principal_id: engineer
+    mode: security-policy
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/security-engineer.md
+  - id: integration-engineer
+    principal_id: engineer
+    mode: git-evidence-reconciliation
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/integration-engineer.md
+  - id: runtime-architect
+    principal_id: cto
+    mode: runtime-contracts
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/runtime-architect.md
+  - id: runtime-engineer
+    principal_id: engineer
+    mode: provider-adapter
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/runtime-engineer.md
+  - id: model-runtime-engineer
+    principal_id: engineer
+    mode: local-model-runtime
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/model-runtime-engineer.md
+  - id: frontend-engineer
+    principal_id: engineer
+    mode: operator-workspace
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/frontend-engineer.md
+  - id: qa
+    principal_id: qa
+    mode: quality-review
+    max_trust: observer
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/qa.md
+  - id: security-reviewer
+    principal_id: security-reviewer
+    mode: security-review
+    max_trust: observer
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/security-reviewer.md
+  - id: dogfood
+    principal_id: dogfood
+    mode: dogfood-validation
+    max_trust: observer
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/dogfood.md
+  - id: release-manager
+    principal_id: release-manager
+    mode: release-management
+    max_trust: contributor
+    effective_trust: observer
+    autonomous_mutation: disabled
+    prompt: .harness/roles/release-manager.md

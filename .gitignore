@@ -5,10 +5,15 @@
 *.pem
 *.p12
 *.pfx
+*.crt
+*.cer
 *.mobileprovision
 
 # Authority and runtime state
 .beads/
+.dolt/
+.temporal/
+.kube/
 *.db
 *.db-*
 *.sqlite
@@ -17,6 +22,13 @@ data/
 artifacts/
 traces/
 sessions/
+object-store/
+postgres-data/
+temporal-data/
+kubernetes-secrets/
+browser-profile/
+browser-profiles/
+keychain/
 
 # Build and editor output
 bin/

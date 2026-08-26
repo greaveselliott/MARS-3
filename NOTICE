@@ -1,0 +1,17 @@
+MARS-3
+Copyright 2026 Elliott Greaves
+
+This product includes a project-owned adaptation of operating-model concepts
+from MARS (https://github.com/greaveselliott/MARS), copyright 2026 Elliott
+Greaves, licensed under the Apache License, Version 2.0. The MARS runtime,
+application code, interface, inference lifecycle, and release machinery are
+not included.
+
+The development workflow uses Beads
+(https://github.com/gastownhall/beads), pinned to version 1.2.2 and source
+revision 6c124203e771433a3550c348771a5b5e27fd3c21, under its applicable upstream
+MIT License. Its embedded Dolt dependency is pinned through revision 1bf533220ab0.
+Beads databases are external operational state and are not redistributed in
+this repository.
+
+See THIRD_PARTY_NOTICES and the generated provenance manifest for details.
