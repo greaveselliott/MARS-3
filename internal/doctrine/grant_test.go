@@ -176,6 +176,53 @@ func TestWave1PRFallbackMainCIFixRejectsTampering(t *testing.T) {
 	}
 }
 
+func TestWave1PRFallbackFixtureFixAcceptsPinnedSignedAddendum(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkWave1CIFixtureFixAddendum(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed fixture-stabilization addendum was rejected: %v", findings)
+	}
+}
+
+func TestWave1PRFallbackFixtureFixRejectsTampering(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(wave1CIFixtureFixPath)
+	signature := read(wave1CIFixtureFixSignature)
+	publicKey := read(wave1PlanningGrantKey)
+	for _, testCase := range []struct {
+		name string
+		old  string
+		new  string
+		code string
+	}{
+		{name: "failed attempts", old: "failedAttempts: 1,2", new: "failedAttempts: 1", code: "public.pr_fallback_fixture_value"},
+		{name: "production config", old: "mutate-production-or-developer-git-configuration", new: "mutate-production-git-configuration", code: "public.pr_fallback_fixture_sequence"},
+		{name: "scope", old: "    - internal/doctrine/grant_test.go", new: "    - internal/runtime/escape.go", code: "public.pr_fallback_fixture_sequence"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
+			root := t.TempDir()
+			writePlanningGrantTestFile(t, root, wave1CIFixtureFixPath, tampered)
+			writePlanningGrantTestFile(t, root, wave1CIFixtureFixSignature, signature)
+			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+			var findings []Finding
+			checkWave1CIFixtureFixAddendum(root, &findings)
+			if !findingCodePresent(findings, testCase.code) || !findingCodePresent(findings, "public.pr_fallback_fixture_signature") {
+				t.Fatalf("tampered fixture stabilization was not rejected by contract and signature: %v", findings)
+			}
+		})
+	}
+}
+
 func TestWave1PlanningGrantAcceptsPinnedSignedContract(t *testing.T) {
 	grant, signature, publicKey := loadPlanningGrantFixture(t)
 	root := writePlanningGrantFixture(t, grant, signature, publicKey)
@@ -843,6 +890,7 @@ func writeWave1TransitionSquashFixture(t *testing.T, parent string) (string, str
 	}
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1PublishedMain)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+wave1TransitionTag+":refs/tags/"+wave1TransitionTag)
 	publicKey, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(wave1PlanningGrantKey)))
@@ -871,10 +919,11 @@ func writeWave1PRFallbackMainFixture(t *testing.T, reviewedTree bool) (string, s
 	sourceHead := planningGrantTestGitOutput(t, source, "rev-parse", "HEAD")
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	disablePlanningGrantTestGitMaintenance(t, root)
 	for _, revision := range []string{wave1PublishedMain, sourceHead} {
 		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, revision)
 	}
-	for _, tag := range []string{wave1PriorPublicationTag, wave1V2PublicationTag, wave1PublicationTag, wave1TransitionTag, wave1SuccessorTransitionTag} {
+	for _, tag := range []string{wave1PriorPublicationTag, wave1V2PublicationTag, wave1PublicationTag, wave1TransitionTag, wave1SuccessorTransitionTag, wave1FinalTransitionTag} {
 		if _, err := planningGrantGitOutput(source, "rev-parse", "--verify", "refs/tags/"+tag+"^{tag}"); err == nil {
 			runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+tag+":refs/tags/"+tag)
 		}
@@ -894,6 +943,12 @@ func writeWave1PRFallbackMainFixture(t *testing.T, reviewedTree bool) (string, s
 	)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--force", "-B", "main", squash)
 	return root, squash
+}
+
+func disablePlanningGrantTestGitMaintenance(t *testing.T, root string) {
+	t.Helper()
+	runPlanningGrantTestGit(t, root, "config", "maintenance.auto", "false")
+	runPlanningGrantTestGit(t, root, "config", "gc.auto", "0")
 }
 
 func setWave1PRFallbackMainPushFacts(t *testing.T, root, head string) {

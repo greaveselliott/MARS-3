@@ -79,6 +79,14 @@ const (
 	wave1MainCIFixNamespace         = "mars3-pr-fallback-main-ci-addendum"
 	wave1SuccessorTransitionTag     = "mars3/w001-transition-v2"
 	wave1SuccessorTagMessage        = "MARS-3 W-001 transition tree attestation v2"
+	wave1SuccessorTagObject         = "cd7d6daeea77041167b5aa3763952b47b4ad09c0"
+	wave1CIFixtureReviewedHead      = "b9ca75dfe42001a9632d8c752e2ddb80624fa4ae"
+	wave1CIFixtureReviewedTree      = "f8af794a23f67fec73af71328dc6aeae0fa9e104"
+	wave1CIFixtureFixPath           = ".harness/grants/WAVE-1-pr-fallback-fixture-stabilization-addendum.yaml"
+	wave1CIFixtureFixSignature      = ".harness/grants/WAVE-1-pr-fallback-fixture-stabilization-addendum.yaml.sig"
+	wave1CIFixtureFixNamespace      = "mars3-pr-fallback-fixture-stabilization-addendum"
+	wave1FinalTransitionTag         = "mars3/w001-transition-v3"
+	wave1FinalTransitionTagMessage  = "MARS-3 W-001 transition tree attestation v3"
 )
 
 type grantScalarExpectation struct {
@@ -352,6 +360,97 @@ var wave1MainCIFixSequences = map[string][]string{
 		"retry-direct-main-push",
 		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
 		"create-or-move-any-tag-other-than-the-v2-transition-tag",
+		"mutate-any-bead-work-field-or-dependency",
+		"claim-or-transition-bead",
+		"issue-or-assert-live-lease",
+		"runtime-or-platform-implementation",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var wave1CIFixtureFixScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3PRFallbackFixtureStabilizationAddendum"},
+	{path: "addendum.id", value: "WAVE-1-pr-fallback-fixture-stabilization-addendum"},
+	{path: "addendum.classification", value: "PUBLIC"},
+	{path: "addendum.issuedAt", value: "2026-08-26T09:53:55Z"},
+	{path: "addendum.expiresAt", value: "2026-08-29T09:53:55Z"},
+	{path: "addendum.baseCommit", value: wave1CIFixtureReviewedHead},
+	{path: "addendum.baseTree", value: wave1CIFixtureReviewedTree},
+	{path: "addendum.publicationBaseCommit", value: wave1PublishedMain},
+	{path: "addendum.publicationBaseTree", value: wave1PublishedTree},
+	{path: "addendum.repository", value: planningGrantRepository},
+	{path: "addendum.workingBranch", value: wave1PRFallbackBranch},
+	{path: "addendum.pullRequest", value: "5"},
+	{path: "addendum.signerRole", value: "human-bootstrap-authority"},
+	{path: "addendum.coordinator", value: "delivery-orchestrator"},
+	{path: "addendum.failureOwnership", value: "foundation"},
+	{path: "addendum.sourceDirective", value: "authorised"},
+	{path: "addendum.purpose", value: "disable Git auto-maintenance only inside disposable test repositories to eliminate post-assertion cleanup races"},
+	{path: "addendum.priorAddendum", value: "WAVE-1-pr-fallback-main-ci-addendum"},
+	{path: "addendum.priorAddendumSHA256", value: "8880fd546cf70fff39a02ba2851a74414f892a06741ae41f17a40532044bc130"},
+	{path: "addendum.priorAddendumSignatureSHA256", value: "b757aa7fef86ec8f4f6e417f795e02d97a6ee1a0fa5f2edfd39f8d51efee4256"},
+	{path: "addendum.blockedDispositionComment", value: "01a03d7d-5f5a-70e2-8ca2-93e1c76e3c02"},
+	{path: "addendum.failedRun", value: "32955169341"},
+	{path: "addendum.failedAttempts", value: "1,2"},
+	{path: "addendum.failureFingerprint", value: "go-test-tempdir-cleanup-git-pack-race"},
+	{path: "addendum.priorTransitionTag", value: wave1SuccessorTransitionTag},
+	{path: "addendum.priorTransitionTagObject", value: wave1SuccessorTagObject},
+	{path: "addendum.priorTransitionTagTarget", value: wave1CIFixtureReviewedHead},
+	{path: "addendum.priorTransitionTagTree", value: wave1CIFixtureReviewedTree},
+	{path: "addendum.successorTransitionTag", value: wave1FinalTransitionTag},
+	{path: "addendum.successorTransitionTagMessage", value: wave1FinalTransitionTagMessage},
+	{path: "addendum.mergeMode", value: "squash"},
+	{path: "addendum.autonomousMutation", value: "false"},
+	{path: "addendum.canonicalWorkMutationAllowed", value: "false"},
+	{path: "addendum.githubPolicyMutationAllowed", value: "false"},
+	{path: "addendum.secretScannerExceptionAllowed", value: "false"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.externalStateReadbackRequired", value: "true"},
+	{path: "verification.protectedMainUnchangedUntilMerge", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: wave1CIFixtureFixNamespace},
+	{path: "integrity.detachedSignature", value: "WAVE-1-pr-fallback-fixture-stabilization-addendum.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var wave1CIFixtureFixSequences = map[string][]string{
+	"addendum.allowedEffects": {
+		"edit-listed-public-paths",
+		"create-one-pinned-signer-fixture-stabilization-commit",
+		"preserve-v1-and-v2-transition-tags-exactly",
+		"create-and-push-one-pinned-signer-v3-transition-tag",
+		"update-existing-pull-request",
+		"run-one-fresh-public-commit-gate",
+		"squash-merge-promptly-after-fresh-qa-and-security-acceptance",
+		"append-public-safe-stabilization-intent-and-receipt",
+	},
+	"addendum.authorizedPaths": {
+		wave1CIFixtureFixPath,
+		wave1CIFixtureFixSignature,
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"addendum.requiredProperties": {
+		"preserve-b9ca75d-and-v2-tag-as-immutable-history",
+		"verify-every-feature-commit-with-the-pinned-signer",
+		"disable-git-auto-maintenance-only-in-disposable-test-repositories",
+		"require-v3-tag-target-equal-current-reviewed-feature-head-on-pull-request",
+		"require-v3-tag-tree-equal-pull-request-and-squash-main-trees",
+		"require-exact-base-head-event-and-topology",
+		"require-fresh-public-gate-and-immutable-reviews",
+	},
+	"addendum.prohibitedEffects": {
+		"rerun-the-exhausted-failed-workflow",
+		"mutate-production-or-developer-git-configuration",
+		"move-or-delete-v1-or-v2-transition-tags",
+		"retry-direct-main-push",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"create-or-move-any-tag-other-than-the-v3-transition-tag",
 		"mutate-any-bead-work-field-or-dependency",
 		"claim-or-transition-bead",
 		"issue-or-assert-live-lease",
@@ -1167,6 +1266,58 @@ func checkWave1MainCIFixAddendum(root string, findings *[]Finding) {
 			addFinding(findings, wave1MainCIFixSignature, "public.pr_fallback_main_ci_signature", "%v", err)
 		}
 	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(wave1CIFixtureFixPath))); err == nil {
+		checkWave1CIFixtureFixAddendum(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_fixture_state", "fixture-stabilization addendum state cannot be established")
+	}
+}
+
+func checkWave1CIFixtureFixAddendum(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, wave1CIFixtureFixPath)
+	if err != nil {
+		addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_fixture_missing", "signed fixture-stabilization addendum is required")
+		return
+	}
+	document := parseStrictGrant(data, wave1CIFixtureFixScalars, wave1CIFixtureFixSequences, []string{"addendum", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_fixture_schema", "%s", message)
+	}
+	for _, expected := range wave1CIFixtureFixScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_fixture_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_fixture_value", "%s does not match the signed fixture-stabilization contract", expected.path)
+		}
+	}
+	for path, expected := range wave1CIFixtureFixSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_fixture_sequence", "%s must equal the exact ordered fixture-stabilization contract", path)
+		}
+	}
+	for _, section := range []string{"addendum", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_fixture_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	signature, signatureErr := readRepoFile(root, wave1CIFixtureFixSignature)
+	if signatureErr != nil {
+		addFinding(findings, wave1CIFixtureFixSignature, "public.pr_fallback_fixture_signature_missing", "detached fixture-stabilization signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.pr_fallback_fixture_key", "fixture stabilization must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, wave1CIFixtureFixNamespace); err != nil {
+			addFinding(findings, wave1CIFixtureFixSignature, "public.pr_fallback_fixture_signature", "%v", err)
+		}
+	}
 }
 
 type planningGrantCheckoutKind int
@@ -1524,6 +1675,21 @@ func checkWave1PRFallbackGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_state", "main-CI correction addendum state cannot be established")
 		return
 	}
+	fixtureFixActive := false
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(wave1CIFixtureFixPath))); err == nil {
+		fixtureFixActive = true
+		before := len(*findings)
+		checkWave1CIFixtureFixAddendum(root, findings)
+		if len(*findings) != before {
+			return
+		}
+		if !checkWave1PriorV2TransitionTag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_fixture_state", "fixture-stabilization addendum state cannot be established")
+		return
+	}
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
 	if err != nil || !sha1Pattern.MatchString(strings.TrimSpace(string(headOutput))) {
 		addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_head", "HEAD must resolve to one exact commit")
@@ -1544,6 +1710,10 @@ func checkWave1PRFallbackGitDiff(root string, findings *[]Finding) {
 		if mainCIFixActive {
 			tagName = wave1SuccessorTransitionTag
 			tagMessage = wave1SuccessorTagMessage
+		}
+		if fixtureFixActive {
+			tagName = wave1FinalTransitionTag
+			tagMessage = wave1FinalTransitionTagMessage
 		}
 		expectedTarget := historyEnd
 		requireDistinct := false
@@ -1585,7 +1755,15 @@ func checkWave1PRFallbackGitDiff(root string, findings *[]Finding) {
 	for _, path := range wave1MainCIFixSequences["addendum.authorizedPaths"] {
 		correctionAuthorized[path] = true
 	}
-	if mainCIFixActive && len(commits) > 3 {
+	fixtureAuthorized := make(map[string]bool, len(wave1CIFixtureFixSequences["addendum.authorizedPaths"]))
+	for _, path := range wave1CIFixtureFixSequences["addendum.authorizedPaths"] {
+		fixtureAuthorized[path] = true
+	}
+	if fixtureFixActive && len(commits) > 4 {
+		addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_fixture_commit_count", "fixture stabilization permits exactly one successor commit")
+		return
+	}
+	if !fixtureFixActive && mainCIFixActive && len(commits) > 3 {
 		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_commit_count", "main-CI correction permits exactly one successor commit")
 		return
 	}
@@ -1623,6 +1801,14 @@ func checkWave1PRFallbackGitDiff(root string, findings *[]Finding) {
 				addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_main_ci_reviewed_head", "the reviewed changes-requested head must remain the exact second feature commit")
 				return
 			}
+		} else if index == 2 && fixtureFixActive {
+			authorized = correctionAuthorized
+			if commit.id != wave1CIFixtureReviewedHead {
+				addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_fixture_reviewed_head", "the failed-CI head must remain the exact third feature commit")
+				return
+			}
+		} else if index >= 3 && fixtureFixActive {
+			authorized = fixtureAuthorized
 		} else if index >= 2 && mainCIFixActive {
 			authorized = correctionAuthorized
 		}
@@ -1644,7 +1830,9 @@ func checkWave1PRFallbackGitDiff(root string, findings *[]Finding) {
 	}
 	paths, err := normalizedPlanningGrantGitPaths(tracked, untracked)
 	liveAuthorized := fallbackAuthorized
-	if mainCIFixActive {
+	if fixtureFixActive {
+		liveAuthorized = fixtureAuthorized
+	} else if mainCIFixActive {
 		liveAuthorized = correctionAuthorized
 	}
 	if err != nil || !planningGrantPathsAllowed(paths, liveAuthorized) {
@@ -1772,6 +1960,36 @@ func checkWave1PriorTransitionTag(root string, findings *[]Finding) bool {
 	tree, err := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
 	if err != nil || strings.TrimSpace(string(tree)) != wave1TransitionReviewedTree {
 		addFinding(findings, wave1MainCIFixPath, "public.pr_fallback_v1_tag", "the signed v1 transition tag tree must remain unchanged")
+		return false
+	}
+	return true
+}
+
+func checkWave1PriorV2TransitionTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + wave1SuccessorTransitionTag
+	tagObject, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(tagObject)) != wave1SuccessorTagObject {
+		addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_v2_tag", "the signed v2 transition tag object must remain unchanged")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", wave1SuccessorTagObject)
+	if err != nil {
+		addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_v2_tag", "the signed v2 transition tag cannot be read")
+		return false
+	}
+	publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, wave1PlanningGrantKey, "public.pr_fallback_v2_tag", "v2 transition tag requires the pinned genesis key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, wave1SuccessorTransitionTag, wave1SuccessorTagMessage)
+	if err != nil || target != wave1CIFixtureReviewedHead {
+		addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_v2_tag", "the signed v2 transition tag target must remain unchanged")
+		return false
+	}
+	tree, err := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if err != nil || strings.TrimSpace(string(tree)) != wave1CIFixtureReviewedTree {
+		addFinding(findings, wave1CIFixtureFixPath, "public.pr_fallback_v2_tag", "the signed v2 transition tag tree must remain unchanged")
 		return false
 	}
 	return true
