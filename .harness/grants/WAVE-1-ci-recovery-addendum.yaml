@@ -1,0 +1,90 @@
+schemaVersion: 1
+kind: MARS3CIRecoveryAddendum
+
+addendum:
+  id: WAVE-1-ci-recovery-addendum
+  classification: PUBLIC
+  issuedAt: 2026-08-26T07:25:36Z
+  expiresAt: 2026-08-29T07:25:36Z
+  baseCommit: a22cfe6fada6f2bc787742eae50bca28cec80c89
+  workingBranch: codex/w-001-work-authority
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  purpose: prospectively repair nullable GitHub pull-request merge identity admission without weakening publication controls
+  retroactiveAuthorization: false
+  priorHead: a22cfe6fada6f2bc787742eae50bca28cec80c89
+  priorTree: 3c5befaefab37a8d0a2e3a8af2efd6e1eb1d8cae
+  priorTag: mars3/wave1-contract-publication-v1
+  priorTagObject: 4bce7e7d4a8b2cc1a5b30b9feaee61232c3cc0de
+  failedRunId: 32941818590
+  failedRunAttempts: 2
+  finalFailedJobId: 98095787715
+  failureFingerprint: public.planning_grant_branch-github-pr-null-merge-commit-sha
+  rootCause: pull-request-event-merge-commit-sha-was-null
+  correctionInvariant: nullable-event-field-requires-github-sha-event-base-head-and-exact-two-parent-git-topology
+  successorTag: mars3/wave1-contract-publication-v2
+  successorTagMessage: MARS-3 Wave-1 contract-publication tree attestation v2
+  v1TagImmutable: true
+  autonomousMutation: false
+  implementationClaimed: false
+  liveLeaseAsserted: false
+  canonicalWorkMutationAllowed: false
+  githubPolicyMutationAllowed: false
+  secretScannerExceptionAllowed: false
+  allowedEffects:
+    - edit-listed-public-paths
+    - run-public-commit-gate
+    - create-pinned-signer-git-commits
+    - create-and-push-one-pinned-signer-retry-tag
+    - push-working-branch
+    - update-existing-pull-request
+    - append-public-safe-recovery-intent-and-receipt
+  authorizedPaths:
+    - .harness/grants/WAVE-1-ci-recovery-addendum.yaml
+    - .harness/grants/WAVE-1-ci-recovery-addendum.yaml.sig
+    - docs/evidence/WAVE-1-contract-publication.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredCorrectionProperties:
+    - accept-null-event-merge-sha-only-for-verified-pull-request-merge
+    - reject-nonempty-mismatched-event-merge-sha
+    - require-github-sha-equals-checked-out-merge
+    - require-event-base-and-head-equal-git-merge-parents
+    - retain-hosted-runner-workflow-job-repository-and-workspace-facts
+    - retain-pinned-workflow-digest-and-signed-feature-commit-validation
+    - enforce-addendum-only-paths-after-the-v1-target
+    - preserve-v1-tag-and-record-both-failed-attempts
+    - require-v2-tag-tree-equal-updated-review-and-squash-main-trees
+  prohibitedEffects:
+    - authorize-prior-effects-retroactively
+    - move-or-delete-v1-tag
+    - create-or-move-any-tag-other-than-v2
+    - accept-nonempty-mismatched-event-merge-sha
+    - use-nullable-merge-sha-rule-outside-pull-request-ci
+    - mutate-workflow-ruleset-or-repository-settings
+    - add-secret-scanner-ignore-or-allowlist
+    - mutate-any-bead-work-field-or-dependency
+    - claim-or-transition-bead
+    - issue-or-assert-live-lease
+    - runtime-or-platform-implementation
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  failedAttemptsPreserved: true
+  externalStateReadbackRequired: true
+  rawRunnerPayloadIncluded: false
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-ci-recovery-addendum
+  detachedSignature: WAVE-1-ci-recovery-addendum.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

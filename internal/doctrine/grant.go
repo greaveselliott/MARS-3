@@ -23,24 +23,32 @@ import (
 )
 
 const (
-	wave1PlanningGrantPath      = ".harness/grants/WAVE-1-contract-publication.yaml"
-	wave1PlanningGrantSignature = ".harness/grants/WAVE-1-contract-publication.yaml.sig"
-	wave1PlanningGrantKey       = ".harness/keys/genesis-signing-key.pub"
-	wave1PlanningGrantNamespace = "mars3-planning-grant"
-	wave1PlanningGrantBase      = "ee385ce236ae1f99da692d223d7666b80dd9108f"
-	wave1PlanningGrantBranch    = "codex/w-001-work-authority"
-	planningGrantCommitNS       = "git"
-	planningGrantRepository     = "greaveselliott/MARS-3"
-	planningGrantWorkflow       = "Foundation quality"
-	planningGrantWorkflowPath   = ".github/workflows/foundation-quality.yml"
-	planningGrantWorkflowJob    = "public-commit-gate"
-	wave1DispositionPath        = ".harness/grants/WAVE-1-recovery-disposition.yaml"
-	wave1DispositionSignature   = ".harness/grants/WAVE-1-recovery-disposition.yaml.sig"
-	wave1DispositionSnapshot    = ".harness/grants/WAVE-1-authority-recovery-state.json"
-	wave1DispositionNamespace   = "mars3-recovery-disposition"
-	wave1DispositionSnapshotSHA = "4d3b5c9d90a223c0e9d974e836559309a2f4dac7f209a3966336e9152f57feca"
-	wave1PublicationTag         = "mars3/wave1-contract-publication-v1"
-	wave1PublicationTagMessage  = "MARS-3 Wave-1 contract-publication tree attestation v1"
+	wave1PlanningGrantPath          = ".harness/grants/WAVE-1-contract-publication.yaml"
+	wave1PlanningGrantSignature     = ".harness/grants/WAVE-1-contract-publication.yaml.sig"
+	wave1PlanningGrantKey           = ".harness/keys/genesis-signing-key.pub"
+	wave1PlanningGrantNamespace     = "mars3-planning-grant"
+	wave1PlanningGrantBase          = "ee385ce236ae1f99da692d223d7666b80dd9108f"
+	wave1PlanningGrantBranch        = "codex/w-001-work-authority"
+	planningGrantCommitNS           = "git"
+	planningGrantRepository         = "greaveselliott/MARS-3"
+	planningGrantWorkflow           = "Foundation quality"
+	planningGrantWorkflowPath       = ".github/workflows/foundation-quality.yml"
+	planningGrantWorkflowJob        = "public-commit-gate"
+	wave1DispositionPath            = ".harness/grants/WAVE-1-recovery-disposition.yaml"
+	wave1DispositionSignature       = ".harness/grants/WAVE-1-recovery-disposition.yaml.sig"
+	wave1DispositionSnapshot        = ".harness/grants/WAVE-1-authority-recovery-state.json"
+	wave1DispositionNamespace       = "mars3-recovery-disposition"
+	wave1DispositionSnapshotSHA     = "4d3b5c9d90a223c0e9d974e836559309a2f4dac7f209a3966336e9152f57feca"
+	wave1PriorPublicationTag        = "mars3/wave1-contract-publication-v1"
+	wave1PriorPublicationTagMessage = "MARS-3 Wave-1 contract-publication tree attestation v1"
+	wave1PriorPublicationTagObject  = "4bce7e7d4a8b2cc1a5b30b9feaee61232c3cc0de"
+	wave1AddendumPath               = ".harness/grants/WAVE-1-ci-recovery-addendum.yaml"
+	wave1AddendumSignature          = ".harness/grants/WAVE-1-ci-recovery-addendum.yaml.sig"
+	wave1AddendumNamespace          = "mars3-ci-recovery-addendum"
+	wave1AddendumBase               = "a22cfe6fada6f2bc787742eae50bca28cec80c89"
+	wave1AddendumBaseTree           = "3c5befaefab37a8d0a2e3a8af2efd6e1eb1d8cae"
+	wave1PublicationTag             = "mars3/wave1-contract-publication-v2"
+	wave1PublicationTagMessage      = "MARS-3 Wave-1 contract-publication tree attestation v2"
 )
 
 type grantScalarExpectation struct {
@@ -167,8 +175,8 @@ var wave1DispositionScalars = []grantScalarExpectation{
 	{path: "disposition.p001PreDescriptionSHA256", value: "828e32051ee661e6d31c5017e996e3d8ec82257ca0a17e263f974248c5772314"},
 	{path: "disposition.p001PostDescriptionSHA256", value: "d24074a56a4df0d150450555b981f84fa377364f40c9c9191e49f4ecae73c20c"},
 	{path: "disposition.publicationMode", value: "squash-with-signed-tree-tag"},
-	{path: "disposition.publicationTag", value: wave1PublicationTag},
-	{path: "disposition.publicationTagMessage", value: wave1PublicationTagMessage},
+	{path: "disposition.publicationTag", value: wave1PriorPublicationTag},
+	{path: "disposition.publicationTagMessage", value: wave1PriorPublicationTagMessage},
 	{path: "disposition.rulesetId", value: "21510926"},
 	{path: "disposition.rulesetObservedUpdatedAt", value: "2026-08-26T03:00:36.071+01:00"},
 	{path: "disposition.rulesetMutationAllowed", value: "false"},
@@ -268,6 +276,97 @@ var wave1DispositionSequences = map[string][]string{
 		"add-secret-scanner-ignore-or-allowlist",
 		"mutate-github-rules-or-repository-settings",
 		"create-or-move-any-other-tag",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var wave1AddendumScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3CIRecoveryAddendum"},
+	{path: "addendum.id", value: "WAVE-1-ci-recovery-addendum"},
+	{path: "addendum.classification", value: "PUBLIC"},
+	{path: "addendum.issuedAt", value: "2026-08-26T07:25:36Z"},
+	{path: "addendum.expiresAt", value: "2026-08-29T07:25:36Z"},
+	{path: "addendum.baseCommit", value: wave1AddendumBase},
+	{path: "addendum.workingBranch", value: wave1PlanningGrantBranch},
+	{path: "addendum.signerRole", value: "human-bootstrap-authority"},
+	{path: "addendum.coordinator", value: "delivery-orchestrator"},
+	{path: "addendum.failureOwnership", value: "foundation"},
+	{path: "addendum.purpose", value: "prospectively repair nullable GitHub pull-request merge identity admission without weakening publication controls"},
+	{path: "addendum.retroactiveAuthorization", value: "false"},
+	{path: "addendum.priorHead", value: wave1AddendumBase},
+	{path: "addendum.priorTree", value: wave1AddendumBaseTree},
+	{path: "addendum.priorTag", value: wave1PriorPublicationTag},
+	{path: "addendum.priorTagObject", value: wave1PriorPublicationTagObject},
+	{path: "addendum.failedRunId", value: "32941818590"},
+	{path: "addendum.failedRunAttempts", value: "2"},
+	{path: "addendum.finalFailedJobId", value: "98095787715"},
+	{path: "addendum.failureFingerprint", value: "public.planning_grant_branch-github-pr-null-merge-commit-sha"},
+	{path: "addendum.rootCause", value: "pull-request-event-merge-commit-sha-was-null"},
+	{path: "addendum.correctionInvariant", value: "nullable-event-field-requires-github-sha-event-base-head-and-exact-two-parent-git-topology"},
+	{path: "addendum.successorTag", value: wave1PublicationTag},
+	{path: "addendum.successorTagMessage", value: wave1PublicationTagMessage},
+	{path: "addendum.v1TagImmutable", value: "true"},
+	{path: "addendum.autonomousMutation", value: "false"},
+	{path: "addendum.implementationClaimed", value: "false"},
+	{path: "addendum.liveLeaseAsserted", value: "false"},
+	{path: "addendum.canonicalWorkMutationAllowed", value: "false"},
+	{path: "addendum.githubPolicyMutationAllowed", value: "false"},
+	{path: "addendum.secretScannerExceptionAllowed", value: "false"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.failedAttemptsPreserved", value: "true"},
+	{path: "verification.externalStateReadbackRequired", value: "true"},
+	{path: "verification.rawRunnerPayloadIncluded", value: "false"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: wave1AddendumNamespace},
+	{path: "integrity.detachedSignature", value: "WAVE-1-ci-recovery-addendum.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var wave1AddendumSequences = map[string][]string{
+	"addendum.allowedEffects": {
+		"edit-listed-public-paths",
+		"run-public-commit-gate",
+		"create-pinned-signer-git-commits",
+		"create-and-push-one-pinned-signer-retry-tag",
+		"push-working-branch",
+		"update-existing-pull-request",
+		"append-public-safe-recovery-intent-and-receipt",
+	},
+	"addendum.authorizedPaths": {
+		wave1AddendumPath,
+		wave1AddendumSignature,
+		"docs/evidence/WAVE-1-contract-publication.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"addendum.requiredCorrectionProperties": {
+		"accept-null-event-merge-sha-only-for-verified-pull-request-merge",
+		"reject-nonempty-mismatched-event-merge-sha",
+		"require-github-sha-equals-checked-out-merge",
+		"require-event-base-and-head-equal-git-merge-parents",
+		"retain-hosted-runner-workflow-job-repository-and-workspace-facts",
+		"retain-pinned-workflow-digest-and-signed-feature-commit-validation",
+		"enforce-addendum-only-paths-after-the-v1-target",
+		"preserve-v1-tag-and-record-both-failed-attempts",
+		"require-v2-tag-tree-equal-updated-review-and-squash-main-trees",
+	},
+	"addendum.prohibitedEffects": {
+		"authorize-prior-effects-retroactively",
+		"move-or-delete-v1-tag",
+		"create-or-move-any-tag-other-than-v2",
+		"accept-nonempty-mismatched-event-merge-sha",
+		"use-nullable-merge-sha-rule-outside-pull-request-ci",
+		"mutate-workflow-ruleset-or-repository-settings",
+		"add-secret-scanner-ignore-or-allowlist",
+		"mutate-any-bead-work-field-or-dependency",
+		"claim-or-transition-bead",
+		"issue-or-assert-live-lease",
+		"runtime-or-platform-implementation",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
 	},
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
@@ -427,6 +526,55 @@ func checkWave1RecoveryDisposition(root string, findings *[]Finding) {
 			addFinding(findings, legacy, "public.recovery_legacy_artifact", "legacy recovery artifact state cannot be established")
 		}
 	}
+	checkWave1CIRecoveryAddendum(root, findings)
+}
+
+func checkWave1CIRecoveryAddendum(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, wave1AddendumPath)
+	if err != nil {
+		addFinding(findings, wave1AddendumPath, "public.ci_recovery_addendum_missing", "signed Wave-1 CI recovery addendum is required after the preserved failed publication")
+		return
+	}
+	document := parseStrictGrant(data, wave1AddendumScalars, wave1AddendumSequences, []string{"addendum", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, wave1AddendumPath, "public.ci_recovery_addendum_schema", "%s", message)
+	}
+	for _, expected := range wave1AddendumScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, wave1AddendumPath, "public.ci_recovery_addendum_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, wave1AddendumPath, "public.ci_recovery_addendum_value", "%s does not match the signed CI recovery contract", expected.path)
+		}
+	}
+	for path, expected := range wave1AddendumSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, wave1AddendumPath, "public.ci_recovery_addendum_sequence", "%s must equal the exact ordered CI recovery contract", path)
+		}
+	}
+	for _, section := range []string{"addendum", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, wave1AddendumPath, "public.ci_recovery_addendum_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+
+	signature, signatureErr := readRepoFile(root, wave1AddendumSignature)
+	if signatureErr != nil {
+		addFinding(findings, wave1AddendumSignature, "public.ci_recovery_addendum_signature_missing", "detached CI recovery addendum signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.ci_recovery_addendum_key", "CI recovery addendum must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, wave1AddendumNamespace); err != nil {
+			addFinding(findings, wave1AddendumSignature, "public.ci_recovery_addendum_signature", "%v", err)
+		}
+	}
 }
 
 type planningGrantCheckoutKind int
@@ -516,6 +664,9 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_ancestry", "the exact signed planning-grant base commit must be an ancestor of HEAD")
 		return
 	}
+	if !checkWave1PriorPublicationTag(root, findings) {
+		return
+	}
 
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
 	if err != nil || !sha1Pattern.MatchString(strings.TrimSpace(string(headOutput))) {
@@ -538,6 +689,10 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 			historyEnd = tagTarget
 		}
 	}
+	if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", wave1AddendumBase, historyEnd); err != nil {
+		addFinding(findings, wave1AddendumPath, "public.ci_recovery_addendum_ancestry", "the exact CI recovery base must be an ancestor of the effective publication history")
+		return
+	}
 	commits, err := planningGrantCommitRange(root, historyEnd)
 	if err != nil {
 		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_commit_history", "contract-publication commit ancestry cannot be enumerated")
@@ -556,7 +711,18 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_commit_signature", "contract-publication commits cannot be verified with the pinned genesis signer")
 	}
 
-	pathOutputs := make([][]byte, 0, len(commits)+2)
+	legacyAuthorized := make(map[string]bool, len(wave1PlanningGrantSequences["grant.authorizedPaths"])+len(wave1DispositionSequences["disposition.authorizedPaths"]))
+	for _, path := range wave1PlanningGrantSequences["grant.authorizedPaths"] {
+		legacyAuthorized[path] = true
+	}
+	for _, path := range wave1DispositionSequences["disposition.authorizedPaths"] {
+		legacyAuthorized[path] = true
+	}
+	addendumAuthorized := make(map[string]bool, len(wave1AddendumSequences["addendum.authorizedPaths"]))
+	for _, path := range wave1AddendumSequences["addendum.authorizedPaths"] {
+		addendumAuthorized[path] = true
+	}
+
 	signatureFailure := false
 	for _, commit := range commits {
 		if len(commit.parents) == 1 && keyValid {
@@ -565,12 +731,30 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 				signatureFailure = true
 			}
 		}
+		if len(commit.parents) != 1 {
+			continue
+		}
 		paths, err := planningGrantGitOutput(root, "diff-tree", "--root", "-m", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id)
 		if err != nil {
 			addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_paths", "per-commit contract-publication paths cannot be enumerated")
 			return
 		}
-		pathOutputs = append(pathOutputs, paths)
+		normalized, err := normalizedPlanningGrantGitPaths(paths)
+		if err != nil {
+			addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_paths", "per-commit contract-publication paths are not canonical safe repository-relative names")
+			return
+		}
+		authorized := addendumAuthorized
+		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", commit.id, wave1AddendumBase); err == nil {
+			authorized = legacyAuthorized
+		} else if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", wave1AddendumBase, commit.id); err != nil {
+			addFinding(findings, wave1AddendumPath, "public.ci_recovery_addendum_ancestry", "contract-publication history diverges from the exact CI recovery base")
+			return
+		}
+		if !planningGrantPathsAllowed(normalized, authorized) {
+			addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_scope", "a contract-publication commit includes a path outside its signed authorization phase")
+			return
+		}
 	}
 	if signatureFailure {
 		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_commit_signature", "every non-merge contract-publication commit must carry a valid pinned SSH signature")
@@ -586,25 +770,44 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_paths", "untracked contract-publication paths cannot be enumerated")
 		return
 	}
-	pathOutputs = append(pathOutputs, tracked, untracked)
-	paths, err := normalizedPlanningGrantGitPaths(pathOutputs...)
+	paths, err := normalizedPlanningGrantGitPaths(tracked, untracked)
 	if err != nil {
 		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_paths", "contract-publication paths are not canonical safe repository-relative names")
 		return
 	}
-	authorized := make(map[string]bool, len(wave1PlanningGrantSequences["grant.authorizedPaths"])+len(wave1DispositionSequences["disposition.authorizedPaths"]))
-	for _, path := range wave1PlanningGrantSequences["grant.authorizedPaths"] {
-		authorized[path] = true
+	if !planningGrantPathsAllowed(paths, addendumAuthorized) {
+		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_scope", "current CI recovery changes include a path outside the signed addendum")
+		return
 	}
-	for _, path := range wave1DispositionSequences["disposition.authorizedPaths"] {
-		authorized[path] = true
-	}
+}
+
+func planningGrantPathsAllowed(paths []string, authorized map[string]bool) bool {
 	for _, path := range paths {
 		if !authorized[path] {
-			addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_scope", "actual contract-publication changes include a path outside the signed authorization")
-			return
+			return false
 		}
 	}
+	return true
+}
+
+func checkWave1PriorPublicationTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + wave1PriorPublicationTag
+	object, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(object)) != wave1PriorPublicationTagObject {
+		addFinding(findings, wave1AddendumPath, "public.prior_publication_tag", "the preserved failed v1 publication tag must resolve to its exact immutable object")
+		return false
+	}
+	target, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{}")
+	if err != nil || strings.TrimSpace(string(target)) != wave1AddendumBase {
+		addFinding(findings, wave1AddendumPath, "public.prior_publication_tag", "the preserved failed v1 publication tag target must remain unchanged")
+		return false
+	}
+	tree, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{}^{tree}")
+	if err != nil || strings.TrimSpace(string(tree)) != wave1AddendumBaseTree {
+		addFinding(findings, wave1AddendumPath, "public.prior_publication_tag", "the preserved failed v1 publication tag tree must remain unchanged")
+		return false
+	}
+	return true
 }
 
 // Contract publication has exactly three admissible checkout states:
@@ -682,7 +885,7 @@ func planningGrantGitHubCheckout(root, head, branch string) (planningGrantChecko
 			os.Getenv("GITHUB_BASE_REF") != "main" || event.PullRequest == nil ||
 			event.PullRequest.Head.Ref != wave1PlanningGrantBranch ||
 			event.PullRequest.Base.Ref != "main" ||
-			event.PullRequest.MergeCommitSHA != head ||
+			(event.PullRequest.MergeCommitSHA != "" && event.PullRequest.MergeCommitSHA != head) ||
 			!sha1Pattern.MatchString(event.PullRequest.Head.SHA) ||
 			!sha1Pattern.MatchString(event.PullRequest.Base.SHA) {
 			return planningGrantCheckout{}, false

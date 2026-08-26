@@ -231,6 +231,57 @@ func TestWave1RecoveryDispositionBindsSignatureSnapshotAndLegacyExclusion(t *tes
 	})
 }
 
+func TestWave1CIRecoveryAddendumBindsExactProspectiveCorrection(t *testing.T) {
+	grant, signature, publicKey := loadPlanningGrantFixture(t)
+
+	t.Run("canonical addendum passes", func(t *testing.T) {
+		root := writePlanningGrantFixture(t, grant, signature, publicKey)
+		var findings []Finding
+		checkWave1CIRecoveryAddendum(root, &findings)
+		if len(findings) != 0 {
+			t.Fatalf("valid signed CI recovery addendum rejected: %v", findings)
+		}
+	})
+
+	t.Run("tampered authority fails", func(t *testing.T) {
+		root := writePlanningGrantFixture(t, grant, signature, publicKey)
+		path := filepath.Join(root, filepath.FromSlash(wave1AddendumPath))
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		data = bytes.Replace(data, []byte("canonicalWorkMutationAllowed: false"), []byte("canonicalWorkMutationAllowed: true"), 1)
+		if err := os.WriteFile(path, data, 0o644); err != nil {
+			t.Fatal(err)
+		}
+		var findings []Finding
+		checkWave1CIRecoveryAddendum(root, &findings)
+		for _, code := range []string{"public.ci_recovery_addendum_value", "public.ci_recovery_addendum_signature"} {
+			if !findingCodePresent(findings, code) {
+				t.Fatalf("tampered CI recovery addendum did not produce %s: %v", code, findings)
+			}
+		}
+	})
+
+	t.Run("extra path fails", func(t *testing.T) {
+		root := writePlanningGrantFixture(t, grant, signature, publicKey)
+		path := filepath.Join(root, filepath.FromSlash(wave1AddendumPath))
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		data = bytes.Replace(data, []byte("    - internal/doctrine/grant_test.go\n"), []byte("    - internal/doctrine/grant_test.go\n    - .github/workflows/foundation-quality.yml\n"), 1)
+		if err := os.WriteFile(path, data, 0o644); err != nil {
+			t.Fatal(err)
+		}
+		var findings []Finding
+		checkWave1CIRecoveryAddendum(root, &findings)
+		if !findingCodePresent(findings, "public.ci_recovery_addendum_sequence") || !findingCodePresent(findings, "public.ci_recovery_addendum_signature") {
+			t.Fatalf("widened CI recovery addendum was accepted: %v", findings)
+		}
+	})
+}
+
 func TestWave1PlanningGrantIsRequired(t *testing.T) {
 	var findings []Finding
 	checkWave1PlanningGrant(t.TempDir(), &findings)
@@ -242,12 +293,23 @@ func TestWave1PlanningGrantIsRequired(t *testing.T) {
 func TestWave1PlanningGrantConfinesLiveContractPublicationDiff(t *testing.T) {
 	t.Run("authorized untracked file on signed branch passes", func(t *testing.T) {
 		root := writePlanningGrantGitFixture(t)
-		writePlanningGrantTestFile(t, root, "docs/features/F-002-work-authority.md", []byte("# Authorized contract fixture\n"))
+		writePlanningGrantTestFile(t, root, "docs/evidence/WAVE-1-contract-publication.md", []byte("# Authorized CI recovery evidence fixture\n"))
 
 		var findings []Finding
 		checkWave1PlanningGrant(root, &findings)
 		if len(findings) != 0 {
 			t.Fatalf("authorized untracked contract path was rejected in detached checkout: %v", findings)
+		}
+	})
+
+	t.Run("legacy path is not reusable after CI recovery base", func(t *testing.T) {
+		root := writePlanningGrantGitFixture(t)
+		writePlanningGrantTestFile(t, root, "docs/features/F-002-work-authority.md", []byte("# Legacy authorization must not leak forward\n"))
+
+		var findings []Finding
+		checkWave1PlanningGrant(root, &findings)
+		if !findingCodePresent(findings, "public.planning_grant_diff_scope") {
+			t.Fatalf("legacy broad path authorization was reusable after the CI recovery base: %v", findings)
 		}
 	})
 
@@ -270,6 +332,41 @@ func TestWave1PlanningGrantConfinesLiveContractPublicationDiff(t *testing.T) {
 }
 
 func TestWave1PlanningGrantBindsCheckoutAndCommitHistory(t *testing.T) {
+	t.Run("published v1 tag cannot move or disappear", func(t *testing.T) {
+		root := writePlanningGrantGitFixture(t)
+		runPlanningGrantTestGit(t, root, "tag", "-d", wave1PriorPublicationTag)
+
+		var findings []Finding
+		checkWave1PlanningGrant(root, &findings)
+		if !findingCodePresent(findings, "public.prior_publication_tag") {
+			t.Fatal("missing immutable v1 publication tag was accepted")
+		}
+	})
+
+	t.Run("nullable pull request event merge SHA uses exact checkout topology", func(t *testing.T) {
+		root := writePlanningGrantGitFixture(t)
+		merge := checkoutPlanningGrantSyntheticMerge(t, root, true)
+		setPlanningGrantPullRequestFactsWithEventMerge(t, root, merge, nil)
+
+		checkout, ok := planningGrantGitHubCheckout(root, merge, "")
+		if !ok {
+			t.Fatal("canonical GitHub pull-request checkout with a null optional event merge SHA was rejected")
+		}
+		if checkout.kind != planningGrantPullRequestMerge || checkout.firstParent != wave1PlanningGrantBase || checkout.secondParent != wave1PlanningGrantFirstCommitFixture {
+			t.Fatalf("nullable event merge SHA did not retain exact base/head topology: %+v", checkout)
+		}
+	})
+
+	t.Run("nonempty mismatched pull request event merge SHA fails", func(t *testing.T) {
+		root := writePlanningGrantGitFixture(t)
+		merge := checkoutPlanningGrantSyntheticMerge(t, root, true)
+		setPlanningGrantPullRequestFactsWithEventMerge(t, root, merge, "1111111111111111111111111111111111111111")
+
+		if _, ok := planningGrantGitHubCheckout(root, merge, ""); ok {
+			t.Fatal("nonempty event merge SHA that disagrees with GITHUB_SHA was accepted")
+		}
+	})
+
 	t.Run("wrong symbolic branch fails", func(t *testing.T) {
 		root := writePlanningGrantGitFixture(t)
 		runPlanningGrantTestGit(t, root, "branch", "-m", "codex/unauthorized-contract-copy")
@@ -319,7 +416,7 @@ func TestWave1PlanningGrantBindsCheckoutAndCommitHistory(t *testing.T) {
 
 	t.Run("protected main squash-style push fails closed", func(t *testing.T) {
 		root := writePlanningGrantGitFixture(t)
-		const authorized = "docs/features/F-002-work-authority.md"
+		const authorized = "docs/evidence/WAVE-1-contract-publication.md"
 		writePlanningGrantTestFile(t, root, authorized, []byte("# Rewritten squash fixture\n"))
 		commitPlanningGrantTestPaths(t, root, "squash-style rewritten tip", authorized)
 		head := planningGrantTestGitOutput(t, root, "rev-parse", "HEAD")
@@ -335,7 +432,7 @@ func TestWave1PlanningGrantBindsCheckoutAndCommitHistory(t *testing.T) {
 
 	t.Run("unsigned tip fails", func(t *testing.T) {
 		root := writePlanningGrantGitFixture(t)
-		const authorized = "docs/features/F-002-work-authority.md"
+		const authorized = "docs/evidence/WAVE-1-contract-publication.md"
 		writePlanningGrantTestFile(t, root, authorized, []byte("# Unsigned authorized change\n"))
 		commitPlanningGrantTestPaths(t, root, "unsigned authorized tip", authorized)
 
@@ -484,8 +581,9 @@ func writePlanningGrantGitFixture(t *testing.T) string {
 	}
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1PlanningGrantBase)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1AddendumBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--detach", "FETCH_HEAD")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+wave1PriorPublicationTag+":refs/tags/"+wave1PriorPublicationTag)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", wave1PlanningGrantBranch)
 
 	writePlanningGrantCurrentFiles(t, root)
@@ -516,7 +614,7 @@ func writePlanningGrantDispositionFiles(t *testing.T, root string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, path := range []string{wave1DispositionPath, wave1DispositionSignature, wave1DispositionSnapshot} {
+	for _, path := range []string{wave1DispositionPath, wave1DispositionSignature, wave1DispositionSnapshot, wave1AddendumPath, wave1AddendumSignature} {
 		data, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(path)))
 		if err != nil {
 			t.Fatal(err)
@@ -552,12 +650,16 @@ func checkoutPlanningGrantSyntheticMerge(t *testing.T, root string, detached boo
 }
 
 func setPlanningGrantPullRequestFacts(t *testing.T, root, merge string) {
+	setPlanningGrantPullRequestFactsWithEventMerge(t, root, merge, merge)
+}
+
+func setPlanningGrantPullRequestFactsWithEventMerge(t *testing.T, root, merge string, eventMerge any) {
 	t.Helper()
 	const ref = "refs/pull/17/merge"
 	event := map[string]any{
 		"repository": map[string]any{"full_name": planningGrantRepository},
 		"pull_request": map[string]any{
-			"merge_commit_sha": merge,
+			"merge_commit_sha": eventMerge,
 			"base":             map[string]any{"ref": "main", "sha": wave1PlanningGrantBase},
 			"head":             map[string]any{"ref": wave1PlanningGrantBranch, "sha": wave1PlanningGrantFirstCommitFixture},
 		},
