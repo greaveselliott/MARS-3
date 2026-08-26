@@ -12,6 +12,7 @@ package doctrine
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -19,6 +20,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -87,7 +89,62 @@ const (
 	wave1CIFixtureFixNamespace      = "mars3-pr-fallback-fixture-stabilization-addendum"
 	wave1FinalTransitionTag         = "mars3/w001-transition-v3"
 	wave1FinalTransitionTagMessage  = "MARS-3 W-001 transition tree attestation v3"
+	w001BootstrapGrantPath          = ".harness/grants/W-001-bootstrap.yaml"
+	w001BootstrapGrantSignature     = ".harness/grants/W-001-bootstrap.yaml.sig"
+	w001BootstrapGrantNamespace     = "mars3-w001-bootstrap-grant"
+	w001BootstrapBase               = "37b55b912b20715349bc50e0524c85d4b22f1772"
+	w001BootstrapBaseTree           = "f06864b0802cea793cf7a0c08b60b7e734539a94"
+	w001BootstrapBranch             = "codex/w-001-work-authority"
+	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v1"
+	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v1"
 )
+
+// W001BootstrapGrant is the validated public projection consumed by the
+// one-shot bootstrap helper. It contains no local path, credential, or signer
+// state.
+type W001BootstrapGrant struct {
+	ID                          string
+	AttemptID                   string
+	IdempotencyKey              string
+	Bead                        string
+	BaseCommit                  string
+	WorkingBranch               string
+	Assignee                    string
+	AuthorityProjectID          string
+	ExpectedNativeStatus        string
+	ExpectedLifecycleState      string
+	ExpectedCreatedAt           string
+	ExpectedUpdatedAt           string
+	ExpectedMetadataSHA256      string
+	ExpectedLabelsSHA256        string
+	ExpectedDependency          string
+	ExpectedDependencyType      string
+	ExpectedDependencyStatus    string
+	ExpectedDependencyLifecycle string
+	ExpectedDependencySHA256    string
+	ExpectedLineageSHA256       string
+	ExpiresAt                   string
+	PostNativeStatus            string
+	PostLifecycleState          string
+	PostMetadataSHA256          string
+	PostLabelsSHA256            string
+	PostMetadataBase64          string
+	RemoveLabel                 string
+	AddLabel                    string
+	BeadsVersion                string
+	BeadsSourceCommit           string
+	BeadsBinarySHA256           string
+	DoltModule                  string
+	DoltModuleSHA256            string
+	GoVersion                   string
+	GoOS                        string
+	GoArch                      string
+	ICUFormula                  string
+	DoltTestImage               string
+	RyukTestImage               string
+	PatchPath                   string
+	PatchSHA256                 string
+}
 
 type grantScalarExpectation struct {
 	path  string
@@ -856,6 +913,140 @@ var wave1V3AddendumSequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001BootstrapGrantScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3ImplementationBootstrapGrant"},
+	{path: "grant.id", value: "W-001-bootstrap"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-26T10:30:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-29T10:30:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001BootstrapBase},
+	{path: "grant.baseTree", value: w001BootstrapBaseTree},
+	{path: "grant.workingBranch", value: w001BootstrapBranch},
+	{path: "grant.reviewTag", value: w001BootstrapReviewTag},
+	{path: "grant.reviewTagMessage", value: w001BootstrapReviewTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.blockerComment", value: "01a03d98-a2e2-77db-bbd6-76575366454f"},
+	{path: "grant.purpose", value: "publish and execute one reviewed atomic W-001 bootstrap claim without asserting a live lease"},
+	{path: "grant.bead", value: "M3-W001"},
+	{path: "grant.displayId", value: "W-001"},
+	{path: "grant.profile", value: "work-authority-engineer"},
+	{path: "grant.attemptId", value: "w001-bootstrap-3135f1d1-b0d4-4956-9fc9-1852310bfd77"},
+	{path: "grant.replayRef", value: "w001-claim-97a7e81e-e749-4cb0-8a0a-8e269e13e38f"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.liveLeaseAsserted", value: "false"},
+	{path: "grant.productionEffects", value: "false"},
+	{path: "expected.beadsProject", value: "e9669a62-5be6-4b94-85f8-c502c29d394a"},
+	{path: "expected.nativeStatus", value: "open"},
+	{path: "expected.lifecycleState", value: "backlog"},
+	{path: "expected.claimState", value: "unclaimed"},
+	{path: "expected.assignee", value: "work-authority-engineer"},
+	{path: "expected.createdAt", value: "2026-08-26T05:09:05Z"},
+	{path: "expected.updatedAt", value: "2026-08-26T06:22:03Z"},
+	{path: "expected.metadataSHA256", value: "10c61003cb39518f57905620fcc0c47d29950fe82ae8d98a3111a057fa554dba"},
+	{path: "expected.labelsSHA256", value: "be506df06d8c206a3919a71a57e8aaacd2b5e1e233e25bafc2f5f87f306b188c"},
+	{path: "expected.dependency", value: "M3-H001"},
+	{path: "expected.dependencyType", value: "blocks"},
+	{path: "expected.dependencyNativeStatus", value: "closed"},
+	{path: "expected.dependencyLifecycleState", value: "done"},
+	{path: "expected.dependencyDigest", value: "3ad0bca78b14e4e1fd5544477f131c0a86dd8a4d4e9563d43fa4ae1c202f4100"},
+	{path: "expected.lineageDigest", value: "9f3e91b4b642dc740898347c35e8f38abc35cc3ac1be83c81fe122cc308eaced"},
+	{path: "postimage.nativeStatus", value: "in_progress"},
+	{path: "postimage.lifecycleState", value: "in-progress"},
+	{path: "postimage.claimState", value: "claimed"},
+	{path: "postimage.removeLabel", value: "backlog"},
+	{path: "postimage.addLabel", value: "in-progress"},
+	{path: "postimage.generationRef", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "postimage.issueIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "postimage.issueMutationSequence", value: "1"},
+	{path: "postimage.dependencyGraphRevision", value: "1"},
+	{path: "postimage.metadataSHA256", value: "3a0bbed5ca93acf77d04eedfad6bcaa16a9701f3e6da3f8669eb9928f6d09139"},
+	{path: "postimage.labelsSHA256", value: "7e4e77e20ee7a46dd77c4a9884dee51aa9f0fa9f2445099a0cb457d72cb83bbb"},
+	{path: "postimage.metadataBase64", value: "eyJib290c3RyYXBDbGFpbSI6eyJhdHRlbXB0SWQiOiJ3MDAxLWJvb3RzdHJhcC0zMTM1ZjFkMS1iMGQ0LTQ5NTYtOWZjOS0xODUyMzEwYmZkNzciLCJiYXNlQ29tbWl0IjoiMzdiNTViOTEyYjIwNzE1MzQ5YmM1MGUwNTI0Yzg1ZDRiMjJmMTc3MiIsImdyYW50SWQiOiJXLTAwMS1ib290c3RyYXAiLCJpZGVtcG90ZW5jeUtleSI6IncwMDEtY2xhaW0tOTdhN2U4MWUtZTc0OS00Y2IwLThhMGEtOGUyNjllMTNlMzhmIn0sImNvbnRyYWN0UHVibGljYXRpb25SZXF1aXJlZCI6dHJ1ZSwiY29vcmRpbmF0b3IiOiJkZWxpdmVyeS1vcmNoZXN0cmF0b3IiLCJkaXNwbGF5SWQiOiJXLTAwMSIsImV4Y2x1c2l2ZVBhdGhzIjpbImludGVybmFsL2F1dGhvcml0eS8qKiIsImNtZC9tYXJzMy1hdXRob3JpdHkvKioiLCJhcGkvYXV0aG9yaXR5LyoqIiwiZGF0YWJhc2UvYXV0aG9yaXR5LyoqIiwiZGVwbG95L2F1dGhvcml0eS8qKiIsImRvY3MvZXZpZGVuY2UvVy0wMDEtdmFsaWRhdGlvbi5tZCIsImdvLm1vZCIsImdvLnN1bSIsIk1ha2VmaWxlIiwiTk9USUNFIiwiVEhJUkRfUEFSVFlfTk9USUNFUyJdLCJmYWlsdXJlT3duZXJzaGlwIjoiZm91bmRhdGlvbiIsImZlYXR1cmVJZCI6IkYtMDAyIiwiZ29hbElkcyI6WyJHLTAwMSJdLCJsaWZlY3ljbGVTdGF0ZSI6ImluLXByb2dyZXNzIiwicHJvZHVjdERlY2lzaW9uSWRzIjpbIlBELTAwMiJdLCJwdWJsaWNEaXNjbG9zdXJlIjp0cnVlLCJyaXNrIjoiY3JpdGljYWwiLCJzY2VuYXJpb0lkcyI6WyJGLTAwMi1TMSIsIkYtMDAyLVMyIiwiRi0wMDItUzMiLCJGLTAwMi1TNCIsIkYtMDAyLVM1IiwiRi0wMDItUzYiXSwic2NoZW1hVmVyc2lvbiI6MSwidmVyaWZpY2F0aW9uT3JkZXIiOlsicWEiLCJzZWN1cml0eS1yZXZpZXdlciIsImRlbGl2ZXJ5LW9yY2hlc3RyYXRvciJdLCJ3b3JrVHlwZSI6ImVuYWJsZXIiLCJ3b3JrVmVyc2lvbiI6eyJhdXRob3JpdHlHZW5lcmF0aW9uIjoiNmU3OWZmODEtYTAwNy00MmE1LWExNzgtN2NlNThkYmI3MThiIiwiZGVwZW5kZW5jeUdyYXBoUmV2aXNpb24iOjEsImlzc3VlSW5jYXJuYXRpb24iOiJlMWU4ZDJkM2Y4MDg3MTA5NmE1NjhmYjQ4OWY0OTU3NWE0MmFiZDM3YjI2OWRmOWZhZjc3N2EwOWNkNjg5YjQxIiwiaXNzdWVNdXRhdGlvblNlcXVlbmNlIjoxfX0"},
+	{path: "toolchain.beadsVersion", value: "1.2.2"},
+	{path: "toolchain.beadsSourceCommit", value: beadsCommit},
+	{path: "toolchain.beadsBinarySHA256", value: "6cc5cf1d3fea5774606af82410ac05e35b78ad5f404f1da5be33c93ff087cffb"},
+	{path: "toolchain.doltSourceCommit", value: doltCommit},
+	{path: "toolchain.doltModule", value: "github.com/dolthub/dolt/go v0.40.5-0.20260605230755-1bf533220ab0"},
+	{path: "toolchain.doltModuleSHA256", value: "oPg5f5bYFy5x7Ws2qtVG7wiva96cIh9SFg7nrC4n7QA="},
+	{path: "toolchain.goVersion", value: "go1.26.2"},
+	{path: "toolchain.goOS", value: "darwin"},
+	{path: "toolchain.goArch", value: "arm64"},
+	{path: "toolchain.cgoEnabled", value: "false"},
+	{path: "toolchain.icuFormula", value: "icu4c@78 78.2"},
+	{path: "toolchain.doltTestImage", value: "dolthub/dolt-sql-server@sha256:6b651663c5024d98a98a4db7226a5e85f90a9344c78fee85617c0fb4a30c6e64"},
+	{path: "toolchain.ryukTestImage", value: "testcontainers/ryuk@sha256:31b31269d06603366cbfd0284708dcd2e281e8a4188e53fce3d3304439d0df3d"},
+	{path: "toolchain.patchPath", value: "internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch"},
+	{path: "toolchain.patchSHA256", value: "dadfbfde1350659dc28079f82979eb9ad145e10a6f0fd40f0af4948fa9d81d62"},
+	{path: "toolchain.helperCommandPath", value: "cmd/mars3-authority/main.go"},
+	{path: "toolchain.helperCommandSHA256", value: "efd8e92cd30114374b0cdcce2680f12ac944cee4fcc3d84042244e486147d538"},
+	{path: "toolchain.helperLibraryPath", value: "internal/authority/bootstrap/bootstrap.go"},
+	{path: "toolchain.helperLibrarySHA256", value: "178a9b7e8cb1e9f2428456783fc27dabffa21fc8a72196cd638771d4173b679b"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequiredBeforeClaim", value: "true"},
+	{path: "verification.externalStateReadbackRequired", value: "true"},
+	{path: "verification.disposableAtomicityConformanceRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001BootstrapGrantNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-bootstrap.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001BootstrapGrantSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"edit-exact-preclaim-paths",
+		"build-patched-Beads-from-the-exact-signed-source-and-patch",
+		"run-disposable-atomic-claim-conformance",
+		"create-pinned-signer-feature-commits-and-one-signed-review-tag",
+		"push-one-feature-branch-and-review-tag-and-open-one-ready-PR",
+		"run-public-commit-gate-and-obtain-independent-QA-and-Security-review",
+		"squash-merge-promptly-with-reviewed-tree-equality",
+		"append-public-safe-authority-intents-receipts-and-dispositions",
+		"execute-one-expected-preimage-CAS-claim-on-accepted-main",
+		"append-one-public-safe-canonical-claim-receipt",
+	},
+	"grant.preclaimPaths": {
+		w001BootstrapGrantPath,
+		w001BootstrapGrantSignature,
+		"cmd/mars3-authority/main.go",
+		"internal/authority/bootstrap/bootstrap.go",
+		"internal/authority/bootstrap/bootstrap_test.go",
+		"internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+		"docs/design-docs/ADR-001-git-beads-authority.md",
+		"docs/product-specs/work-authority.md",
+		"docs/features/F-002-work-authority.md",
+		"docs/evidence/W-001-bootstrap-transition.md",
+		"NOTICE",
+		"THIRD_PARTY_NOTICES",
+	},
+	"grant.implementationPaths": {
+		"internal/authority/**", "cmd/mars3-authority/**", "api/authority/**",
+		"database/authority/**", "deploy/authority/**", "docs/evidence/W-001-validation.md",
+		"go.mod", "go.sum", "Makefile", "NOTICE", "THIRD_PARTY_NOTICES",
+	},
+	"grant.prohibitedEffects": {
+		"execute-claim-before-helper-merge-protected-main-success-QA-and-Security-acceptance",
+		"use-raw-SQL-hidden-code-or-a-two-transaction-claim",
+		"mutate-another-Bead-dependency-or-authority-project",
+		"issue-or-assert-a-live-lease-before-verified-gateway-issuance",
+		"edit-outside-the-current-signed-phase-paths",
+		"move-delete-or-reuse-the-review-tag",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"production-or-destructive-effect",
+		"reconcile-plan-or-manifest-without-a-separate-signed-postclaim-grant",
+		"begin-gateway-implementation-under-this-bootstrap-claim-grant",
+		"autonomous-mutation", "trust-escalation",
+		"credentials-provider-session-customer-data-or-raw-payloads",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -1318,6 +1509,156 @@ func checkWave1CIFixtureFixAddendum(root string, findings *[]Finding) {
 			addFinding(findings, wave1CIFixtureFixSignature, "public.pr_fallback_fixture_signature", "%v", err)
 		}
 	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001BootstrapGrantPath))); err == nil {
+		checkW001BootstrapGrant(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_state", "W-001 bootstrap grant state cannot be established")
+	}
+}
+
+func checkW001BootstrapGrant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001BootstrapGrantPath)
+	if err != nil {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_missing", "signed W-001 bootstrap grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001BootstrapGrantScalars, w001BootstrapGrantSequences,
+		[]string{"grant", "expected", "postimage", "toolchain", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_schema", "%s", message)
+	}
+	for _, expected := range w001BootstrapGrantScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_value", "%s does not match the signed W-001 bootstrap contract", expected.path)
+		}
+	}
+	for path, expected := range w001BootstrapGrantSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_sequence", "%s must equal the exact ordered W-001 bootstrap contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "expected", "postimage", "toolchain", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_expiry", "bootstrap grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	incarnationInput, _ := json.Marshal(map[string]string{
+		"created_at": scalarValue(document, "expected.createdAt"),
+		"id":         scalarValue(document, "grant.bead"),
+	})
+	if fileSHA256(incarnationInput) != scalarValue(document, "postimage.issueIncarnation") {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_incarnation", "issue incarnation must be the signed digest of the canonical issue identity")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001BootstrapGrantSignature)
+	if signatureErr != nil {
+		addFinding(findings, w001BootstrapGrantSignature, "public.w001_bootstrap_signature_missing", "detached W-001 bootstrap signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_bootstrap_key", "W-001 bootstrap grant must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001BootstrapGrantNamespace); err != nil {
+			addFinding(findings, w001BootstrapGrantSignature, "public.w001_bootstrap_signature", "%v", err)
+		}
+	}
+
+	for _, binding := range []struct {
+		pathField string
+		hashField string
+		code      string
+	}{
+		{"toolchain.patchPath", "toolchain.patchSHA256", "public.w001_bootstrap_patch_digest"},
+		{"toolchain.helperCommandPath", "toolchain.helperCommandSHA256", "public.w001_bootstrap_helper_digest"},
+		{"toolchain.helperLibraryPath", "toolchain.helperLibrarySHA256", "public.w001_bootstrap_helper_digest"},
+	} {
+		path := scalarValue(document, binding.pathField)
+		expectedDigest := scalarValue(document, binding.hashField)
+		content, err := readRepoFile(root, path)
+		if err != nil || !sha256Pattern.MatchString(expectedDigest) || fileSHA256(content) != expectedDigest {
+			addFinding(findings, path, binding.code, "bootstrap helper material must match its exact signed SHA-256")
+		}
+	}
+
+	postPayload, err := base64.RawStdEncoding.DecodeString(scalarValue(document, "postimage.metadataBase64"))
+	if err != nil || !json.Valid(postPayload) || fileSHA256(postPayload) != scalarValue(document, "postimage.metadataSHA256") {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_postimage", "postimage metadata must be valid unpadded base64 JSON with the signed digest")
+	} else {
+		var metadata map[string]any
+		if json.Unmarshal(postPayload, &metadata) != nil || metadata["lifecycleState"] != "in-progress" {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_postimage", "postimage metadata must set the exact lifecycle")
+		}
+		workVersion, ok := metadata["workVersion"].(map[string]any)
+		if !ok || workVersion["authorityGeneration"] != scalarValue(document, "postimage.generationRef") ||
+			workVersion["issueIncarnation"] != scalarValue(document, "postimage.issueIncarnation") ||
+			workVersion["issueMutationSequence"] != float64(1) || workVersion["dependencyGraphRevision"] != float64(1) {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_work_version", "postimage metadata must carry the exact bootstrap WorkVersion")
+		}
+	}
+}
+
+func scalarValue(document strictPlanningGrant, path string) string {
+	values := document.scalars[path]
+	if len(values) != 1 {
+		return ""
+	}
+	return values[0]
+}
+
+// LoadW001BootstrapGrant returns the exact validated public configuration for
+// the one-shot helper. It performs the complete repository grant check first.
+func LoadW001BootstrapGrant(repo string) (W001BootstrapGrant, error) {
+	root, err := repositoryRoot(repo)
+	if err != nil {
+		return W001BootstrapGrant{}, err
+	}
+	var findings []Finding
+	checkWave1PlanningGrant(root, &findings)
+	if len(findings) != 0 {
+		sortFindings(findings)
+		return W001BootstrapGrant{}, fmt.Errorf("W-001 bootstrap grant validation failed: %s: %s", findings[0].Code, findings[0].Message)
+	}
+	data, err := readRepoFile(root, w001BootstrapGrantPath)
+	if err != nil {
+		return W001BootstrapGrant{}, err
+	}
+	document := parseStrictGrant(data, w001BootstrapGrantScalars, w001BootstrapGrantSequences,
+		[]string{"grant", "expected", "postimage", "toolchain", "verification", "integrity"})
+	return W001BootstrapGrant{
+		ID: scalarValue(document, "grant.id"), AttemptID: scalarValue(document, "grant.attemptId"), IdempotencyKey: scalarValue(document, "grant.replayRef"),
+		Bead: scalarValue(document, "grant.bead"), BaseCommit: scalarValue(document, "grant.baseCommit"), ExpiresAt: scalarValue(document, "grant.expiresAt"),
+		WorkingBranch: scalarValue(document, "grant.workingBranch"), Assignee: scalarValue(document, "expected.assignee"),
+		AuthorityProjectID:   scalarValue(document, "expected.beadsProject"),
+		ExpectedNativeStatus: scalarValue(document, "expected.nativeStatus"), ExpectedLifecycleState: scalarValue(document, "expected.lifecycleState"),
+		ExpectedCreatedAt: scalarValue(document, "expected.createdAt"), ExpectedUpdatedAt: scalarValue(document, "expected.updatedAt"),
+		ExpectedMetadataSHA256: scalarValue(document, "expected.metadataSHA256"), ExpectedLabelsSHA256: scalarValue(document, "expected.labelsSHA256"),
+		ExpectedDependency: scalarValue(document, "expected.dependency"), ExpectedDependencyType: scalarValue(document, "expected.dependencyType"),
+		ExpectedDependencyStatus: scalarValue(document, "expected.dependencyNativeStatus"), ExpectedDependencyLifecycle: scalarValue(document, "expected.dependencyLifecycleState"),
+		ExpectedDependencySHA256: scalarValue(document, "expected.dependencyDigest"), ExpectedLineageSHA256: scalarValue(document, "expected.lineageDigest"),
+		PostNativeStatus: scalarValue(document, "postimage.nativeStatus"), PostLifecycleState: scalarValue(document, "postimage.lifecycleState"),
+		PostMetadataSHA256: scalarValue(document, "postimage.metadataSHA256"), PostLabelsSHA256: scalarValue(document, "postimage.labelsSHA256"),
+		PostMetadataBase64: scalarValue(document, "postimage.metadataBase64"), RemoveLabel: scalarValue(document, "postimage.removeLabel"), AddLabel: scalarValue(document, "postimage.addLabel"),
+		BeadsVersion: scalarValue(document, "toolchain.beadsVersion"), BeadsSourceCommit: scalarValue(document, "toolchain.beadsSourceCommit"),
+		BeadsBinarySHA256: scalarValue(document, "toolchain.beadsBinarySHA256"),
+		DoltModule:        scalarValue(document, "toolchain.doltModule"), DoltModuleSHA256: scalarValue(document, "toolchain.doltModuleSHA256"),
+		GoVersion: scalarValue(document, "toolchain.goVersion"), GoOS: scalarValue(document, "toolchain.goOS"), GoArch: scalarValue(document, "toolchain.goArch"),
+		ICUFormula: scalarValue(document, "toolchain.icuFormula"), DoltTestImage: scalarValue(document, "toolchain.doltTestImage"), RyukTestImage: scalarValue(document, "toolchain.ryukTestImage"),
+		PatchPath: scalarValue(document, "toolchain.patchPath"), PatchSHA256: scalarValue(document, "toolchain.patchSHA256"),
+	}, nil
 }
 
 type planningGrantCheckoutKind int
@@ -1375,6 +1716,13 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 	}
 	if metadata.Mode()&os.ModeSymlink != 0 || (!metadata.IsDir() && !metadata.Mode().IsRegular()) {
 		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_git", "repository Git metadata is not a regular directory or worktree pointer")
+		return
+	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001BootstrapGrantPath))); err == nil {
+		checkW001BootstrapGrantGitDiff(root, findings)
+		return
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_state", "W-001 bootstrap grant state cannot be established")
 		return
 	}
 	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(wave1DirectMainGrantPath))); err == nil {
@@ -1535,6 +1883,227 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, wave1PlanningGrantPath, "public.planning_grant_diff_scope", "current v3 CI recovery changes include a path outside the signed v3 addendum")
 		return
 	}
+}
+
+func checkW001BootstrapGrantGitDiff(root string, findings *[]Finding) {
+	topLevel, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
+	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(topLevel))) {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_git", "Git metadata must resolve to the audited repository root")
+		return
+	}
+	base, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001BootstrapBase+"^{commit}")
+	if err != nil || strings.TrimSpace(string(base)) != w001BootstrapBase {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_base", "the exact signed bootstrap base must resolve locally")
+		return
+	}
+	baseTree, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001BootstrapBase+"^{tree}")
+	if err != nil || strings.TrimSpace(string(baseTree)) != w001BootstrapBaseTree {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_base", "the exact signed bootstrap base tree must remain unchanged")
+		return
+	}
+	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
+	head := strings.TrimSpace(string(headOutput))
+	if err != nil || !sha1Pattern.MatchString(head) {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_git", "HEAD must resolve to one exact commit")
+		return
+	}
+	branchOutput, branchErr := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
+	branch := strings.TrimSpace(string(branchOutput))
+	featureHead := head
+	requireTag := false
+	mainTreeCheck := false
+
+	switch {
+	case branchErr == nil && branch == w001BootstrapBranch && os.Getenv("GITHUB_ACTIONS") != "true":
+		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001BootstrapBase, head); err != nil {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_ancestry", "local bootstrap work must descend from the exact signed base")
+			return
+		}
+	case branchErr == nil && branch == "main" && os.Getenv("GITHUB_ACTIONS") != "true":
+		requireTag, mainTreeCheck = true, true
+	case os.Getenv("GITHUB_ACTIONS") == "true":
+		featureHead, requireTag, mainTreeCheck = w001BootstrapGitHubCheckout(root, head, branch, findings)
+		if featureHead == "" {
+			return
+		}
+	default:
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_branch", "bootstrap work requires the exact signed branch or accepted main")
+		return
+	}
+
+	if requireTag {
+		tagExpected := featureHead
+		if mainTreeCheck {
+			tagExpected = ""
+		}
+		target, ok := checkW001BootstrapReviewTag(root, tagExpected, findings)
+		if !ok {
+			return
+		}
+		featureHead = target
+	}
+	if mainTreeCheck {
+		parents, err := planningGrantCommitParents(root, head)
+		if err != nil || len(parents) != 1 || parents[0] != w001BootstrapBase {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_main_topology", "accepted main must be one squash commit over the signed bootstrap base")
+			return
+		}
+		mainTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", featureHead+"^{tree}")
+		if strings.TrimSpace(string(mainTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_main_tree", "accepted main tree must equal the signed reviewed feature tree")
+			return
+		}
+	}
+
+	if featureHead != w001BootstrapBase {
+		commits, err := planningGrantCommitRangeFrom(root, w001BootstrapBase, featureHead)
+		if err != nil || len(commits) == 0 {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_history", "bootstrap feature history must be a nonempty linear chain")
+			return
+		}
+		publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+		if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+			addFinding(findings, wave1PlanningGrantKey, "public.w001_bootstrap_commit_signature", "bootstrap commits require the pinned genesis signer")
+			return
+		}
+		previous := w001BootstrapBase
+		authorized := w001BootstrapPreclaimPathSet()
+		for _, commit := range commits {
+			if len(commit.parents) != 1 || commit.parents[0] != previous {
+				addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_topology", "bootstrap feature history must be a contiguous one-parent chain")
+				return
+			}
+			object, err := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+			if err != nil || verifyPlanningGrantCommit(object, publicKey) != nil {
+				addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_commit_signature", "every bootstrap feature commit must carry the pinned SSH signature")
+				return
+			}
+			paths, err := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
+			normalized, normalizeErr := normalizedPlanningGrantGitPaths(paths)
+			if err != nil || normalizeErr != nil || !planningGrantPathsAllowed(normalized, authorized) {
+				addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_scope", "a bootstrap feature commit includes a path outside its signed preclaim scope")
+				return
+			}
+			previous = commit.id
+		}
+	}
+
+	tracked, err := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
+	if err != nil {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_scope", "current tracked bootstrap paths cannot be enumerated")
+		return
+	}
+	untracked, err := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
+	if err != nil {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_scope", "current untracked bootstrap paths cannot be enumerated")
+		return
+	}
+	paths, err := normalizedPlanningGrantGitPaths(tracked, untracked)
+	if err != nil || !planningGrantPathsAllowed(paths, w001BootstrapPreclaimPathSet()) {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_scope", "current changes include a path outside the signed preclaim scope")
+	}
+}
+
+func w001BootstrapPreclaimPathSet() map[string]bool {
+	authorized := make(map[string]bool, len(w001BootstrapGrantSequences["grant.preclaimPaths"]))
+	for _, path := range w001BootstrapGrantSequences["grant.preclaimPaths"] {
+		authorized[path] = true
+	}
+	return authorized
+}
+
+func w001BootstrapGitHubCheckout(root, head, branch string, findings *[]Finding) (string, bool, bool) {
+	if os.Getenv("CI") != "true" || os.Getenv("GITHUB_ACTIONS") != "true" || os.Getenv("RUNNER_ENVIRONMENT") != "github-hosted" ||
+		os.Getenv("GITHUB_REPOSITORY") != planningGrantRepository || os.Getenv("GITHUB_WORKFLOW") != planningGrantWorkflow ||
+		os.Getenv("GITHUB_JOB") != planningGrantWorkflowJob || os.Getenv("GITHUB_SHA") != head ||
+		!samePlanningGrantRepositoryRoot(root, os.Getenv("GITHUB_WORKSPACE")) {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_runner", "GitHub bootstrap checkout lacks canonical runner identity")
+		return "", false, false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ID")); !ok {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_runner", "GitHub bootstrap run ID is invalid")
+		return "", false, false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ATTEMPT")); !ok {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_runner", "GitHub bootstrap run attempt is invalid")
+		return "", false, false
+	}
+	workflowRef := os.Getenv("GITHUB_WORKFLOW_REF")
+	workflowPrefix := planningGrantRepository + "/" + planningGrantWorkflowPath + "@"
+	workflow, err := readRepoFile(root, planningGrantWorkflowPath)
+	if err != nil || fileSHA256(workflow) != canonicalFoundationWorkflowSHA256 || !strings.HasPrefix(workflowRef, workflowPrefix) {
+		addFinding(findings, planningGrantWorkflowPath, "public.w001_bootstrap_workflow", "bootstrap CI requires the pinned protected workflow")
+		return "", false, false
+	}
+	event, ok := readPlanningGrantGitHubEvent(os.Getenv("GITHUB_EVENT_PATH"))
+	if !ok || event.Repository.FullName != planningGrantRepository {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_event", "bootstrap CI event identity is invalid")
+		return "", false, false
+	}
+	switch os.Getenv("GITHUB_EVENT_NAME") {
+	case "pull_request":
+		ref := os.Getenv("GITHUB_REF")
+		if branch != "" || !validPlanningGrantPullRequestRef(os.Getenv("GITHUB_REF")) || os.Getenv("GITHUB_HEAD_REF") != w001BootstrapBranch ||
+			os.Getenv("GITHUB_BASE_REF") != "main" || event.PullRequest == nil || event.PullRequest.Head.Ref != w001BootstrapBranch ||
+			event.PullRequest.Base.Ref != "main" || event.PullRequest.Base.SHA != w001BootstrapBase ||
+			!sha1Pattern.MatchString(event.PullRequest.Head.SHA) ||
+			(event.PullRequest.MergeCommitSHA != "" && !sha1Pattern.MatchString(event.PullRequest.MergeCommitSHA)) {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_event", "pull-request event does not bind the signed branch and base")
+			return "", false, false
+		}
+		workflowSuffix := strings.TrimPrefix(workflowRef, workflowPrefix)
+		if workflowSuffix != ref && workflowSuffix != "refs/heads/main" {
+			addFinding(findings, planningGrantWorkflowPath, "public.w001_bootstrap_workflow", "pull-request workflow ref is not canonical")
+			return "", false, false
+		}
+		parents, err := planningGrantCommitParents(root, head)
+		if err != nil || len(parents) != 2 || parents[0] != w001BootstrapBase || parents[1] != event.PullRequest.Head.SHA {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_pr_topology", "pull-request checkout must be the exact two-parent synthetic merge")
+			return "", false, false
+		}
+		return event.PullRequest.Head.SHA, true, false
+	case "push":
+		if branch != "" && branch != "main" || os.Getenv("GITHUB_REF") != "refs/heads/main" || os.Getenv("GITHUB_REF_PROTECTED") != "true" ||
+			os.Getenv("GITHUB_HEAD_REF") != "" || os.Getenv("GITHUB_BASE_REF") != "" || workflowRef != workflowPrefix+"refs/heads/main" ||
+			event.Ref != "refs/heads/main" || event.Before != w001BootstrapBase || event.After != head || event.HeadCommit == nil || event.HeadCommit.ID != head || event.PullRequest != nil {
+			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_event", "protected-main event does not bind the signed bootstrap base and squash")
+			return "", false, false
+		}
+		return head, true, true
+	default:
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_event", "unsupported GitHub event for bootstrap publication")
+		return "", false, false
+	}
+}
+
+func checkW001BootstrapReviewTag(root, expectedFeatureHead string, findings *[]Finding) (string, bool) {
+	ref := "refs/tags/" + w001BootstrapReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || !sha1Pattern.MatchString(strings.TrimSpace(string(objectID))) {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_tag", "bootstrap CI requires the signed immutable review tag")
+		return "", false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", strings.TrimSpace(string(objectID)))
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_tag", "bootstrap review tag cannot be verified with the pinned key")
+		return "", false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001BootstrapReviewTag, w001BootstrapReviewTagMessage)
+	if err != nil {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_tag", "bootstrap review tag must be an exact pinned-signer tree attestation")
+		return "", false
+	}
+	if expectedFeatureHead != "" && expectedFeatureHead != target {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_tag_target", "review tag must target the immutable feature head")
+		return "", false
+	}
+	if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001BootstrapBase, target); err != nil || target == w001BootstrapBase {
+		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_tag_target", "review tag target must preserve nonempty bootstrap feature history")
+		return "", false
+	}
+	return target, true
 }
 
 func checkWave1DirectMainTransitionGitDiff(root string, findings *[]Finding) {

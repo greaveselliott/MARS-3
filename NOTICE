@@ -14,4 +14,9 @@ MIT License. Its embedded Dolt dependency is pinned through revision 1bf533220ab
 Beads databases are external operational state and are not redistributed in
 this repository.
 
+The W-001 bootstrap includes a clearly marked MARS-3 modification patch against
+the pinned Beads source. That patch is distributed under the upstream MIT
+License reproduced in THIRD_PARTY_NOTICES; no Beads database or binary is
+distributed.
+
 See THIRD_PARTY_NOTICES and the generated provenance manifest for details.

@@ -274,6 +274,7 @@ and digest; digests prove integrity, never freshness by themselves.
 
 ```text
 backlog --claim+lease--> in-progress --handoff--> in-review
+backlog --signed W-001 atomic bootstrap claim (no capability)--> in-progress
 in-review --changes-requested--> in-progress
 in-review --accepted chain+merge+completed run+reconcile--> done
 backlog|in-progress|in-review --authorized supersession--> superseded
@@ -283,15 +284,19 @@ lease: active --release|revoke|expire--> inactive --new issue--> active(same gen
 lease-store: restore|rollback|reinit --> disabled --human recovery--> new generation,epoch 1
 ```
 
-There is one declared bootstrap exception: after the accepted F-002 contract,
+There is one declared bootstrap sequence: after the accepted F-002 contract,
 a separately signed, human-directed W-001 grant binds the canonical claim,
 attempt, immutable base commit, exact W-001 paths, publication effects, expiry,
   expected WorkVersion, exact `backlog/open/unclaimed` →
   `in-progress/in_progress/claimed` CAS transition, pinned Beads client and
-  binary hash, idempotency key, and public-safe receipts. It permits W-001 to enter `in-progress` and build the
-gateway without falsely asserting that its not-yet-built lease exists. It is
-not transferable or autonomous, cannot authorize production/destructive
-effects, and becomes unusable as soon as self-host conformance is accepted.
+  binary hash, idempotency key, and public-safe receipts. That first grant uses
+one reviewed helper transaction to enter `in-progress`, but grants no
+implementation capability. A second signed grant must reconcile the plan and
+manifest to the verified canonical postimage; only a later bounded delivery
+grant may authorize building the gateway without falsely asserting that its
+not-yet-built lease exists. The sequence is not transferable or autonomous,
+cannot authorize production/destructive effects, and its delivery exception
+becomes unusable as soon as self-host conformance is accepted.
 Every later mutation uses the normal live-lease transition above. P-001 and all
 subsequent work receive no equivalent exception.
 

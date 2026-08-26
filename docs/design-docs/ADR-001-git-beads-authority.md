@@ -106,28 +106,36 @@ The strict document contains exactly:
 - `autonomousMutation: false`, `liveLeaseAsserted: false`,
   `productionEffects: false`, and exact verification order
   `qa`, `security-reviewer`, `delivery-orchestrator`;
-- exact transition paths `.harness/grants/W-001-bootstrap.yaml`, its signature,
-  `.harness/manifest.yaml`, the active plan, the bootstrap-transition evidence,
-  `docs/evidence/W-001-bootstrap-transition.md`,
-  `internal/doctrine/grant.go`, and `internal/doctrine/grant_test.go`;
+- exact preclaim paths for the grant and signature, validator, public helper,
+  pinned Beads source patch, tests, doctrine/spec/BDD updates, bootstrap
+  evidence, and third-party notices;
 - exact implementation path patterns equal to the canonical M3-W001
   `exclusivePaths`; a mismatch blocks the claim rather than widening either
   side; and
-- allowed effects limited to pinned-state verification, one expected-version
-  CAS claim of M3-W001, edits within those listed paths, public gates, signed
-  commits, branch push/PR update, public-safe authority intent/receipt records,
-  and self-host conformance. It explicitly prohibits other-Bead or unlisted
-  mutation, asserting a lease before verified issuance, production/destructive
-  effects, autonomous mutation, trust escalation, credentials, and provider or
-  customer data.
+- allowed effects limited to pinned-state verification, disposable atomicity
+  conformance, publication of the reviewed helper tree, one expected-preimage
+  CAS claim of M3-W001, and one public-safe claim receipt. It explicitly
+  prohibits plan/manifest reconciliation, gateway implementation, other-Bead
+  or unlisted mutation, asserting a lease before verified issuance,
+  production/destructive effects, autonomous mutation, trust escalation,
+  credentials, and provider or customer data.
+
+The helper patches the pinned Beads source in a temporary directory and uses
+the native `ClaimIssueInTx` primitive plus metadata and lifecycle-label updates
+inside one outer Dolt transaction. The pinned v1.2.2 `update --claim
+--metadata` route is not used because it commits those effects in separate
+transactions; `batch` without this reviewed patch has no claim CAS. Raw SQL and
+hidden local code are prohibited.
 
 Unknown fields, YAML aliases/anchors/tags/flow syntax, duplicate keys,
 unresolved paths, changed signed bytes, signer drift, stale expected version or
 digests, path disagreement, expiry, and any actual diff outside the signed path
 union fail closed. The canonical claim must succeed before implementation. The
-grant becomes unusable when self-host conformance verifies the gateway and the
-first real W-001 lease, or at expiry, whichever occurs first; all subsequent
-effects use the accepted gateway.
+claim grant cannot reconcile the Git plan or start implementation. A separate
+signed postclaim reconciliation grant must bind the verified claim receipt,
+accepted helper commit, and exact plan/manifest postimage. A later delivery
+grant remains bounded until self-host conformance verifies the gateway and the
+first real W-001 lease; all subsequent effects use the accepted gateway.
 
 ## Invariants
 

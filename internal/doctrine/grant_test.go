@@ -22,6 +22,97 @@ import (
 
 const wave1PlanningGrantFirstCommitFixture = "fc9f6641d0f739a401a4f7be3bc0ee575df1310a"
 
+func TestW001BootstrapGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001BootstrapGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 bootstrap grant was rejected: %v", findings)
+	}
+}
+
+func TestW001BootstrapGrantRejectsTampering(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(w001BootstrapGrantPath)
+	signature := read(w001BootstrapGrantSignature)
+	publicKey := read(wave1PlanningGrantKey)
+	materials := map[string][]byte{
+		scalarPathFromGrant(t, grant, "patchPath"):         nil,
+		scalarPathFromGrant(t, grant, "helperCommandPath"): nil,
+		scalarPathFromGrant(t, grant, "helperLibraryPath"): nil,
+	}
+	for path := range materials {
+		materials[path] = read(path)
+	}
+
+	for _, testCase := range []struct {
+		name string
+		old  string
+		new  string
+		code string
+	}{
+		{name: "claim_state", old: "claimState: unclaimed", new: "claimState: claimed", code: "public.w001_bootstrap_value"},
+		{name: "scope", old: "    - internal/authority/bootstrap/bootstrap_test.go", new: "    - internal/runtime/escape.go", code: "public.w001_bootstrap_sequence"},
+		{name: "dependency_type", old: "dependencyType: blocks", new: "dependencyType: related", code: "public.w001_bootstrap_value"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			root := writeW001BootstrapGrantFixture(t, bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1), signature, publicKey, materials)
+			var findings []Finding
+			checkW001BootstrapGrant(root, &findings)
+			if !findingCodePresent(findings, testCase.code) || !findingCodePresent(findings, "public.w001_bootstrap_signature") {
+				t.Fatalf("tampered bootstrap grant was not rejected by contract and signature: %v", findings)
+			}
+		})
+	}
+
+	t.Run("helper_bytes", func(t *testing.T) {
+		tamperedMaterials := make(map[string][]byte, len(materials))
+		for path, data := range materials {
+			tamperedMaterials[path] = append([]byte(nil), data...)
+		}
+		path := scalarPathFromGrant(t, grant, "helperLibraryPath")
+		tamperedMaterials[path] = append(tamperedMaterials[path], []byte("\n// unauthorized drift\n")...)
+		root := writeW001BootstrapGrantFixture(t, grant, signature, publicKey, tamperedMaterials)
+		var findings []Finding
+		checkW001BootstrapGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_bootstrap_helper_digest") {
+			t.Fatalf("tampered helper bytes were not rejected: %v", findings)
+		}
+	})
+}
+
+func scalarPathFromGrant(t *testing.T, grant []byte, key string) string {
+	t.Helper()
+	prefix := "  " + key + ": "
+	for _, line := range strings.Split(string(grant), "\n") {
+		if strings.HasPrefix(line, prefix) {
+			return strings.TrimPrefix(line, prefix)
+		}
+	}
+	t.Fatalf("missing %s", key)
+	return ""
+}
+
+func writeW001BootstrapGrantFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
+	t.Helper()
+	root := t.TempDir()
+	writePlanningGrantTestFile(t, root, w001BootstrapGrantPath, grant)
+	writePlanningGrantTestFile(t, root, w001BootstrapGrantSignature, signature)
+	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+	for path, data := range materials {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	return root
+}
+
 func TestWave1DirectMainTransitionAcceptsPinnedSignedContract(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	var findings []Finding
@@ -75,6 +166,9 @@ func TestWave1DirectMainTransitionAcceptsCurrentMainCheckout(t *testing.T) {
 		t.Skip("the top-level public gate exercises canonical GitHub push facts")
 	}
 	repo := filepath.Clean(filepath.Join("..", ".."))
+	if _, err := os.Stat(filepath.Join(repo, filepath.FromSlash(w001BootstrapGrantPath))); err == nil {
+		t.Skip("the signed W-001 bootstrap grant supersedes the historical direct-main checkout")
+	}
 	var findings []Finding
 	checkWave1DirectMainTransitionGitDiff(repo, &findings)
 	if len(findings) != 0 {

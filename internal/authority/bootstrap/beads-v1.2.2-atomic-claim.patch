@@ -1,0 +1,317 @@
+diff --git a/cmd/bd/batch.go b/cmd/bd/batch.go
+index a9255b24..b6dac54d 100644
+--- a/cmd/bd/batch.go
++++ b/cmd/bd/batch.go
+@@ -5,0 +6,4 @@ import (
++	"crypto/sha256"
++	"encoding/base64"
++	"encoding/hex"
++	"encoding/json"
+@@ -9,0 +14 @@ import (
++	"sort"
+@@ -11,0 +17 @@ import (
++	"time"
+@@ -52,0 +59 @@ Grammar (one command per line):
++  bootstrap-claim <id> <key>=<value> ...
+@@ -255,0 +263,3 @@ func parseBatchScript(r io.Reader) ([]batchOp, error) {
++		case "bootstrap-claim":
++			op.cmd = "bootstrap-claim"
++			op.args = tokens[1:]
+@@ -270 +280 @@ func parseBatchScript(r io.Reader) ([]batchOp, error) {
+-			return nil, fmt.Errorf("line %d: unsupported batch command %q (supported: close, update, create, dep add, dep remove)", lineNo, tokens[0])
++			return nil, fmt.Errorf("line %d: unsupported batch command %q (supported: close, update, create, dep add, dep remove, bootstrap-claim)", lineNo, tokens[0])
+@@ -339,0 +350,3 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
++	case "bootstrap-claim":
++		return runBootstrapClaimBatchOp(ctx, tx, op, actorName)
++
+@@ -438,0 +452,130 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
++type atomicClaimTransaction interface {
++	ClaimIssue(context.Context, string, string) error
++}
++
++var bootstrapClaimKeys = map[string]bool{
++	"expected_status":               true,
++	"expected_assignee":             true,
++	"expected_created_at":           true,
++	"expected_updated_at":           true,
++	"expected_metadata_sha256":      true,
++	"expected_labels_sha256":        true,
++	"expected_dependency":           true,
++	"expected_dependency_type":      true,
++	"expected_dependency_status":    true,
++	"expected_dependency_lifecycle": true,
++	"expected_dependency_sha256":    true,
++	"post_metadata_base64":          true,
++	"remove_label":                  true,
++	"add_label":                     true,
++}
++
++func runBootstrapClaimBatchOp(ctx context.Context, tx storage.Transaction, op batchOp, actor string) (batchOpResult, error) {
++	result := batchOpResult{Line: op.line, Op: op.cmd}
++	if len(op.args) != 15 {
++		return result, fmt.Errorf("bootstrap-claim requires <id> and exactly fourteen key=value arguments")
++	}
++	id := op.args[0]
++	values := make(map[string]string, len(op.args)-1)
++	for _, token := range op.args[1:] {
++		parts := strings.SplitN(token, "=", 2)
++		if len(parts) != 2 || parts[0] == "" || !bootstrapClaimKeys[parts[0]] {
++			return result, fmt.Errorf("bootstrap-claim: invalid argument %q", token)
++		}
++		if _, exists := values[parts[0]]; exists {
++			return result, fmt.Errorf("bootstrap-claim: duplicate argument %q", parts[0])
++		}
++		values[parts[0]] = parts[1]
++	}
++	if len(values) != len(bootstrapClaimKeys) {
++		return result, fmt.Errorf("bootstrap-claim: every required argument must occur exactly once")
++	}
++	claimTx, ok := tx.(atomicClaimTransaction)
++	if !ok {
++		return result, fmt.Errorf("bootstrap-claim: storage transaction lacks native CAS claim support")
++	}
++	issue, err := tx.GetIssue(ctx, id)
++	if err != nil {
++		return result, fmt.Errorf("bootstrap-claim: read issue: %w", err)
++	}
++	if string(issue.Status) != values["expected_status"] || issue.Assignee != values["expected_assignee"] ||
++		issue.CreatedAt.UTC().Format(time.RFC3339) != values["expected_created_at"] ||
++		issue.UpdatedAt.UTC().Format(time.RFC3339) != values["expected_updated_at"] {
++		return result, fmt.Errorf("bootstrap-claim: issue precondition mismatch")
++	}
++	metadataDigest, err := canonicalJSONDigest(issue.Metadata)
++	if err != nil || metadataDigest != values["expected_metadata_sha256"] {
++		return result, fmt.Errorf("bootstrap-claim: metadata precondition mismatch")
++	}
++	labels, err := tx.GetLabels(ctx, id)
++	if err != nil {
++		return result, fmt.Errorf("bootstrap-claim: read labels: %w", err)
++	}
++	sort.Strings(labels)
++	labelsJSON, _ := json.Marshal(labels)
++	if digestBytes(labelsJSON) != values["expected_labels_sha256"] {
++		return result, fmt.Errorf("bootstrap-claim: label precondition mismatch")
++	}
++	dependencies, err := tx.GetDependencyRecords(ctx, id)
++	if err != nil || len(dependencies) != 1 || dependencies[0].DependsOnID != values["expected_dependency"] ||
++		string(dependencies[0].Type) != values["expected_dependency_type"] {
++		return result, fmt.Errorf("bootstrap-claim: dependency precondition mismatch")
++	}
++	dependency, err := tx.GetIssue(ctx, dependencies[0].DependsOnID)
++	if err != nil || string(dependency.Status) != values["expected_dependency_status"] ||
++		metadataStringValue(dependency.Metadata, "lifecycleState") != values["expected_dependency_lifecycle"] {
++		return result, fmt.Errorf("bootstrap-claim: dependency state mismatch")
++	}
++	dependencyJSON, _ := json.Marshal(map[string]interface{}{"dependencies": []interface{}{map[string]interface{}{
++		"dependency_type": string(dependencies[0].Type), "id": dependencies[0].DependsOnID,
++		"lifecycleState": metadataStringValue(dependency.Metadata, "lifecycleState"), "status": string(dependency.Status),
++	}}})
++	if digestBytes(dependencyJSON) != values["expected_dependency_sha256"] {
++		return result, fmt.Errorf("bootstrap-claim: dependency digest mismatch")
++	}
++	postMetadata, err := base64.RawStdEncoding.DecodeString(values["post_metadata_base64"])
++	if err != nil || !json.Valid(postMetadata) {
++		return result, fmt.Errorf("bootstrap-claim: post metadata is not valid unpadded base64 JSON")
++	}
++	if err := claimTx.ClaimIssue(ctx, id, actor); err != nil {
++		return result, fmt.Errorf("bootstrap-claim: native CAS claim: %w", err)
++	}
++	if err := tx.UpdateIssue(ctx, id, map[string]interface{}{"metadata": json.RawMessage(postMetadata)}, actor); err != nil {
++		return result, fmt.Errorf("bootstrap-claim: metadata update: %w", err)
++	}
++	if err := tx.RemoveLabel(ctx, id, values["remove_label"], actor); err != nil {
++		return result, fmt.Errorf("bootstrap-claim: remove lifecycle label: %w", err)
++	}
++	if err := tx.AddLabel(ctx, id, values["add_label"], actor); err != nil {
++		return result, fmt.Errorf("bootstrap-claim: add lifecycle label: %w", err)
++	}
++	result.Target = id
++	return result, nil
++}
++
++func canonicalJSONDigest(data []byte) (string, error) {
++	var decoded interface{}
++	if err := json.Unmarshal(data, &decoded); err != nil {
++		return "", err
++	}
++	canonical, err := json.Marshal(decoded)
++	if err != nil {
++		return "", err
++	}
++	return digestBytes(canonical), nil
++}
++
++func metadataStringValue(data []byte, key string) string {
++	var values map[string]interface{}
++	if json.Unmarshal(data, &values) != nil {
++		return ""
++	}
++	value, _ := values[key].(string)
++	return value
++}
++
++func digestBytes(data []byte) string {
++	digest := sha256.Sum256(data)
++	return hex.EncodeToString(digest[:])
++}
++
+diff --git a/cmd/bd/batch_embedded_test.go b/cmd/bd/batch_embedded_test.go
+index aa9d89be..817e032a 100644
+--- a/cmd/bd/batch_embedded_test.go
++++ b/cmd/bd/batch_embedded_test.go
+@@ -6,0 +7,3 @@ import (
++	"encoding/base64"
++	"encoding/json"
++	"fmt"
+@@ -7,0 +11 @@ import (
++	"sort"
+@@ -9,0 +14 @@ import (
++	"time"
+@@ -14,0 +20,116 @@ import (
++func bootstrapClaimScript(t *testing.T, st storage.DoltStorage, ctx context.Context, id, updatedAt string) string {
++	t.Helper()
++	issue, err := st.GetIssue(ctx, id)
++	if err != nil {
++		t.Fatalf("GetIssue %s: %v", id, err)
++	}
++	metadataDigest, err := canonicalJSONDigest(issue.Metadata)
++	if err != nil {
++		t.Fatalf("canonical metadata: %v", err)
++	}
++	labels, err := st.GetLabels(ctx, id)
++	if err != nil {
++		t.Fatalf("GetLabels %s: %v", id, err)
++	}
++	sort.Strings(labels)
++	labelsJSON, _ := json.Marshal(labels)
++	post := base64.RawStdEncoding.EncodeToString([]byte(`{"lifecycleState":"in-progress","workVersion":{"authorityGeneration":"fixture-generation","dependencyGraphRevision":1,"issueIncarnation":"fixture-incarnation","issueMutationSequence":1}}`))
++	dependencyJSON, _ := json.Marshal(map[string]interface{}{"dependencies": []interface{}{map[string]interface{}{
++		"dependency_type": "blocks", "id": "tbc-dep", "lifecycleState": "done", "status": "closed",
++	}}})
++	return fmt.Sprintf("bootstrap-claim %s expected_status=open expected_assignee=bootstrap-engineer expected_created_at=%s expected_updated_at=%s expected_metadata_sha256=%s expected_labels_sha256=%s expected_dependency=tbc-dep expected_dependency_type=blocks expected_dependency_status=closed expected_dependency_lifecycle=done expected_dependency_sha256=%s post_metadata_base64=%s remove_label=backlog add_label=in-progress\n",
++		id, issue.CreatedAt.UTC().Format(time.RFC3339), updatedAt, metadataDigest, digestBytes(labelsJSON), digestBytes(dependencyJSON), post)
++}
++
++func seedBootstrapClaimFixture(t *testing.T, st storage.DoltStorage, ctx context.Context) *types.Issue {
++	t.Helper()
++	seedBatchTestIssues(t, ctx, st, "tbc-dep", "tbc-work")
++	if err := st.CloseIssue(ctx, "tbc-dep", "fixture prerequisite", "test", ""); err != nil {
++		t.Fatalf("CloseIssue dependency: %v", err)
++	}
++	if err := st.UpdateIssue(ctx, "tbc-dep", map[string]interface{}{
++		"metadata": json.RawMessage(`{"lifecycleState":"done"}`),
++	}, "test"); err != nil {
++		t.Fatalf("UpdateIssue dependency metadata: %v", err)
++	}
++	if err := st.UpdateIssue(ctx, "tbc-work", map[string]interface{}{
++		"assignee": "bootstrap-engineer",
++		"metadata": json.RawMessage(`{"lifecycleState":"backlog"}`),
++	}, "test"); err != nil {
++		t.Fatalf("UpdateIssue fixture: %v", err)
++	}
++	if err := st.AddLabel(ctx, "tbc-work", "backlog", "test"); err != nil {
++		t.Fatalf("AddLabel fixture: %v", err)
++	}
++	if err := st.AddDependency(ctx, &types.Dependency{
++		IssueID: "tbc-work", DependsOnID: "tbc-dep", Type: types.DepBlocks,
++	}, "test"); err != nil {
++		t.Fatalf("AddDependency fixture: %v", err)
++	}
++	issue, err := st.GetIssue(ctx, "tbc-work")
++	if err != nil {
++		t.Fatalf("GetIssue fixture: %v", err)
++	}
++	return issue
++}
++
++func TestBatchBootstrapClaimIsOneAtomicTransition(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	tmpDir := t.TempDir()
++	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	ctx := context.Background()
++	issue := seedBootstrapClaimFixture(t, st, ctx)
++	script := bootstrapClaimScript(t, st, ctx, issue.ID, issue.UpdatedAt.UTC().Format(time.RFC3339))
++	if err := runBatchScriptInTx(t, ctx, st, script); err != nil {
++		t.Fatalf("bootstrap claim: %v", err)
++	}
++	got, err := st.GetIssue(ctx, issue.ID)
++	if err != nil {
++		t.Fatalf("GetIssue claimed: %v", err)
++	}
++	if got.Status != types.StatusInProgress || got.Assignee != "bootstrap-engineer" {
++		t.Fatalf("claim state = %s/%s, want in_progress/bootstrap-engineer", got.Status, got.Assignee)
++	}
++	var metadata map[string]interface{}
++	if err := json.Unmarshal(got.Metadata, &metadata); err != nil || metadata["lifecycleState"] != "in-progress" {
++		t.Fatalf("post metadata = %s, err=%v", got.Metadata, err)
++	}
++	labels, err := st.GetLabels(ctx, issue.ID)
++	if err != nil {
++		t.Fatalf("GetLabels claimed: %v", err)
++	}
++	sort.Strings(labels)
++	if strings.Join(labels, ",") != "in-progress" {
++		t.Fatalf("labels = %v, want [in-progress]", labels)
++	}
++}
++
++func TestBatchBootstrapClaimPreconditionFailureRollsBack(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	tmpDir := t.TempDir()
++	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	ctx := context.Background()
++	issue := seedBootstrapClaimFixture(t, st, ctx)
++	script := bootstrapClaimScript(t, st, ctx, issue.ID, "2000-01-01T00:00:00Z")
++	if err := runBatchScriptInTx(t, ctx, st, script); err == nil {
++		t.Fatal("expected stale bootstrap claim to fail")
++	}
++	got, err := st.GetIssue(ctx, issue.ID)
++	if err != nil {
++		t.Fatalf("GetIssue after failure: %v", err)
++	}
++	if got.Status != types.StatusOpen || got.Assignee != "bootstrap-engineer" {
++		t.Fatalf("failed claim mutated state to %s/%s", got.Status, got.Assignee)
++	}
++	var metadata map[string]interface{}
++	if err := json.Unmarshal(got.Metadata, &metadata); err != nil || metadata["lifecycleState"] != "backlog" {
++		t.Fatalf("failed claim mutated metadata = %s, err=%v", got.Metadata, err)
++	}
++}
++
+diff --git a/internal/storage/dolt/transaction.go b/internal/storage/dolt/transaction.go
+index 4c41f70f..49acea08 100644
+--- a/internal/storage/dolt/transaction.go
++++ b/internal/storage/dolt/transaction.go
+@@ -26,0 +27,10 @@ type doltTransaction struct {
++// ClaimIssue applies Beads' native compare-and-swap claim inside the caller's
++// existing regular transaction. The method is consumed through a narrow local
++// interface by the bootstrap batch operation.
++func (t *doltTransaction) ClaimIssue(ctx context.Context, id, actor string) error {
++	t.dirty.MarkDirty("issues")
++	t.dirty.MarkDirty("events")
++	_, err := issueops.ClaimIssueInTx(ctx, t.regularTx, id, actor)
++	return err
++}
++
+diff --git a/internal/storage/embeddeddolt/transaction.go b/internal/storage/embeddeddolt/transaction.go
+index 663b94a5..0cdf571d 100644
+--- a/internal/storage/embeddeddolt/transaction.go
++++ b/internal/storage/embeddeddolt/transaction.go
+@@ -78,0 +79,11 @@ func (t *embeddedTransaction) UpdateIssue(ctx context.Context, id string, update
++// ClaimIssue applies Beads' native compare-and-swap claim inside the caller's
++// existing transaction. It is intentionally exposed only through the
++// transaction's concrete type so the public batch interface does not grow a
++// general claim capability.
++func (t *embeddedTransaction) ClaimIssue(ctx context.Context, id, actor string) error {
++	t.dirty.MarkDirty("issues")
++	t.dirty.MarkDirty("events")
++	_, err := issueops.ClaimIssueInTx(ctx, t.tx, id, actor)
++	return err
++}
++

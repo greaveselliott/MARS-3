@@ -106,8 +106,10 @@ operation without echoing credentials or payloads.
 
 ## State and role behavior
 
-- `backlog -> in-progress` requires a ready, version-matched claim and a verified
-  live implementation lease.
+- A normal `backlog -> in-progress` transition requires a ready,
+  version-matched claim and a verified live implementation lease. The sole
+  W-001 bootstrap claim is the declared exception below and grants no tool,
+  path, or implementation capability.
 - `in-progress -> in-review` requires the owning attempt's public-safe evidence
   reference and handoff. The implementation lease no longer authorizes writes
   after handoff.
@@ -123,14 +125,16 @@ operation without echoing credentials or payloads.
 - `superseded` requires an authorized reason and successor; it never masquerades
   as delivered value.
 
-W-001 has one non-autonomous bootstrap exception because it implements the
-gateway that will fence subsequent work. After this contract is accepted, a
-separately signed human grant binds the canonical W-001 claim, one attempt, one
-immutable base commit, the exact W-001 paths and publication effects, an
-expiry, and public-safe effect receipts. It allows that attempt to build and
-qualify the lease service without claiming a nonexistent live lease. It cannot
-authorize production or destructive effects, is not transferable, expires at
-self-host conformance, and is unavailable to P-001 or later work.
+W-001 has one non-autonomous bootstrap sequence because it implements the
+gateway that will fence subsequent work. Its first separately signed human
+grant publishes an atomic claim helper and permits exactly one canonical
+W-001 claim; that claim grants no implementation capability and cannot change
+the Git plan or manifest. A second signed postclaim grant must bind the
+verified receipt and exact Git reconciliation. Only then may a separately
+bounded delivery grant let the claimed attempt build and qualify the lease
+service without pretending that its not-yet-built lease exists. None of these
+grants authorizes production or destructive effects, is transferable, or is
+available to P-001 or later work.
 
 ADR-001 defines the exact signed-file schema, signer namespace, static effects,
 transition paths, and implementation-path equality rule for that grant. The
