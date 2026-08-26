@@ -15,15 +15,23 @@ code or documentation is semantically correct.
 | `.github/` | F-001, ADR-004, this map |
 | `cmd/mars3/` | F-001, ADR-001, this map |
 | `internal/doctrine/` | F-001, MARS provenance, this map |
+| `cmd/mars3-authority/`, `internal/authority/`, `api/authority/`, `deploy/authority/` | F-002, ADR-001, this map |
+| `database/authority/` | foundation specification, F-002, ADR-001, ADR-003, this map |
+| `cmd/mars3-platform/`, `internal/platform/`, `charts/`, `deploy/platform/` | F-003, ADR-006, this map |
+| `database/platform/` | foundation specification, F-003, ADR-003, ADR-006, this map |
 | `internal/trace/` | ADR-002, this map |
 | `internal/policy/` | ADR-003, this map |
 | `internal/runtime/` | ADR-005, this map |
 | `web/`, `electron/` | operator workspace specification, this map |
 | `migrations/`, `database/` | foundation specification, ADR-003, this map |
 
-The most-specific matching prefix wins, and its complete required document set
-must be present in the file marker. New source prefixes require a map and
-configuration update before source is accepted.
+Every matching ancestor prefix contributes requirements. A file's effective
+document set is the deduplicated union of all matching rules, so a newly added
+descendant rule cannot drop the foundation, security, or feature coverage of a
+broader prefix. The database sub-prefixes repeat their inherited documents to
+keep this human-readable table self-contained, but the audit does not rely on
+that repetition. New source prefixes require a map and configuration update
+before source is accepted.
 
 ## Marker forms
 

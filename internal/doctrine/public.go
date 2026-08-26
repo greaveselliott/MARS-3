@@ -100,6 +100,7 @@ func CheckPublic(repo string) ([]Finding, error) {
 		return nil, err
 	}
 	var findings []Finding
+	checkWave1PlanningGrant(root, &findings)
 	checkRequiredPublicMetadata(root, &findings)
 	checkSymlinks(root, &findings)
 	declarations := loadGeneratedDeclarations(root, &findings)
@@ -109,7 +110,7 @@ func CheckPublic(repo string) ([]Finding, error) {
 	}
 	for _, path := range paths {
 		checkPublicPath(path, &findings)
-		checkH001Scope(path, &findings)
+		checkGovernedPublicScope(path, &findings)
 		data, err := readAuditedFile(root, path)
 		if err != nil {
 			addFinding(&findings, path, "public.read", "%v", err)
@@ -131,8 +132,28 @@ func CheckPublic(repo string) ([]Finding, error) {
 	return findings, nil
 }
 
-func checkH001Scope(path string, findings *[]Finding) {
-	for _, prefix := range []string{".github/", ".harness/", "cmd/mars3/", "docs/", "internal/doctrine/"} {
+func checkGovernedPublicScope(path string, findings *[]Finding) {
+	if !safeRelativePath(path) || cleanPublicPath(path) != path {
+		addFinding(findings, path, "public.scope", "path is not a canonical repository-relative governed path")
+		return
+	}
+	for _, prefix := range []string{
+		".github/",
+		".harness/",
+		"api/authority/",
+		"charts/",
+		"cmd/mars3/",
+		"cmd/mars3-authority/",
+		"cmd/mars3-platform/",
+		"database/authority/",
+		"database/platform/",
+		"deploy/authority/",
+		"deploy/platform/",
+		"docs/",
+		"internal/authority/",
+		"internal/doctrine/",
+		"internal/platform/",
+	} {
 		if strings.HasPrefix(path, prefix) {
 			return
 		}
@@ -144,7 +165,7 @@ func checkH001Scope(path string, findings *[]Finding) {
 			return
 		}
 	}
-	addFinding(findings, path, "public.h001_scope", "path is outside H-001's exclusive doctrine-foundation scope")
+	addFinding(findings, path, "public.scope", "path is outside the governed public foundation and Wave-1 source roots")
 }
 
 func checkRequiredPublicMetadata(root string, findings *[]Finding) {
@@ -212,7 +233,7 @@ func checkPublicPath(path string, findings *[]Finding) {
 
 func checkPublicContent(root, path string, data []byte, findings *[]Finding) {
 	if !utf8.Valid(data) || bytes.IndexByte(data, 0) >= 0 {
-		addFinding(findings, path, "public.h001_binary", "binary and unscannable content is prohibited during H-001")
+		addFinding(findings, path, "public.binary", "binary and unscannable content is prohibited in governed public source")
 		return
 	}
 	content := string(data)

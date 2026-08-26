@@ -4,7 +4,7 @@
 **Owner:** CEO (`strategy`)
 **Date:** 2026-08-26
 **Goals:** G-001
-**Features:** F-001
+**Features:** F-001, F-002
 **Supersedes:** None
 **Superseded by:** None
 

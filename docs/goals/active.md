@@ -11,14 +11,15 @@ evidence, provenance, trust, tracing, and security mechanically inspectable
 before any autonomous mutation or production effect is possible.
 
 **Priority:** P0
-**Confidence:** Medium until H-001 independent review
+**Confidence:** Medium; the doctrine foundation is accepted, but runtime
+authority and substrate evidence remain pending
 **Source/dedupe:** MARS-3 public-first plan and signed genesis charter; unique
 active foundation goal
 **Supports:** future governed project delivery and provider/runtime choice
 **Conflicts:** feature throughput that bypasses public, authority, evidence, or
 security gates
-**Review trigger:** H-001 rejection; authority-model change; secret incident;
-or first end-to-end fixture evidence
+**Review trigger:** W-001 or P-001 rejection; authority-model change; secret
+incident; or first end-to-end fixture evidence
 
 ### Hypothesis
 
@@ -32,7 +33,9 @@ granting model output implicit authority.
 - A fresh public clone has one durable delivery route and exactly one active
   execution plan.
 - Git and Beads/Dolt have explicit, non-overlapping authority, with one current
-  claimed Bead and no Markdown lifecycle shadow system.
+  selected Bead, at most one compatible implementation claim, and no Markdown
+  lifecycle shadow system. A `contract-publication` phase may select a backlog
+  Bead without pretending that it is claimed.
 - MARS doctrine provenance validates offline at the pinned revision, and an
   intentional refresh can modify generated provenance only.
 - Every principal has a separately declared maximum trust and an initial
@@ -51,12 +54,13 @@ Safety, truthful authority, and reproducibility take priority over feature
 throughput. A provider adapter, operator interface, or runtime service that
 cannot preserve these controls is deferred rather than special-cased.
 
-### Explicit non-goals for H-001
+### Current Wave-1 boundaries
 
 - No MARS runtime or user-facing MARS concept.
-- No provider SDK, model runtime, agent sandbox, hosted service, or production
-  control plane.
-- No autonomous mutation or production publication.
+- W-001 is limited to the work-authority gateway, claim/lease fencing, and its
+  public-safe projections; P-001 is limited to the local substrate contract.
+- No provider SDK, model runtime, autonomous production publication, or
+  production tenant workload is authorized by Wave 1.
 
 ### Falsification evidence
 

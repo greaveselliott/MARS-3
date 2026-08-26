@@ -34,6 +34,60 @@ prefix_requirements:
       - docs/features/F-001-doctrine-foundation.md
       - docs/design-docs/mars-provenance.md
       - docs/code-documentation-map.md
+  - prefix: cmd/mars3-authority/
+    docs:
+      - docs/features/F-002-work-authority.md
+      - docs/design-docs/ADR-001-git-beads-authority.md
+      - docs/code-documentation-map.md
+  - prefix: internal/authority/
+    docs:
+      - docs/features/F-002-work-authority.md
+      - docs/design-docs/ADR-001-git-beads-authority.md
+      - docs/code-documentation-map.md
+  - prefix: api/authority/
+    docs:
+      - docs/features/F-002-work-authority.md
+      - docs/design-docs/ADR-001-git-beads-authority.md
+      - docs/code-documentation-map.md
+  - prefix: database/authority/
+    docs:
+      - docs/product-specs/foundation.md
+      - docs/features/F-002-work-authority.md
+      - docs/design-docs/ADR-001-git-beads-authority.md
+      - docs/design-docs/ADR-003-rule-of-two.md
+      - docs/code-documentation-map.md
+  - prefix: deploy/authority/
+    docs:
+      - docs/features/F-002-work-authority.md
+      - docs/design-docs/ADR-001-git-beads-authority.md
+      - docs/code-documentation-map.md
+  - prefix: cmd/mars3-platform/
+    docs:
+      - docs/features/F-003-local-substrate.md
+      - docs/design-docs/ADR-006-local-substrate.md
+      - docs/code-documentation-map.md
+  - prefix: internal/platform/
+    docs:
+      - docs/features/F-003-local-substrate.md
+      - docs/design-docs/ADR-006-local-substrate.md
+      - docs/code-documentation-map.md
+  - prefix: charts/
+    docs:
+      - docs/features/F-003-local-substrate.md
+      - docs/design-docs/ADR-006-local-substrate.md
+      - docs/code-documentation-map.md
+  - prefix: deploy/platform/
+    docs:
+      - docs/features/F-003-local-substrate.md
+      - docs/design-docs/ADR-006-local-substrate.md
+      - docs/code-documentation-map.md
+  - prefix: database/platform/
+    docs:
+      - docs/product-specs/foundation.md
+      - docs/features/F-003-local-substrate.md
+      - docs/design-docs/ADR-006-local-substrate.md
+      - docs/design-docs/ADR-003-rule-of-two.md
+      - docs/code-documentation-map.md
   - prefix: internal/trace/
     docs:
       - docs/design-docs/ADR-002-trace-spine.md

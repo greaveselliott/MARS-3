@@ -5,8 +5,9 @@ coding agents. It will support contained Codex and Claude agent-loop adapters
 alongside a project-owned native harness for qualified open model runtimes.
 
 This repository is being built through one active execution plan and bounded
-Beads work items. The initial milestone establishes doctrine, provenance, and
-public-disclosure checks before any agent runtime is allowed to mutate code.
+Beads work items. The doctrine foundation is complete; Wave 1 publishes the
+work-authority and local-substrate contracts before either implementation is
+claimed.
 
 ## Authority and delivery
 
@@ -47,8 +48,10 @@ See `CONTRIBUTING.md` before opening an issue or pull request. Every submitted
 artifact is presumed immediately public. Security vulnerabilities belong in
 GitHub private vulnerability reporting, as described in `SECURITY.md`.
 
-Status: doctrine foundation under review. No runtime, policy service, provider
-adapter, or production security boundary is implemented yet.
+Status: H-001 is merged and reconciled. W-001 is selected in
+`contract-publication` and remains unclaimed until its Git-owned contract is
+accepted. No provider adapter or production security boundary is implemented
+yet.
 
 ## License
 

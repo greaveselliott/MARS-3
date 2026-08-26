@@ -7,6 +7,7 @@
 | [ADR-003](ADR-003-rule-of-two.md) | Accepted | Lethal-trifecta labels and hard admission policy. |
 | [ADR-004](ADR-004-pr-first-publication.md) | Accepted | Pull-request-first prompt publication. |
 | [ADR-005](ADR-005-provider-neutral-runtime.md) | Accepted | Separate agent-runtime adapters from native-harness model transports. |
+| [ADR-006](ADR-006-local-substrate.md) | Proposed | Local Lima/k3s substrate, identity, persistence, and isolation boundaries. |
 
 MARS provenance and the foundation/deployed ownership boundary are documented
 in [mars-provenance.md](mars-provenance.md). Architecture changes must add a

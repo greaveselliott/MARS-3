@@ -1,0 +1,84 @@
+schemaVersion: 1
+kind: MARS3ContractPublicationGrant
+
+grant:
+  id: WAVE-1-contract-publication
+  classification: PUBLIC
+  issuedAt: 2026-08-26T05:30:55Z
+  baseCommit: ee385ce236ae1f99da692d223d7666b80dd9108f
+  workingBranch: codex/w-001-work-authority
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  purpose: publish reviewed Wave-1 Git contracts and admission validators before any implementation claim
+  autonomousMutation: false
+  implementationClaimed: false
+  expiresOn: first verified merge of this grant and its bounded contract-publication change to main
+  successorAuthority: signed W-001 implementation bootstrap grant or the accepted authority gateway
+  targetBeads:
+    - M3-W001
+    - M3-P001
+  allowedEffects:
+    - edit-listed-public-paths
+    - run-public-commit-gate
+    - create-signed-git-commits
+    - push-working-branch
+    - open-or-update-pull-request
+    - append-public-safe-contract-status-intent-and-receipt
+  authorizedPaths:
+    - AGENTS.md
+    - README.md
+    - .harness/docsync.yaml
+    - .harness/manifest.yaml
+    - .harness/grants/WAVE-1-contract-publication.yaml
+    - .harness/grants/WAVE-1-contract-publication.yaml.sig
+    - docs/QUALITY_SCORE.md
+    - docs/code-documentation-map.md
+    - docs/design-docs/ADR-001-git-beads-authority.md
+    - docs/design-docs/ADR-006-local-substrate.md
+    - docs/design-docs/index.md
+    - docs/evidence/H-001-review-disposition.md
+    - docs/evidence/WAVE-1-contract-publication.md
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/features/F-001-doctrine-foundation.md
+    - docs/features/F-002-work-authority.md
+    - docs/features/F-003-local-substrate.md
+    - docs/features/README.md
+    - docs/goals/active.md
+    - docs/product-decisions/PD-001-public-first.md
+    - docs/product-decisions/PD-002-git-beads-authority.md
+    - docs/product-decisions/PD-003-provider-neutral.md
+    - docs/product-specs/foundation.md
+    - docs/product-specs/index.md
+    - docs/product-specs/local-substrate.md
+    - docs/product-specs/work-authority.md
+    - internal/doctrine/doctrine.go
+    - internal/doctrine/doctrine_test.go
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+    - internal/doctrine/plan.go
+    - internal/doctrine/plan_test.go
+    - internal/doctrine/public.go
+    - internal/doctrine/public_test.go
+  prohibitedEffects:
+    - claim-or-transition-bead
+    - issue-or-assert-live-lease
+    - runtime-or-platform-implementation
+    - production-or-destructive-effect
+    - trust-escalation
+    - provider-or-customer-data-access
+    - credential-persistence
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  rawAuthorityPayloadIncluded: false
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-planning-grant
+  detachedSignature: WAVE-1-contract-publication.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

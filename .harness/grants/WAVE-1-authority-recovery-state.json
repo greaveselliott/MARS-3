@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "schema": "mars3-authority-observation/v2",
+  "repository": "greaveselliott/MARS-3",
+  "authorityProject": "M3",
+  "capturedAt": "2026-08-26T06:34:53Z",
+  "capturedRevision": "k46ees2p",
+  "revisionSurface": "pinned bd vc status short Dolt revision",
+  "canonicalization": "UTF-8 JSON bytes with LF line endings; this complete file is SHA-256 bound by the signed addendum",
+  "limitations": [
+    "The pinned bootstrap client does not expose a row version or non-reusable issue incarnation.",
+    "The captured Dolt revision, creation time, update time, description hash, exact metadata, dependencies, and head comment form the bootstrap observation only; they are not the W-001 runtime WorkVersion.",
+    "Legacy digests in WAVE-1-authority-recovery.yaml are authenticated assertions but are not reconstructible offline and receive no retroactive authority from this snapshot."
+  ],
+  "records": [
+    {
+      "beadId": "M3-W001",
+      "displayId": "W-001",
+      "createdAt": "2026-08-26T05:09:05Z",
+      "updatedAt": "2026-08-26T06:22:03Z",
+      "bootstrapIncarnation": "M3-W001@2026-08-26T05:09:05Z",
+      "nativeStatus": "open",
+      "lifecycleState": "backlog",
+      "assignee": "work-authority-engineer",
+      "claimState": "absent",
+      "leaseState": "absent",
+      "dependencies": [
+        "M3-H001"
+      ],
+      "exclusivePaths": [
+        "internal/authority/**",
+        "cmd/mars3-authority/**",
+        "api/authority/**",
+        "database/authority/**",
+        "deploy/authority/**",
+        "docs/evidence/W-001-validation.md",
+        "go.mod",
+        "go.sum",
+        "Makefile",
+        "NOTICE",
+        "THIRD_PARTY_NOTICES"
+      ],
+      "descriptionSHA256": "8beae9fd8af7fb9f702ea26fbf3d4ac971614cc611957e88fc79fe2513a98a6f",
+      "headCommentId": "01a03cc4-c5c8-785c-a25e-eb84bd640d3e",
+      "headCommentKind": "RECOVERY SCOPE CORRECTION"
+    },
+    {
+      "beadId": "M3-P001",
+      "displayId": "P-001",
+      "createdAt": "2026-08-26T05:09:19Z",
+      "updatedAt": "2026-08-26T06:22:24Z",
+      "bootstrapIncarnation": "M3-P001@2026-08-26T05:09:19Z",
+      "nativeStatus": "open",
+      "lifecycleState": "backlog",
+      "assignee": "platform-engineer",
+      "claimState": "absent",
+      "leaseState": "absent",
+      "dependencies": [
+        "M3-H001",
+        "M3-W001"
+      ],
+      "exclusivePaths": [
+        "internal/platform/**",
+        "cmd/mars3-platform/**",
+        "charts/**",
+        "deploy/platform/**",
+        "database/platform/**",
+        "docs/evidence/P-001-validation.md",
+        "go.mod",
+        "go.sum",
+        "Makefile",
+        "NOTICE",
+        "THIRD_PARTY_NOTICES"
+      ],
+      "descriptionSHA256": "828e32051ee661e6d31c5017e996e3d8ec82257ca0a17e263f974248c5772314",
+      "headCommentId": "01a03cc4-d30d-7493-a8b2-e3f3e0c90ca4",
+      "headCommentKind": "RECOVERY SCOPE CORRECTION"
+    }
+  ],
+  "prospectiveCorrection": {
+    "beadId": "M3-P001",
+    "idempotencyKey": "wave1-p001-shared-path-description-correction-v1",
+    "preRevision": "k46ees2p",
+    "operation": "replace-description-only",
+    "preDescriptionSHA256": "828e32051ee661e6d31c5017e996e3d8ec82257ca0a17e263f974248c5772314",
+    "postDescriptionSHA256": "d24074a56a4df0d150450555b981f84fa377364f40c9c9191e49f4ecae73c20c",
+    "requiredPostconditions": [
+      "native-status-open",
+      "lifecycle-backlog",
+      "claim-absent",
+      "lease-absent",
+      "dependencies-exactly-M3-H001-and-M3-W001",
+      "exclusive-paths-unchanged",
+      "all-other-Beads-unchanged"
+    ]
+  }
+}

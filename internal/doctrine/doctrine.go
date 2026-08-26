@@ -2,6 +2,7 @@
 FactoryDocSync:
 docs:
 - docs/features/F-001-doctrine-foundation.md
+- docs/features/F-002-work-authority.md
 - docs/design-docs/ADR-001-git-beads-authority.md
 - docs/design-docs/mars-provenance.md
 - docs/code-documentation-map.md
@@ -80,6 +81,7 @@ func CheckDoctrine(repo string) ([]Finding, error) {
 	checkGenesis(root, &findings)
 	checkGenesisEffectChain(root, &findings)
 	checkBootstrapClaimAttestation(root, &findings)
+	checkWave1PlanningGrant(root, &findings)
 	checkMARSProvenance(root, &findings)
 	checkRoleManifest(root, &findings)
 	checkClaimVerificationOrder(root, &findings)

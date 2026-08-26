@@ -1,18 +1,19 @@
 # F-001 — Public doctrine foundation
 
-**Status:** Active
+**Status:** Passing
 **Goal:** G-001
 **Product decisions:** PD-001, PD-002, PD-003
 **Product specification:** `docs/product-specs/foundation.md`
-**Active Bead:** M3-H001 (display ID H-001)
+**Completed Bead:** M3-H001 (display ID H-001)
 
 ## Business logic
 
 1. Git, Beads/Dolt, and the future live-lease store have distinct authority and
    meet only through stable identifiers, immutable commits, trace references,
    review verdicts, and run dispositions.
-2. Exactly one active plan selects the current failing scenario and claimed
-   Bead.
+2. Exactly one active plan selects the current failing scenario and Bead. A
+   bounded `contract-publication` phase keeps that Bead in `backlog` and names
+   a signed, expiring planning grant; `delivery` requires the canonical claim.
 3. MARS-derived doctrine is accepted only from one pinned commit with path and
    Git-blob provenance; refresh writes generated provenance only.
 4. Every principal begins as an observer. A maximum trust declaration is not
@@ -64,21 +65,22 @@ extra-routable-reviewer, stale-binding, duplicate, malformed, and
 undeclared-reviewer tests bind that contract offline. H-001-E6 received
 `changes-requested`; no earlier verdict carries to a changed commit. QA and
 Security independently accepted exact E7 target
-`81d42ae007992ad6f65ca8fd2bf52d2fc68af834`. Accepted review is still not
-`done`: M3-H001 remains `in-review` until merge, completed run disposition, and
-Git/Beads reconciliation.
+`81d42ae007992ad6f65ca8fd2bf52d2fc68af834`. The reviewed tree was merged to
+public `main`, a completed run and reconciliation receipt were recorded, and
+M3-H001 is now `done`. Its bootstrap claim remains immutable historical
+provenance rather than a current authority grant.
 
 ### F-001-S1 — One durable delivery route
 
 **Given** a fresh public clone with no operational database
-**And** the immutable genesis charter links to M3-H001
-**And** the authorized bootstrap verifier confirms the external M3-H001 claim
-**And** the Bead and signed claim explicitly match Git's goal, product
-decisions, feature, and scenario identifiers
-**And** every ordered verification identity is an executable registry ID
+**And** the immutable genesis charter, signed H-001 claim, validation evidence,
+and terminal disposition link the exact reviewed and merged H-001 identities
+**And** the claim explicitly matches Git's goal, product decisions, feature,
+scenario identifiers, and executable reviewer IDs
 **When** the operator runs doctrine and plan checks
 **Then** Git exposes G-001 → decisions/spec → F-001 → one active plan
-**And** the plan points to M3-H001 without becoming ticket authority
+**And** the plan selects exactly one current canonical Bead under its declared
+phase while the H-001 disposition remains immutable historical evidence
 **And** an undeclared reviewer alias is rejected as unroutable
 **And** no Markdown ticket lifecycle shadow system exists.
 
