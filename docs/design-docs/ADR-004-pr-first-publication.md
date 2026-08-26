@@ -36,9 +36,26 @@ not an inferred default. The workflow must contain exactly one column-zero,
 multiline `permissions` mapping whose sole entry is `contents: read`.
 Job-level permission declarations, inline mappings, duplicate declarations,
 anchors or aliases, explicit YAML mapping keys, and additional scopes are
-rejected. A later workflow that genuinely needs another permission requires a
-dedicated product or architecture decision and a narrower admission rule; it
-cannot weaken this foundation gate in place.
+rejected.
+
+The entire H-001 workflow uses a deliberately small, fail-closed YAML grammar.
+It accepts one literal top-level `on` block containing only `push` to `main`,
+`pull_request`, and manual dispatch. Quoted or escaped keys, flow mappings,
+tags, directives, anchors, aliases, merge keys, extra events, filters, and
+dispatch inputs are rejected rather than interpreted. The only accepted GitHub
+expressions are the two public concurrency identifiers already in the file;
+secret contexts, token contexts, credential-bearing mappings, and any other
+expression are denied.
+
+The action allowlist contains exactly the pinned checkout and Go setup commits,
+each once, with exact inputs. Checkout cannot select another repository or
+retain credentials. Job containers, services, reusable workflows, local
+actions, and Docker actions are prohibited. The only shell container commands
+are the three exact, read-only, no-network Gitleaks invocations using the pinned
+OCI digest; additional flags, mounts, images, or commands fail admission. A
+later workflow that genuinely needs another event, expression, action,
+permission, or container requires a dedicated product or architecture decision
+and a narrower admission rule; it cannot weaken this foundation gate in place.
 
 H-001 pins Go 1.24.11 in CI and uses Gitleaks v8.18.4 by immutable OCI digest.
 The scanner must first reject a synthetic canary, then scan both the worktree

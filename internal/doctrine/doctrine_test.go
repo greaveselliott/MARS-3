@@ -355,6 +355,114 @@ jobs:
 	}
 }
 
+func TestCanonicalFoundationWorkflowPolicy(t *testing.T) {
+	content := canonicalFoundationWorkflow(t)
+	var findings []Finding
+	checkWorkflow(".github/workflows/foundation-quality.yml", content, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("committed foundation workflow was rejected: %v", findings)
+	}
+
+	crlf := strings.ReplaceAll(content, "\n", "\r\n")
+	findings = nil
+	checkWorkflow(".github/workflows/foundation-quality.yml", crlf, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("CRLF canonical workflow was rejected: %v", findings)
+	}
+
+	comment := "# quoted policy data: \"pull_request_target\": ${{ secrets['NOT_LIVE'] }}\n"
+	findings = nil
+	checkWorkflow(".github/workflows/foundation-quality.yml", comment+content, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("YAML comment data was treated as active workflow syntax: %v", findings)
+	}
+
+	plainBlockData := replaceWorkflowFixture(t, content, "          go test ./...\n", "          printf '%s\\n' 'plain secrets text'\n          go test ./...\n")
+	findings = nil
+	checkWorkflow(".github/workflows/foundation-quality.yml", plainBlockData, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("plain non-expression block-scalar data was rejected: %v", findings)
+	}
+}
+
+func TestCanonicalFoundationWorkflowRejectsAuthorityBypasses(t *testing.T) {
+	base := canonicalFoundationWorkflow(t)
+	action := "actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683"
+	container := allowedWorkflowContainer
+	cases := []struct {
+		name        string
+		content     string
+		findingCode string
+	}{
+		{name: "quoted privileged trigger", content: replaceWorkflowFixture(t, base, "  pull_request:\n", "  \"pull_request_target\":\n"), findingCode: "public.workflow_yaml"},
+		{name: "escaped privileged trigger", content: replaceWorkflowFixture(t, base, "  pull_request:\n", `  "pull_request\u005ftarget":`+"\n"), findingCode: "public.workflow_yaml"},
+		{name: "literal privileged trigger", content: replaceWorkflowFixture(t, base, "  pull_request:\n", "  pull_request_target:\n"), findingCode: "public.workflow_event"},
+		{name: "flow trigger map", content: replaceWorkflowFixture(t, base, "on:\n  push:\n    branches: [main]\n  pull_request:\n  workflow_dispatch:\n", "on: { push: null, pull_request_target: null }\n"), findingCode: "public.workflow_yaml"},
+		{name: "trigger list", content: replaceWorkflowFixture(t, base, "on:\n  push:\n    branches: [main]\n  pull_request:\n  workflow_dispatch:\n", "on: [push, pull_request_target]\n"), findingCode: "public.workflow_yaml"},
+		{name: "duplicate trigger", content: replaceWorkflowFixture(t, base, "  pull_request:\n", "  pull_request:\n  pull_request:\n"), findingCode: "public.workflow_event"},
+		{name: "secret bracket context", content: replaceWorkflowFixture(t, base, "concurrency:\n", "env:\n  VALUE: ${{ secrets['CANARY'] }}\n\nconcurrency:\n"), findingCode: "public.workflow_secret"},
+		{name: "secret mixed context", content: replaceWorkflowFixture(t, base, "concurrency:\n", "env:\n  VALUE: ${{ SeCrEtS . CANARY }}\n\nconcurrency:\n"), findingCode: "public.workflow_secret"},
+		{name: "github token bracket context", content: replaceWorkflowFixture(t, base, "concurrency:\n", "env:\n  VALUE: ${{ github['token'] }}\n\nconcurrency:\n"), findingCode: "public.workflow_secret"},
+		{name: "github token dynamic context", content: replaceWorkflowFixture(t, base, "${{ github.workflow }}", "${{ github[format('{0}{1}', 'to', 'ken')] }}"), findingCode: "public.workflow_secret"},
+		{name: "duplicate allowed expression", content: replaceWorkflowFixture(t, base, "name: Foundation quality", "name: Foundation quality ${{ github.workflow }}"), findingCode: "public.workflow_secret"},
+		{name: "block scalar secret expression", content: replaceWorkflowFixture(t, base, "          go test ./...\n", "          printf '%s\\n' \"${{ secrets.CANARY }}\"\n          go test ./...\n"), findingCode: "public.workflow_secret"},
+		{name: "explicit token key", content: replaceWorkflowFixture(t, base, "    timeout-minutes: 20\n", "    timeout-minutes: 20\n    token: synthetic\n"), findingCode: "public.workflow_secret"},
+		{name: "secrets inheritance", content: replaceWorkflowFixture(t, base, "    timeout-minutes: 20\n", "    timeout-minutes: 20\n    secrets: inherit\n"), findingCode: "public.workflow_secret"},
+		{name: "container credentials", content: replaceWorkflowFixture(t, base, "    timeout-minutes: 20\n", "    timeout-minutes: 20\n    credentials:\n      username: synthetic\n"), findingCode: "public.workflow_secret"},
+		{name: "action tag", content: replaceWorkflowFixture(t, base, action, "actions/checkout@v4"), findingCode: "public.workflow_action"},
+		{name: "action expression", content: replaceWorkflowFixture(t, base, action, "actions/checkout@${{ github.ref }}"), findingCode: "public.workflow_action"},
+		{name: "action uppercase SHA", content: replaceWorkflowFixture(t, base, action, "actions/checkout@11BD71901BBE5B1630CEEA73D27597364C9AF683"), findingCode: "public.workflow_action"},
+		{name: "arbitrary pinned action", content: replaceWorkflowFixture(t, base, action, "example/action@11bd71901bbe5b1630ceea73d27597364c9af683"), findingCode: "public.workflow_action"},
+		{name: "local action", content: replaceWorkflowFixture(t, base, action, "./local-action"), findingCode: "public.workflow_action"},
+		{name: "Docker action", content: replaceWorkflowFixture(t, base, action, "docker://example/image@sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba"), findingCode: "public.workflow_action"},
+		{name: "quoted uses key", content: replaceWorkflowFixture(t, base, "        uses: "+action, "        \"uses\": "+action), findingCode: "public.workflow_yaml"},
+		{name: "quoted action value", content: replaceWorkflowFixture(t, base, action, `"`+action+`"`), findingCode: "public.workflow_action"},
+		{name: "checkout extra input", content: replaceWorkflowFixture(t, base, "          persist-credentials: false\n", "          persist-credentials: false\n          repository: example/other\n"), findingCode: "public.workflow_action"},
+		{name: "checkout privileged token input", content: replaceWorkflowFixture(t, base, "          persist-credentials: false\n", "          persist-credentials: false\n          github-token: synthetic\n"), findingCode: "public.workflow_action"},
+		{name: "duplicate action with block", content: replaceWorkflowFixture(t, base, "          persist-credentials: false\n", "          persist-credentials: false\n        with:\n          fetch-depth: 0\n          persist-credentials: false\n"), findingCode: "public.workflow_action"},
+		{name: "job reusable workflow", content: replaceWorkflowFixture(t, base, "    timeout-minutes: 20\n", "    timeout-minutes: 20\n    uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683\n"), findingCode: "public.workflow_action"},
+		{name: "job container", content: replaceWorkflowFixture(t, base, "    timeout-minutes: 20\n", "    timeout-minutes: 20\n    container: node:18\n"), findingCode: "public.workflow_container"},
+		{name: "job services", content: replaceWorkflowFixture(t, base, "    timeout-minutes: 20\n", "    timeout-minutes: 20\n    services:\n      cache:\n        image: redis:latest\n"), findingCode: "public.workflow_container"},
+		{name: "mutable shell container", content: replaceWorkflowFixture(t, base, container, "alpine:latest"), findingCode: "public.workflow_container"},
+		{name: "privileged shell container", content: replaceWorkflowFixture(t, base, "docker run --rm", "docker run --rm --privileged=true"), findingCode: "public.workflow_container"},
+		{name: "host network shell container", content: replaceWorkflowFixture(t, base, "--network none", "--network host"), findingCode: "public.workflow_container"},
+		{name: "writable root mount", content: replaceWorkflowFixture(t, base, "${RUNNER_TEMP}/gitleaks-canary:/scan:ro", "/:/scan"), findingCode: "public.workflow_container"},
+		{name: "anchor declaration", content: replaceWorkflowFixture(t, base, "name: Foundation quality", "name: &policy Foundation quality"), findingCode: "public.workflow_yaml"},
+		{name: "alias value", content: replaceWorkflowFixture(t, base, "    timeout-minutes: 20", "    timeout-minutes: *policy"), findingCode: "public.workflow_yaml"},
+		{name: "explicit key", content: replaceWorkflowFixture(t, base, "  workflow_dispatch:\n", "  ? workflow_dispatch\n  :\n"), findingCode: "public.workflow_yaml"},
+		{name: "YAML tag", content: replaceWorkflowFixture(t, base, "name: Foundation quality", "name: !str Foundation quality"), findingCode: "public.workflow_yaml"},
+		{name: "YAML directive", content: "%YAML 1.2\n" + base, findingCode: "public.workflow_yaml"},
+		{name: "second document", content: base + "\n---\nname: second\n", findingCode: "public.workflow_yaml"},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var findings []Finding
+			checkWorkflow(".github/workflows/foundation-quality.yml", testCase.content, &findings)
+			if !findingCodePresent(findings, testCase.findingCode) {
+				t.Fatalf("workflow bypass was accepted; wanted %s, got %v", testCase.findingCode, findings)
+			}
+		})
+	}
+}
+
+func canonicalFoundationWorkflow(t *testing.T) string {
+	t.Helper()
+	path := filepath.Join("..", "..", ".github", "workflows", "foundation-quality.yml")
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(content)
+}
+
+func replaceWorkflowFixture(t *testing.T, content, oldValue, newValue string) string {
+	t.Helper()
+	if !strings.Contains(content, oldValue) {
+		t.Fatalf("workflow fixture does not contain %q", oldValue)
+	}
+	return strings.Replace(content, oldValue, newValue, 1)
+}
+
 func findingCodePresent(findings []Finding, code string) bool {
 	for _, finding := range findings {
 		if finding.Code == code {

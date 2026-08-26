@@ -37,10 +37,24 @@ var (
 	privateIPv4Pattern = regexp.MustCompile(`\b(?:10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2})\b`)
 	hostFieldPattern   = regexp.MustCompile(`(?i)\b(?:host(?:name)?|machine[_-]?id|trace[_-]?backend(?:[_-]?url)?)\s*[:=]\s*["']?([A-Za-z0-9._:/-]+)`)
 	unsafeMarkup       = regexp.MustCompile(`(?i)(<\s*(?:script|iframe|object|embed|foreignObject)\b|\bon(?:error|load|click)\s*=|javascript\s*:|data\s*:\s*text/html)`)
-	workflowAction     = regexp.MustCompile(`(?m)^\s*-?\s*uses:\s*([^\s#]+)`)
 	containerReference = regexp.MustCompile(`(?:docker://|ghcr\.io/|docker\.io/)[A-Za-z0-9._/@:-]+`)
 	containerDigest    = regexp.MustCompile(`@sha256:[0-9a-f]{64}$`)
+	dockerCommand      = regexp.MustCompile(`\bdocker\s+([A-Za-z][A-Za-z0-9-]*)\b`)
+	secretWord         = regexp.MustCompile(`(?i)\bsecrets\b`)
+	githubTokenWord    = regexp.MustCompile(`(?i)\bgithub\s*(?:\.\s*token|\[\s*["']token["']\s*\])`)
 )
+
+var allowedWorkflowActions = map[string]bool{
+	"actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683": true,
+	"actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5": true,
+}
+
+var allowedWorkflowExpressions = map[string]int{
+	"github.workflow": 1,
+	"github.event.pull_request.number || github.ref": 1,
+}
+
+const allowedWorkflowContainer = "docker.io/zricethezav/gitleaks@sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba"
 
 var forbiddenBasenames = map[string]bool{
 	".ds_store":           true,
@@ -358,36 +372,586 @@ func hasExecutableFence(content string) bool {
 }
 
 func checkWorkflow(path, content string, findings *[]Finding) {
-	if regexp.MustCompile(`(?m)^\s*pull_request_target\s*:`).MatchString(content) {
-		addFinding(findings, path, "public.pull_request_target", "pull_request_target is prohibited")
+	records, syntaxMessages := parseCanonicalWorkflow(content)
+	for _, message := range syntaxMessages {
+		addFinding(findings, path, "public.workflow_yaml", "%s", message)
+	}
+	for _, message := range checkWorkflowEvents(records) {
+		addFinding(findings, path, "public.workflow_event", "%s", message)
 	}
 	for _, message := range checkWorkflowPermissions(content) {
 		addFinding(findings, path, "public.workflow_permissions", "%s", message)
 	}
-	if strings.Contains(content, "${{ secrets.") {
-		addFinding(findings, path, "public.workflow_secret", "foundation workflows must not read repository secrets")
+	for _, message := range checkWorkflowSecrets(records, content) {
+		addFinding(findings, path, "public.workflow_secret", "%s", message)
 	}
-	for _, match := range workflowAction.FindAllStringSubmatch(content, -1) {
-		reference := strings.Trim(match[1], "\"'")
-		if strings.HasPrefix(reference, "./") {
+	for _, message := range checkWorkflowActions(records) {
+		addFinding(findings, path, "public.workflow_action", "%s", message)
+	}
+	for _, message := range checkWorkflowContainers(records, content) {
+		addFinding(findings, path, "public.workflow_container", "%s", message)
+	}
+	for _, reference := range containerReference.FindAllString(content, -1) {
+		if reference != allowedWorkflowContainer || !containerDigest.MatchString(reference) {
+			addFinding(findings, path, "public.unpinned_container", "workflow container is not on the immutable H-001 allowlist")
+		}
+	}
+}
+
+type workflowYAMLRecord struct {
+	Line      int
+	Indent    int
+	Key       string
+	Value     string
+	List      bool
+	Ancestors []string
+}
+
+type workflowYAMLStackEntry struct {
+	Indent int
+	Key    string
+}
+
+// parseCanonicalWorkflow recognizes only the deliberately small YAML surface
+// used by the H-001 foundation workflow. Unsupported YAML is rejected rather
+// than interpreted: authority-bearing syntax must have one obvious spelling.
+func parseCanonicalWorkflow(content string) ([]workflowYAMLRecord, []string) {
+	var records []workflowYAMLRecord
+	var messages []string
+	if strings.HasPrefix(content, "\ufeff") {
+		messages = append(messages, "UTF-8 BOM is prohibited")
+	}
+
+	lines := strings.Split(content, "\n")
+	stack := []workflowYAMLStackEntry{}
+	blockScalarIndent := -1
+	for index, line := range lines {
+		raw := strings.TrimSuffix(line, "\r")
+		trimmed := strings.TrimSpace(raw)
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
 			continue
 		}
-		if strings.HasPrefix(reference, "docker://") {
-			if !containerDigest.MatchString(reference) {
-				addFinding(findings, path, "public.unpinned_container", "container action must be pinned to an immutable SHA-256 digest")
+
+		indent, structural, validIndent := workflowYAMLLine(raw)
+		if !validIndent {
+			messages = append(messages, fmt.Sprintf("line %d uses a tab in YAML indentation", index+1))
+			continue
+		}
+		if blockScalarIndent >= 0 {
+			if indent > blockScalarIndent {
+				continue
+			}
+			blockScalarIndent = -1
+		}
+		if structural == "" {
+			continue
+		}
+		if structural == "---" || structural == "..." || strings.HasPrefix(structural, "%") {
+			messages = append(messages, fmt.Sprintf("line %d uses a YAML directive or document marker", index+1))
+			continue
+		}
+		if workflowYAMLExplicitKey(structural) {
+			messages = append(messages, fmt.Sprintf("line %d uses an explicit YAML mapping key", index+1))
+			continue
+		}
+		if workflowYAMLHasAnchorOrAlias(structural) {
+			messages = append(messages, fmt.Sprintf("line %d uses a YAML anchor or alias", index+1))
+			continue
+		}
+		if workflowYAMLHasTag(structural) {
+			messages = append(messages, fmt.Sprintf("line %d uses a YAML tag", index+1))
+			continue
+		}
+
+		mappingLine := structural
+		list := false
+		if strings.HasPrefix(mappingLine, "-") {
+			if len(mappingLine) == 1 || (mappingLine[1] != ' ' && mappingLine[1] != '\t') {
+				messages = append(messages, fmt.Sprintf("line %d uses unsupported sequence syntax", index+1))
+				continue
+			}
+			list = true
+			mappingLine = strings.TrimSpace(mappingLine[1:])
+		}
+
+		colon := workflowYAMLColon(mappingLine)
+		if colon < 0 {
+			messages = append(messages, fmt.Sprintf("line %d is not a canonical mapping", index+1))
+			continue
+		}
+		rawKey := strings.TrimSpace(mappingLine[:colon])
+		if len(rawKey) >= 1 && (rawKey[0] == '\'' || rawKey[0] == '"') {
+			messages = append(messages, fmt.Sprintf("line %d uses a quoted or escaped mapping key", index+1))
+			continue
+		}
+		key, value, mapping := workflowYAMLMapping(mappingLine)
+		if !mapping || !workflowCanonicalKey(key) {
+			messages = append(messages, fmt.Sprintf("line %d uses a non-canonical mapping key", index+1))
+			continue
+		}
+		if workflowYAMLHasFlowMap(mappingLine) {
+			messages = append(messages, fmt.Sprintf("line %d uses a flow-style mapping", index+1))
+			continue
+		}
+		if workflowYAMLHasFlowSequence(mappingLine) && !(key == "branches" && value == "[main]") {
+			messages = append(messages, fmt.Sprintf("line %d uses an unsupported flow-style sequence", index+1))
+			continue
+		}
+
+		for len(stack) > 0 && stack[len(stack)-1].Indent >= indent {
+			stack = stack[:len(stack)-1]
+		}
+		ancestors := make([]string, len(stack))
+		for stackIndex, entry := range stack {
+			ancestors[stackIndex] = entry.Key
+		}
+		records = append(records, workflowYAMLRecord{
+			Line:      index + 1,
+			Indent:    indent,
+			Key:       key,
+			Value:     value,
+			List:      list,
+			Ancestors: ancestors,
+		})
+		stack = append(stack, workflowYAMLStackEntry{Indent: indent, Key: key})
+		if workflowYAMLBlockScalar(value) {
+			blockScalarIndent = indent
+		}
+	}
+	return records, messages
+}
+
+func workflowCanonicalKey(key string) bool {
+	if key == "" {
+		return false
+	}
+	for _, character := range key {
+		if (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '_' || character == '-' || character == '.' {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
+func workflowYAMLHasTag(line string) bool {
+	return workflowYAMLHasIndicator(line, '!')
+}
+
+func workflowYAMLHasIndicator(line string, indicator byte) bool {
+	var quote byte
+	for index := 0; index < len(line); index++ {
+		character := line[index]
+		if quote != 0 {
+			if character == quote && (index == 0 || line[index-1] != '\\') {
+				quote = 0
 			}
 			continue
 		}
-		at := strings.LastIndex(reference, "@")
-		if at < 0 || !sha1Pattern.MatchString(reference[at+1:]) {
-			addFinding(findings, path, "public.unpinned_action", "third-party action must be pinned to an immutable commit SHA")
+		if character == '\'' || character == '"' {
+			quote = character
+			continue
+		}
+		if character != indicator {
+			continue
+		}
+		if index > 0 && !workflowYAMLIndicatorBoundary(line[index-1]) {
+			continue
+		}
+		if index+1 < len(line) && !workflowYAMLIndicatorTerminator(line[index+1]) {
+			return true
 		}
 	}
-	for _, reference := range containerReference.FindAllString(content, -1) {
-		if !containerDigest.MatchString(reference) {
-			addFinding(findings, path, "public.unpinned_container", "workflow container must be pinned to an immutable SHA-256 digest")
+	return false
+}
+
+func workflowYAMLHasFlowMap(line string) bool {
+	return workflowYAMLHasFlowCharacters(line, '{', '}')
+}
+
+func workflowYAMLHasFlowSequence(line string) bool {
+	return workflowYAMLHasFlowCharacters(line, '[', ']')
+}
+
+func workflowYAMLHasFlowCharacters(line string, open, close byte) bool {
+	var quote byte
+	for index := 0; index < len(line); index++ {
+		character := line[index]
+		if quote != 0 {
+			if character == quote && (index == 0 || line[index-1] != '\\') {
+				quote = 0
+			}
+			continue
+		}
+		if character == '\'' || character == '"' {
+			quote = character
+			continue
+		}
+		if strings.HasPrefix(line[index:], "${{") {
+			end := strings.Index(line[index+3:], "}}")
+			if end >= 0 {
+				index += end + 4
+				continue
+			}
+		}
+		if character == open || character == close {
+			return true
 		}
 	}
+	return false
+}
+
+func checkWorkflowEvents(records []workflowYAMLRecord) []string {
+	var messages []string
+	var onIndexes []int
+	for index, record := range records {
+		if record.Indent == 0 && record.Key == "on" {
+			onIndexes = append(onIndexes, index)
+		}
+	}
+	if len(onIndexes) != 1 {
+		return []string{"workflow must declare exactly one canonical top-level on block"}
+	}
+	onIndex := onIndexes[0]
+	if records[onIndex].Value != "" || records[onIndex].List {
+		messages = append(messages, "top-level on must be a block mapping")
+	}
+
+	allowed := map[string]bool{"push": true, "pull_request": true, "workflow_dispatch": true}
+	counts := map[string]int{}
+	currentEvent := ""
+	pushBranches := 0
+	for index := onIndex + 1; index < len(records); index++ {
+		record := records[index]
+		if record.Indent == 0 {
+			break
+		}
+		if record.Indent == 2 {
+			currentEvent = record.Key
+			if !allowed[record.Key] || record.Value != "" || record.List {
+				messages = append(messages, fmt.Sprintf("line %d declares a non-canonical workflow event", record.Line))
+				continue
+			}
+			counts[record.Key]++
+			continue
+		}
+		if currentEvent == "push" && record.Indent == 4 && record.Key == "branches" && record.Value == "[main]" && !record.List {
+			pushBranches++
+			continue
+		}
+		messages = append(messages, fmt.Sprintf("line %d adds unsupported configuration to workflow event %s", record.Line, currentEvent))
+	}
+	for _, event := range []string{"push", "pull_request", "workflow_dispatch"} {
+		if counts[event] != 1 {
+			messages = append(messages, fmt.Sprintf("event %s must appear exactly once", event))
+		}
+	}
+	if pushBranches != 1 {
+		messages = append(messages, "push must contain exactly branches: [main]")
+	}
+	return messages
+}
+
+func checkWorkflowSecrets(records []workflowYAMLRecord, content string) []string {
+	var messages []string
+	for _, record := range records {
+		switch record.Key {
+		case "secrets", "credentials", "token", "password", "environment", "env":
+			messages = append(messages, fmt.Sprintf("line %d declares prohibited credential-bearing key %s", record.Line, record.Key))
+		}
+	}
+	activeContent := workflowActiveContent(content)
+	expressionCounts := make(map[string]int)
+	for _, expression := range workflowExpressions(activeContent) {
+		expression = strings.TrimSpace(expression)
+		if secretWord.MatchString(expression) || githubTokenWord.MatchString(expression) {
+			messages = append(messages, "GitHub expressions must not reference secrets or github.token")
+		}
+		if _, allowed := allowedWorkflowExpressions[expression]; !allowed {
+			messages = append(messages, "GitHub expression is not on the immutable H-001 allowlist")
+			continue
+		}
+		expressionCounts[expression]++
+	}
+	for expression, required := range allowedWorkflowExpressions {
+		if expressionCounts[expression] != required {
+			messages = append(messages, fmt.Sprintf("GitHub expression %s must appear exactly %d time", expression, required))
+		}
+	}
+	if regexp.MustCompile(`(?i)\bGITHUB_TOKEN\b`).MatchString(activeContent) {
+		messages = append(messages, "GITHUB_TOKEN references are prohibited")
+	}
+	return messages
+}
+
+func workflowActiveContent(content string) string {
+	lines := strings.Split(content, "\n")
+	var active strings.Builder
+	blockScalarIndent := -1
+	for _, line := range lines {
+		raw := strings.TrimSuffix(line, "\r")
+		indent, structural, validIndent := workflowYAMLLine(raw)
+		if !validIndent {
+			continue
+		}
+		if blockScalarIndent >= 0 {
+			if strings.TrimSpace(raw) == "" || indent > blockScalarIndent {
+				active.WriteString(raw)
+				active.WriteByte('\n')
+				continue
+			}
+			blockScalarIndent = -1
+		}
+		if structural == "" || strings.HasPrefix(strings.TrimSpace(raw), "#") {
+			continue
+		}
+		active.WriteString(structural)
+		active.WriteByte('\n')
+		_, value, mapping := workflowYAMLMapping(strings.TrimSpace(strings.TrimPrefix(structural, "-")))
+		if mapping && workflowYAMLBlockScalar(value) {
+			blockScalarIndent = indent
+		}
+	}
+	return active.String()
+}
+
+func workflowExpressions(content string) []string {
+	var expressions []string
+	for offset := 0; offset < len(content); {
+		start := strings.Index(content[offset:], "${{")
+		if start < 0 {
+			break
+		}
+		start += offset + 3
+		end := strings.Index(content[start:], "}}")
+		if end < 0 {
+			expressions = append(expressions, content[start:])
+			break
+		}
+		expressions = append(expressions, content[start:start+end])
+		offset = start + end + 2
+	}
+	return expressions
+}
+
+func checkWorkflowActions(records []workflowYAMLRecord) []string {
+	var messages []string
+	counts := map[string]int{}
+	for index, record := range records {
+		if record.Key != "uses" {
+			continue
+		}
+		reference := record.Value
+		if !recordHasAncestor(record, "steps") {
+			messages = append(messages, fmt.Sprintf("line %d declares a reusable, local, or job-level action", record.Line))
+			continue
+		}
+		if !allowedWorkflowActions[reference] {
+			messages = append(messages, fmt.Sprintf("line %d action is not on the immutable H-001 allowlist", record.Line))
+			continue
+		}
+		counts[reference]++
+		expected := map[string]string{}
+		if strings.HasPrefix(reference, "actions/checkout@") {
+			expected = map[string]string{"fetch-depth": "0", "persist-credentials": "false"}
+		} else if strings.HasPrefix(reference, "actions/setup-go@") {
+			expected = map[string]string{"go-version": "1.24.11", "cache": "false"}
+		}
+		for _, message := range checkWorkflowActionInputs(records, index, expected) {
+			messages = append(messages, message)
+		}
+	}
+	for reference := range allowedWorkflowActions {
+		if counts[reference] != 1 {
+			messages = append(messages, fmt.Sprintf("action %s must appear exactly once", reference))
+		}
+	}
+	return messages
+}
+
+func checkWorkflowActionInputs(records []workflowYAMLRecord, actionIndex int, expected map[string]string) []string {
+	record := records[actionIndex]
+	stepIndent := -1
+	stepIndex := -1
+	for index := actionIndex - 1; index >= 0; index-- {
+		if records[index].List && recordHasAncestor(records[index], "steps") {
+			stepIndent = records[index].Indent
+			stepIndex = index
+			break
+		}
+	}
+	if stepIndent < 0 || record.Indent != stepIndent+2 {
+		return []string{fmt.Sprintf("line %d action is not attached to a canonical step", record.Line)}
+	}
+	stepEnd := len(records)
+	for index := stepIndex + 1; index < len(records); index++ {
+		if records[index].List && records[index].Indent == stepIndent && recordHasAncestor(records[index], "steps") {
+			stepEnd = index
+			break
+		}
+	}
+	withIndex := -1
+	withCount := 0
+	for index := actionIndex + 1; index < stepEnd; index++ {
+		candidate := records[index]
+		if candidate.Indent == record.Indent && candidate.Key == "with" {
+			withIndex = index
+			withCount++
+			if candidate.Value != "" || candidate.List {
+				return []string{fmt.Sprintf("line %d action inputs must use one canonical with block", candidate.Line)}
+			}
+		}
+	}
+	if withCount != 1 {
+		return []string{fmt.Sprintf("line %d action requires exactly one with block", record.Line)}
+	}
+	found := map[string]int{}
+	for index := withIndex + 1; index < stepEnd; index++ {
+		candidate := records[index]
+		if candidate.Indent <= records[withIndex].Indent {
+			break
+		}
+		expectedValue, ok := expected[candidate.Key]
+		if !ok || candidate.Indent != records[withIndex].Indent+2 || candidate.List || !recordHasAncestor(candidate, "with") {
+			return []string{fmt.Sprintf("line %d action input %s is not on the canonical allowlist", candidate.Line, candidate.Key)}
+		}
+		if candidate.Value != expectedValue {
+			return []string{fmt.Sprintf("line %d action input %s has a non-canonical value", candidate.Line, candidate.Key)}
+		}
+		found[candidate.Key]++
+	}
+	var messages []string
+	for key := range expected {
+		if found[key] != 1 {
+			messages = append(messages, fmt.Sprintf("line %d action requires exactly one %s input", record.Line, key))
+		}
+	}
+	return messages
+}
+
+func recordHasAncestor(record workflowYAMLRecord, key string) bool {
+	for _, ancestor := range record.Ancestors {
+		if ancestor == key {
+			return true
+		}
+	}
+	return false
+}
+
+func checkWorkflowContainers(records []workflowYAMLRecord, content string) []string {
+	var messages []string
+	for _, record := range records {
+		if record.Key == "container" || record.Key == "services" || record.Key == "image" {
+			messages = append(messages, fmt.Sprintf("line %d declares a prohibited job container or service", record.Line))
+		}
+	}
+	commands := dockerCommand.FindAllStringSubmatch(workflowActiveContent(content), -1)
+	for _, command := range commands {
+		if command[1] != "run" {
+			messages = append(messages, fmt.Sprintf("docker subcommand %s is prohibited", command[1]))
+		}
+	}
+	commandSignatures, commandMessages := workflowDockerRunCommands(content)
+	messages = append(messages, commandMessages...)
+	if len(commands) != 3 || len(commandSignatures) != 3 {
+		messages = append(messages, "foundation workflow must contain exactly three canonical docker run commands")
+	}
+	expected := expectedWorkflowDockerCommands()
+	actual := make(map[string]int)
+	for _, signature := range commandSignatures {
+		actual[signature]++
+		if _, ok := expected[signature]; !ok {
+			messages = append(messages, "docker run command is not on the exact H-001 allowlist")
+		}
+	}
+	for signature, count := range expected {
+		if actual[signature] != count {
+			messages = append(messages, "required canonical docker run command is missing or duplicated")
+		}
+	}
+	return messages
+}
+
+func workflowDockerRunCommands(content string) ([]string, []string) {
+	lines := strings.Split(content, "\n")
+	var signatures []string
+	var messages []string
+	for index := 0; index < len(lines); index++ {
+		if !regexp.MustCompile(`\bdocker\s+run\b`).MatchString(lines[index]) {
+			continue
+		}
+		logical := strings.TrimSpace(lines[index])
+		for strings.HasSuffix(logical, "\\") && index+1 < len(lines) {
+			logical = strings.TrimSpace(strings.TrimSuffix(logical, "\\")) + " " + strings.TrimSpace(lines[index+1])
+			index++
+		}
+		fields, err := workflowShellFields(logical)
+		if err != nil {
+			messages = append(messages, "docker run command is not in canonical shell form")
+			continue
+		}
+		signatures = append(signatures, strings.Join(fields, "\x00"))
+	}
+	return signatures, messages
+}
+
+func expectedWorkflowDockerCommands() map[string]int {
+	common := []string{"docker", "run", "--rm", "--network", "none", "--read-only", "--cap-drop", "ALL", "--security-opt", "no-new-privileges"}
+	canary := append(append([]string{"if"}, common...), "-v", "${RUNNER_TEMP}/gitleaks-canary:/scan:ro", allowedWorkflowContainer, "detect", "--no-git", "--source", "/scan", "--redact", "--no-banner;", "then")
+	worktree := append(append([]string{}, common...), "-v", "${GITHUB_WORKSPACE}:/repo:ro", "-w", "/repo", allowedWorkflowContainer, "detect", "--no-git", "--source", ".", "--redact", "--no-banner")
+	history := append(append([]string{}, common...), "-v", "${GITHUB_WORKSPACE}:/repo:ro", "-w", "/repo", allowedWorkflowContainer, "detect", "--source", ".", "--redact", "--no-banner")
+	return map[string]int{
+		strings.Join(canary, "\x00"):   1,
+		strings.Join(worktree, "\x00"): 1,
+		strings.Join(history, "\x00"):  1,
+	}
+}
+
+func workflowShellFields(command string) ([]string, error) {
+	var fields []string
+	var field strings.Builder
+	var quote byte
+	escaped := false
+	flush := func() {
+		if field.Len() > 0 {
+			fields = append(fields, field.String())
+			field.Reset()
+		}
+	}
+	for index := 0; index < len(command); index++ {
+		character := command[index]
+		if escaped {
+			field.WriteByte(character)
+			escaped = false
+			continue
+		}
+		if character == '\\' && quote != '\'' {
+			escaped = true
+			continue
+		}
+		if quote != 0 {
+			if character == quote {
+				quote = 0
+			} else {
+				field.WriteByte(character)
+			}
+			continue
+		}
+		if character == '\'' || character == '"' {
+			quote = character
+			continue
+		}
+		if character == ' ' || character == '\t' || character == '\r' || character == '\n' {
+			flush()
+			continue
+		}
+		field.WriteByte(character)
+	}
+	if quote != 0 || escaped {
+		return nil, fmt.Errorf("unterminated shell token")
+	}
+	flush()
+	return fields, nil
 }
 
 // checkWorkflowPermissions accepts one deliberately small GitHub Actions

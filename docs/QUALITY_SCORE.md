@@ -2,17 +2,17 @@
 
 **Updated:** 2026-08-26
 **Owner:** Delivery Orchestrator
-**Current release readiness:** Not releasable; H-001-E3 awaiting independent review
+**Current release readiness:** Not releasable; H-001-E3 changes requested and E4 remediation in progress
 
 This ledger is evidence-backed. A missing result is `pending`, not an inferred
 pass and not a numeric score.
 
 | Feature/scenario | Mode | Failure ownership | Evidence state | Review state |
 | --- | --- | --- | --- | --- |
-| F-001-S1 authority route | doctrine-foundation | foundation | H-001-E3: deterministic checks passed | pending QA |
-| F-001-S2 provenance | doctrine-foundation | foundation | H-001-E3: 20-source offline refresh passed | pending QA |
-| F-001-S3 trust defaults | security-review | foundation | H-001-E3: profile mutation denial passed | pending QA then Security |
-| F-001-S4 public safety | security-review | foundation | H-001-E3: anchor/alias denial and reproducible binary evidence passed | pending QA then Security |
+| F-001-S1 authority route | doctrine-foundation | foundation | H-001-E3: deterministic checks passed | fresh E4 review required |
+| F-001-S2 provenance | doctrine-foundation | foundation | H-001-E3: 20-source offline refresh passed | fresh E4 review required |
+| F-001-S3 trust defaults | security-review | foundation | H-001-E3: profile mutation denial passed | fresh E4 QA then Security required |
+| F-001-S4 public safety | security-review | foundation | H-001-E3 failed quoted-trigger and bracket-secret admission | E4 remediation in progress |
 
 ## Release gate
 

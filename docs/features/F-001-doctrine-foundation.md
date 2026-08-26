@@ -49,11 +49,15 @@
 | F-001-S1 | passing | QA | doctrine/plan checks and authority inspection |
 | F-001-S2 | passing | QA | offline provenance and refresh-scope tests |
 | F-001-S3 | passing | Security | manifest/trust and mutation-denial tests |
-| F-001-S4 | passing | Security | public-check, secret scan, source tests, vet, diff check |
+| F-001-S4 | failing | Security | H-001-E3 workflow-admission findings; E4 validation pending |
 
-`passing` records deterministic candidate evidence in H-001-E3. It does not
-mean accepted or done: release readiness remains blocked until QA and Security
-accept the same immutable containing commit and Beads records reconciliation.
+The first three `passing` states retain deterministic evidence from H-001-E3,
+but no review verdict carries to a changed commit. F-001-S4 is `failing` after
+Security reproduced a quoted privileged trigger and the Foundation Maintainer
+found a bracket-form secret context. E4 must re-establish deterministic
+evidence before a fresh QA → Security sequence. Passing never means accepted or
+done: release readiness remains blocked until both reviewers accept the same
+immutable containing commit and Beads records reconciliation.
 
 ### F-001-S1 — One durable delivery route
 
@@ -94,9 +98,13 @@ mutation
 identity, local metadata, raw-payload fields, unsafe fixtures, binaries during
 H-001, missing license or provenance, undeclared generated files, and stale
 documentation links
-**And** workflow admission rejects inline, nested, duplicated, aliased, or
-otherwise non-canonical permission declarations instead of inferring that the
-effective GitHub token remains read-only
+**And** workflow admission accepts only the literal public triggers, read-only
+permission block, pinned actions with exact inputs, public concurrency
+expressions, and three exact no-network/read-only scanner containers
+**And** it rejects quoted or indirect authority keys, privileged triggers,
+secret or token contexts, extra action inputs, reusable or local actions, job
+containers or services, and modified Docker flags, mounts, images, or commands
+instead of inferring safety from one recognized spelling
 **And** deterministic tests, vet, diff checks, and secret history scan pass
 **And** independent human QA and Security review the same immutable commit for
 semantic or unrecognized disclosure risks that pattern checks cannot prove.

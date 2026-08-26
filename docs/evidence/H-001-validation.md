@@ -2,7 +2,7 @@
 
 **Classification:** PUBLIC
 **Evidence ID:** H-001-E3
-**Status:** Candidate; independent QA and Security review pending
+**Status:** Superseded; Security changes requested
 **Opaque trace reference:** `bootstrap-h001-qa-remediation-v3`
 **Recorded:** 2026-08-26
 **Verification owners:** QA Reviewer, then Security Reviewer
@@ -123,6 +123,13 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
   alias-key regression. H-001-E3 also replaces the underspecified binary hash
   with the reproducible recipe and matching rebuilds above. No prior review
   verdict carries forward to the immutable commit containing H-001-E3.
+- QA accepted the immutable H-001-E3 review target
+  `54a1a1b062238d58f3bb3f9de61ab019ad3170c2`. Security then reproduced a
+  quoted `pull_request_target` key that GitHub accepts but the E3 spelling-based
+  event check did not detect. The Foundation Maintainer separately reproduced
+  a bracket-form `secrets` expression omitted by the E3 dot-form check.
+  Security returned `changes-requested`; M3-H001 reopened on the same Bead and
+  branch. E3 is superseded and neither verdict carries to E4.
 
 FactoryDocSync was checked and remained current. This ticket changed its BDD,
 authority, provenance, trace, security, publication, runtime, and operator
@@ -138,7 +145,8 @@ documentation together with the validation behavior.
 - The bootstrap exception remains direct human procedure until W-001 replaces
   it; it is not reusable by a tenant agent.
 
-Next executable owner: QA Reviewer. On `accepted`, the same immutable commit
-routes to Security Reviewer. The Delivery Orchestrator may reconcile and close
-M3-H001 only after both canonical Beads verdicts and a completed run
-disposition.
+Next executable owner: Foundation Maintainer. The remediation must produce a
+new signed checkpoint, reproducible evidence, and immutable E4 review target.
+Only then does it route to QA Reviewer, followed by Security Reviewer on the
+same commit. The Delivery Orchestrator may reconcile and close M3-H001 only
+after both canonical Beads verdicts and a completed run disposition.
