@@ -82,6 +82,53 @@ func TestWave1DirectMainTransitionAcceptsCurrentMainCheckout(t *testing.T) {
 	}
 }
 
+func TestWave1PRFallbackAcceptsPinnedSignedAddendum(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkWave1PRFallbackAddendum(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed PR-fallback addendum was rejected: %v", findings)
+	}
+}
+
+func TestWave1PRFallbackRejectsTampering(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(wave1PRFallbackPath)
+	signature := read(wave1PRFallbackSignature)
+	publicKey := read(wave1PlanningGrantKey)
+	for _, testCase := range []struct {
+		name string
+		old  string
+		new  string
+		code string
+	}{
+		{name: "retry", old: "retryDirectPush: false", new: "retryDirectPush: true", code: "public.pr_fallback_value"},
+		{name: "branch", old: "workingBranch: codex/w-001-bootstrap-transition", new: "workingBranch: codex/escape", code: "public.pr_fallback_value"},
+		{name: "scope", old: "    - internal/doctrine/grant_test.go", new: "    - internal/runtime/escape.go", code: "public.pr_fallback_sequence"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
+			root := t.TempDir()
+			writePlanningGrantTestFile(t, root, wave1PRFallbackPath, tampered)
+			writePlanningGrantTestFile(t, root, wave1PRFallbackSignature, signature)
+			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+			var findings []Finding
+			checkWave1PRFallbackAddendum(root, &findings)
+			if !findingCodePresent(findings, testCase.code) || !findingCodePresent(findings, "public.pr_fallback_signature") {
+				t.Fatalf("tampered PR fallback was not rejected by contract and signature: %v", findings)
+			}
+		})
+	}
+}
+
 func TestWave1PlanningGrantAcceptsPinnedSignedContract(t *testing.T) {
 	grant, signature, publicKey := loadPlanningGrantFixture(t)
 	root := writePlanningGrantFixture(t, grant, signature, publicKey)
