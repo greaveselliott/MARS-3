@@ -78,6 +78,19 @@ func TestVerifyPreimageBindsDependencyAndLineage(t *testing.T) {
 	}
 }
 
+func TestPostclaimLabelDigestMatchesDeclaredTransition(t *testing.T) {
+	labels := []string{"public-first", "foundation", "enabler", "critical", "backlog"}
+	for index, label := range labels {
+		if label == "backlog" {
+			labels[index] = "in-progress"
+		}
+	}
+	const declared = "3e4e77e20ee7a46dd77c4a9884dee51aa9f0fa9f2445099a0cb457d72cb83bbb"
+	if actual := digestLabels(labels); actual != declared {
+		t.Fatalf("postclaim label digest = %s, want %s", actual, declared)
+	}
+}
+
 func mustTime(t *testing.T, value string) time.Time {
 	t.Helper()
 	parsed, err := time.Parse(time.RFC3339, value)

@@ -635,10 +635,7 @@ func verifyPreimage(issue issueRecord, config doctrine.W001BootstrapGrant) error
 	if err != nil || metadataDigest != config.ExpectedMetadataSHA256 {
 		return errors.New("canonical metadata does not match the signed digest")
 	}
-	labels := append([]string(nil), issue.Labels...)
-	sort.Strings(labels)
-	labelsJSON, _ := json.Marshal(labels)
-	if digest(labelsJSON) != config.ExpectedLabelsSHA256 {
+	if digestLabels(issue.Labels) != config.ExpectedLabelsSHA256 {
 		return errors.New("canonical labels do not match the signed digest")
 	}
 	return verifyAuthorityBinding(issue, config)
@@ -688,10 +685,7 @@ func verifyPostimage(issue issueRecord, config doctrine.W001BootstrapGrant) erro
 	if err != nil || metadataDigest != config.PostMetadataSHA256 {
 		return errors.New("canonical postclaim metadata does not match the signed digest")
 	}
-	labels := append([]string(nil), issue.Labels...)
-	sort.Strings(labels)
-	labelsJSON, _ := json.Marshal(labels)
-	if digest(labelsJSON) != config.PostLabelsSHA256 {
+	if digestLabels(issue.Labels) != config.PostLabelsSHA256 {
 		return errors.New("canonical postclaim labels do not match the signed digest")
 	}
 	var metadata struct {
@@ -708,6 +702,13 @@ func verifyPostimage(issue issueRecord, config doctrine.W001BootstrapGrant) erro
 		return errors.New("canonical postclaim idempotency binding does not match the signed grant")
 	}
 	return verifyAuthorityBinding(issue, config)
+}
+
+func digestLabels(values []string) string {
+	labels := append([]string(nil), values...)
+	sort.Strings(labels)
+	encoded, _ := json.Marshal(labels)
+	return digest(encoded)
 }
 
 func claimScript(issue issueRecord, config doctrine.W001BootstrapGrant) (string, error) {
