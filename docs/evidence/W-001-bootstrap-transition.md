@@ -143,6 +143,25 @@ closed before canonical mutation. The final grant uses the digest derived from
 the sorted label transition, and a deterministic regression now binds that
 derivation.
 
+## Preserved v2 publication finding
+
+Signed tag `mars3/w001-bootstrap-helper-v2` remains immutably attached to
+commit `c95f159cadef6ccc6fcaf2dccfad5c7457e60c3a`, tree
+`bf13f5c9de0651b5e3edfa8a1723ca4789a3c336`. GitHub run `32971431988`
+failed at `public.w001_bootstrap_event`: the validator incorrectly required
+GitHub's advisory pull-request merge field to equal the exact checked-out
+synthetic merge. The runner had current branch and base identities, but this
+optional payload field can be absent, null, current, or a stale lowercase
+40-hex value.
+
+The successor accepts only those well-formed advisory representations. It
+still binds the event's exact feature head and signed base, requires the
+checkout to have those exact two parents, requires the checked-out tree to
+equal the feature tree, and requires the immutable signed review tag to target
+that feature head. Malformed advisory values and every head, parent, tree, or
+tag mismatch continue to fail closed. The v2 tag is not moved or reused; the
+successor review uses `mars3/w001-bootstrap-helper-v3`.
+
 ## Pending receipt
 
 No claim receipt exists yet. After the authorized effect, append only the

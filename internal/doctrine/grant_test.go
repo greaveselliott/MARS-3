@@ -1120,6 +1120,19 @@ func TestNormalizedPlanningGrantGitPathsFailsClosed(t *testing.T) {
 	}
 }
 
+func TestValidAdvisoryPullRequestMergeSHA(t *testing.T) {
+	for _, value := range []string{"", "1111111111111111111111111111111111111111", wave1V3ObservedStaleMerge} {
+		if !validAdvisoryPullRequestMergeSHA(value) {
+			t.Fatalf("valid advisory merge identity %q was rejected", value)
+		}
+	}
+	for _, value := range []string{"not-a-commit", "111111111111111111111111111111111111111", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"} {
+		if validAdvisoryPullRequestMergeSHA(value) {
+			t.Fatalf("malformed advisory merge identity %q was accepted", value)
+		}
+	}
+}
+
 func loadPlanningGrantFixture(t *testing.T) ([]byte, []byte, []byte) {
 	t.Helper()
 	repo := filepath.Clean(filepath.Join("..", ".."))

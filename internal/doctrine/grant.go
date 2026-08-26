@@ -98,8 +98,8 @@ const (
 	w001BootstrapBase               = "37b55b912b20715349bc50e0524c85d4b22f1772"
 	w001BootstrapBaseTree           = "f06864b0802cea793cf7a0c08b60b7e734539a94"
 	w001BootstrapBranch             = "codex/w-001-work-authority"
-	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v2"
-	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v2"
+	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v3"
+	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v3"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -2147,7 +2147,7 @@ func w001BootstrapGitHubCheckout(root, head, branch string, findings *[]Finding)
 			os.Getenv("GITHUB_BASE_REF") != "main" || event.PullRequest == nil || event.PullRequest.Head.Ref != w001BootstrapBranch ||
 			event.PullRequest.Base.Ref != "main" || event.PullRequest.Base.SHA != w001BootstrapBase ||
 			!sha1Pattern.MatchString(event.PullRequest.Head.SHA) ||
-			event.PullRequest.MergeCommitSHA != head {
+			!validAdvisoryPullRequestMergeSHA(event.PullRequest.MergeCommitSHA) {
 			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_event", "pull-request event does not bind the signed branch and base")
 			return "", false, false
 		}
@@ -2561,7 +2561,7 @@ func checkWave1PRFallbackCheckout(root, head string, findings *[]Finding) (plann
 			os.Getenv("GITHUB_BASE_REF") != "main" || event.PullRequest == nil || event.PullRequest.Head.Ref != wave1PRFallbackBranch ||
 			event.PullRequest.Base.Ref != "main" || event.PullRequest.Base.SHA != wave1PublishedMain ||
 			!sha1Pattern.MatchString(event.PullRequest.Head.SHA) ||
-			(event.PullRequest.MergeCommitSHA != "" && !sha1Pattern.MatchString(event.PullRequest.MergeCommitSHA)) {
+			!validAdvisoryPullRequestMergeSHA(event.PullRequest.MergeCommitSHA) {
 			addFinding(findings, wave1PRFallbackPath, "public.pr_fallback_event", "pull-request event does not bind the exact fallback base and branch")
 			return planningGrantCheckout{}, false
 		}
@@ -2932,7 +2932,7 @@ func planningGrantGitHubCheckout(root, head, branch string) (planningGrantChecko
 			os.Getenv("GITHUB_BASE_REF") != "main" || event.PullRequest == nil ||
 			event.PullRequest.Head.Ref != wave1PlanningGrantBranch ||
 			event.PullRequest.Base.Ref != "main" ||
-			(event.PullRequest.MergeCommitSHA != "" && !sha1Pattern.MatchString(event.PullRequest.MergeCommitSHA)) ||
+			!validAdvisoryPullRequestMergeSHA(event.PullRequest.MergeCommitSHA) ||
 			!sha1Pattern.MatchString(event.PullRequest.Head.SHA) ||
 			!sha1Pattern.MatchString(event.PullRequest.Base.SHA) {
 			return planningGrantCheckout{}, false
@@ -2988,6 +2988,10 @@ func validPlanningGrantPullRequestRef(ref string) bool {
 	}
 	_, ok := parsePositiveInt(parts[0])
 	return ok
+}
+
+func validAdvisoryPullRequestMergeSHA(value string) bool {
+	return value == "" || sha1Pattern.MatchString(value)
 }
 
 func planningGrantPublicationTagTarget(root string, checkout planningGrantCheckout, head string, findings *[]Finding) (string, bool) {
