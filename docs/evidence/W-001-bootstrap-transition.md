@@ -337,10 +337,22 @@ patched-binary SHA-256
 `949e1d535e19ecb39e974b90b7321ef1f7f7d6b77c3958d72edb07e78d9def5a`,
 and helper-library SHA-256
 `d039c787f73e98f059937242e068d76c12753cc9accedc025bf619e1fa63c0fd`.
-The evidence-only successor uses `mars3/w001-bootstrap-helper-v8`; its exact
-commit, tree, public run, and independent dispositions remain pending until the
-new immutable subject is published and reviewed. The v7 tag is immutable and is
-not moved. No claim is authorized by this correction or dry run.
+The evidence-only v8 successor commit was
+`1ec5ad636d4d4288703607932e9c06a414a84d37`, tree
+`4c188ce59039c3eb81a403b5223463488c82a8b0`, retained by tag object
+`3645b291f6d5e5bed7d652afa22c1aa9e14eb232`. Public run `33004634256`, job
+`98294933116`, built the validator and then failed at doctrine before later
+steps because the v8 tag used the Engineer identity rather than the exact
+synthetic Release Manager identity required by the signed-tag verifier. The
+tag is preserved and not moved; no test, merge, Beads mutation, claim, or lease
+followed that failed admission.
+
+The bounded identity-only successor uses
+`mars3/w001-bootstrap-helper-v9` with exact tagger
+`MARS-3 Release Manager <release-manager@example.com>`. Its exact commit, tree,
+public run, and independent dispositions remain pending until the new immutable
+subject is published and reviewed. The v7 and v8 tags remain immutable. No
+claim is authorized by this correction or dry run.
 
 ## Pending receipt
 
