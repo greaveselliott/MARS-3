@@ -5,7 +5,8 @@
 **Features:** F-002, F-003
 **Selected Bead:** M3-W001
 **Phase:** `contract-publication`
-**Status:** implementation checkpoint pending immutable publication review
+**Status:** signed implementation checkpoint recorded; immutable publication
+review pending
 
 This manifest records the bounded publication of the W-001 and P-001
 contracts. It is not implementation evidence for either feature and creates no
@@ -47,6 +48,8 @@ retroactively authorize the path used to reach it.
 | Recovery-scope corrections | W-001 `01a03cc4-c5c8-785c-a25e-eb84bd640d3e`; P-001 `01a03cc4-d30d-7493-a8b2-e3f3e0c90ca4` | Records missing reconstructible state/version/idempotency bindings and freezes both Beads. |
 | Prospective P-001 intent | `01a03cde-0845-7a58-8325-5ce37cae64f3` | Exact description-only preimage/postimage and idempotency key under the signed disposition. |
 | Prospective P-001 receipt | `01a03cde-c1a7-747c-b574-1ff0b84511b0` | Exact postimage verified at revision `r9qvsh9a`; no other authority effect observed. |
+| Checkpoint intent | `01a03ce5-d05a-7e21-b03b-afc56a46327d` | Authorized one signed local contract and admission-validator checkpoint after the complete preflight passed. |
+| Checkpoint receipt | `01a03ce7-c3de-7416-90a7-903963e4a800` | Binds the signed checkpoint, tree, reproducible binary hash, unchanged backlog/unclaimed authority state, and next publication step. |
 
 ## Canonical final read-back
 
@@ -106,14 +109,25 @@ reported no worktree or history leaks and required no exception.
 
 ## Immutable publication evidence
 
-- Implementation checkpoint commit/tree: pending.
-- Reproducible Linux/amd64 validator binary SHA-256: pending.
-- Signed publication tag object/target/tree: pending.
+- Implementation checkpoint commit:
+  `fe72df5b81f1bd9dae2cb799948a10b36b12ab80`.
+- Implementation checkpoint tree:
+  `eb0cd99b684ce2e2f7837dabc8c90396f83fa75f`.
+- Reproducible Linux/amd64 validator binary SHA-256:
+  `46ae0935e766da18e21107685eda7968af3695ebf24f3034beafce66998a6728`.
+  Two clean builds with distinct empty caches produced identical bytes using
+  Go 1.26.2, `CGO_ENABLED=0`, `GOOS=linux`, `GOARCH=amd64`, `-trimpath`,
+  `-buildvcs=false`, and an empty build ID.
+- Signed publication tag object/target/tree: created only after this evidence
+  commit. The validator binds its exact ref, target ancestry, message, signer,
+  and equality with the reviewed and squash-main trees; the external
+  publication receipt records the resulting immutable object identifiers.
 - Remote branch and pull request: pending.
 - `Public commit gate` PR and protected-main runs: pending.
 - QA disposition: pending.
 - Security disposition: pending.
 - Orchestrator publication/reconciliation disposition: pending.
 
-Missing values keep this transition in progress. They are not inferred from
-the passing worktree checks.
+The remaining publication values keep this transition in progress. They are
+not inferred from passing local checks, and no self-referential tag or merge
+identifier is fabricated inside the commit that it identifies.
