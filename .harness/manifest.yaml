@@ -9,7 +9,10 @@ authority:
   work_definition_system: beads-dolt
   live_lease_system: postgresql-gateway
   execution_system: temporal-non-authoritative
-  current_bead: M3-H001
+  current_bead: M3-W001
+  current_bead_state: backlog
+  current_bead_claimed: false
+  plan_phase: contract-publication
   durable_product_system: git
   markdown_ticket_authority: prohibited
   genesis_is_provenance_only: true

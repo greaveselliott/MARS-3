@@ -1,126 +1,188 @@
-# Active operating plan — MARS-3 walking skeleton
+# Active operating plan — governed work-authority walking skeleton
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
 **Updated:** 2026-08-26
+**Phase:** contract-publication
 **Goal:** G-001
-**Current feature:** F-001
-**Current Bead:** M3-H001 (display ID H-001)
+**Current feature:** F-002
+**Current Bead:** M3-W001 (display ID W-001)
 **Authority:** Beads/Dolt for work state; Git for this durable plan
 
 This is the only active execution plan. It is a Git-owned ordering and evidence
-contract, not a second ticket database.
+contract, not a second ticket database. During `contract-publication`, the
+current Bead is selected but remains `backlog`; no implementation claim or
+capability lease exists. The signed `WAVE-1-contract-publication` grant permits
+only the exact Git paths and public effects needed for this transition and
+expires on merge. The Orchestrator changes the phase to `delivery` only after
+this plan and its referenced contract are accepted on `main` and a separate
+signed W-001 implementation bootstrap grant binds the canonical claim, base
+commit, attempt, paths, and human-directed publication boundary.
 
 ## Durable lineage
 
 - Goal: [G-001](../../goals/active.md)
-- Decisions: [PD-001](../../product-decisions/PD-001-public-first.md),
-  [PD-002](../../product-decisions/PD-002-git-beads-authority.md), and
-  [PD-003](../../product-decisions/PD-003-provider-neutral.md)
-- Product promise: [foundation specification](../../product-specs/foundation.md)
-- Behavior contract: [F-001](../../features/F-001-doctrine-foundation.md)
-- Work authority: external Bead `M3-H001`; this Git plan is a one-way link,
-  never lifecycle authority.
+- Decision: [PD-002](../../product-decisions/PD-002-git-beads-authority.md)
+- Product promise: [work-authority specification](../../product-specs/work-authority.md)
+- Behavior contract: [F-002](../../features/F-002-work-authority.md)
+- Work authority: external Bead `M3-W001`; this Git plan selects it and mirrors
+  bounded state but never creates a claim, lease, transition, or disposition.
+
+The local-substrate contract and P-001 are prepared in the same planning wave,
+but F-002 is the sole current feature and W-001 is the sole selected Bead.
+The Orchestrator reconciled P-001's canonical dependency set to closed M3-H001
+plus backlog M3-W001 under opaque replan correlation
+`wave1-p001-w001-dependency-replan-v1`; P-001 remains backlog and unclaimed.
+
+That restrictive dependency mutation followed a durable `REPLAN` intent and
+receipt, but `WAVE-1-contract-publication` did not explicitly enumerate a
+Beads dependency effect in its allowed-effect list. This is recorded as a
+foundation-owned authority intervention, not retroactively described as
+preauthorized. The safer blocking edge remains frozen, no further Beads
+mutation is permitted under the planning grant, and contract acceptance
+requires the signed Git evidence plus explicit independent QA and Security
+disposition on this correction.
+
+The first recovery attempt then under-specified its own state encoding and
+intermediate metadata/description effects. Those records remain durable and
+are not retroactively accepted. The prospective, signed
+`WAVE-1-recovery-disposition` binds a reconstructible public snapshot and
+authorized exactly one P-001 description postimage, which read-back verified
+without lifecycle, dependency, claim, lease, or W-001 changes. Both Beads
+remain backlog and unclaimed. The original scanner-triggering recovery file is
+represented by signed public checksums rather than admitted through a secret
+scanner exception.
+
+GitHub's existing linear, squash-only protection remains unchanged. The final
+reviewed branch tree must be retained by the signed annotated tag
+`mars3/wave1-contract-publication-v1`; PR and protected-main CI require the tag
+target tree, reviewed PR tree, and squash-main tree to be identical. This
+preserves the signed feature history without weakening branch or scanner
+policy.
 
 ## Current hypothesis and walking skeleton
 
-If a public clone can prove one authority route, pinned doctrine, observer-first
-trust, public-safe evidence, and independent review verdicts before any runtime is
-introduced, later agents can be added without granting model output implicit
-authority.
+If every work mutation passes through one typed gateway that joins canonical
+Beads state to a factory-issued, monotonically fenced live lease, stale workers
+and provider runtimes can be prevented from claiming authority through local
+state, retries, or direct database access. W-001 proves this at its gateway and
+synthetic pre-effect boundary; S-002 later qualifies real external brokers.
 
-The walking skeleton is H-001: doctrine plus deterministic validation only.
-It relies on the signed external Beads bootstrap record, not on the gateway or
-lease fencing that W-001 will build. Runtime, UI, provider, and production
-surfaces remain excluded.
+The walking skeleton is one synthetic public project and one W-001 attempt:
+read a ready Bead, compare-and-swap claim it, issue a scoped lease epoch,
+heartbeat it, reject stale or mismatched writes, append a bounded event, and
+rebuild the read projection without giving Temporal or PostgreSQL ownership of
+the work graph. The current phase publishes that contract only; implementation
+starts after the phase transition to `delivery`.
 
 ## Scenario priority
 
-1. F-001-S1 — one durable delivery route.
-2. F-001-S2 — offline doctrine provenance.
-3. F-001-S3 — observer-first trust.
-4. F-001-S4 — immediate public disclosure safety.
+1. F-002-S1 — gateway-only canonical mutation and role separation.
+2. F-002-S2 — atomic compare-and-swap claim.
+3. F-002-S3 — monotonic live lease epoch and heartbeat.
+4. F-002-S4 — effect fencing and immediate lease-loss denial.
+5. F-002-S5 — direct authority access and local label admission fail closed.
+6. F-002-S6 — ordered journal recovery and full rebaseline.
 
-These scenarios are an explicit H-001 group because the public gate cannot be
-accepted safely without all four.
+The scenarios are ordered to establish read truth before mutation, then prove
+that losing authority blocks the W-001 synthetic effect boundary and defines
+the contract later real brokers must enforce. M3-W001 already
+declares this exact group and required evidence, but implementation of the
+group is not authorized until the later canonical claim and bootstrap grant.
 
 ## Delivery waves
 
 | Wave | Bead | Owner | Depends on | State | Exit evidence |
 | --- | --- | --- | --- | --- | --- |
-| 0 | H-001 Doctrine foundation | Foundation Maintainer | signed genesis | in-review | public-safe harness, provenance, BDD, plan, validation CLI |
-| 1 | W-001 Work Authority | Work Authority Engineer | H-001 | backlog | Beads gateway, CAS claims, PostgreSQL lease epochs, direct access denied |
-| 1 | P-001 Local substrate | Platform Engineer | H-001 | backlog | Lima/k3s, OIDC, RLS, Temporal, object storage |
-| 2 | T-001 Trace spine | Trace Engineer | W-001, P-001 | backlog | audit ledger, OTel/Tempo, effect intents and receipts |
-| 3 | S-001 Rule-of-Two policy | Security Engineer | T-001 | backlog | labels, taint, tool contracts, hard admission policy |
+| 0 | H-001 Doctrine foundation | Foundation Maintainer | signed genesis | done | QA/Security accepted E7, verified public merge, completed run, and reconciliation receipt |
+| 1 | W-001 Work Authority | Work Authority Engineer | H-001 | backlog | Beads gateway, CAS claims, PostgreSQL lease epochs, stale-effect denial, and projection recovery |
+| 1 | P-001 Local substrate | Platform Engineer | H-001, W-001 | backlog | Lima/k3s, OIDC, RLS, Temporal, storage, and isolation evidence |
+| 2 | T-001 Trace spine | Trace Engineer | W-001, P-001 | backlog | audit ledger, OTel/Tempo, effect intents, receipts, and replay |
+| 3 | S-001 Rule-of-Two policy | Security Engineer | T-001 | backlog | labels, taint, tool contracts, and hard admission policy |
 | 4 | I-001 Git/evidence reconciliation | Integration Engineer | W-001, T-001, S-001 | backlog | PR publication saga and merged-evidence closure |
-| 4 | S-002 Secure effects | Security/Platform Engineer | P-001, T-001, S-001 | backlog | gVisor, brokers, credential proxy, deterministic publication |
-| 5 | A-001 Runtime contracts | Runtime Architect | T-001, S-001, S-002 | backlog | adapter conformance, qualification, routing |
+| 4 | S-002 Secure effects | Security/Platform Engineer | P-001, T-001, S-001 | backlog | gVisor, brokers, credential proxy, and deterministic publication |
+| 5 | A-001 Runtime contracts | Runtime Architect | T-001, S-001, S-002 | backlog | adapter conformance, qualification, and routing |
 | 5 | UI-001 Operator workspace | Frontend Engineer | P-001, T-001, S-001 | backlog | shared React/Electron workspace and trace/security views |
 | 6 | C-001 Codex adapter | Runtime Engineer | A-001, S-002 | backlog | contained Codex ticket execution |
 | 6 | L-001 Colibri advisory | Model Runtime Engineer | A-001, P-001 | backlog | local advisory generation with mutation disabled |
 | 7 | E-001 Public first-slice fixture | Engineer → QA → Security | I-001, UI-001, C-001, L-001 | backlog | public fixture delivery and merged PR |
 | 8 | C-002 Claude parity | Runtime Engineer | E-001 | backlog | Claude and mixed-routing conformance |
-| 9 | D-001 Dogfood/release | Dogfood/Release | C-002 | backlog | compartments, trust ledger, re-verification, approval |
+| 9 | D-001 Dogfood/release | Dogfood/Release | C-002 | backlog | compartments, trust ledger, re-verification, and approval |
 | 10 | K-001 Skills/code graph | Foundation Maintainer | D-001 | backlog | signed, licensed, quarantined capability registry |
 | 11 | O-001 Hosted hardening | Platform/Security | K-001 | backlog | multi-tenant isolation and capacity suite |
 
-No backlog Bead is claimable before its dependencies have `accepted` review
-verdicts and a `completed` run disposition. Parallel entries in one wave still require distinct exclusive
-paths and capability leases.
+No backlog Bead is claimable before its dependencies and Git-owned feature
+contract are accepted. P-001 is deliberately sequenced after W-001 so it can
+use accepted gateway fencing instead of receiving another bootstrap exception.
+The Orchestrator may schedule it only through a later truthful plan transition.
 
-## H-001 claim contract
+## Current contract-publication transition
 
-- Work type: enabler
-- Owner: Foundation Maintainer
-- Coordinator: Delivery Orchestrator
-- Risk: high
-- Failure ownership: foundation
-- Scenarios: F-001-S1 through F-001-S4
-- Verification order: `qa` → `security-reviewer` → `delivery-orchestrator`
-- Independent review: `qa` and `security-reviewer` accepted exact H-001-E7
-  target `81d42ae007992ad6f65ca8fd2bf52d2fc68af834`; merge and Orchestrator
-  reconciliation remain pending.
-- Branch: `codex/h-001-doctrine-foundation`
-- Expected evidence: all public commit gates, immutable commit identifier,
-  generated-provenance scope test, trust-default test, QA review verdict,
-  Security review verdict, completed run disposition, and Git/Beads
-  reconciliation receipt.
+- Canonical work: M3-W001, native `open`, typed lifecycle `backlog`.
+- Work type: enabler.
+- Intended owner/profile: Work Authority Engineer (`work-authority-engineer`).
+- Coordinator: Delivery Orchestrator.
+- Risk: critical.
+- Failure ownership: foundation.
+- Scenarios: F-002-S1 through F-002-S6.
+- Verification order: `qa` → `security-reviewer` → `delivery-orchestrator`.
+- Working branch: `codex/w-001-work-authority`.
+- Claim state: absent by design during `contract-publication`.
+- Required next transition: merge the contract, verify the accepted commit,
+  signed tree tag, and recovery disposition, record the publication receipt,
+  issue and verify a separate signed W-001 bootstrap grant, compare-and-swap
+  claim M3-W001 with the pinned client, then change this plan to `delivery` and
+  W-001 to `in-progress`.
 
-Exclusive paths are held in the authoritative Bead. This plan deliberately
-does not copy mutable claim or lease data.
+The W-001 bootstrap grant is deliberately not a live lease: it is
+human-directed, binds one base commit and attempt, permits only canonical W-001
+paths plus required evidence/publication, and expires when the gateway passes
+self-host conformance. The first PostgreSQL epoch is W-001 acceptance evidence,
+not a prerequisite for building the epoch service. The authoritative Bead
+holds exclusive paths and mutable lifecycle; this plan does not copy lease
+values or represent a proposed owner as a current grant.
 
 ## Success evidence
 
-- A fresh clone follows G-001 → PD-001/PD-002/PD-003 → F-001 → this plan →
-  M3-H001 without ambiguity.
-- Doctrine, plan, DocSync, public, test, vet, diff, and Git history scans pass
-  on one immutable commit.
-- Offline provenance verifies the pinned commit, file paths, blobs, license,
-  adaptations, exclusions, and generated-only refresh scope.
-- All roles load as observers, with autonomous mutation disabled.
-- QA and Security independently return `accepted` for the same commit, the run
-  records `completed`, then the Orchestrator reconciles it to the Bead.
+- A fresh clone follows G-001 → PD-002 → work-authority specification
+  → F-002 → this plan → M3-W001 without needing the operational database to
+  understand intended behavior.
+- The plan checker accepts exactly one selected backlog Bead only during
+  `contract-publication`, and rejects an active implementation row in that
+  phase.
+- In `delivery`, the checker requires exactly one `in-progress` or `in-review`
+  row and requires it to match the current Bead.
+- W-001 later proves CAS/version conflicts, dependency rejection, monotonic
+  fencing, owner-only heartbeat, synthetic stale-effect denial, ordered event
+  replay, coherent projection rebaseline, and denial of direct Beads/Dolt access.
+- QA and Security independently validate the same immutable W-001 commit before
+  the Orchestrator can record a completed disposition or close the Bead.
+- Contract-publication CI proves every feature commit has the pinned SSH
+  signature and the signed publication tag preserves the exact reviewed tree
+  across the protected squash merge.
 
 ## Falsification evidence
 
-The hypothesis is false if any check requires private state to understand the
-product contract; Git and Beads claim the same mutable authority; a provider or
-role can self-escalate; raw payloads or local identity enter evidence; doctrine
-refresh changes project-owned files; review targets differ; or H-001 reaches
-`done` before both independent review verdicts, a completed run disposition,
-and reconciliation.
+The hypothesis is false if contract publication creates a hidden claim; the
+plan and Beads disagree without a blocking finding; two workers can claim the
+same Bead; a stale epoch passes the synthetic pre-effect boundary; an
+agent can reach Beads/Dolt directly; a projection becomes writable authority;
+event truncation silently loses work; or W-001 reaches `done` without required
+review, completed disposition, remote durability, and reconciliation.
 
 ## Failure ownership and convergence
 
 Classify every failure as `foundation-owned`, `deployed-owned`, or
-`mixed-or-unclear` before remediation. This foundation plan can create only
-foundation-owned work. One automatic retry is allowed per normalized failure
-fingerprint. A repeat records `blocked` with the current state, required
-transition, exact allowed corrective action, and human escalation.
+`mixed-or-unclear` before remediation. Provider outage and authority-substrate
+failure are foundation/runtime findings and cannot silently create customer
+product work. One automatic retry is allowed per normalized fingerprint;
+equivalent recurrence records a durable `blocked` disposition and escalates.
 
-Only the Delivery Orchestrator changes dependency order. A replan records the
-affected Beads, old and new order, evidence, and decision owner in Git. During
-H-001 the authorized bootstrap operator reconciles the external Beads record
-with effect intents and receipts; W-001 moves later reconciliation behind the
-authority gateway.
+Only the Delivery Orchestrator changes dependency order or the selected Bead.
+During contract publication, the signed one-time grant permits only its listed
+paths and effect intents/receipts without an implementation claim. During
+W-001 implementation, the separate signed bootstrap grant replaces the
+not-yet-built lease only for its exact human-directed scope. Once self-hosted
+fencing exists, every mutation must pass the current authoritative state,
+exact required transition, allowed corrective action, and live epoch checks;
+the bootstrap grant is then unusable.

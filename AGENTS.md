@@ -9,13 +9,15 @@ future redaction step.
 1. Read `docs/goals/active.md`,
    `docs/exec-plans/active/current-operating-plan.md`, and the feature contract
    named by the current Bead.
-2. Read the current Bead through the authority gateway. During H-001 only, the
-   authorized bootstrap operator verifies the signed external Beads record
-   with the pinned client because W-001 has not built the gateway yet. Confirm
-   the claim, dependency state, declared exclusive paths, and expected
-   evidence. After W-001, also confirm the factory-issued live lease epoch.
-3. Work only inside the claimed paths. Make the smallest safe change that can
-   satisfy the named BDD scenario.
+2. Read the current Bead through the authority gateway. Before W-001 is
+   accepted, only the exact signed bootstrap grant named by the active plan may
+   authorize a bounded human-directed transition with the pinned client.
+   Confirm the claim, dependency state, declared exclusive paths, base commit,
+   attempt, and expected evidence. After W-001, also confirm the
+   factory-issued live lease epoch.
+3. Work only inside the claimed paths or the exact paths in an active signed
+   transition grant. Make the smallest safe change that can satisfy the named
+   BDD scenario or bounded contract-publication purpose.
 4. Attach reproducible, public-safe evidence before requesting independent
    review.
 
@@ -34,10 +36,27 @@ future redaction step.
   The active plan may display reconciled Bead state, but it does not replace
   Beads.
 - `.harness/genesis.yaml` is immutable provenance, not a ticket database.
-- H-001 is the bounded, non-autonomous bootstrap exception. Its direct external
-  Beads operations require effect intents and receipts and may route creation
-  and claims for W-001 and P-001. W-001 replaces agent access with
-  gateway-mediated compare-and-swap claims and PostgreSQL lease epochs.
+- H-001 was the bounded, non-autonomous genesis exception. Its direct external
+  Beads operations required effect intents and receipts. It created W-001 and
+  P-001, but its implementation authority ended when H-001 closed.
+- The signed `WAVE-1-contract-publication` grant is a one-time, contract-only
+  transition from accepted H-001. It names the base commit, branch, exact paths,
+  effects, reviewers, and prohibitions; it expires on the first verified merge
+  of that bounded change and grants no implementation claim or live lease.
+- The signed `WAVE-1-recovery-disposition` is a prospective, non-retroactive
+  correction contract. It binds the public recovery snapshot, the sole allowed
+  P-001 description postimage, and the signed-tree publication route. It does
+  not accept prior effects, alter GitHub or scanner policy, or grant runtime
+  authority.
+- Final Wave-1 contract publication uses the immutable signed tag
+  `mars3/wave1-contract-publication-v1`; its retained target tree must equal the
+  reviewed PR tree and protected-main squash tree.
+- W-001 necessarily bootstraps the gateway that will later fence it. After its
+  contract merges, one separately signed, human-directed W-001 implementation
+  grant may bind the canonical claim, attempt, base commit, exact paths, and
+  publication effects without pretending a live lease exists. It expires when
+  self-hosted gateway conformance is accepted. P-001 is sequenced behind W-001
+  and receives no equivalent unfenced implementation exception.
 - Chat coordinates work. A material decision or completion claim is durable
   only after it reaches its owning Git artifact and, where applicable, the
   Bead through the authority gateway.
@@ -56,7 +75,9 @@ blocked run disposition, never `done`.
 
 Every principal starts with `effective_trust: observer`, independently of its
 `max_trust`. A claim and capability lease may grant bounded writes only after
-the policy gate approves the exact action. Autonomous mutation is disabled.
+the policy gate approves the exact action. The only pre-gateway exceptions are
+the signed, path-bounded, non-autonomous transition grants above; they are not
+reusable trust or lease substitutes. Autonomous mutation is disabled.
 Production publication, destructive operations, and trust escalation always
 require explicit human approval.
 
@@ -118,8 +139,9 @@ correctness.
 ## Handoff protocol
 
 After W-001, record these entries through the authority gateway, with
-public-safe summaries mirrored into Git evidence when required. During H-001,
-the authorized bootstrap operator uses the signed external procedure:
+public-safe summaries mirrored into Git evidence when required. Before W-001,
+the authorized human bootstrap operator may use the same record types only
+under the exact signed transition grant named by the active plan:
 
 ```text
 CLAIM: scope, dependencies, bootstrap authorization or lease epoch, expected evidence

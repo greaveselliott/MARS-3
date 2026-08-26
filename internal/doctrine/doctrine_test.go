@@ -205,11 +205,77 @@ profiles:
 	}
 }
 
-func TestPublicCheckRejectsBinaryDuringFoundation(t *testing.T) {
+func TestPublicCheckRejectsBinaryInGovernedSource(t *testing.T) {
 	var findings []Finding
 	checkPublicContent(t.TempDir(), "fixture.png", []byte{0x00, 0x01, 0x02}, &findings)
-	if !findingCodePresent(findings, "public.h001_binary") {
+	if !findingCodePresent(findings, "public.binary") {
 		t.Fatalf("binary content was accepted: %v", findings)
+	}
+}
+
+func TestGovernedPublicScopeAllowsDocSyncMarkedWave1Sources(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+		body string
+	}{
+		{
+			name: "work authority Go source",
+			path: "internal/authority/gateway.go",
+			body: `/*
+FactoryDocSync:
+docs:
+- docs/features/F-002-work-authority.md
+- docs/design-docs/ADR-001-git-beads-authority.md
+- docs/code-documentation-map.md
+*/
+package authority
+`,
+		},
+		{
+			name: "platform chart YAML",
+			path: "charts/mars3/templates/config.yaml",
+			body: `# FactoryDocSync:
+# docs:
+# - docs/features/F-003-local-substrate.md
+# - docs/design-docs/ADR-006-local-substrate.md
+# - docs/code-documentation-map.md
+apiVersion: v1
+kind: ConfigMap
+`,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			var findings []Finding
+			checkGovernedPublicScope(testCase.path, &findings)
+			checkPublicContent(t.TempDir(), testCase.path, []byte(testCase.body), &findings)
+			if len(findings) != 0 {
+				t.Fatalf("valid Wave-1 source was rejected: %v", findings)
+			}
+			_, count, valid := parseDocSyncMarkers(testCase.path, []byte(testCase.body), factoryDocSyncMarker)
+			if count != 1 || valid != 1 {
+				t.Fatalf("fixture DocSync marker count=%d valid=%d, want 1 and 1", count, valid)
+			}
+		})
+	}
+}
+
+func TestGovernedPublicScopeRejectsUnrelatedAndEscapingPaths(t *testing.T) {
+	for _, path := range []string{
+		"internal/private/gateway.go",
+		"internal/runtime/adapter.go",
+		"cmd/unrelated/main.go",
+		"internal/authority/../../private.go",
+		"../outside.go",
+	} {
+		t.Run(path, func(t *testing.T) {
+			var findings []Finding
+			checkGovernedPublicScope(path, &findings)
+			if !findingCodePresent(findings, "public.scope") {
+				t.Fatalf("unrelated or escaping path was accepted: %s (%v)", path, findings)
+			}
+		})
 	}
 }
 
@@ -869,6 +935,84 @@ func TestRefreshDoctrineRejectsIncompleteRequiredProvenance(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "required MARS source") {
 		t.Fatalf("incomplete provenance was accepted: %v", err)
 	}
+}
+
+func TestDocSyncRequiresUnionOfMatchingAncestorRules(t *testing.T) {
+	root := t.TempDir()
+	writeDocSyncFixtureFile(t, root, ".harness/docsync.yaml", `schema_version: 1
+marker: FactoryDocSync
+source_extensions:
+  - .sql
+prefix_requirements:
+  - prefix: database/
+    docs:
+      - docs/product-specs/foundation.md
+      - docs/design-docs/ADR-003-rule-of-two.md
+  - prefix: database/authority/leases/
+    docs:
+      - docs/code-documentation-map.md
+`)
+	for _, path := range []string{
+		"docs/product-specs/foundation.md",
+		"docs/design-docs/ADR-003-rule-of-two.md",
+		"docs/code-documentation-map.md",
+	} {
+		writeDocSyncFixtureFile(t, root, path, "# Public fixture\n")
+	}
+
+	sourcePath := "database/authority/leases/schema.sql"
+	writeDocSyncFixtureFile(t, root, sourcePath, `-- FactoryDocSync:
+-- docs:
+-- - docs/code-documentation-map.md
+select 1;
+`)
+	findings, err := AuditDocSync(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"docs/product-specs/foundation.md",
+		"docs/design-docs/ADR-003-rule-of-two.md",
+	} {
+		if !docSyncFindingMentions(findings, sourcePath, "docsync.prefix_requirement", required) {
+			t.Fatalf("descendant rule dropped ancestor requirement %s: %v", required, findings)
+		}
+	}
+
+	writeDocSyncFixtureFile(t, root, sourcePath, `-- FactoryDocSync:
+-- docs:
+-- - docs/product-specs/foundation.md
+-- - docs/design-docs/ADR-003-rule-of-two.md
+-- - docs/code-documentation-map.md
+select 1;
+`)
+	findings, err = AuditDocSync(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(findings) != 0 {
+		t.Fatalf("complete ancestor union was rejected: %v", findings)
+	}
+}
+
+func writeDocSyncFixtureFile(t *testing.T, root, relative, content string) {
+	t.Helper()
+	path := filepath.Join(root, filepath.FromSlash(relative))
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func docSyncFindingMentions(findings []Finding, path, code, fragment string) bool {
+	for _, finding := range findings {
+		if finding.Path == path && finding.Code == code && strings.Contains(finding.Message, fragment) {
+			return true
+		}
+	}
+	return false
 }
 
 func contentHashForTest(content []byte) string {

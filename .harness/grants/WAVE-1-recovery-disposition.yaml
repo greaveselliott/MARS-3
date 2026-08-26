@@ -1,0 +1,136 @@
+schemaVersion: 1
+kind: MARS3RecoveryDispositionGrant
+
+disposition:
+  id: WAVE-1-recovery-disposition
+  classification: PUBLIC
+  issuedAt: 2026-08-26T06:44:37Z
+  expiresAt: 2026-08-29T06:44:37Z
+  baseCommit: fc9f6641d0f739a401a4f7be3bc0ee575df1310a
+  workingBranch: codex/w-001-work-authority
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  purpose: prospectively constrain Wave-1 recovery disposition, final description repair, and squash-safe signed-tree publication
+  retroactiveAuthorization: false
+  priorExternalEffectsAccepted: false
+  autonomousMutation: false
+  implementationClaimed: false
+  liveLeaseAsserted: false
+  originalArtifactSHA256: 46a7e8459204b29e739a27859539deb44f6a54d79e4ac64ad6c3cc358d9b5d04
+  originalDetachedSignatureSHA256: 4ab35549b3cb64bd58f59006aeadcbfdca0754850662481e44c0f9c8e51f5356
+  originalArtifactGitDisposition: not-committed-because-the-pinned-scanner-flags-two-public-checksum-fields
+  stateSnapshot: WAVE-1-authority-recovery-state.json
+  stateSnapshotSHA256: 4d3b5c9d90a223c0e9d974e836559309a2f4dac7f209a3966336e9152f57feca
+  stateSnapshotSchema: mars3-authority-observation/v2
+  preAuthorityRevision: k46ees2p
+  legacyStateDigestsReconstructible: false
+  p001CorrectionIdempotencyKey: wave1-p001-shared-path-description-correction-v1
+  p001PreDescriptionSHA256: 828e32051ee661e6d31c5017e996e3d8ec82257ca0a17e263f974248c5772314
+  p001PostDescriptionSHA256: d24074a56a4df0d150450555b981f84fa377364f40c9c9191e49f4ecae73c20c
+  publicationMode: squash-with-signed-tree-tag
+  publicationTag: mars3/wave1-contract-publication-v1
+  publicationTagMessage: MARS-3 Wave-1 contract-publication tree attestation v1
+  rulesetId: 21510926
+  rulesetObservedUpdatedAt: 2026-08-26T03:00:36.071+01:00
+  rulesetMutationAllowed: false
+  requiredStatusCheck: Public commit gate
+  targetBeads:
+    - M3-W001
+    - M3-P001
+  mutableBeads:
+    - M3-P001
+  allowedEffects:
+    - verify-and-independently-disposition-observed-final-authority-state
+    - replace-m3-p001-description-with-exact-postimage
+    - append-public-safe-disposition-intent-and-receipt
+    - edit-listed-public-paths
+    - run-public-commit-gate
+    - create-pinned-signer-git-commits
+    - create-and-push-one-pinned-signer-publication-tag
+    - push-working-branch
+    - open-or-update-pull-request
+  authorizedPaths:
+    - .harness/docsync.yaml
+    - .harness/manifest.yaml
+    - .harness/grants/WAVE-1-authority-recovery-state.json
+    - .harness/grants/WAVE-1-recovery-disposition.yaml
+    - .harness/grants/WAVE-1-recovery-disposition.yaml.sig
+    - AGENTS.md
+    - README.md
+    - docs/QUALITY_SCORE.md
+    - docs/code-documentation-map.md
+    - docs/design-docs/ADR-001-git-beads-authority.md
+    - docs/design-docs/ADR-006-local-substrate.md
+    - docs/design-docs/index.md
+    - docs/evidence/H-001-review-disposition.md
+    - docs/evidence/WAVE-1-contract-publication.md
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/features/F-001-doctrine-foundation.md
+    - docs/features/F-002-work-authority.md
+    - docs/features/F-003-local-substrate.md
+    - docs/features/README.md
+    - docs/goals/active.md
+    - docs/product-decisions/PD-001-public-first.md
+    - docs/product-decisions/PD-002-git-beads-authority.md
+    - docs/product-decisions/PD-003-provider-neutral.md
+    - docs/product-specs/foundation.md
+    - docs/product-specs/index.md
+    - docs/product-specs/local-substrate.md
+    - docs/product-specs/work-authority.md
+    - internal/doctrine/docsync.go
+    - internal/doctrine/doctrine.go
+    - internal/doctrine/doctrine_test.go
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+    - internal/doctrine/plan.go
+    - internal/doctrine/plan_test.go
+    - internal/doctrine/public.go
+  requiredP001Postconditions:
+    - native-status-open
+    - lifecycle-backlog
+    - claim-absent
+    - lease-absent
+    - dependencies-exactly-M3-H001-and-M3-W001
+    - exclusive-paths-unchanged
+    - all-other-Beads-unchanged
+  requiredPublicationProperties:
+    - every-feature-commit-has-the-pinned-ssh-signature
+    - signed-tag-target-descends-from-the-exact-grant-base
+    - signed-tag-target-tree-equals-reviewed-pr-head-tree
+    - squash-main-tree-equals-signed-tag-target-tree
+    - tag-keeps-reviewed-feature-history-reachable
+    - required-public-commit-gate-passes-on-pr-and-main
+  prohibitedEffects:
+    - authorize-prior-effects-retroactively
+    - mutate-m3-w001
+    - mutate-p001-metadata-dependencies-lifecycle-claim-or-lease
+    - mutate-any-other-bead
+    - any-description-write-other-than-the-exact-p001-postimage
+    - issue-or-assert-live-lease
+    - runtime-or-platform-implementation
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+    - provider-or-customer-data-access
+    - credential-persistence
+    - add-secret-scanner-ignore-or-allowlist
+    - mutate-github-rules-or-repository-settings
+    - create-or-move-any-other-tag
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  recoveryDispositionRequired: true
+  externalStateReadbackRequired: true
+  rawAuthorityPayloadIncluded: false
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-recovery-disposition
+  detachedSignature: WAVE-1-recovery-disposition.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

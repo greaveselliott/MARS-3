@@ -61,11 +61,13 @@ func AuditDocSync(repo string) ([]Finding, error) {
 		if !isDocSyncSource(path, config.SourceExtensions) || hasPathPrefix(path, config.Excluded) {
 			continue
 		}
-		rule, mapped := longestDocSyncRule(path, config.Rules)
+		matchingRules := matchingDocSyncRules(path, config.Rules)
+		mapped := len(matchingRules) > 0
 		if !mapped {
 			addFinding(&findings, path, "docsync.unmapped_source", "configured source file is outside the canonical prefix map")
 			continue
 		}
+		requiredDocs := requiredDocsForRules(matchingRules)
 		data, err := readAuditedFile(root, path)
 		if err != nil {
 			addFinding(&findings, path, "docsync.read", "%v", err)
@@ -88,9 +90,9 @@ func AuditDocSync(repo string) ([]Finding, error) {
 		if len(docs) == 0 {
 			addFinding(&findings, path, "docsync.docs_missing", "%s must name at least one documentation file", config.Marker)
 		}
-		for _, required := range rule.RequiredDocs {
+		for _, required := range requiredDocs {
 			if !containsString(docs, required) {
-				addFinding(&findings, path, "docsync.prefix_requirement", "prefix %q requires %s", rule.Prefix, required)
+				addFinding(&findings, path, "docsync.prefix_requirement", "matching prefix requirements include %s", required)
 			}
 		}
 		for _, document := range docs {
@@ -344,16 +346,22 @@ func hasPathPrefix(path string, prefixes []string) bool {
 	return false
 }
 
-func longestDocSyncRule(path string, rules []docSyncRule) (docSyncRule, bool) {
-	var selected docSyncRule
-	found := false
+func matchingDocSyncRules(path string, rules []docSyncRule) []docSyncRule {
+	var matches []docSyncRule
 	for _, rule := range rules {
-		if strings.HasPrefix(path, rule.Prefix) && (!found || len(rule.Prefix) > len(selected.Prefix)) {
-			selected = rule
-			found = true
+		if strings.HasPrefix(path, rule.Prefix) {
+			matches = append(matches, rule)
 		}
 	}
-	return selected, found
+	return matches
+}
+
+func requiredDocsForRules(rules []docSyncRule) []string {
+	var required []string
+	for _, rule := range rules {
+		required = append(required, rule.RequiredDocs...)
+	}
+	return uniqueSorted(required)
 }
 
 func parseDocSyncMarkers(path string, data []byte, marker string) ([]string, int, int) {
