@@ -57,6 +57,16 @@ later workflow that genuinely needs another event, expression, action,
 permission, or container requires a dedicated product or architecture decision
 and a narrower admission rule; it cannot weaken this foundation gate in place.
 
+Structural diagnostics are not the final authority: YAML and shell each have
+too many equivalent spellings to prove the whole job from selected fields. The
+validator therefore normalizes only CRLF to LF and binds the complete sole
+workflow to SHA-256
+`b087a9bacc60f895aa00d58c34bd4b3791500762330addee84691ddc7dda2c62`.
+Any other byte, job, step, runner, shell, condition, failure behavior, command,
+comment, or workflow path fails the H-001 contract. Updating that digest is an
+authority-bearing code change requiring a new ADR decision, immutable evidence,
+and fresh QA then Security review; the workflow cannot bless itself.
+
 H-001 pins Go 1.24.11 in CI and uses Gitleaks v8.18.4 by immutable OCI digest.
 The scanner must first reject a synthetic canary, then scan both the worktree
 and complete history. A newer release that fails that canary is not qualified

@@ -130,6 +130,16 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
   a bracket-form `secrets` expression omitted by the E3 dot-form check.
   Security returned `changes-requested`; M3-H001 reopened on the same Bead and
   branch. E3 is superseded and neither verdict carries to E4.
+- Signed remediation checkpoint
+  `74005d6a8f1e93aeb9f7f1faeff296c1f233fe48` and GitHub Actions run
+  `32926762404` passed the then-current gates. An independent preflight review
+  correctly withheld E4: selected-field validation still admitted disabled or
+  masked gates, arbitrary steps, runner and shell changes, and a dynamically
+  constructed Docker invocation. Its raw container scans also produced
+  misleading findings on inert text, and the positive fixture read the live
+  workflow. These are foundation-owned findings on the same Bead, not a new
+  ticket. The subsequent remediation binds the entire CRLF-normalized workflow
+  to an independent hard-coded digest while retaining structural diagnostics.
 
 FactoryDocSync was checked and remained current. This ticket changed its BDD,
 authority, provenance, trace, security, publication, runtime, and operator

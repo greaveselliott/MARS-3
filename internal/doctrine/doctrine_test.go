@@ -369,19 +369,44 @@ func TestCanonicalFoundationWorkflowPolicy(t *testing.T) {
 	if len(findings) != 0 {
 		t.Fatalf("CRLF canonical workflow was rejected: %v", findings)
 	}
+}
 
-	comment := "# quoted policy data: \"pull_request_target\": ${{ secrets['NOT_LIVE'] }}\n"
-	findings = nil
-	checkWorkflow(".github/workflows/foundation-quality.yml", comment+content, &findings)
-	if len(findings) != 0 {
-		t.Fatalf("YAML comment data was treated as active workflow syntax: %v", findings)
+func TestImmutableFoundationWorkflowRejectsEveryExecutionMutation(t *testing.T) {
+	base := canonicalFoundationWorkflow(t)
+	cases := []struct {
+		name    string
+		content string
+	}{
+		{name: "disabled step", content: replaceWorkflowFixture(t, base, "        run: go build", "        if: false\n        run: go build")},
+		{name: "continued failure", content: replaceWorkflowFixture(t, base, "        run: go build", "        continue-on-error: true\n        run: go build")},
+		{name: "neutralized test", content: replaceWorkflowFixture(t, base, "          go test ./...", "          true")},
+		{name: "masked test failure", content: replaceWorkflowFixture(t, base, "          go test ./...", "          go test ./... || true")},
+		{name: "self hosted runner", content: replaceWorkflowFixture(t, base, "    runs-on: ubuntu-24.04", "    runs-on: self-hosted")},
+		{name: "extra network step", content: replaceWorkflowFixture(t, base, "      - name: Check doctrine", "      - name: Extra command\n        run: curl -fsS https://example.com/\n\n      - name: Check doctrine")},
+		{name: "custom shell", content: replaceWorkflowFixture(t, base, "        run: go build", "        shell: python\n        run: go build")},
+		{name: "dynamic container", content: replaceWorkflowFixture(t, base, "          go vet ./...", "          go vet ./...\n          d=docker\n          \"$d\" run alpine:latest")},
+		{name: "additional arbitrary step", content: replaceWorkflowFixture(t, base, "      - name: Check whitespace", "      - name: Unreviewed step\n        run: true\n\n      - name: Check whitespace")},
+		{name: "apparently harmless comment", content: "# workflow changes require a new contract\n" + base},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			var findings []Finding
+			checkWorkflow(canonicalFoundationWorkflowPath, testCase.content, &findings)
+			if !findingCodePresent(findings, "public.workflow_contract") {
+				t.Fatalf("workflow mutation was accepted: %v", findings)
+			}
+		})
 	}
 
-	plainBlockData := replaceWorkflowFixture(t, content, "          go test ./...\n", "          printf '%s\\n' 'plain secrets text'\n          go test ./...\n")
+	var findings []Finding
+	checkWorkflow(".github/workflows/another.yml", base, &findings)
+	if !findingCodePresent(findings, "public.workflow_contract") {
+		t.Fatalf("additional workflow path was accepted: %v", findings)
+	}
 	findings = nil
-	checkWorkflow(".github/workflows/foundation-quality.yml", plainBlockData, &findings)
-	if len(findings) != 0 {
-		t.Fatalf("plain non-expression block-scalar data was rejected: %v", findings)
+	checkPublicContent(t.TempDir(), ".github/workflows/foundation-quality.YML", []byte(base), &findings)
+	if !findingCodePresent(findings, "public.workflow_contract") {
+		t.Fatalf("case-variant workflow extension bypassed the path contract: %v", findings)
 	}
 }
 

@@ -12,6 +12,7 @@ package doctrine
 import (
 	"bufio"
 	"bytes"
+	"crypto/sha256"
 	"fmt"
 	"io/fs"
 	"net/mail"
@@ -55,6 +56,11 @@ var allowedWorkflowExpressions = map[string]int{
 }
 
 const allowedWorkflowContainer = "docker.io/zricethezav/gitleaks@sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba"
+
+const (
+	canonicalFoundationWorkflowPath   = ".github/workflows/foundation-quality.yml"
+	canonicalFoundationWorkflowSHA256 = "b087a9bacc60f895aa00d58c34bd4b3791500762330addee84691ddc7dda2c62"
+)
 
 var forbiddenBasenames = map[string]bool{
 	".ds_store":           true,
@@ -236,7 +242,8 @@ func checkPublicContent(root, path string, data []byte, findings *[]Finding) {
 			addFinding(findings, path, "public.executable_markdown", "executable shell fences are prohibited in Markdown fixtures")
 		}
 	}
-	if strings.HasPrefix(path, ".github/workflows/") && (strings.HasSuffix(path, ".yaml") || strings.HasSuffix(path, ".yml")) {
+	workflowPath := strings.ToLower(filepath.ToSlash(path))
+	if strings.HasPrefix(workflowPath, ".github/workflows/") && (strings.HasSuffix(workflowPath, ".yaml") || strings.HasSuffix(workflowPath, ".yml")) {
 		checkWorkflow(path, content, findings)
 	}
 	if strings.EqualFold(filepath.Ext(path), ".md") {
@@ -372,6 +379,11 @@ func hasExecutableFence(content string) bool {
 }
 
 func checkWorkflow(path, content string, findings *[]Finding) {
+	normalized := strings.ReplaceAll(content, "\r\n", "\n")
+	digest := fmt.Sprintf("%x", sha256.Sum256([]byte(normalized)))
+	if filepath.ToSlash(path) != canonicalFoundationWorkflowPath || digest != canonicalFoundationWorkflowSHA256 {
+		addFinding(findings, path, "public.workflow_contract", "workflow must match the immutable H-001 foundation contract")
+	}
 	records, syntaxMessages := parseCanonicalWorkflow(content)
 	for _, message := range syntaxMessages {
 		addFinding(findings, path, "public.workflow_yaml", "%s", message)

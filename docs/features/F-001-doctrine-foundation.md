@@ -105,6 +105,9 @@ expressions, and three exact no-network/read-only scanner containers
 secret or token contexts, extra action inputs, reusable or local actions, job
 containers or services, and modified Docker flags, mounts, images, or commands
 instead of inferring safety from one recognized spelling
+**And** a CRLF-normalized full-workflow digest rejects disabled or masked gates,
+extra steps, runner or shell changes, dynamically constructed commands, and all
+other execution mutations outside the structural allowlists
 **And** deterministic tests, vet, diff checks, and secret history scan pass
 **And** independent human QA and Security review the same immutable commit for
 semantic or unrecognized disclosure risks that pattern checks cannot prove.

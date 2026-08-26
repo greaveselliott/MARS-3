@@ -12,7 +12,7 @@ pass and not a numeric score.
 | F-001-S1 authority route | doctrine-foundation | foundation | H-001-E3: deterministic checks passed | fresh E4 review required |
 | F-001-S2 provenance | doctrine-foundation | foundation | H-001-E3: 20-source offline refresh passed | fresh E4 review required |
 | F-001-S3 trust defaults | security-review | foundation | H-001-E3: profile mutation denial passed | fresh E4 QA then Security required |
-| F-001-S4 public safety | security-review | foundation | H-001-E3 failed quoted-trigger and bracket-secret admission | E4 remediation in progress |
+| F-001-S4 public safety | security-review | foundation | E4 preflight found unbounded job/step execution after E3 findings | immutable workflow remediation in progress |
 
 ## Release gate
 
