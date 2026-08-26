@@ -167,6 +167,19 @@ func checkClaimVerificationOrderData(claimPath string, claim, manifest []byte, f
 		addFinding(findings, claimPath, "doctrine.claim_verification_order", "verification.order must be one non-empty scalar sequence")
 		return
 	}
+	canonicalOrder := [...]string{"qa", "security-reviewer", "delivery-orchestrator"}
+	exactOrder := len(order) == len(canonicalOrder)
+	if exactOrder {
+		for index := range canonicalOrder {
+			if order[index] != canonicalOrder[index] {
+				exactOrder = false
+				break
+			}
+		}
+	}
+	if !exactOrder {
+		addFinding(findings, claimPath, "doctrine.claim_verification_order_exact", "verification.order must equal [qa, security-reviewer, delivery-orchestrator]")
+	}
 
 	executable := executableIdentityRegistry(manifest)
 	seen := make(map[string]bool, len(order))

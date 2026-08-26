@@ -2,17 +2,17 @@
 
 **Updated:** 2026-08-26
 **Owner:** Delivery Orchestrator
-**Current release readiness:** Not releasable; H-001-E6 awaiting independent review
+**Current release readiness:** Not releasable; H-001-E6 received QA changes-requested
 
 This ledger is evidence-backed. A missing result is `pending`, not an inferred
 pass and not a numeric score.
 
 | Feature/scenario | Mode | Failure ownership | Evidence state | Review state |
 | --- | --- | --- | --- | --- |
-| F-001-S1 authority route | doctrine-foundation | foundation | H-001-E6: registry-backed reviewer routing and signed-claim lineage passed | pending QA |
-| F-001-S2 provenance | doctrine-foundation | foundation | H-001-E6: 20-source offline refresh passed | pending QA |
-| F-001-S3 trust defaults | security-review | foundation | H-001-E6: profile mutation denial passed | pending QA then Security |
-| F-001-S4 public safety | security-review | foundation | H-001-E6: exact workflow, public, secret, and reproducible-build checks passed | pending QA then Security |
+| F-001-S1 authority route | doctrine-foundation | foundation | exact ordered-chain enforcement and corrected signed claim pass locally | E6 changes-requested; replacement evidence pending |
+| F-001-S2 provenance | doctrine-foundation | foundation | 20-source offline refresh remains passing | replacement evidence pending |
+| F-001-S3 trust defaults | security-review | foundation | profile mutation denial remains passing | replacement QA then Security pending |
+| F-001-S4 public safety | security-review | foundation | exact workflow, public, secret, and reproducible-build checks remain passing | replacement QA then Security pending |
 
 ## Release gate
 

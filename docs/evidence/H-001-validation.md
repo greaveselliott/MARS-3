@@ -2,7 +2,7 @@
 
 **Classification:** PUBLIC
 **Evidence ID:** H-001-E6
-**Status:** Candidate; independent QA and Security review pending
+**Status:** Superseded; QA changes-requested, Security did not start
 **Opaque trace reference:** `bootstrap-h001-verifier-routing-v7`
 **Recorded:** 2026-08-26
 **Verification owners:** QA Reviewer, then Security Reviewer
@@ -191,6 +191,14 @@ same SHA-256 shown above. `go version -m` reported `go1.26.2`, `CGO_ENABLED=0`,
   routing and stale-binding regressions. Exact-SHA CI run `32930252268` passed,
   and two clean Linux/amd64 builds reproduced the validation-binary hash above.
   No prior verdict carries to the immutable commit containing H-001-E6.
+- QA returned `changes-requested` for immutable H-001-E6 target
+  `0c6241b99f803aa8fead148ad95aad9d57a711a6`. The validator proved identities
+  were nonempty, unique, and routable, but it accepted both an incomplete
+  `[qa]` sequence and the reordered `[security-reviewer, qa,
+  delivery-orchestrator]` sequence. That contradicted the exact ordered chain
+  in F-001 and ADR-001. The normalized fingerprint is
+  `H001-VERIFICATION-ORDER-NOT-EXACT`; M3-H001 reopened on the same Bead and
+  branch, Security did not start, and no E6 verdict carries forward.
 
 FactoryDocSync was checked and remained current. This ticket changed its BDD,
 authority, provenance, trace, security, publication, runtime, and operator
@@ -210,7 +218,9 @@ documentation together with the validation behavior.
   correctness failure, but future pin maintenance must update the workflow
   contract through a new decision and review.
 
-Next executable owner: QA principal `qa`. On `accepted`, the exact same
-immutable H-001-E6 commit routes to `security-reviewer`. The Delivery
-Orchestrator may reconcile and close M3-H001 only after both canonical Beads
-verdicts and a completed run disposition.
+Next executable owner: Foundation Maintainer, limited to recording the exact
+ordered-chain correction, a fresh immutable checkpoint, and replacement
+evidence. That evidence then routes to principal `qa`; only an accepted exact
+commit can route onward to `security-reviewer`. The Delivery Orchestrator may
+reconcile and close M3-H001 only after both canonical Beads verdicts and a
+completed run disposition.

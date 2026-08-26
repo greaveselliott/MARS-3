@@ -341,6 +341,45 @@ profiles:
 	}
 }
 
+func TestClaimVerificationOrderRejectsNonCanonicalSequence(t *testing.T) {
+	manifest := []byte(`roles:
+  - id: qa
+  - id: security-reviewer
+  - id: delivery-orchestrator
+  - id: dogfood
+profiles:
+  - id: qa
+    principal_id: qa
+  - id: security-reviewer
+    principal_id: security-reviewer
+  - id: delivery-orchestrator
+    principal_id: delivery-orchestrator
+  - id: dogfood
+    principal_id: dogfood
+`)
+	cases := []struct {
+		name  string
+		order string
+	}{
+		{name: "incomplete", order: "    - qa\n    - security-reviewer\n"},
+		{name: "reordered", order: "    - security-reviewer\n    - qa\n    - delivery-orchestrator\n"},
+		{name: "extra routable reviewer", order: "    - qa\n    - dogfood\n    - security-reviewer\n    - delivery-orchestrator\n"},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			claim := []byte("verification:\n  order:\n" + testCase.order)
+			var findings []Finding
+			checkClaimVerificationOrderData(".harness/claims/H-001.yaml", claim, manifest, &findings)
+			if !findingCodePresent(findings, "doctrine.claim_verification_order_exact") {
+				t.Fatalf("non-canonical verification order was accepted: %v", findings)
+			}
+			if findingCodePresent(findings, "doctrine.claim_verifier_unroutable") {
+				t.Fatalf("routable identity was misclassified while checking exact order: %v", findings)
+			}
+		})
+	}
+}
+
 func TestClaimVerificationOrderRejectsUnroutableOrMalformedEntries(t *testing.T) {
 	manifest := []byte(`roles:
   - id: qa
