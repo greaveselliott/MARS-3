@@ -86,6 +86,11 @@ func Run(options Options) error {
 			return fmt.Errorf("--%s is required", name)
 		}
 	}
+	repoRoot, err := filepath.Abs(options.Repo)
+	if err != nil {
+		return fmt.Errorf("resolve repository root: %w", err)
+	}
+	options.Repo = filepath.Clean(repoRoot)
 
 	config, err := doctrine.LoadW001BootstrapGrant(options.Repo)
 	if err != nil {
