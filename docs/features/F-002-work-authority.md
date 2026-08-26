@@ -274,6 +274,7 @@ and digest; digests prove integrity, never freshness by themselves.
 
 ```text
 backlog --claim+lease--> in-progress --handoff--> in-review
+backlog --signed W-001 atomic bootstrap claim (no capability)--> in-progress
 in-review --changes-requested--> in-progress
 in-review --accepted chain+merge+completed run+reconcile--> done
 backlog|in-progress|in-review --authorized supersession--> superseded
@@ -283,15 +284,37 @@ lease: active --release|revoke|expire--> inactive --new issue--> active(same gen
 lease-store: restore|rollback|reinit --> disabled --human recovery--> new generation,epoch 1
 ```
 
-There is one declared bootstrap exception: after the accepted F-002 contract,
+There is one declared bootstrap sequence: after the accepted F-002 contract,
 a separately signed, human-directed W-001 grant binds the canonical claim,
 attempt, immutable base commit, exact W-001 paths, publication effects, expiry,
   expected WorkVersion, exact `backlog/open/unclaimed` →
   `in-progress/in_progress/claimed` CAS transition, pinned Beads client and
-  binary hash, idempotency key, and public-safe receipts. It permits W-001 to enter `in-progress` and build the
-gateway without falsely asserting that its not-yet-built lease exists. It is
-not transferable or autonomous, cannot authorize production/destructive
-effects, and becomes unusable as soon as self-host conformance is accepted.
+  binary hash, idempotency key, and public-safe receipts. That first grant uses
+one reviewed helper transaction to enter `in-progress`, but grants no
+implementation capability. A second signed grant must reconcile the plan and
+manifest to the verified canonical postimage; only a later bounded delivery
+grant may authorize building the gateway without falsely asserting that its
+not-yet-built lease exists. The sequence is not transferable or autonomous,
+cannot authorize production/destructive effects, and its delivery exception
+becomes unusable as soon as self-host conformance is accepted.
+
+The reviewed helper tree alone cannot exercise the first transition. After its
+squash merge and protected-main check, a distinct one-hour signed execution
+authorization must bind the actual merged SHA/tree, review tag and feature
+commit, QA and Security accepted commit, exact patched binary, attempt,
+idempotency key, authority project, signed preimage, and opaque canonical
+workspace-instance digest. The authorization is canonical JSON with one
+trailing newline; its exact payload and detached-signature digests are part of
+the in-memory identity. After conformance the helper reloads that exact object
+and rejects any signed-byte change. Before the effect it revalidates both
+expiries, resolves the fixed public GitHub `main` under a sanitized Git
+environment, rejects ambient Beads/Dolt workspace overrides, and rechecks the
+strict embedded metadata, direct database filesystem identity, absence of any
+`.beads/redirect`, and complete preimage. The patched operation also disables
+redirect following and repeats those direct-store checks inside the transaction
+before mutation. A local squash, mutable remote, copied or redirected
+workspace, swapped token, or command error cannot be accepted; command
+uncertainty blocks retry until separately authorized reconciliation.
 Every later mutation uses the normal live-lease transition above. P-001 and all
 subsequent work receive no equivalent exception.
 

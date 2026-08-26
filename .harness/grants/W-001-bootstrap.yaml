@@ -1,0 +1,152 @@
+schemaVersion: 1
+kind: MARS3ImplementationBootstrapGrant
+
+grant:
+  id: W-001-bootstrap
+  classification: PUBLIC
+  issuedAt: 2026-08-26T10:30:00Z
+  expiresAt: 2026-08-29T10:30:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 37b55b912b20715349bc50e0524c85d4b22f1772
+  baseTree: f06864b0802cea793cf7a0c08b60b7e734539a94
+  workingBranch: codex/w-001-work-authority
+  reviewTag: mars3/w001-bootstrap-helper-v9
+  reviewTagMessage: MARS-3 W-001 bootstrap helper tree attestation v9
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  blockerComment: 01a03d98-a2e2-77db-bbd6-76575366454f
+  purpose: publish and execute one reviewed atomic W-001 bootstrap claim without asserting a live lease
+  bead: M3-W001
+  displayId: W-001
+  profile: work-authority-engineer
+  attemptId: w001-bootstrap-3135f1d1-b0d4-4956-9fc9-1852310bfd77
+  replayRef: w001-claim-97a7e81e-e749-4cb0-8a0a-8e269e13e38f
+  autonomousMutation: false
+  liveLeaseAsserted: false
+  productionEffects: false
+  allowedEffects:
+    - edit-exact-preclaim-paths
+    - build-patched-Beads-from-the-exact-signed-source-and-patch
+    - run-disposable-atomic-claim-conformance
+    - create-pinned-signer-feature-commits-and-one-signed-review-tag
+    - push-one-feature-branch-and-review-tag-and-open-one-ready-PR
+    - run-public-commit-gate-and-obtain-independent-QA-and-Security-review
+    - squash-merge-promptly-with-reviewed-tree-equality
+    - append-public-safe-authority-intents-receipts-and-dispositions
+    - execute-one-expected-preimage-CAS-claim-on-accepted-main
+    - append-one-public-safe-canonical-claim-receipt
+  preclaimPaths:
+    - .harness/grants/W-001-bootstrap.yaml
+    - .harness/grants/W-001-bootstrap.yaml.sig
+    - cmd/mars3-authority/main.go
+    - internal/authority/bootstrap/bootstrap.go
+    - internal/authority/bootstrap/bootstrap_test.go
+    - internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+    - docs/design-docs/ADR-001-git-beads-authority.md
+    - docs/product-specs/work-authority.md
+    - docs/features/F-002-work-authority.md
+    - docs/evidence/W-001-bootstrap-transition.md
+    - NOTICE
+    - THIRD_PARTY_NOTICES
+  implementationPaths:
+    - internal/authority/**
+    - cmd/mars3-authority/**
+    - api/authority/**
+    - database/authority/**
+    - deploy/authority/**
+    - docs/evidence/W-001-validation.md
+    - go.mod
+    - go.sum
+    - Makefile
+    - NOTICE
+    - THIRD_PARTY_NOTICES
+  prohibitedEffects:
+    - execute-claim-before-helper-merge-protected-main-success-QA-and-Security-acceptance
+    - execute-claim-without-a-separate-signed-short-lived-post-review-authorization
+    - use-raw-SQL-hidden-code-or-a-two-transaction-claim
+    - mutate-another-Bead-dependency-or-authority-project
+    - issue-or-assert-a-live-lease-before-verified-gateway-issuance
+    - edit-outside-the-current-signed-phase-paths
+    - move-delete-or-reuse-the-review-tag
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - production-or-destructive-effect
+    - reconcile-plan-or-manifest-without-a-separate-signed-postclaim-grant
+    - begin-gateway-implementation-under-this-bootstrap-claim-grant
+    - autonomous-mutation
+    - trust-escalation
+    - credentials-provider-session-customer-data-or-raw-payloads
+
+expected:
+  beadsProject: e9669a62-5be6-4b94-85f8-c502c29d394a
+  nativeStatus: open
+  lifecycleState: backlog
+  claimState: unclaimed
+  assignee: work-authority-engineer
+  createdAt: 2026-08-26T05:09:05Z
+  updatedAt: 2026-08-26T06:22:03Z
+  metadataSHA256: 10c61003cb39518f57905620fcc0c47d29950fe82ae8d98a3111a057fa554dba
+  labelsSHA256: be506df06d8c206a3919a71a57e8aaacd2b5e1e233e25bafc2f5f87f306b188c
+  dependency: M3-H001
+  dependencyType: blocks
+  dependencyNativeStatus: closed
+  dependencyLifecycleState: done
+  dependencyDigest: 3ad0bca78b14e4e1fd5544477f131c0a86dd8a4d4e9563d43fa4ae1c202f4100
+  lineageDigest: 9f3e91b4b642dc740898347c35e8f38abc35cc3ac1be83c81fe122cc308eaced
+
+postimage:
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  claimState: claimed
+  removeLabel: backlog
+  addLabel: in-progress
+  generationRef: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  issueIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  metadataSHA256: 3a0bbed5ca93acf77d04eedfad6bcaa16a9701f3e6da3f8669eb9928f6d09139
+  labelsSHA256: 3e4e77e20ee7a46dd77c4a9884dee51aa9f0fa9f2445099a0cb457d72cb83bbb
+  metadataBase64: eyJib290c3RyYXBDbGFpbSI6eyJhdHRlbXB0SWQiOiJ3MDAxLWJvb3RzdHJhcC0zMTM1ZjFkMS1iMGQ0LTQ5NTYtOWZjOS0xODUyMzEwYmZkNzciLCJiYXNlQ29tbWl0IjoiMzdiNTViOTEyYjIwNzE1MzQ5YmM1MGUwNTI0Yzg1ZDRiMjJmMTc3MiIsImdyYW50SWQiOiJXLTAwMS1ib290c3RyYXAiLCJpZGVtcG90ZW5jeUtleSI6IncwMDEtY2xhaW0tOTdhN2U4MWUtZTc0OS00Y2IwLThhMGEtOGUyNjllMTNlMzhmIn0sImNvbnRyYWN0UHVibGljYXRpb25SZXF1aXJlZCI6dHJ1ZSwiY29vcmRpbmF0b3IiOiJkZWxpdmVyeS1vcmNoZXN0cmF0b3IiLCJkaXNwbGF5SWQiOiJXLTAwMSIsImV4Y2x1c2l2ZVBhdGhzIjpbImludGVybmFsL2F1dGhvcml0eS8qKiIsImNtZC9tYXJzMy1hdXRob3JpdHkvKioiLCJhcGkvYXV0aG9yaXR5LyoqIiwiZGF0YWJhc2UvYXV0aG9yaXR5LyoqIiwiZGVwbG95L2F1dGhvcml0eS8qKiIsImRvY3MvZXZpZGVuY2UvVy0wMDEtdmFsaWRhdGlvbi5tZCIsImdvLm1vZCIsImdvLnN1bSIsIk1ha2VmaWxlIiwiTk9USUNFIiwiVEhJUkRfUEFSVFlfTk9USUNFUyJdLCJmYWlsdXJlT3duZXJzaGlwIjoiZm91bmRhdGlvbiIsImZlYXR1cmVJZCI6IkYtMDAyIiwiZ29hbElkcyI6WyJHLTAwMSJdLCJsaWZlY3ljbGVTdGF0ZSI6ImluLXByb2dyZXNzIiwicHJvZHVjdERlY2lzaW9uSWRzIjpbIlBELTAwMiJdLCJwdWJsaWNEaXNjbG9zdXJlIjp0cnVlLCJyaXNrIjoiY3JpdGljYWwiLCJzY2VuYXJpb0lkcyI6WyJGLTAwMi1TMSIsIkYtMDAyLVMyIiwiRi0wMDItUzMiLCJGLTAwMi1TNCIsIkYtMDAyLVM1IiwiRi0wMDItUzYiXSwic2NoZW1hVmVyc2lvbiI6MSwidmVyaWZpY2F0aW9uT3JkZXIiOlsicWEiLCJzZWN1cml0eS1yZXZpZXdlciIsImRlbGl2ZXJ5LW9yY2hlc3RyYXRvciJdLCJ3b3JrVHlwZSI6ImVuYWJsZXIiLCJ3b3JrVmVyc2lvbiI6eyJhdXRob3JpdHlHZW5lcmF0aW9uIjoiNmU3OWZmODEtYTAwNy00MmE1LWExNzgtN2NlNThkYmI3MThiIiwiZGVwZW5kZW5jeUdyYXBoUmV2aXNpb24iOjEsImlzc3VlSW5jYXJuYXRpb24iOiJlMWU4ZDJkM2Y4MDg3MTA5NmE1NjhmYjQ4OWY0OTU3NWE0MmFiZDM3YjI2OWRmOWZhZjc3N2EwOWNkNjg5YjQxIiwiaXNzdWVNdXRhdGlvblNlcXVlbmNlIjoxfX0
+
+toolchain:
+  beadsVersion: 1.2.2
+  beadsSourceCommit: 6c124203e771433a3550c348771a5b5e27fd3c21
+  beadsBinarySHA256: 6cc5cf1d3fea5774606af82410ac05e35b78ad5f404f1da5be33c93ff087cffb
+  doltSourceCommit: 1bf533220ab0
+  doltModule: github.com/dolthub/dolt/go v0.40.5-0.20260605230755-1bf533220ab0
+  doltModuleSHA256: oPg5f5bYFy5x7Ws2qtVG7wiva96cIh9SFg7nrC4n7QA=
+  goVersion: go1.26.2
+  goOS: darwin
+  goArch: arm64
+  goBinarySHA256: 005640c7ff93028cb704283b0f737f2db3faf8b51b2561170c769b83905da646
+  cgoEnabled: true
+  icuFormula: icu4c@78 78.2
+  doltTestImage: dolthub/dolt-sql-server@sha256:6b651663c5024d98a98a4db7226a5e85f90a9344c78fee85617c0fb4a30c6e64
+  ryukDisabled: true
+  patchPath: internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch
+  patchSHA256: 50128252828352366ced6560371468a5746c2603ef89ea746a33be8994ffceb6
+  patchedBinarySHA256: 949e1d535e19ecb39e974b90b7321ef1f7f7d6b77c3958d72edb07e78d9def5a
+  helperCommandPath: cmd/mars3-authority/main.go
+  helperCommandSHA256: d8ae9fcf5b04902fa3f2ece3369688ca7abf1e55f0cd4f57a611006a861979ea
+  helperLibraryPath: internal/authority/bootstrap/bootstrap.go
+  helperLibrarySHA256: d039c787f73e98f059937242e068d76c12753cc9accedc025bf619e1fa63c0fd
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequiredBeforeClaim: true
+  externalStateReadbackRequired: true
+  disposableAtomicityConformanceRequired: true
+  postReviewExecutionAuthorizationRequired: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-bootstrap-grant
+  detachedSignature: W-001-bootstrap.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

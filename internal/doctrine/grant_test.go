@@ -18,9 +18,179 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 const wave1PlanningGrantFirstCommitFixture = "fc9f6641d0f739a401a4f7be3bc0ee575df1310a"
+
+func TestW001BootstrapGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001BootstrapGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 bootstrap grant was rejected: %v", findings)
+	}
+}
+
+func TestW001BootstrapGrantRejectsTampering(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(w001BootstrapGrantPath)
+	signature := read(w001BootstrapGrantSignature)
+	publicKey := read(wave1PlanningGrantKey)
+	materials := map[string][]byte{
+		scalarPathFromGrant(t, grant, "patchPath"):         nil,
+		scalarPathFromGrant(t, grant, "helperCommandPath"): nil,
+		scalarPathFromGrant(t, grant, "helperLibraryPath"): nil,
+	}
+	for path := range materials {
+		materials[path] = read(path)
+	}
+
+	for _, testCase := range []struct {
+		name string
+		old  string
+		new  string
+		code string
+	}{
+		{name: "claim_state", old: "claimState: unclaimed", new: "claimState: claimed", code: "public.w001_bootstrap_value"},
+		{name: "scope", old: "    - internal/authority/bootstrap/bootstrap_test.go", new: "    - internal/runtime/escape.go", code: "public.w001_bootstrap_sequence"},
+		{name: "dependency_type", old: "dependencyType: blocks", new: "dependencyType: related", code: "public.w001_bootstrap_value"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			root := writeW001BootstrapGrantFixture(t, bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1), signature, publicKey, materials)
+			var findings []Finding
+			checkW001BootstrapGrant(root, &findings)
+			if !findingCodePresent(findings, testCase.code) || !findingCodePresent(findings, "public.w001_bootstrap_signature") {
+				t.Fatalf("tampered bootstrap grant was not rejected by contract and signature: %v", findings)
+			}
+		})
+	}
+
+	t.Run("helper_bytes", func(t *testing.T) {
+		tamperedMaterials := make(map[string][]byte, len(materials))
+		for path, data := range materials {
+			tamperedMaterials[path] = append([]byte(nil), data...)
+		}
+		path := scalarPathFromGrant(t, grant, "helperLibraryPath")
+		tamperedMaterials[path] = append(tamperedMaterials[path], []byte("\n// unauthorized drift\n")...)
+		root := writeW001BootstrapGrantFixture(t, grant, signature, publicKey, tamperedMaterials)
+		var findings []Finding
+		checkW001BootstrapGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_bootstrap_helper_digest") {
+			t.Fatalf("tampered helper bytes were not rejected: %v", findings)
+		}
+	})
+}
+
+func TestW001ExecutionAuthorizationFailsClosedWithoutPinnedSignature(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	grant, err := LoadW001BootstrapGrant(repo)
+	if err != nil {
+		t.Skipf("bootstrap grant is being re-signed in this fixture: %v", err)
+	}
+	issuedAt := time.Now().UTC().Truncate(time.Second)
+	authorization := W001BootstrapExecutionAuthorization{
+		SchemaVersion: 1, Kind: "MARS3W001BootstrapExecutionAuthorization", Classification: "PUBLIC",
+		GrantID: grant.ID, Repository: planningGrantRepository, AttemptID: grant.AttemptID, IdempotencyKey: grant.IdempotencyKey,
+		Bead: grant.Bead, AuthorityProjectID: grant.AuthorityProjectID,
+		MergedCommit: strings.Repeat("1", 40), MergedTree: strings.Repeat("2", 40), ReviewTag: grant.ReviewTag,
+		ReviewedFeatureCommit: strings.Repeat("3", 40), PullRequest: 6, ProtectedMainCheckRun: 1,
+		QAReviewedCommit: strings.Repeat("3", 40), QADisposition: "accepted",
+		SecurityReviewedCommit: strings.Repeat("3", 40), SecurityDisposition: "accepted",
+		PatchedBinarySHA256: grant.PatchedBinarySHA256, ExpectedMetadataSHA256: grant.ExpectedMetadataSHA256,
+		WorkspaceInstanceSHA256: strings.Repeat("4", 64),
+		AllowedEffect:           "execute-one-expected-preimage-W-001-CAS-claim",
+		IssuedAt:                issuedAt.Format(time.RFC3339), ExpiresAt: issuedAt.Add(time.Hour).Format(time.RFC3339),
+	}
+	data, err := json.Marshal(authorization)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "execution.json")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path+".sig", []byte("not a signature\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadW001BootstrapExecutionAuthorization(repo, path, grant); err == nil {
+		t.Fatal("unsigned execution authorization was accepted")
+	}
+}
+
+func TestW001ExecutionAuthorizationRequiresCanonicalSingleObject(t *testing.T) {
+	authorization := W001BootstrapExecutionAuthorization{
+		SchemaVersion:  1,
+		Kind:           "MARS3W001BootstrapExecutionAuthorization",
+		Classification: "PUBLIC",
+	}
+	canonical, err := json.Marshal(authorization)
+	if err != nil {
+		t.Fatal(err)
+	}
+	canonical = append(canonical, '\n')
+	if _, err := decodeCanonicalW001ExecutionAuthorization(canonical); err != nil {
+		t.Fatalf("canonical authorization was rejected: %v", err)
+	}
+	duplicates := append([]byte(`{"schemaVersion":1,`), canonical[1:]...)
+	if _, err := decodeCanonicalW001ExecutionAuthorization(duplicates); err == nil {
+		t.Fatal("duplicate authorization key was accepted")
+	}
+	var indented bytes.Buffer
+	if err := json.Indent(&indented, canonical[:len(canonical)-1], "", "  "); err != nil {
+		t.Fatal(err)
+	}
+	indented.WriteByte('\n')
+	if _, err := decodeCanonicalW001ExecutionAuthorization(indented.Bytes()); err == nil {
+		t.Fatal("non-canonical authorization formatting was accepted")
+	}
+}
+
+func TestW001ExecutionAuthorizationIdentityIncludesSignedBytes(t *testing.T) {
+	first := W001BootstrapExecutionAuthorization{MergedCommit: strings.Repeat("1", 40), payloadSHA256: strings.Repeat("a", 64), signatureSHA256: strings.Repeat("b", 64)}
+	second := first
+	second.signatureSHA256 = strings.Repeat("c", 64)
+	if first == second {
+		t.Fatal("distinct detached-signature bytes had equal authorization identity")
+	}
+	second = first
+	second.payloadSHA256 = strings.Repeat("d", 64)
+	if first == second {
+		t.Fatal("distinct signed-payload bytes had equal authorization identity")
+	}
+}
+
+func scalarPathFromGrant(t *testing.T, grant []byte, key string) string {
+	t.Helper()
+	prefix := "  " + key + ": "
+	for _, line := range strings.Split(string(grant), "\n") {
+		if strings.HasPrefix(line, prefix) {
+			return strings.TrimPrefix(line, prefix)
+		}
+	}
+	t.Fatalf("missing %s", key)
+	return ""
+}
+
+func writeW001BootstrapGrantFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
+	t.Helper()
+	root := t.TempDir()
+	writePlanningGrantTestFile(t, root, w001BootstrapGrantPath, grant)
+	writePlanningGrantTestFile(t, root, w001BootstrapGrantSignature, signature)
+	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+	for path, data := range materials {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	return root
+}
 
 func TestWave1DirectMainTransitionAcceptsPinnedSignedContract(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
@@ -75,6 +245,9 @@ func TestWave1DirectMainTransitionAcceptsCurrentMainCheckout(t *testing.T) {
 		t.Skip("the top-level public gate exercises canonical GitHub push facts")
 	}
 	repo := filepath.Clean(filepath.Join("..", ".."))
+	if _, err := os.Stat(filepath.Join(repo, filepath.FromSlash(w001BootstrapGrantPath))); err == nil {
+		t.Skip("the signed W-001 bootstrap grant supersedes the historical direct-main checkout")
+	}
 	var findings []Finding
 	checkWave1DirectMainTransitionGitDiff(repo, &findings)
 	if len(findings) != 0 {
@@ -928,9 +1101,9 @@ func writeWave1PRFallbackMainFixture(t *testing.T, reviewedTree bool) (string, s
 			runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+tag+":refs/tags/"+tag)
 		}
 	}
-	treeSource := sourceHead
-	if !reviewedTree {
-		treeSource = wave1PublishedMain
+	treeSource := wave1PublishedMain
+	if reviewedTree {
+		treeSource = "refs/tags/" + wave1FinalTransitionTag + "^{}"
 	}
 	tree := planningGrantTestGitOutput(t, root, "rev-parse", "--verify", treeSource+"^{tree}")
 	squash := planningGrantTestGitOutput(t, root,
@@ -990,6 +1163,19 @@ func TestNormalizedPlanningGrantGitPathsFailsClosed(t *testing.T) {
 	}
 }
 
+func TestValidAdvisoryPullRequestMergeSHA(t *testing.T) {
+	for _, value := range []string{"", "1111111111111111111111111111111111111111", wave1V3ObservedStaleMerge} {
+		if !validAdvisoryPullRequestMergeSHA(value) {
+			t.Fatalf("valid advisory merge identity %q was rejected", value)
+		}
+	}
+	for _, value := range []string{"not-a-commit", "111111111111111111111111111111111111111", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"} {
+		if validAdvisoryPullRequestMergeSHA(value) {
+			t.Fatalf("malformed advisory merge identity %q was accepted", value)
+		}
+	}
+}
+
 func loadPlanningGrantFixture(t *testing.T) ([]byte, []byte, []byte) {
 	t.Helper()
 	repo := filepath.Clean(filepath.Join("..", ".."))
@@ -1022,6 +1208,7 @@ func writePlanningGrantGitFixture(t *testing.T) string {
 	}
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1V3AddendumBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--detach", "FETCH_HEAD")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+wave1PriorPublicationTag+":refs/tags/"+wave1PriorPublicationTag)
@@ -1030,6 +1217,16 @@ func writePlanningGrantGitFixture(t *testing.T) string {
 
 	writePlanningGrantCurrentFiles(t, root)
 	return root
+}
+
+func TestPlanningGrantGitFixtureDisablesAutoMaintenance(t *testing.T) {
+	root := writePlanningGrantGitFixture(t)
+	if value := planningGrantTestGitOutput(t, root, "config", "--local", "--get", "maintenance.auto"); value != "false" {
+		t.Fatalf("disposable planning fixture enabled Git maintenance: %q", value)
+	}
+	if value := planningGrantTestGitOutput(t, root, "config", "--local", "--get", "gc.auto"); value != "0" {
+		t.Fatalf("disposable planning fixture enabled Git auto-GC: %q", value)
+	}
 }
 
 func writePlanningGrantCurrentFiles(t *testing.T, root string) {

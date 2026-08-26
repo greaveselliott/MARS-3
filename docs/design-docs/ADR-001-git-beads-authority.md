@@ -106,28 +106,68 @@ The strict document contains exactly:
 - `autonomousMutation: false`, `liveLeaseAsserted: false`,
   `productionEffects: false`, and exact verification order
   `qa`, `security-reviewer`, `delivery-orchestrator`;
-- exact transition paths `.harness/grants/W-001-bootstrap.yaml`, its signature,
-  `.harness/manifest.yaml`, the active plan, the bootstrap-transition evidence,
-  `docs/evidence/W-001-bootstrap-transition.md`,
-  `internal/doctrine/grant.go`, and `internal/doctrine/grant_test.go`;
+- exact preclaim paths for the grant and signature, validator, public helper,
+  pinned Beads source patch, tests, doctrine/spec/BDD updates, bootstrap
+  evidence, and third-party notices;
 - exact implementation path patterns equal to the canonical M3-W001
   `exclusivePaths`; a mismatch blocks the claim rather than widening either
   side; and
-- allowed effects limited to pinned-state verification, one expected-version
-  CAS claim of M3-W001, edits within those listed paths, public gates, signed
-  commits, branch push/PR update, public-safe authority intent/receipt records,
-  and self-host conformance. It explicitly prohibits other-Bead or unlisted
-  mutation, asserting a lease before verified issuance, production/destructive
-  effects, autonomous mutation, trust escalation, credentials, and provider or
-  customer data.
+- allowed effects limited to pinned-state verification, disposable atomicity
+  conformance, publication of the reviewed helper tree, one expected-preimage
+  CAS claim of M3-W001, and one public-safe claim receipt. It explicitly
+  prohibits plan/manifest reconciliation, gateway implementation, other-Bead
+  or unlisted mutation, asserting a lease before verified issuance,
+  production/destructive effects, autonomous mutation, trust escalation,
+  credentials, and provider or customer data.
+
+Publication and execution are separate authority moments. The bootstrap grant
+can publish a reviewed helper but `--apply` also requires an external JSON
+authorization signed under `mars3-w001-bootstrap-execution`, valid for at most
+one hour, and bound to the actual squash-merged commit/tree, immutable review
+tag and feature commit, protected-main check run, exact QA and Security
+accepted commit, patched-binary digest, attempt, idempotency key, project, Bead,
+preimage digest, and an opaque digest of the canonical authority-workspace
+instance. The helper resolves `main` only from the fixed public GitHub HTTPS
+endpoint using the pinned system Git executable with caller Git, SSH, proxy,
+certificate, replace-object, and user-configuration overrides removed. It
+reloads the signed execution authorization after conformance and rejects any
+field or signed-byte change. The authorization uses one canonical JSON encoding
+and binds both payload and detached-signature digests. The helper then rechecks
+both expiries, the accepted commit, the strict direct embedded workspace
+metadata, database-directory identity, absence of `.beads/redirect`, and the
+Bead preimage at the effect boundary. Beads/Dolt workspace overrides are
+removed from every client invocation. The patched client disables redirect
+resolution for this one operation and repeats the direct-store identity and
+redirect check inside the transaction before mutation. A local branch, mutable
+remote-tracking ref, copied or redirected workspace, or swapped authorization
+is never execution proof.
+
+The helper patches the pinned Beads source in a temporary directory and uses
+the native `ClaimIssueInTx` primitive plus metadata and lifecycle-label updates
+inside one outer Dolt transaction. The pinned v1.2.2 `update --claim
+--metadata` route is not used because it commits those effects in separate
+transactions; `batch` without this reviewed patch has no claim CAS. Raw SQL and
+hidden local code are prohibited.
+
+Conformance pins the Go executable and reproducible patched-binary digests,
+uses an isolated allowlisted Go environment with network module resolution
+disabled, resolves versioned ICU `icu4c@78`, disables Ryuk, and starts Dolt by
+the signed image digest. It runs success, stale rollback, post-claim-operation
+rollback, concurrent one-winner, and redirect-at-transaction-boundary denial
+cases, then executes the built binary against a disposable copy of the
+canonical embedded workspace. Success requires a verified new Dolt version
+commit. Any command error is unknown acceptance and blocks retry pending
+separately authorized reconciliation.
 
 Unknown fields, YAML aliases/anchors/tags/flow syntax, duplicate keys,
 unresolved paths, changed signed bytes, signer drift, stale expected version or
 digests, path disagreement, expiry, and any actual diff outside the signed path
 union fail closed. The canonical claim must succeed before implementation. The
-grant becomes unusable when self-host conformance verifies the gateway and the
-first real W-001 lease, or at expiry, whichever occurs first; all subsequent
-effects use the accepted gateway.
+claim grant cannot reconcile the Git plan or start implementation. A separate
+signed postclaim reconciliation grant must bind the verified claim receipt,
+accepted helper commit, and exact plan/manifest postimage. A later delivery
+grant remains bounded until self-host conformance verifies the gateway and the
+first real W-001 lease; all subsequent effects use the accepted gateway.
 
 ## Invariants
 
