@@ -1022,9 +1022,9 @@ func writeWave1PRFallbackMainFixture(t *testing.T, reviewedTree bool) (string, s
 			runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+tag+":refs/tags/"+tag)
 		}
 	}
-	treeSource := sourceHead
-	if !reviewedTree {
-		treeSource = wave1PublishedMain
+	treeSource := wave1PublishedMain
+	if reviewedTree {
+		treeSource = "refs/tags/" + wave1FinalTransitionTag + "^{}"
 	}
 	tree := planningGrantTestGitOutput(t, root, "rev-parse", "--verify", treeSource+"^{tree}")
 	squash := planningGrantTestGitOutput(t, root,

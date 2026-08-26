@@ -82,3 +82,32 @@ No claim receipt exists yet. After the authorized effect, append only the
 public-safe helper receipt, the independently read-back postimage hashes, and
 the opaque Beads trace/comment reference. Do not include local paths, raw
 database content, terminal recordings, credentials, or provider state.
+
+## Dry-run checkpoint
+
+The signed helper was executed without `--apply` from clean commit
+`e0ab3109aea538b1b883e2642da80358691f8268`. It rebuilt the pinned Beads source
+and public patch, verified the signed source/toolchain/image bindings, and
+executed both required disposable tests against Dolt:
+
+- `TestBatchBootstrapClaimIsOneAtomicTransition` — passed;
+- `TestBatchBootstrapClaimPreconditionFailureRollsBack` — passed.
+
+The temporary patched binary SHA-256 was
+`67d52f0e8aac0bd737c20b6d7f2596d487af9f85a8660c96c05da003681ad6e2`.
+The bounded result was `conformance-passed-no-canonical-mutation`; independent
+readback remained native `open`, lifecycle `backlog`, and
+`liveLeaseAsserted: false`.
+
+Repository-relative verification command shape:
+
+```text
+go run ./cmd/mars3-authority bootstrap-claim --repo . \
+  --beads-source <pinned-public-source-checkout> \
+  --beads-workspace <external-authority-workspace> \
+  --beads-binary <pinned-public-binary>
+```
+
+The two bracketed paths are external local inputs and are intentionally not
+recorded. The helper verified their hashes/identity against the public grant;
+the evidence does not disclose machine paths.
