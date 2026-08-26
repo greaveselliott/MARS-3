@@ -1,6 +1,6 @@
 # W-001 bootstrap claim transition evidence
 
-**Status:** Prepared; no canonical claim has executed
+**Status:** Successor v2 disposable conformance passed; no canonical claim has executed
 **Classification:** PUBLIC
 **Goal:** G-001
 **Decision:** PD-002
@@ -90,6 +90,58 @@ pass. Only then may the human authority sign a one-hour execution authorization
 binding those exact facts. The helper revalidates the authorization, grant
 expiry, authenticated remote `main`, workspace, and preimage immediately
 before the sole effect.
+
+## Successor v2 disposable conformance
+
+The signed implementation checkpoint was
+`d3159dbb84bc1ad5da35c2a63d0e6217cf334ac2`, with tree
+`c9b168d7a93fa8f9800c42de9b043ea05823217f`. From that clean checkpoint,
+the dry-run helper rebuilt the pinned patched client and returned
+`conformance-passed-no-canonical-mutation` with these public-safe bindings:
+
+- patched binary SHA-256
+  `8ba8ba8ba97e83582bc552af367e053106a39c20a4c8e0fe8a2580cd17d70475`;
+- patch SHA-256
+  `dadeafcc0c3fc1b27752129f8904e1aa6e828a9a14624ffa6750064b6a0afd3b`;
+- helper command SHA-256
+  `d8ae9fcf5b04902fa3f2ece3369688ca7abf1e55f0cd4f57a611006a861979ea`;
+- helper library SHA-256
+  `23c0c6bbfa28525f5f2612173970a8f77ab9d7986805ec9cd8045c02fe9da94a`;
+- disposable backend `embedded`, disposable postimage verified, canonical
+  unchanged before any effect, native status `open`, lifecycle `backlog`, and
+  `liveLeaseAsserted: false`.
+
+All four executable Docker/Dolt conformance cases passed:
+
+- `TestBatchBootstrapClaimIsOneAtomicTransition`;
+- `TestBatchBootstrapClaimPreconditionFailureRollsBack`;
+- `TestBatchBootstrapClaimPostClaimFailureRollsBack`;
+- `TestBatchBootstrapClaimContentionHasOneWinner`.
+
+The patched CLI then executed the exact claim operation against a disposable
+copy of the canonical embedded workspace. The copy matched the signed
+preimage, reached the signed postimage, and advanced its Dolt version commit.
+The original workspace was read again and matched its pre-run issue digest.
+
+An additional read-only post-run check normalized only ID, status, assignee,
+timestamps, sorted labels, lifecycle, and dependency tuples. The W-001 summary
+SHA-256 was
+`8cc4cb33c443d417c7a88fb0cadda4942f5331f44d1fdf4c3072deb75de7d6b7`:
+W-001 remained `open/backlog`, assigned to `work-authority-engineer`, with its
+sole H-001 dependency `closed/done`. The P-001 summary SHA-256 was
+`c1d04bf54be0c2332e4b12b2eb843e3a695e77f82ce33e8a7fae9987272e6be6`:
+P-001 remained `open/backlog`, assigned to `platform-engineer`, with H-001
+`closed/done` and W-001 `open/backlog`. Neither Bead was claimed and no lease
+was issued.
+
+Three bounded disposable-only corrections preceded the accepted run. A
+CGO-disabled client could not open the copied embedded workspace; the first
+CGO-enabled client exposed that the transaction decorator did not forward the
+native compare-and-swap primitive; and a later successful disposable claim
+exposed a one-nibble error in the signed post-label digest. Each attempt failed
+closed before canonical mutation. The final grant uses the digest derived from
+the sorted label transition, and a deterministic regression now binds that
+derivation.
 
 ## Pending receipt
 
