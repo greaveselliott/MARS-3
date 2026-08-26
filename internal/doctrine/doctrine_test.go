@@ -318,6 +318,43 @@ func TestWorkflowPermissionsRejectsExplicitMappingKeys(t *testing.T) {
 	}
 }
 
+func TestWorkflowPermissionsRejectsAliasedPermissionKey(t *testing.T) {
+	content := `name: &permission_key permissions
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    *permission_key:
+      contents: write
+    steps: []
+`
+	var findings []Finding
+	checkWorkflow(".github/workflows/test.yml", content, &findings)
+	if !findingCodePresent(findings, "public.workflow_permissions") {
+		t.Fatalf("aliased job permission key was accepted:\n%s", content)
+	}
+}
+
+func TestWorkflowPermissionsAllowsAnchorCharactersOnlyAsData(t *testing.T) {
+	content := `name: test
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: "printf '%s' 'a & b * c'"
+      - run: |
+          printf '%s' '&anchor *alias'
+`
+	var findings []Finding
+	checkWorkflow(".github/workflows/test.yml", content, &findings)
+	if findingCodePresent(findings, "public.workflow_permissions") {
+		t.Fatalf("quoted or block-scalar data was treated as YAML indirection: %v", findings)
+	}
+}
+
 func findingCodePresent(findings []Finding, code string) bool {
 	for _, finding := range findings {
 		if finding.Code == code {

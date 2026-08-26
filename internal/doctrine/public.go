@@ -433,6 +433,10 @@ func checkWorkflowPermissions(content string) []string {
 			messages = append(messages, fmt.Sprintf("line %d uses a YAML explicit mapping key, which foundation workflows prohibit", index+1))
 			continue
 		}
+		if workflowYAMLHasAnchorOrAlias(structural) {
+			messages = append(messages, fmt.Sprintf("line %d uses a YAML anchor or alias, which foundation workflows prohibit", index+1))
+			continue
+		}
 		permissionKeys := workflowYAMLPermissionKeyCount(structural)
 		if permissionKeys == 0 {
 			continue
@@ -484,6 +488,42 @@ func checkWorkflowPermissions(content string) []string {
 		messages = append(messages, "workflow must declare top-level permissions exactly once")
 	}
 	return messages
+}
+
+func workflowYAMLHasAnchorOrAlias(line string) bool {
+	var quote byte
+	for index := 0; index < len(line); index++ {
+		character := line[index]
+		if quote != 0 {
+			if character == quote && (index == 0 || line[index-1] != '\\') {
+				quote = 0
+			}
+			continue
+		}
+		if character == '\'' || character == '"' {
+			quote = character
+			continue
+		}
+		if character != '&' && character != '*' {
+			continue
+		}
+		if index > 0 && !workflowYAMLIndicatorBoundary(line[index-1]) {
+			continue
+		}
+		if index+1 >= len(line) || workflowYAMLIndicatorTerminator(line[index+1]) {
+			continue
+		}
+		return true
+	}
+	return false
+}
+
+func workflowYAMLIndicatorBoundary(character byte) bool {
+	return character == ' ' || character == '\t' || strings.ContainsRune("[{,:?-", rune(character))
+}
+
+func workflowYAMLIndicatorTerminator(character byte) bool {
+	return character == ' ' || character == '\t' || strings.ContainsRune("[]{}:,", rune(character))
 }
 
 func workflowYAMLExplicitKey(line string) bool {

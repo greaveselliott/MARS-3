@@ -2,6 +2,7 @@
 
 **Classification:** PUBLIC
 **Evidence ID:** H-001-E2
+**Status:** Superseded after QA `changes-requested`; not acceptance evidence
 **Opaque trace reference:** `bootstrap-h001-security-remediation-v2`
 **Recorded:** 2026-08-26
 **Verification owners:** QA Reviewer, then Security Reviewer
@@ -98,6 +99,11 @@ for the same canary was rejected and is not part of the gate.
   the fail-closed permission structure described above. Prior review verdicts
   do not carry forward; the immutable commit containing H-001-E2 must complete
   a fresh QA → Security review sequence.
+- QA returned `changes-requested` for H-001-E2 after an anchored scalar used as
+  an aliased job key resolved to `permissions` without a finding. QA also found
+  that the recorded validation-binary hash lacked a reproducible build tuple
+  and did not match two clean checkpoint rebuilds. M3-H001 reopened on the same
+  branch for a third candidate; H-001-E2 must not be used as acceptance proof.
 
 FactoryDocSync was checked and remained current. This ticket changed its BDD,
 authority, provenance, trace, security, publication, runtime, and operator
@@ -113,7 +119,7 @@ documentation together with the validation behavior.
 - The bootstrap exception remains direct human procedure until W-001 replaces
   it; it is not reusable by a tenant agent.
 
-Next executable owner: QA Reviewer. On `accepted`, the same immutable commit
-routes to Security Reviewer. The Delivery Orchestrator may reconcile and close
-M3-H001 only after both canonical Beads verdicts and a completed run
-disposition.
+Next executable owner: Foundation Maintainer, limited to the two QA-requested
+corrections. A replacement evidence manifest must bind an explicitly versioned,
+cross-compiled, path-independent build recipe and route a new immutable commit
+through fresh QA → Security review.
