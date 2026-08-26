@@ -405,6 +405,32 @@ index 663b94a5..0cdf571d 100644
 +	return err
 +}
 +
+diff --git a/internal/storage/hook_decorator.go b/internal/storage/hook_decorator.go
+index ae2e1996..7af502e4 100644
+--- a/internal/storage/hook_decorator.go
++++ b/internal/storage/hook_decorator.go
+@@ -19,0 +20 @@ import (
++	"fmt"
+@@ -431,0 +433,19 @@ type hookTrackingTransaction struct {
++// ClaimIssue preserves the narrow native CAS capability through the hook
++// decorator used by real command execution. It is intentionally not added to
++// the public Transaction interface.
++func (t *hookTrackingTransaction) ClaimIssue(ctx context.Context, id, actor string) error {
++	claimTx, ok := t.Transaction.(interface {
++		ClaimIssue(context.Context, string, string) error
++	})
++	if !ok {
++		return fmt.Errorf("underlying transaction lacks native CAS claim support")
++	}
++	if err := claimTx.ClaimIssue(ctx, id, actor); err != nil {
++		return err
++	}
++	if issue, err := t.Transaction.GetIssue(ctx, id); err == nil {
++		t.pending = append(t.pending, pendingHook{hooks.EventUpdate, issue})
++	}
++	return nil
++}
++
 diff --git a/internal/testutil/testdoltcommon.go b/internal/testutil/testdoltcommon.go
 index 476f0285..953f65c3 100644
 --- a/internal/testutil/testdoltcommon.go

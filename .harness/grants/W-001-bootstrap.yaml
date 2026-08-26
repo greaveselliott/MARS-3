@@ -126,8 +126,8 @@ toolchain:
   doltTestImage: dolthub/dolt-sql-server@sha256:6b651663c5024d98a98a4db7226a5e85f90a9344c78fee85617c0fb4a30c6e64
   ryukDisabled: true
   patchPath: internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch
-  patchSHA256: a21560d7ceb3ef530920a0277f77b4b8c8d67d0dbd6d0c2b3d8321365851d34b
-  patchedBinarySHA256: b5ed129fddb299732d44a76fd0aa82695dfe7770e5cf122fbec671f79cdd6e69
+  patchSHA256: dadeafcc0c3fc1b27752129f8904e1aa6e828a9a14624ffa6750064b6a0afd3b
+  patchedBinarySHA256: 8ba8ba8ba97e83582bc552af367e053106a39c20a4c8e0fe8a2580cd17d70475
   helperCommandPath: cmd/mars3-authority/main.go
   helperCommandSHA256: d8ae9fcf5b04902fa3f2ece3369688ca7abf1e55f0cd4f57a611006a861979ea
   helperLibraryPath: internal/authority/bootstrap/bootstrap.go
