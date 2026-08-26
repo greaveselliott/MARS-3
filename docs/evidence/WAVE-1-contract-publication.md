@@ -5,7 +5,7 @@
 **Features:** F-002, F-003
 **Selected Bead:** M3-W001
 **Phase:** `contract-publication`
-**Status:** signed implementation checkpoint recorded; immutable publication
+**Status:** signed CI recovery checkpoint recorded; v2 immutable publication
 review pending
 
 This manifest records the bounded publication of the W-001 and P-001
@@ -24,6 +24,10 @@ claim, lease, lifecycle transition, or shipped product value.
   `641ca4a3d15608f48c7199873318679be86b4e5b234212ce23282e3a77f583b9`.
 - Reconstructible state snapshot SHA-256:
   `4d3b5c9d90a223c0e9d974e836559309a2f4dac7f209a3966336e9152f57feca`.
+- Signed CI recovery addendum SHA-256:
+  `73cd581393c8798ad3a44a8c2d0d5fc5f211088a0b04368b960e0514176cd882`.
+- CI recovery addendum detached-signature SHA-256:
+  `c987c7aafbc47a715c50caedce36117096dd716e2c617b589d5c7067b5cb8ce0`.
 - The original recovery artifact remains outside Git because the pinned
   scanner flags two public checksum fields. Its exact artifact and detached
   signature checksums are bound by the signed disposition. No scanner ignore,
@@ -50,6 +54,11 @@ retroactively authorize the path used to reach it.
 | Prospective P-001 receipt | `01a03cde-c1a7-747c-b574-1ff0b84511b0` | Exact postimage verified at revision `r9qvsh9a`; no other authority effect observed. |
 | Checkpoint intent | `01a03ce5-d05a-7e21-b03b-afc56a46327d` | Authorized one signed local contract and admission-validator checkpoint after the complete preflight passed. |
 | Checkpoint receipt | `01a03ce7-c3de-7416-90a7-903963e4a800` | Binds the signed checkpoint, tree, reproducible binary hash, unchanged backlog/unclaimed authority state, and next publication step. |
+| Initial publication and PR | tag receipt `01a03ce9-dd0d-72f5-9c6f-3b4ccce7fab8`; push receipt `01a03ceb-222b-7236-8f1b-09105920205e`; PR receipt `01a03cec-2028-7013-b736-0cb0a485f674` | Published immutable v1 tag and opened PR 4 at `a22cfe6`; no main or work-authority mutation. |
+| CI failure and bounded retry | status `01a03ced-75f1-7a87-be16-40ca1c61fa5f`; retry intent `01a03cf1-e8a3-73ff-9203-0dd773169ca2`; diagnostic receipt `01a03cf5-1782-7501-b537-e952869e10e1` | Both attempts of run `32941818590` failed at doctrine. Debug evidence proved the hosted checkout was exact, while the pull-request event field `merge_commit_sha` was null. |
+| Blocked disposition | `01a03cf5-452b-76b6-8d76-6359d5d7b391` | Exhausted the allowed equivalent retry and prohibited another attempt on the unchanged v1 head. |
+| Prospective CI recovery authority | replan `01a03cf5-cbef-7989-977a-1b37c1f9b982`; signed-addendum receipt `01a03cf6-e5a7-7c06-bfff-7a3643b31f9f` | Preserves v1, authorizes only addendum/code/test/evidence paths, and permits one v2 tag without changing workflow, ruleset, scanner, Beads, claim, or lease state. |
+| CI recovery checkpoint | intent `01a03cfc-ed3d-7a93-b257-752394ac5978`; receipt `01a03cfd-9056-76f9-bb82-c84b588a6753` | Binds the signed correction commit, exact topology regressions, and new reproducible validator hash. |
 
 ## Canonical final read-back
 
@@ -78,13 +87,18 @@ files are serialized by the W-before-P dependency and later live leases.
   required before the validator can change authority modes.
 - The grant gate validates the exact symbolic branch, every signed feature
   commit, per-commit path union including add-then-delete, current worktree,
-  and the signed recovery disposition and snapshot.
+  the signed recovery disposition/snapshot, and the signed CI addendum. Paths
+  authorized before v1 cannot be reused after its target.
+- Pull-request admission permits a null optional event `merge_commit_sha` only
+  when `GITHUB_SHA`, the event base/head identities, and the exact two-parent
+  Git checkout all agree. Any nonempty mismatch still fails closed.
 - FactoryDocSync unions all matching ancestor-prefix requirements. A more
   specific database rule cannot drop foundation or Rule-of-Two coverage.
-- The current squash-only linear GitHub policy is retained. Final PR and main
-  CI require signed tag `mars3/wave1-contract-publication-v1`; its target keeps
-  the signed feature history reachable and its tree must equal both reviewed
-  PR and squash-main trees.
+- The current squash-only linear GitHub policy is retained. The immutable v1
+  tag preserves the failed reviewed attempt. Final PR and main CI require the
+  separately authorized signed v2 tag; its target keeps the corrected signed
+  feature history reachable and its tree must equal both reviewed PR and
+  squash-main trees.
 
 ## Reproducible worktree checks
 
@@ -103,9 +117,10 @@ gitleaks detect --source . --redact --no-banner
 go run ./cmd/mars3 doctrine refresh --repo . --source <exact-pinned-mars-checkout> --ref f55d129bfc794510ca485bb54fc0a35c7b04a700
 ```
 
-All commands passed on the pre-checkpoint worktree on 2026-08-26. The offline
-refresh verified 20 source files and remained a dry run. The pinned scanner
-reported no worktree or history leaks and required no exception.
+All commands passed before the original checkpoint and again on the corrected
+CI-recovery worktree on 2026-08-26. The offline refresh verified 20 source
+files and remained a dry run. The pinned scanner reported no worktree or
+history leaks and required no exception.
 
 ## Immutable publication evidence
 
@@ -118,12 +133,27 @@ reported no worktree or history leaks and required no exception.
   Two clean builds with distinct empty caches produced identical bytes using
   Go 1.26.2, `CGO_ENABLED=0`, `GOOS=linux`, `GOARCH=amd64`, `-trimpath`,
   `-buildvcs=false`, and an empty build ID.
-- Signed publication tag object/target/tree: created only after this evidence
-  commit. The validator binds its exact ref, target ancestry, message, signer,
-  and equality with the reviewed and squash-main trees; the external
-  publication receipt records the resulting immutable object identifiers.
-- Remote branch and pull request: pending.
-- `Public commit gate` PR and protected-main runs: pending.
+- Immutable failed v1 tag: object
+  `4bce7e7d4a8b2cc1a5b30b9feaee61232c3cc0de`, target
+  `a22cfe6fada6f2bc787742eae50bca28cec80c89`, tree
+  `3c5befaefab37a8d0a2e3a8af2efd6e1eb1d8cae`. It is preserved and never moved.
+- CI recovery checkpoint commit:
+  `178c5094a1462975b21b961c060890055a09deaf`.
+- CI recovery checkpoint tree:
+  `c2e28762618954cf68e34d8cbbd6ff76c4708cf0`.
+- Corrected reproducible Linux/amd64 validator binary SHA-256:
+  `8567f5bc5461f8e7fe0b9e9702b745d0e6e8ab74320c61d3f2d5cc63ba5f3867`.
+  Two builds with distinct empty caches were byte-identical under the same
+  Go 1.26.2 build tuple.
+- Corrected signed publication v2 tag object/target/tree: created only after
+  this evidence commit. The validator binds its exact ref, target ancestry,
+  message, signer, equality with reviewed and squash-main trees, and continued
+  immutability of v1. The external publication receipt records the resulting
+  identifiers.
+- Remote PR: [PR 4](https://github.com/greaveselliott/MARS-3/pull/4) is open;
+  its v1 head failed run `32941818590` twice as preserved above. Corrected-head
+  push and v2 check are pending.
+- `Public commit gate` corrected PR and protected-main runs: pending.
 - QA disposition: pending.
 - Security disposition: pending.
 - Orchestrator publication/reconciliation disposition: pending.
