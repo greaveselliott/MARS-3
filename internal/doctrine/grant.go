@@ -130,6 +130,19 @@ const (
 	w001PostclaimSecurityPatchPath    = "internal/authority/bootstrap/beads-v1.2.2-effective-db-security.patch"
 	w001PostclaimSecurityPatchSHA     = "d48b398a8688d337192ab030c69fd9df0809f72051da7850ff2fdbad5e322d45"
 	w001PostclaimSecurityBinarySHA    = "8d13927671519fd74470820a72c6ff069589655e338649f31db7e654b2b36c00"
+	w001PostclaimHookFixPath          = ".harness/grants/W-001-postclaim-hook-isolation-v4.yaml"
+	w001PostclaimHookFixSig           = ".harness/grants/W-001-postclaim-hook-isolation-v4.yaml.sig"
+	w001PostclaimHookFixNS            = "mars3-w001-postclaim-hook-isolation-v4"
+	w001PostclaimHookFixBase          = "9e8a587f8187c2d385a6c5fa023346405733d7ff"
+	w001PostclaimHookFixTree          = "fb4a0abea8f3e77a92ca86672078d2d68df7a9e0"
+	w001PostclaimHookFixTag           = "mars3/w001-postclaim-reconciliation-v4"
+	w001PostclaimHookFixTagMsg        = "MARS-3 W-001 postclaim reconciliation tree attestation v4"
+	w001PostclaimV3TagObject          = "004fde1244312e088a4397809cb7ab3a81706612"
+	w001PostclaimHookHelperSHA        = "cc8e102d8e4aa26e847f14a6a39522b20f193b6419b147678a01db3eb6bcab21"
+	w001PostclaimHookTestSHA          = "a1be6df7bfddb10ce964471af484b71ecb4399ab840c8062d28696a87662e809"
+	w001PostclaimHookPatchPath        = "internal/authority/bootstrap/beads-v1.2.2-bootstrap-hook-isolation.patch"
+	w001PostclaimHookPatchSHA         = "fc282ebc257fc41c15ab7b8ffdd50a1600f840254cf6e10b6997f9e30a0dc1fc"
+	w001PostclaimHookBinarySHA        = "22042fc0844ab7700417d917c386f2eab4bab5dd6a6404be091cbd5edbe9e154"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -178,6 +191,8 @@ type W001BootstrapGrant struct {
 	PatchSHA256                 string
 	CorrectionPatchPath         string
 	CorrectionPatchSHA256       string
+	HookIsolationPatchPath      string
+	HookIsolationPatchSHA256    string
 	PatchedBinarySHA256         string
 	GoBinarySHA256              string
 	ReviewTag                   string
@@ -1442,6 +1457,144 @@ var w001PostclaimSecurityFixSequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001PostclaimHookFixScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001PostclaimHookIsolationGrant"},
+	{path: "grant.id", value: "W-001-postclaim-hook-isolation-v4"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-26T23:45:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-28T23:45:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001PostclaimHookFixBase},
+	{path: "grant.baseTree", value: w001PostclaimHookFixTree},
+	{path: "grant.workingBranch", value: w001PostclaimBranch},
+	{path: "grant.reviewTag", value: w001PostclaimHookFixTag},
+	{path: "grant.reviewTagMessage", value: w001PostclaimHookFixTagMsg},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "isolate the one-shot W-001 bootstrap helper from workspace hooks and last-merged local configuration without mutating canonical work"},
+	{path: "grant.bead", value: "M3-W001"},
+	{path: "grant.displayId", value: "W-001"},
+	{path: "grant.priorGrant", value: "W-001-postclaim-security-correction-v3"},
+	{path: "grant.priorGrantSHA256", value: "6ce07a2b1b42b5d3fb3a31b1ec6c71cb80851bd732e52fade781d7c88b0e6caa"},
+	{path: "grant.priorGrantSignatureSHA256", value: "df9dc6d62b70b40e5b0000aa10abf48afcf53fcfed581311f2bf0c61d532dfcf"},
+	{path: "grant.priorReviewTag", value: w001PostclaimSecurityFixTag},
+	{path: "grant.priorReviewTagObject", value: w001PostclaimV3TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001PostclaimHookFixBase},
+	{path: "grant.successfulRun", value: "33018302554"},
+	{path: "grant.successfulJob", value: "98342126652"},
+	{path: "grant.qaDisposition", value: "accepted"},
+	{path: "grant.securityDisposition", value: "changes-requested"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.liveLeaseAsserted", value: "false"},
+	{path: "grant.implementationAllowed", value: "false"},
+	{path: "grant.canonicalWorkMutationAllowed", value: "false"},
+	{path: "finding.affectedPostclaimHead", value: w001PostclaimHookFixBase},
+	{path: "finding.affectedPostclaimTree", value: w001PostclaimHookFixTree},
+	{path: "finding.qaDisposition", value: "accepted"},
+	{path: "finding.securityDisposition", value: "changes-requested"},
+	{path: "finding.failureFingerprint", value: "bootstrap-workspace-hook-postcommit-effect"},
+	{path: "finding.failureClass", value: "foundation-owned"},
+	{path: "finding.findingScope", value: "helper-hook-and-local-configuration-isolation"},
+	{path: "finding.canonicalWorkspaceAffected", value: "false"},
+	{path: "canonicalEffect.bead", value: "M3-W001"},
+	{path: "canonicalEffect.nativeStatus", value: "in_progress"},
+	{path: "canonicalEffect.lifecycleState", value: "in-progress"},
+	{path: "canonicalEffect.assignee", value: "work-authority-engineer"},
+	{path: "canonicalEffect.updatedAt", value: "2026-08-26T20:23:37Z"},
+	{path: "canonicalEffect.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalEffect.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalEffect.issueMutationSequence", value: "1"},
+	{path: "canonicalEffect.dependencyGraphRevision", value: "1"},
+	{path: "canonicalEffect.claimReceiptSHA256", value: "04cef4e421a34e0908d392fc794181db3ddb754a134e34599fa41a520c78d126"},
+	{path: "canonicalEffect.doltCommit", value: "67hmen0cmq0he08n7ujlqpcsmmi94fhb"},
+	{path: "canonicalEffect.independentlyReadBackFromM3", value: "true"},
+	{path: "canonicalEffect.workspaceHookUseObservedInCanonicalEffect", value: "false"},
+	{path: "canonicalEffect.liveLeaseAsserted", value: "false"},
+	{path: "materials.validationEvidencePath", value: "docs/evidence/W-001-validation.md"},
+	{path: "materials.validationEvidenceSHA256", value: "da9533a215fa2f255c242f369cbc0e9818f0c89c7f18281328633d68403aea0f"},
+	{path: "materials.transitionEvidencePath", value: "docs/evidence/W-001-bootstrap-transition.md"},
+	{path: "materials.transitionEvidenceSHA256", value: "ae4fdd2e0c0d03aee305be8cd6b0884cd6b98b597fd865f90c644e47d0130edc"},
+	{path: "materials.helperLibraryPath", value: "internal/authority/bootstrap/bootstrap.go"},
+	{path: "materials.helperLibrarySHA256", value: w001PostclaimHookHelperSHA},
+	{path: "materials.helperTestPath", value: "internal/authority/bootstrap/bootstrap_test.go"},
+	{path: "materials.helperTestSHA256", value: w001PostclaimHookTestSHA},
+	{path: "materials.basePatchPath", value: "internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch"},
+	{path: "materials.basePatchSHA256", value: w001PostclaimSecurityBasePatchSHA},
+	{path: "materials.securityPatchPath", value: w001PostclaimSecurityPatchPath},
+	{path: "materials.securityPatchSHA256", value: w001PostclaimSecurityPatchSHA},
+	{path: "materials.hookIsolationPatchPath", value: w001PostclaimHookPatchPath},
+	{path: "materials.hookIsolationPatchSHA256", value: w001PostclaimHookPatchSHA},
+	{path: "materials.patchedBinarySHA256", value: w001PostclaimHookBinarySHA},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001PostclaimHookFixNS},
+	{path: "integrity.detachedSignature", value: "W-001-postclaim-hook-isolation-v4.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001PostclaimHookFixSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"create-and-verify-this-signed-hook-isolation-correction-grant",
+		"preserve-v3-QA-acceptance-and-Security-changes-requested-as-additive-evidence",
+		"reject-config-local-selector-files-at-every-bootstrap-boundary",
+		"force-workspace-hooks-disabled-for-every-helper-Beads-command",
+		"deny-bootstrap-authority-through-the-hook-transaction-decorator",
+		"add-local-config-and-workspace-hook-regressions",
+		"correct-the-stale-public-bootstrap-status-without-rewriting-history",
+		"validate-historical-v3-bytes-from-the-immutable-signed-v3-tree-and-current-bytes-from-v4",
+		"edit-only-the-exact-authorized-Git-paths",
+		"preserve-the-observed-canonical-M3-postimage-as-effect-evidence-not-helper-acceptance",
+		"create-pinned-signer-correction-commits-and-one-signed-v4-review-tag",
+		"push-the-existing-review-branch-and-v4-tag-and-rerun-the-ready-PR",
+		"obtain-fresh-independent-QA-and-Security-review-before-squash-merge",
+	},
+	"grant.authorizedPaths": {
+		w001PostclaimHookFixPath,
+		w001PostclaimHookFixSig,
+		"docs/evidence/W-001-validation.md",
+		"docs/evidence/W-001-bootstrap-transition.md",
+		"internal/authority/bootstrap/bootstrap.go",
+		"internal/authority/bootstrap/bootstrap_test.go",
+		w001PostclaimHookPatchPath,
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"prior-v1-through-v3-grants-signatures-tags-runs-and-history-remain-immutable",
+		"v3-QA-acceptance-and-Security-changes-requested-remain-distinct-truthful-records",
+		"actual-canonical-M3-postimage-remains-valid-effect-evidence-only",
+		"config-local-selector-presence-fails-at-initial-fresh-effect-and-transaction-boundaries",
+		"every-helper-Beads-command-forces-hooks-disabled",
+		"hook-decorated-transactions-cannot-implement-bootstrap-claim-authority",
+		"hook-enabled-adversarial-fixture-fails-before-read-write-or-sentinel-effect",
+		"historical-and-current-integrity-bindings-are-both-required-and-neither-substitutes-for-the-other",
+		"every-correction-commit-and-current-change-stays-inside-the-signed-path-set",
+		"every-correction-commit-and-v4-review-tag-use-the-pinned-signer",
+		"reviewed-v4-tree-equals-the-protected-main-squash-tree",
+		"no-Beads-lease-implementation-production-or-policy-effect-is-created",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-any-Bead-Dolt-row-dependency-label-comment-or-history",
+		"execute-or-replay-the-canonical-W-001-bootstrap-claim",
+		"execute-any-workspace-hook-or-plugin",
+		"issue-assert-renew-release-or-revoke-a-live-lease",
+		"begin-gateway-runtime-platform-or-product-implementation",
+		"edit-plan-manifest-feature-product-goal-or-scenario-contracts",
+		"move-delete-or-reuse-any-existing-review-tag",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+		"credentials-provider-session-customer-data-or-raw-payloads",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -1978,6 +2131,12 @@ func checkW001BootstrapGrant(root string, findings *[]Finding) {
 	} else if !os.IsNotExist(stateErr) {
 		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_state", "postclaim Security-correction state cannot be established")
 	}
+	hookCorrectionActive := false
+	if _, stateErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); stateErr == nil {
+		hookCorrectionActive = true
+	} else if !os.IsNotExist(stateErr) {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_state", "postclaim hook-isolation state cannot be established")
+	}
 	for _, binding := range []struct {
 		pathField string
 		hashField string
@@ -1989,7 +2148,9 @@ func checkW001BootstrapGrant(root string, findings *[]Finding) {
 	} {
 		path := scalarValue(document, binding.pathField)
 		expectedDigest := scalarValue(document, binding.hashField)
-		if securityCorrectionActive && binding.pathField == "toolchain.helperLibraryPath" {
+		if hookCorrectionActive && binding.pathField == "toolchain.helperLibraryPath" {
+			expectedDigest = w001PostclaimHookHelperSHA
+		} else if securityCorrectionActive && binding.pathField == "toolchain.helperLibraryPath" {
 			expectedDigest = w001PostclaimSecurityHelperSHA
 		}
 		content, err := readRepoFile(root, path)
@@ -2086,6 +2247,14 @@ func checkW001PostclaimGrant(root string, findings *[]Finding) {
 		{"docs/evidence/W-001-bootstrap-transition.md", scalarValue(document, "postimage.evidenceSHA256"), "public.w001_postclaim_postimage", "claim-evidence postimage"},
 	} {
 		content, readErr := readRepoFile(root, binding.path)
+		// Additive successor grants never rewrite historical truth. Once v4 is
+		// present, validate the v1 evidence bytes from the exact signed v3 Git
+		// object while v4 independently validates the current evidence bytes.
+		if binding.path == "docs/evidence/W-001-bootstrap-transition.md" {
+			if _, successorErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); successorErr == nil {
+				content, readErr = planningGrantGitOutput(root, "show", w001PostclaimHookFixBase+":"+binding.path)
+			}
+		}
 		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
 			addFinding(findings, binding.path, binding.code, "%s must match its exact signed SHA-256", binding.message)
 		}
@@ -2240,6 +2409,13 @@ func checkW001PostclaimSecurityFix(root string, findings *[]Finding) {
 		{scalarValue(document, "materials.securityPatchPath"), scalarValue(document, "materials.securityPatchSHA256"), "public.w001_postclaim_security_material"},
 	} {
 		content, readErr := readRepoFile(root, binding.path)
+		// Preserve the v3 material proof against its exact signed commit. The v4
+		// validator separately binds the successor helper and test bytes.
+		if binding.path == "internal/authority/bootstrap/bootstrap.go" || binding.path == "internal/authority/bootstrap/bootstrap_test.go" {
+			if _, successorErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); successorErr == nil {
+				content, readErr = planningGrantGitOutput(root, "show", w001PostclaimHookFixBase+":"+binding.path)
+			}
+		}
 		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
 			addFinding(findings, binding.path, binding.code, "Security-correction material must match its exact signed SHA-256")
 		}
@@ -2249,6 +2425,94 @@ func checkW001PostclaimSecurityFix(root string, findings *[]Finding) {
 		!bytes.Contains(evidence, []byte("**Current disposition:** changes-requested")) ||
 		!bytes.Contains(evidence, []byte("earlier Security acceptance")) || !bytes.Contains(evidence, []byte("is superseded")) {
 		addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_postclaim_security_evidence", "Security correction evidence must preserve the exact additive supersession and finding fingerprint")
+	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); err == nil {
+		checkW001PostclaimHookFix(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_state", "postclaim hook-isolation state cannot be established")
+	}
+}
+
+func checkW001PostclaimHookFix(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001PostclaimHookFixPath)
+	if err != nil {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_missing", "signed postclaim hook-isolation grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001PostclaimHookFixScalars, w001PostclaimHookFixSequences,
+		[]string{"grant", "finding", "canonicalEffect", "materials", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_schema", "%s", message)
+	}
+	for _, expected := range w001PostclaimHookFixScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_value", "%s does not match the signed hook-isolation contract", expected.path)
+		}
+	}
+	for path, expected := range w001PostclaimHookFixSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_sequence", "%s must equal the exact ordered hook-isolation contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "finding", "canonicalEffect", "materials", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_expiry", "hook-isolation grant must use one RFC3339 interval no longer than 72 hours")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001PostclaimHookFixSig)
+	if signatureErr != nil {
+		addFinding(findings, w001PostclaimHookFixSig, "public.w001_postclaim_hook_signature_missing", "detached hook-isolation signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_postclaim_hook_key", "hook-isolation correction must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001PostclaimHookFixNS); err != nil {
+			addFinding(findings, w001PostclaimHookFixSig, "public.w001_postclaim_hook_signature", "%v", err)
+		}
+	}
+
+	for _, binding := range []struct {
+		path   string
+		digest string
+		code   string
+	}{
+		{w001PostclaimSecurityFixPath, scalarValue(document, "grant.priorGrantSHA256"), "public.w001_postclaim_hook_prior_grant"},
+		{w001PostclaimSecurityFixSig, scalarValue(document, "grant.priorGrantSignatureSHA256"), "public.w001_postclaim_hook_prior_grant"},
+		{scalarValue(document, "materials.validationEvidencePath"), scalarValue(document, "materials.validationEvidenceSHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.transitionEvidencePath"), scalarValue(document, "materials.transitionEvidenceSHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.helperLibraryPath"), scalarValue(document, "materials.helperLibrarySHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.helperTestPath"), scalarValue(document, "materials.helperTestSHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.basePatchPath"), scalarValue(document, "materials.basePatchSHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.securityPatchPath"), scalarValue(document, "materials.securityPatchSHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.hookIsolationPatchPath"), scalarValue(document, "materials.hookIsolationPatchSHA256"), "public.w001_postclaim_hook_material"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, binding.code, "hook-isolation material must match its exact signed SHA-256")
+		}
+	}
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	transition, transitionErr := readRepoFile(root, "docs/evidence/W-001-bootstrap-transition.md")
+	if evidenceErr != nil || !bytes.Contains(evidence, []byte("bootstrap-workspace-hook-postcommit-effect")) ||
+		!bytes.Contains(evidence, []byte("## v3 Security disposition")) ||
+		!bytes.Contains(evidence, []byte("**Current disposition:** changes-requested")) ||
+		transitionErr != nil || !bytes.Contains(transition, []byte("Canonical claim verified and reconciled; no live lease or implementation capability exists")) {
+		addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_postclaim_hook_evidence", "hook-isolation evidence must preserve the v3 disposition, exact finding fingerprint, and truthful canonical status")
 	}
 }
 
@@ -2333,6 +2597,11 @@ func LoadW001BootstrapGrant(repo string) (W001BootstrapGrant, error) {
 		grant.CorrectionPatchPath = w001PostclaimSecurityPatchPath
 		grant.CorrectionPatchSHA256 = w001PostclaimSecurityPatchSHA
 		grant.PatchedBinarySHA256 = w001PostclaimSecurityBinarySHA
+	}
+	if _, stateErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); stateErr == nil {
+		grant.HookIsolationPatchPath = w001PostclaimHookPatchPath
+		grant.HookIsolationPatchSHA256 = w001PostclaimHookPatchSHA
+		grant.PatchedBinarySHA256 = w001PostclaimHookBinarySHA
 	}
 	return grant, nil
 }
@@ -2657,6 +2926,17 @@ func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_ancestry", "Security correction requires the preserved v2 CI stabilization")
 		return
 	}
+	hookFixActive := false
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); err == nil {
+		hookFixActive = true
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_state", "postclaim hook-isolation Git state cannot be established")
+		return
+	}
+	if hookFixActive && !securityFixActive {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_ancestry", "hook isolation requires the preserved v3 Security correction")
+		return
+	}
 	base, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimBase+"^{commit}")
 	if err != nil || strings.TrimSpace(string(base)) != w001PostclaimBase {
 		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_base", "exact accepted helper squash must resolve locally")
@@ -2686,6 +2966,17 @@ func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
 			return
 		}
 		if !checkW001PostclaimPriorV2ReviewTag(root, findings) {
+			return
+		}
+	}
+	if hookFixActive {
+		fixBase, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimHookFixBase+"^{commit}")
+		fixTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimHookFixBase+"^{tree}")
+		if err != nil || treeErr != nil || strings.TrimSpace(string(fixBase)) != w001PostclaimHookFixBase || strings.TrimSpace(string(fixTree)) != w001PostclaimHookFixTree {
+			addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_base", "hook isolation must descend from the exact reviewed v3 head and tree")
+			return
+		}
+		if !checkW001PostclaimPriorV3ReviewTag(root, findings) {
 			return
 		}
 	}
@@ -2733,6 +3024,10 @@ func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
 			reviewTag = w001PostclaimSecurityFixTag
 			reviewTagMessage = w001PostclaimSecurityFixTagMsg
 		}
+		if hookFixActive {
+			reviewTag = w001PostclaimHookFixTag
+			reviewTagMessage = w001PostclaimHookFixTagMsg
+		}
 		target, ok := checkW001PostclaimReviewTag(root, expected, reviewTag, reviewTagMessage, findings)
 		if !ok {
 			return
@@ -2768,6 +3063,7 @@ func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
 		v1Authorized := w001PostclaimPathSet()
 		fixAuthorized := w001PostclaimCIFixPathSet()
 		securityAuthorized := w001PostclaimSecurityFixPathSet()
+		hookAuthorized := w001PostclaimHookFixPathSet()
 		for _, commit := range commits {
 			if len(commit.parents) != 1 || commit.parents[0] != previous {
 				addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_topology", "reconciliation feature history must be a contiguous one-parent chain")
@@ -2790,6 +3086,15 @@ func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
 						return
 					}
 					authorized = securityAuthorized
+				}
+			}
+			if hookFixActive {
+				if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", commit.id, w001PostclaimHookFixBase); err != nil {
+					if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001PostclaimHookFixBase, commit.id); err != nil {
+						addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_ancestry", "hook-isolation history diverges from the preserved v3 head")
+						return
+					}
+					authorized = hookAuthorized
 				}
 			}
 			paths, err := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
@@ -2825,6 +3130,9 @@ func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
 	if securityFixActive {
 		currentAuthorized = w001PostclaimSecurityFixPathSet()
 	}
+	if hookFixActive {
+		currentAuthorized = w001PostclaimHookFixPathSet()
+	}
 	if err != nil || !planningGrantPathsAllowed(paths, currentAuthorized) {
 		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_scope", "current changes include a path outside the signed reconciliation scope")
 	}
@@ -2849,6 +3157,14 @@ func w001PostclaimCIFixPathSet() map[string]bool {
 func w001PostclaimSecurityFixPathSet() map[string]bool {
 	authorized := make(map[string]bool, len(w001PostclaimSecurityFixSequences["grant.authorizedPaths"]))
 	for _, path := range w001PostclaimSecurityFixSequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return authorized
+}
+
+func w001PostclaimHookFixPathSet() map[string]bool {
+	authorized := make(map[string]bool, len(w001PostclaimHookFixSequences["grant.authorizedPaths"]))
+	for _, path := range w001PostclaimHookFixSequences["grant.authorizedPaths"] {
 		authorized[path] = true
 	}
 	return authorized
@@ -2920,6 +3236,27 @@ func checkW001PostclaimPriorV2ReviewTag(root string, findings *[]Finding) bool {
 	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001PostclaimCIFixReviewTag, w001PostclaimCIFixTagMessage)
 	if err != nil || target != w001PostclaimSecurityFixBase {
 		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_v2_tag", "v2 review tag target and signature must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001PostclaimPriorV3ReviewTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001PostclaimSecurityFixTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001PostclaimV3TagObject {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_v3_tag", "v3 review tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001PostclaimV3TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_v3_tag", "v3 review tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001PostclaimSecurityFixTag, w001PostclaimSecurityFixTagMsg)
+	if err != nil || target != w001PostclaimHookFixBase {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_v3_tag", "v3 review tag target and signature must remain exact")
 		return false
 	}
 	return true

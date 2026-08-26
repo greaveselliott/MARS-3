@@ -1,6 +1,6 @@
 # W-001 bootstrap claim transition evidence
 
-**Status:** Successor v6 public-CI stabilization pending; no canonical claim has executed
+**Status:** Canonical claim verified and reconciled; no live lease or implementation capability exists
 **Classification:** PUBLIC
 **Goal:** G-001
 **Decision:** PD-002

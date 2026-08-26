@@ -1,0 +1,143 @@
+schemaVersion: 1
+kind: MARS3W001PostclaimHookIsolationGrant
+
+grant:
+  id: W-001-postclaim-hook-isolation-v4
+  classification: PUBLIC
+  issuedAt: 2026-08-26T23:45:00Z
+  expiresAt: 2026-08-28T23:45:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 9e8a587f8187c2d385a6c5fa023346405733d7ff
+  baseTree: fb4a0abea8f3e77a92ca86672078d2d68df7a9e0
+  workingBranch: codex/w-001-postclaim-reconciliation
+  reviewTag: mars3/w001-postclaim-reconciliation-v4
+  reviewTagMessage: MARS-3 W-001 postclaim reconciliation tree attestation v4
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  purpose: isolate the one-shot W-001 bootstrap helper from workspace hooks and last-merged local configuration without mutating canonical work
+  bead: M3-W001
+  displayId: W-001
+  priorGrant: W-001-postclaim-security-correction-v3
+  priorGrantSHA256: 6ce07a2b1b42b5d3fb3a31b1ec6c71cb80851bd732e52fade781d7c88b0e6caa
+  priorGrantSignatureSHA256: df9dc6d62b70b40e5b0000aa10abf48afcf53fcfed581311f2bf0c61d532dfcf
+  priorReviewTag: mars3/w001-postclaim-reconciliation-v3
+  priorReviewTagObject: 004fde1244312e088a4397809cb7ab3a81706612
+  priorReviewTagTarget: 9e8a587f8187c2d385a6c5fa023346405733d7ff
+  successfulRun: 33018302554
+  successfulJob: 98342126652
+  qaDisposition: accepted
+  securityDisposition: changes-requested
+  autonomousMutation: false
+  liveLeaseAsserted: false
+  implementationAllowed: false
+  canonicalWorkMutationAllowed: false
+  allowedEffects:
+    - create-and-verify-this-signed-hook-isolation-correction-grant
+    - preserve-v3-QA-acceptance-and-Security-changes-requested-as-additive-evidence
+    - reject-config-local-selector-files-at-every-bootstrap-boundary
+    - force-workspace-hooks-disabled-for-every-helper-Beads-command
+    - deny-bootstrap-authority-through-the-hook-transaction-decorator
+    - add-local-config-and-workspace-hook-regressions
+    - correct-the-stale-public-bootstrap-status-without-rewriting-history
+    - validate-historical-v3-bytes-from-the-immutable-signed-v3-tree-and-current-bytes-from-v4
+    - edit-only-the-exact-authorized-Git-paths
+    - preserve-the-observed-canonical-M3-postimage-as-effect-evidence-not-helper-acceptance
+    - create-pinned-signer-correction-commits-and-one-signed-v4-review-tag
+    - push-the-existing-review-branch-and-v4-tag-and-rerun-the-ready-PR
+    - obtain-fresh-independent-QA-and-Security-review-before-squash-merge
+  authorizedPaths:
+    - .harness/grants/W-001-postclaim-hook-isolation-v4.yaml
+    - .harness/grants/W-001-postclaim-hook-isolation-v4.yaml.sig
+    - docs/evidence/W-001-validation.md
+    - docs/evidence/W-001-bootstrap-transition.md
+    - internal/authority/bootstrap/bootstrap.go
+    - internal/authority/bootstrap/bootstrap_test.go
+    - internal/authority/bootstrap/beads-v1.2.2-bootstrap-hook-isolation.patch
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - prior-v1-through-v3-grants-signatures-tags-runs-and-history-remain-immutable
+    - v3-QA-acceptance-and-Security-changes-requested-remain-distinct-truthful-records
+    - actual-canonical-M3-postimage-remains-valid-effect-evidence-only
+    - config-local-selector-presence-fails-at-initial-fresh-effect-and-transaction-boundaries
+    - every-helper-Beads-command-forces-hooks-disabled
+    - hook-decorated-transactions-cannot-implement-bootstrap-claim-authority
+    - hook-enabled-adversarial-fixture-fails-before-read-write-or-sentinel-effect
+    - historical-and-current-integrity-bindings-are-both-required-and-neither-substitutes-for-the-other
+    - every-correction-commit-and-current-change-stays-inside-the-signed-path-set
+    - every-correction-commit-and-v4-review-tag-use-the-pinned-signer
+    - reviewed-v4-tree-equals-the-protected-main-squash-tree
+    - no-Beads-lease-implementation-production-or-policy-effect-is-created
+  prohibitedEffects:
+    - mutate-any-Bead-Dolt-row-dependency-label-comment-or-history
+    - execute-or-replay-the-canonical-W-001-bootstrap-claim
+    - execute-any-workspace-hook-or-plugin
+    - issue-assert-renew-release-or-revoke-a-live-lease
+    - begin-gateway-runtime-platform-or-product-implementation
+    - edit-plan-manifest-feature-product-goal-or-scenario-contracts
+    - move-delete-or-reuse-any-existing-review-tag
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+    - credentials-provider-session-customer-data-or-raw-payloads
+
+finding:
+  affectedPostclaimHead: 9e8a587f8187c2d385a6c5fa023346405733d7ff
+  affectedPostclaimTree: fb4a0abea8f3e77a92ca86672078d2d68df7a9e0
+  qaDisposition: accepted
+  securityDisposition: changes-requested
+  failureFingerprint: bootstrap-workspace-hook-postcommit-effect
+  failureClass: foundation-owned
+  findingScope: helper-hook-and-local-configuration-isolation
+  canonicalWorkspaceAffected: false
+
+canonicalEffect:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  assignee: work-authority-engineer
+  updatedAt: 2026-08-26T20:23:37Z
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  claimReceiptSHA256: 04cef4e421a34e0908d392fc794181db3ddb754a134e34599fa41a520c78d126
+  doltCommit: 67hmen0cmq0he08n7ujlqpcsmmi94fhb
+  independentlyReadBackFromM3: true
+  workspaceHookUseObservedInCanonicalEffect: false
+  liveLeaseAsserted: false
+
+materials:
+  validationEvidencePath: docs/evidence/W-001-validation.md
+  validationEvidenceSHA256: da9533a215fa2f255c242f369cbc0e9818f0c89c7f18281328633d68403aea0f
+  transitionEvidencePath: docs/evidence/W-001-bootstrap-transition.md
+  transitionEvidenceSHA256: ae4fdd2e0c0d03aee305be8cd6b0884cd6b98b597fd865f90c644e47d0130edc
+  helperLibraryPath: internal/authority/bootstrap/bootstrap.go
+  helperLibrarySHA256: cc8e102d8e4aa26e847f14a6a39522b20f193b6419b147678a01db3eb6bcab21
+  helperTestPath: internal/authority/bootstrap/bootstrap_test.go
+  helperTestSHA256: a1be6df7bfddb10ce964471af484b71ecb4399ab840c8062d28696a87662e809
+  basePatchPath: internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch
+  basePatchSHA256: 50128252828352366ced6560371468a5746c2603ef89ea746a33be8994ffceb6
+  securityPatchPath: internal/authority/bootstrap/beads-v1.2.2-effective-db-security.patch
+  securityPatchSHA256: d48b398a8688d337192ab030c69fd9df0809f72051da7850ff2fdbad5e322d45
+  hookIsolationPatchPath: internal/authority/bootstrap/beads-v1.2.2-bootstrap-hook-isolation.patch
+  hookIsolationPatchSHA256: fc282ebc257fc41c15ab7b8ffdd50a1600f840254cf6e10b6997f9e30a0dc1fc
+  patchedBinarySHA256: 22042fc0844ab7700417d917c386f2eab4bab5dd6a6404be091cbd5edbe9e154
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-postclaim-hook-isolation-v4
+  detachedSignature: W-001-postclaim-hook-isolation-v4.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

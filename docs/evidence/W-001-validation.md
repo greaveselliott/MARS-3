@@ -3,7 +3,7 @@
 **Classification:** PUBLIC
 **Work authority:** M3-W001
 **Failure ownership:** foundation
-**Correction grant:** `W-001-postclaim-security-correction-v3`
+**Correction grant:** `W-001-postclaim-hook-isolation-v4`
 **Current disposition:** changes-requested pending fresh immutable QA and Security review
 
 ## Superseded Security disposition
@@ -45,24 +45,50 @@ These facts establish what happened in canonical `M3`; they do not establish
 that the superseded helper was safe for another invocation. The one-shot claim
 must not be replayed.
 
-## Corrective control
+## v3 Security disposition
 
-The v3 correction makes the authority proof two-layered and fail-closed:
+QA accepted v3 commit `9e8a587f8187c2d385a6c5fa023346405733d7ff`
+and tree `fb4a0abea8f3e77a92ca86672078d2d68df7a9e0`. Security requested
+changes after a later bounded synthetic test proved that the helper did not
+disable project workspace hooks. Pinned Beads therefore wrapped the embedded
+transaction and could execute `.beads/hooks/on_update` after commit. The v3
+patch also forwarded bootstrap authority through that hook decorator and did
+not reject the last-merged `config.local.yaml` selector. The normalized
+foundation-owned failure fingerprint is
+`bootstrap-workspace-hook-postcommit-effect`.
 
-1. The helper rejects a project `.env`, accepts only a comments-only direct
-   `config.yaml`, binds metadata and config content plus filesystem identity,
-   and repeats that binding at every pre-effect boundary.
+The v3 commit, tag, successful public checks, QA acceptance, and Security
+changes request remain immutable evidence. They are not final acceptance and
+must not be used to merge or replay the one-shot claim.
+
+## v4 corrective control
+
+The v4 correction keeps both earlier patch layers immutable and adds one narrow
+hook-isolation layer:
+
+1. The helper rejects project `.env` and `config.local.yaml` selectors, accepts
+   only a comments-only direct `config.yaml`, binds metadata and config content
+   plus filesystem identity, and repeats that binding at every pre-effect
+   boundary.
 2. Every helper Beads command receives an exact direct `BEADS_DIR`, effective
-   database `M3`, and disabled server/shared-server selectors.
+   database `M3`, disabled server/shared-server selectors, and
+   `BD_NO_HOOKS=1`.
 3. Backend verification requires both embedded mode and a separate effective
    identity report naming backend `dolt`, database `M3`, and `embedded: true`.
 4. The patched batch operation asks the same SQL transaction to prove its
    effective database and embedded identity before any issue, label, or
    dependency read.
-5. Only the embedded transaction implements the concrete proof. Server-backed
-   transactions cannot claim bootstrap authority through the hook decorator.
+5. Only the bare embedded transaction implements the concrete proof.
+   Server-backed and hook-decorated transactions cannot claim bootstrap
+   authority.
 6. The transaction-boundary workspace proof uses schema version 3 and includes
    SHA-256 content bindings for both `metadata.json` and `config.yaml`.
+
+The human authority explicitly approved the additive integrity transition:
+historical v3 helper and evidence bytes are validated from the immutable signed
+v3 Git tree, while current bytes are validated from the signed v4 grant. Both
+checks are mandatory; neither check substitutes for the other or grants an
+operational effect.
 
 ## Reproducible verification
 
@@ -74,7 +100,8 @@ gofmt -w internal/authority/bootstrap/bootstrap.go internal/authority/bootstrap/
 go test ./internal/authority/bootstrap -count=1
 
 # From an exact pinned Beads checkout after applying the immutable base patch
-# and then the bounded effective-database security patch:
+# then the bounded effective-database patch, and finally the hook-isolation
+# patch:
 ICU_PREFIX="$(brew --prefix icu4c@78)"
 CGO_ENABLED=1 CC=/usr/bin/clang CXX=/usr/bin/clang++ \
 CGO_CPPFLAGS="-I${ICU_PREFIX}/include" \
@@ -94,10 +121,12 @@ revision and covers:
 - one-winner contention;
 - redirect insertion at the transaction boundary;
 - alternate-database `.env` selector rejection with both stores unchanged;
-- shared-server config rejection with canonical state unchanged; and
-- server-backed transaction rejection before an authority read or write.
+- shared-server config rejection with canonical state unchanged;
+- `config.local.yaml` rejection at the transaction boundary;
+- server-backed transaction rejection before an authority read or write; and
+- hook-decorated embedded rejection with no state or sentinel effect.
 
-The eight-case patched suite executed without skips and passed against the
+The ten-case patched suite executed without skips and passed against the
 digest-pinned Dolt server image. The repository helper tests also passed. No
 canonical workspace or Bead was used by either test suite.
 
@@ -105,12 +134,14 @@ The immutable base patch remains SHA-256
 `50128252828352366ced6560371468a5746c2603ef89ea746a33be8994ffceb6`.
 The five-file security delta is independently bound as
 `d48b398a8688d337192ab030c69fd9df0809f72051da7850ff2fdbad5e322d45`.
+The three-file hook-isolation delta is independently bound as
+`fc282ebc257fc41c15ab7b8ffdd50a1600f840254cf6e10b6997f9e30a0dc1fc`.
 Two clean builds with distinct caches produced the same corrected binary
-SHA-256, `8d13927671519fd74470820a72c6ff069589655e338649f31db7e654b2b36c00`.
+SHA-256, `22042fc0844ab7700417d917c386f2eab4bab5dd6a6404be091cbd5edbe9e154`.
 This composition preserves the previously reviewed patch bytes and prevents
 the correction grant from silently rebinding unrelated historical changes.
 
-The exact generated patch, helper, tests, signed correction grant, signed v3
+The exact generated patches, helper, tests, signed correction grant, signed v4
 tag, public commit gate, and independent dispositions are bound by the final
 reviewed Git tree. Until both QA and Security accept that immutable tree, PR #7
 must remain unmerged and no delivery lease or implementation right exists.

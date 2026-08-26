@@ -30,7 +30,9 @@ func TestVerifyAtomicityTestResultsRequiresEveryExecutedCase(t *testing.T) {
 		"TestBatchBootstrapClaimRedirectAtTransactionBoundaryFailsClosed",
 		"TestBatchBootstrapClaimSelectorSpliceFailsClosed",
 		"TestBatchBootstrapClaimSharedServerConfigFailsClosed",
+		"TestBatchBootstrapClaimLocalConfigSelectorFailsClosed",
 		"TestBatchBootstrapClaimServerTransactionFailsBeforeRead",
+		"TestBatchBootstrapClaimHookWrappedTransactionFailsBeforeRead",
 	}
 	var output bytes.Buffer
 	for _, name := range tests {
@@ -258,6 +260,47 @@ func TestVerifyWorkspaceRejectsEnvironmentSelectorInEveryForm(t *testing.T) {
 	}
 }
 
+func TestVerifyWorkspaceRejectsLocalConfigSelectorInEveryForm(t *testing.T) {
+	const projectID = "11111111-2222-3333-4444-555555555555"
+	for _, form := range []string{"regular", "directory", "symlink", "broken-symlink"} {
+		t.Run(form, func(t *testing.T) {
+			root := t.TempDir()
+			if err := os.MkdirAll(filepath.Join(root, ".beads", "embeddeddolt", "M3"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			metadata := []byte(`{"database":"dolt","backend":"dolt","dolt_mode":"embedded","dolt_database":"M3","project_id":"` + projectID + `"}`)
+			if err := os.WriteFile(filepath.Join(root, ".beads", "metadata.json"), metadata, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(root, ".beads", "config.yaml"), []byte("# public synthetic bootstrap fixture\n"), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			selector := filepath.Join(root, ".beads", "config.local.yaml")
+			switch form {
+			case "regular":
+				if err := os.WriteFile(selector, []byte("dolt:\n  shared-server: true\n"), 0o600); err != nil {
+					t.Fatal(err)
+				}
+			case "directory":
+				if err := os.Mkdir(selector, 0o700); err != nil {
+					t.Fatal(err)
+				}
+			case "symlink":
+				if err := os.Symlink(filepath.Join(root, ".beads", "metadata.json"), selector); err != nil {
+					t.Fatal(err)
+				}
+			case "broken-symlink":
+				if err := os.Symlink(filepath.Join(root, "missing"), selector); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if _, err := verifyWorkspace(root, doctrine.W001BootstrapGrant{AuthorityProjectID: projectID}); err == nil {
+				t.Fatalf("%s local configuration selector was accepted", form)
+			}
+		})
+	}
+}
+
 func TestWorkspaceInstanceBindsCommentsOnlyConfigContent(t *testing.T) {
 	const projectID = "11111111-2222-3333-4444-555555555555"
 	root := t.TempDir()
@@ -368,6 +411,7 @@ func TestDirectBeadsCommandEnvironmentPinsWorkspaceAndDatabase(t *testing.T) {
 		"BEADS_DOLT_SERVER_DATABASE": "M3",
 		"BEADS_DOLT_SERVER_MODE":     "0",
 		"BEADS_DOLT_SHARED_SERVER":   "0",
+		"BD_NO_HOOKS":                "1",
 	}
 	got := make(map[string]string)
 	for _, value := range environment {

@@ -391,6 +391,12 @@ func rejectWorkspaceSelectors(beadsDir string) error {
 	} else if !os.IsNotExist(err) {
 		return fmt.Errorf("inspect Beads environment selector: %w", err)
 	}
+	localConfig := filepath.Join(beadsDir, "config.local.yaml")
+	if _, err := os.Lstat(localConfig); err == nil {
+		return errors.New("Beads local configuration selector is prohibited for canonical bootstrap authority")
+	} else if !os.IsNotExist(err) {
+		return fmt.Errorf("inspect Beads local configuration selector: %w", err)
+	}
 	configPath := filepath.Join(beadsDir, "config.yaml")
 	info, err := os.Lstat(configPath)
 	if err != nil || !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 {
@@ -505,6 +511,7 @@ func directBeadsCommandEnvironment(workspace string) ([]string, string, error) {
 		"BEADS_DOLT_SERVER_DATABASE=M3",
 		"BEADS_DOLT_SERVER_MODE=0",
 		"BEADS_DOLT_SHARED_SERVER=0",
+		"BD_NO_HOOKS=1",
 	), resolved, nil
 }
 
@@ -581,6 +588,18 @@ func buildPatchedBinary(repo, source string, config doctrine.W001BootstrapGrant,
 		}
 		if err := run(stdout, stderr, "git", "-C", checkout, "apply", "--unidiff-zero", correction); err != nil {
 			return "", "", cleanup, fmt.Errorf("apply bootstrap security-correction patch: %w", err)
+		}
+	}
+	if config.HookIsolationPatchPath != "" {
+		isolation := filepath.Join(repo, filepath.FromSlash(config.HookIsolationPatchPath))
+		if digest, err := fileDigest(isolation); err != nil || digest != config.HookIsolationPatchSHA256 {
+			return "", "", cleanup, errors.New("bootstrap hook-isolation patch does not match the signed SHA-256")
+		}
+		if err := run(stdout, stderr, "git", "-C", checkout, "apply", "--unidiff-zero", "--check", isolation); err != nil {
+			return "", "", cleanup, fmt.Errorf("bootstrap hook-isolation patch preflight: %w", err)
+		}
+		if err := run(stdout, stderr, "git", "-C", checkout, "apply", "--unidiff-zero", isolation); err != nil {
+			return "", "", cleanup, fmt.Errorf("apply bootstrap hook-isolation patch: %w", err)
 		}
 	}
 	goBinary, baseEnv, err := verifiedGoEnvironment(config, temporary)
@@ -777,7 +796,9 @@ func verifyAtomicityTestResults(output []byte) error {
 		"TestBatchBootstrapClaimRedirectAtTransactionBoundaryFailsClosed": false,
 		"TestBatchBootstrapClaimSelectorSpliceFailsClosed":                false,
 		"TestBatchBootstrapClaimSharedServerConfigFailsClosed":            false,
+		"TestBatchBootstrapClaimLocalConfigSelectorFailsClosed":           false,
 		"TestBatchBootstrapClaimServerTransactionFailsBeforeRead":         false,
+		"TestBatchBootstrapClaimHookWrappedTransactionFailsBeforeRead":    false,
 	}
 	for _, line := range bytes.Split(output, []byte("\n")) {
 		var event struct {
