@@ -126,6 +126,48 @@ func TestW001ExecutionAuthorizationFailsClosedWithoutPinnedSignature(t *testing.
 	}
 }
 
+func TestW001ExecutionAuthorizationRequiresCanonicalSingleObject(t *testing.T) {
+	authorization := W001BootstrapExecutionAuthorization{
+		SchemaVersion:  1,
+		Kind:           "MARS3W001BootstrapExecutionAuthorization",
+		Classification: "PUBLIC",
+	}
+	canonical, err := json.Marshal(authorization)
+	if err != nil {
+		t.Fatal(err)
+	}
+	canonical = append(canonical, '\n')
+	if _, err := decodeCanonicalW001ExecutionAuthorization(canonical); err != nil {
+		t.Fatalf("canonical authorization was rejected: %v", err)
+	}
+	duplicates := append([]byte(`{"schemaVersion":1,`), canonical[1:]...)
+	if _, err := decodeCanonicalW001ExecutionAuthorization(duplicates); err == nil {
+		t.Fatal("duplicate authorization key was accepted")
+	}
+	var indented bytes.Buffer
+	if err := json.Indent(&indented, canonical[:len(canonical)-1], "", "  "); err != nil {
+		t.Fatal(err)
+	}
+	indented.WriteByte('\n')
+	if _, err := decodeCanonicalW001ExecutionAuthorization(indented.Bytes()); err == nil {
+		t.Fatal("non-canonical authorization formatting was accepted")
+	}
+}
+
+func TestW001ExecutionAuthorizationIdentityIncludesSignedBytes(t *testing.T) {
+	first := W001BootstrapExecutionAuthorization{MergedCommit: strings.Repeat("1", 40), payloadSHA256: strings.Repeat("a", 64), signatureSHA256: strings.Repeat("b", 64)}
+	second := first
+	second.signatureSHA256 = strings.Repeat("c", 64)
+	if first == second {
+		t.Fatal("distinct detached-signature bytes had equal authorization identity")
+	}
+	second = first
+	second.payloadSHA256 = strings.Repeat("d", 64)
+	if first == second {
+		t.Fatal("distinct signed-payload bytes had equal authorization identity")
+	}
+}
+
 func scalarPathFromGrant(t *testing.T, grant []byte, key string) string {
 	t.Helper()
 	prefix := "  " + key + ": "

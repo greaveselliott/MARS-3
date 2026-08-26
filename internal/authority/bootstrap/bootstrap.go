@@ -132,15 +132,15 @@ func Run(options Options) error {
 			return err
 		}
 	}
-	workspaceInstance, err := verifyWorkspace(options.BeadsWorkspace, config)
+	if err := verifyOriginalBinary(options.BeadsBinary, config); err != nil {
+		return err
+	}
+	workspaceInstance, err := verifyDirectEmbeddedWorkspace(options.BeadsBinary, options.BeadsWorkspace, config)
 	if err != nil {
 		return err
 	}
 	if options.Apply && execution.WorkspaceInstanceSHA256 != workspaceInstance {
 		return errors.New("execution authorization does not bind the canonical workspace instance")
-	}
-	if err := verifyOriginalBinary(options.BeadsBinary, config); err != nil {
-		return err
 	}
 	if err := verifySource(options.BeadsSource, config); err != nil {
 		return err
@@ -167,6 +167,9 @@ func Run(options Options) error {
 	if err != nil {
 		return err
 	}
+	if current, err := verifyDirectEmbeddedWorkspace(options.BeadsBinary, options.BeadsWorkspace, config); err != nil || current != workspaceInstance {
+		return errors.New("canonical direct embedded workspace changed during disposable conformance")
+	}
 	canonicalBeforeEffect, err := readIssue(options.BeadsBinary, options.BeadsWorkspace, config.Bead)
 	if err != nil || verifyPreimage(canonicalBeforeEffect, config) != nil {
 		return errors.New("canonical Bead changed during disposable conformance")
@@ -191,7 +194,7 @@ func Run(options Options) error {
 		if err := verifyAcceptedMain(options.Repo, execution); err != nil {
 			return err
 		}
-		freshWorkspaceInstance, err := verifyWorkspace(options.BeadsWorkspace, config)
+		freshWorkspaceInstance, err := verifyDirectEmbeddedWorkspace(options.BeadsBinary, options.BeadsWorkspace, config)
 		if err != nil {
 			return err
 		}
@@ -211,13 +214,17 @@ func Run(options Options) error {
 		if err != nil {
 			return err
 		}
-		effectWorkspaceInstance, err := verifyWorkspace(options.BeadsWorkspace, config)
+		effectWorkspaceInstance, err := verifyDirectEmbeddedWorkspace(options.BeadsBinary, options.BeadsWorkspace, config)
 		if err != nil || effectWorkspaceInstance != execution.WorkspaceInstanceSHA256 {
 			return errors.New("canonical workspace instance changed at the effect boundary")
 		}
+		effectEnvironment, err := bootstrapClaimEnvironment(options.BeadsWorkspace, config, effectWorkspaceInstance)
+		if err != nil {
+			return err
+		}
 		command := exec.Command(patchedBinary, "-C", ".", "--actor", config.Assignee, "--json", "batch", "--message", "MARS-3 W-001 signed bootstrap claim")
 		command.Dir = options.BeadsWorkspace
-		command.Env = beadsCommandEnvironment()
+		command.Env = effectEnvironment
 		command.Stdin = strings.NewReader(script)
 		command.Stdout = options.Stdout
 		command.Stderr = options.Stderr
@@ -327,7 +334,15 @@ func verifyWorkspace(workspace string, config doctrine.W001BootstrapGrant) (stri
 	if err != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
 		return "", errors.New("Beads workspace must be one direct directory, not an indirect path")
 	}
-	metadataPath := filepath.Join(workspace, ".beads", "metadata.json")
+	beadsDir := filepath.Join(workspace, ".beads")
+	beadsInfo, err := os.Lstat(beadsDir)
+	if err != nil || !beadsInfo.IsDir() || beadsInfo.Mode()&os.ModeSymlink != 0 {
+		return "", errors.New("Beads authority directory must be one direct directory")
+	}
+	if err := rejectWorkspaceRedirect(beadsDir); err != nil {
+		return "", err
+	}
+	metadataPath := filepath.Join(beadsDir, "metadata.json")
 	metadataInfo, err := os.Lstat(metadataPath)
 	if err != nil || !metadataInfo.Mode().IsRegular() || metadataInfo.Mode()&os.ModeSymlink != 0 {
 		return "", errors.New("Beads workspace metadata must be one direct regular file")
@@ -337,16 +352,36 @@ func verifyWorkspace(workspace string, config doctrine.W001BootstrapGrant) (stri
 		return "", fmt.Errorf("read Beads workspace identity: %w", err)
 	}
 	var metadata struct {
-		ProjectID string `json:"project_id"`
-		Database  string `json:"database"`
+		Database     string `json:"database"`
+		Backend      string `json:"backend"`
+		DoltMode     string `json:"dolt_mode"`
+		DoltDatabase string `json:"dolt_database"`
+		ProjectID    string `json:"project_id"`
 	}
-	if err := json.Unmarshal(data, &metadata); err != nil || metadata.ProjectID != config.AuthorityProjectID || metadata.Database != "dolt" {
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&metadata); err != nil {
+		return "", errors.New("Beads workspace metadata is not the strict direct-store contract")
+	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF || metadata.ProjectID != config.AuthorityProjectID || metadata.Database != "dolt" ||
+		metadata.Backend != "dolt" || metadata.DoltMode != "embedded" || metadata.DoltDatabase != "M3" {
 		return "", errors.New("Beads workspace identity does not match the signed authority project")
 	}
-	return workspaceInstanceDigest(workspace, config.AuthorityProjectID)
+	return workspaceInstanceDigest(workspace, metadata.ProjectID, metadata.Database, metadata.Backend, metadata.DoltMode, metadata.DoltDatabase)
 }
 
-func workspaceInstanceDigest(workspace, projectID string) (string, error) {
+func rejectWorkspaceRedirect(beadsDir string) error {
+	_, err := os.Lstat(filepath.Join(beadsDir, "redirect"))
+	if err == nil {
+		return errors.New("Beads redirects are prohibited for canonical bootstrap authority")
+	}
+	if !os.IsNotExist(err) {
+		return fmt.Errorf("inspect Beads redirect state: %w", err)
+	}
+	return nil
+}
+
+func workspaceInstanceDigest(workspace, projectID, database, backend, doltMode, doltDatabase string) (string, error) {
 	absolute, err := filepath.Abs(workspace)
 	if err != nil {
 		return "", err
@@ -357,32 +392,70 @@ func workspaceInstanceDigest(workspace, projectID string) (string, error) {
 	}
 	type entry struct {
 		Path   string `json:"path"`
+		Kind   string `json:"kind"`
 		Device uint64 `json:"device"`
 		Inode  uint64 `json:"inode"`
 	}
 	payload := struct {
 		SchemaVersion int     `json:"schemaVersion"`
 		ProjectID     string  `json:"projectId"`
+		Database      string  `json:"database"`
+		Backend       string  `json:"backend"`
+		DoltMode      string  `json:"doltMode"`
+		DoltDatabase  string  `json:"doltDatabase"`
 		Root          string  `json:"root"`
 		Entries       []entry `json:"entries"`
-	}{SchemaVersion: 1, ProjectID: projectID, Root: filepath.Clean(resolved)}
-	for _, relative := range []string{".", ".beads", ".beads/embeddeddolt", ".beads/embeddeddolt/M3"} {
+	}{SchemaVersion: 2, ProjectID: projectID, Database: database, Backend: backend, DoltMode: doltMode, DoltDatabase: doltDatabase, Root: filepath.Clean(resolved)}
+	for _, required := range []struct {
+		Relative string
+		Kind     string
+	}{{".", "directory"}, {".beads", "directory"}, {".beads/metadata.json", "file"}, {".beads/embeddeddolt", "directory"}, {".beads/embeddeddolt/M3", "directory"}} {
+		relative := required.Relative
 		path := filepath.Join(resolved, filepath.FromSlash(relative))
 		info, statErr := os.Lstat(path)
-		if statErr != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+		if statErr != nil || info.Mode()&os.ModeSymlink != 0 || required.Kind == "directory" && !info.IsDir() || required.Kind == "file" && !info.Mode().IsRegular() {
 			return "", errors.New("Beads workspace instance path is not one direct directory")
 		}
 		stat, ok := info.Sys().(*syscall.Stat_t)
 		if !ok {
 			return "", errors.New("Beads workspace instance has no stable filesystem identity")
 		}
-		payload.Entries = append(payload.Entries, entry{Path: relative, Device: uint64(stat.Dev), Inode: uint64(stat.Ino)})
+		payload.Entries = append(payload.Entries, entry{Path: relative, Kind: required.Kind, Device: uint64(stat.Dev), Inode: uint64(stat.Ino)})
 	}
 	encoded, err := json.Marshal(payload)
 	if err != nil {
 		return "", err
 	}
 	return digest(encoded), nil
+}
+
+func verifyDirectEmbeddedWorkspace(binary, workspace string, config doctrine.W001BootstrapGrant) (string, error) {
+	before, err := verifyWorkspace(workspace, config)
+	if err != nil {
+		return "", err
+	}
+	mode, err := readBackendMode(binary, workspace)
+	if err != nil || mode != "embedded" {
+		return "", errors.New("Beads workspace did not select the direct embedded backend")
+	}
+	after, err := verifyWorkspace(workspace, config)
+	if err != nil || after != before {
+		return "", errors.New("Beads direct workspace identity changed during backend verification")
+	}
+	return before, nil
+}
+
+func bootstrapClaimEnvironment(workspace string, config doctrine.W001BootstrapGrant, workspaceDigest string) ([]string, error) {
+	resolved, err := filepath.EvalSymlinks(workspace)
+	if err != nil {
+		return nil, errors.New("canonical Beads workspace cannot be resolved for the effect")
+	}
+	return append(beadsCommandEnvironment(),
+		"MARS3_W001_BOOTSTRAP_DIRECT_BEADS_DIR="+filepath.Join(resolved, ".beads"),
+		"MARS3_W001_BOOTSTRAP_PROJECT_ID="+config.AuthorityProjectID,
+		"MARS3_W001_BOOTSTRAP_DATABASE=M3",
+		"MARS3_W001_BOOTSTRAP_WORKSPACE_SHA256="+workspaceDigest,
+	), nil
 }
 
 func verifyOriginalBinary(path string, config doctrine.W001BootstrapGrant) error {
@@ -555,7 +628,8 @@ func verifyDisposableWorkspace(patchedBinary, originalBinary, workspace string, 
 	if err := run(stdout, stderr, "/bin/cp", "-R", resolved, copyRoot); err != nil {
 		return "", fmt.Errorf("copy canonical workspace for conformance: %w", err)
 	}
-	if _, err := verifyWorkspace(copyRoot, config); err != nil {
+	workspaceDigest, err := verifyDirectEmbeddedWorkspace(originalBinary, copyRoot, config)
+	if err != nil {
 		return "", err
 	}
 	disposablePre, err := readIssue(originalBinary, copyRoot, config.Bead)
@@ -565,10 +639,7 @@ func verifyDisposableWorkspace(patchedBinary, originalBinary, workspace string, 
 	if digestIssue(disposablePre) != digestIssue(canonical) {
 		return "", errors.New("disposable and canonical issue preimages differ")
 	}
-	backend, err := readBackendMode(originalBinary, copyRoot)
-	if err != nil || backend != "embedded" {
-		return "", errors.New("disposable workspace did not select the canonical embedded backend")
-	}
+	backend := "embedded"
 	beforeVersion, err := readVersionState(originalBinary, copyRoot)
 	if err != nil {
 		return "", err
@@ -579,7 +650,10 @@ func verifyDisposableWorkspace(patchedBinary, originalBinary, workspace string, 
 	}
 	command := exec.Command(patchedBinary, "-C", ".", "--actor", config.Assignee, "--json", "batch", "--message", "MARS-3 W-001 disposable bootstrap claim")
 	command.Dir = copyRoot
-	command.Env = beadsCommandEnvironment()
+	command.Env, err = bootstrapClaimEnvironment(copyRoot, config, workspaceDigest)
+	if err != nil {
+		return "", err
+	}
 	command.Stdin, command.Stdout, command.Stderr = strings.NewReader(script), stdout, stderr
 	if err := command.Run(); err != nil {
 		return "", fmt.Errorf("disposable canonical-backend claim: %w", err)
@@ -634,10 +708,11 @@ func verifyConformanceDependencies(config doctrine.W001BootstrapGrant) (string, 
 
 func verifyAtomicityTestResults(output []byte) error {
 	wanted := map[string]bool{
-		"TestBatchBootstrapClaimIsOneAtomicTransition":        false,
-		"TestBatchBootstrapClaimPreconditionFailureRollsBack": false,
-		"TestBatchBootstrapClaimPostClaimFailureRollsBack":    false,
-		"TestBatchBootstrapClaimContentionHasOneWinner":       false,
+		"TestBatchBootstrapClaimIsOneAtomicTransition":                    false,
+		"TestBatchBootstrapClaimPreconditionFailureRollsBack":             false,
+		"TestBatchBootstrapClaimPostClaimFailureRollsBack":                false,
+		"TestBatchBootstrapClaimContentionHasOneWinner":                   false,
+		"TestBatchBootstrapClaimRedirectAtTransactionBoundaryFailsClosed": false,
 	}
 	for _, line := range bytes.Split(output, []byte("\n")) {
 		var event struct {
@@ -938,7 +1013,7 @@ func beadsCommandEnvironment() []string {
 			key = value[:separator]
 		}
 		upper := strings.ToUpper(key)
-		if strings.HasPrefix(upper, "BEADS_") || strings.HasPrefix(upper, "DOLT_") || strings.HasPrefix(upper, "BD_") || strings.HasPrefix(upper, "GT_") {
+		if strings.HasPrefix(upper, "BEADS_") || strings.HasPrefix(upper, "DOLT_") || strings.HasPrefix(upper, "BD_") || strings.HasPrefix(upper, "GT_") || strings.HasPrefix(upper, "MARS3_W001_BOOTSTRAP_") {
 			continue
 		}
 		environment = append(environment, value)

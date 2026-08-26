@@ -10,8 +10,8 @@ grant:
   baseCommit: 37b55b912b20715349bc50e0524c85d4b22f1772
   baseTree: f06864b0802cea793cf7a0c08b60b7e734539a94
   workingBranch: codex/w-001-work-authority
-  reviewTag: mars3/w001-bootstrap-helper-v6
-  reviewTagMessage: MARS-3 W-001 bootstrap helper tree attestation v6
+  reviewTag: mars3/w001-bootstrap-helper-v7
+  reviewTagMessage: MARS-3 W-001 bootstrap helper tree attestation v7
   signerRole: human-bootstrap-authority
   coordinator: delivery-orchestrator
   failureOwnership: foundation
@@ -126,12 +126,12 @@ toolchain:
   doltTestImage: dolthub/dolt-sql-server@sha256:6b651663c5024d98a98a4db7226a5e85f90a9344c78fee85617c0fb4a30c6e64
   ryukDisabled: true
   patchPath: internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch
-  patchSHA256: dadeafcc0c3fc1b27752129f8904e1aa6e828a9a14624ffa6750064b6a0afd3b
-  patchedBinarySHA256: 8ba8ba8ba97e83582bc552af367e053106a39c20a4c8e0fe8a2580cd17d70475
+  patchSHA256: 50128252828352366ced6560371468a5746c2603ef89ea746a33be8994ffceb6
+  patchedBinarySHA256: 949e1d535e19ecb39e974b90b7321ef1f7f7d6b77c3958d72edb07e78d9def5a
   helperCommandPath: cmd/mars3-authority/main.go
   helperCommandSHA256: d8ae9fcf5b04902fa3f2ece3369688ca7abf1e55f0cd4f57a611006a861979ea
   helperLibraryPath: internal/authority/bootstrap/bootstrap.go
-  helperLibrarySHA256: 16c34ff26fb9b4eac10a455fb3c67856801f78d49f3a789a3dd6f6a22d1c1885
+  helperLibrarySHA256: d039c787f73e98f059937242e068d76c12753cc9accedc025bf619e1fa63c0fd
 
 verification:
   order:

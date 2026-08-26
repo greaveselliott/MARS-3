@@ -98,8 +98,8 @@ const (
 	w001BootstrapBase               = "37b55b912b20715349bc50e0524c85d4b22f1772"
 	w001BootstrapBaseTree           = "f06864b0802cea793cf7a0c08b60b7e734539a94"
 	w001BootstrapBranch             = "codex/w-001-work-authority"
-	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v6"
-	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v6"
+	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v7"
+	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v7"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -180,6 +180,8 @@ type W001BootstrapExecutionAuthorization struct {
 	AllowedEffect           string `json:"allowedEffect"`
 	IssuedAt                string `json:"issuedAt"`
 	ExpiresAt               string `json:"expiresAt"`
+	payloadSHA256           string
+	signatureSHA256         string
 }
 
 type grantScalarExpectation struct {
@@ -1017,12 +1019,12 @@ var w001BootstrapGrantScalars = []grantScalarExpectation{
 	{path: "toolchain.doltTestImage", value: "dolthub/dolt-sql-server@sha256:6b651663c5024d98a98a4db7226a5e85f90a9344c78fee85617c0fb4a30c6e64"},
 	{path: "toolchain.ryukDisabled", value: "true"},
 	{path: "toolchain.patchPath", value: "internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch"},
-	{path: "toolchain.patchSHA256", value: "dadeafcc0c3fc1b27752129f8904e1aa6e828a9a14624ffa6750064b6a0afd3b"},
-	{path: "toolchain.patchedBinarySHA256", value: "8ba8ba8ba97e83582bc552af367e053106a39c20a4c8e0fe8a2580cd17d70475"},
+	{path: "toolchain.patchSHA256", value: "50128252828352366ced6560371468a5746c2603ef89ea746a33be8994ffceb6"},
+	{path: "toolchain.patchedBinarySHA256", value: "949e1d535e19ecb39e974b90b7321ef1f7f7d6b77c3958d72edb07e78d9def5a"},
 	{path: "toolchain.helperCommandPath", value: "cmd/mars3-authority/main.go"},
 	{path: "toolchain.helperCommandSHA256", value: "d8ae9fcf5b04902fa3f2ece3369688ca7abf1e55f0cd4f57a611006a861979ea"},
 	{path: "toolchain.helperLibraryPath", value: "internal/authority/bootstrap/bootstrap.go"},
-	{path: "toolchain.helperLibrarySHA256", value: "16c34ff26fb9b4eac10a455fb3c67856801f78d49f3a789a3dd6f6a22d1c1885"},
+	{path: "toolchain.helperLibrarySHA256", value: "d039c787f73e98f059937242e068d76c12753cc9accedc025bf619e1fa63c0fd"},
 	{path: "verification.publicCommitGateRequired", value: "true"},
 	{path: "verification.immutableCommitReviewRequired", value: "true"},
 	{path: "verification.protectedMainRequiredBeforeClaim", value: "true"},
@@ -1723,14 +1725,9 @@ func LoadW001BootstrapExecutionAuthorization(repo, path string, grant W001Bootst
 	if err != nil {
 		return W001BootstrapExecutionAuthorization{}, err
 	}
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	var authorization W001BootstrapExecutionAuthorization
-	if err := decoder.Decode(&authorization); err != nil {
-		return W001BootstrapExecutionAuthorization{}, fmt.Errorf("decode execution authorization: %w", err)
-	}
-	if err := decoder.Decode(&struct{}{}); err != io.EOF {
-		return W001BootstrapExecutionAuthorization{}, errors.New("execution authorization must contain exactly one JSON object")
+	authorization, err := decodeCanonicalW001ExecutionAuthorization(data)
+	if err != nil {
+		return W001BootstrapExecutionAuthorization{}, err
 	}
 	signature, err := os.ReadFile(path + ".sig")
 	if err != nil {
@@ -1740,6 +1737,8 @@ func LoadW001BootstrapExecutionAuthorization(repo, path string, grant W001Bootst
 	if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest || verifySSHSig(data, signature, publicKey, w001BootstrapExecutionNamespace) != nil {
 		return W001BootstrapExecutionAuthorization{}, errors.New("execution authorization signature is invalid")
 	}
+	authorization.payloadSHA256 = fileSHA256(data)
+	authorization.signatureSHA256 = fileSHA256(signature)
 	issuedAt, issueErr := time.Parse(time.RFC3339, authorization.IssuedAt)
 	expiresAt, expiryErr := time.Parse(time.RFC3339, authorization.ExpiresAt)
 	now := time.Now().UTC()
@@ -1758,6 +1757,27 @@ func LoadW001BootstrapExecutionAuthorization(repo, path string, grant W001Bootst
 		!sha1Pattern.MatchString(authorization.MergedCommit) || !sha1Pattern.MatchString(authorization.ReviewedFeatureCommit) ||
 		!sha1Pattern.MatchString(authorization.MergedTree) || authorization.MergedCommit == authorization.ReviewedFeatureCommit {
 		return W001BootstrapExecutionAuthorization{}, errors.New("execution authorization does not match the exact post-review claim contract")
+	}
+	return authorization, nil
+}
+
+func decodeCanonicalW001ExecutionAuthorization(data []byte) (W001BootstrapExecutionAuthorization, error) {
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	var authorization W001BootstrapExecutionAuthorization
+	if err := decoder.Decode(&authorization); err != nil {
+		return W001BootstrapExecutionAuthorization{}, fmt.Errorf("decode execution authorization: %w", err)
+	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+		return W001BootstrapExecutionAuthorization{}, errors.New("execution authorization must contain exactly one JSON object")
+	}
+	canonical, err := json.Marshal(authorization)
+	if err != nil {
+		return W001BootstrapExecutionAuthorization{}, err
+	}
+	canonical = append(canonical, '\n')
+	if !bytes.Equal(data, canonical) {
+		return W001BootstrapExecutionAuthorization{}, errors.New("execution authorization must use exact canonical JSON with one trailing newline")
 	}
 	return authorization, nil
 }

@@ -27,6 +27,7 @@ func TestVerifyAtomicityTestResultsRequiresEveryExecutedCase(t *testing.T) {
 		"TestBatchBootstrapClaimPreconditionFailureRollsBack",
 		"TestBatchBootstrapClaimPostClaimFailureRollsBack",
 		"TestBatchBootstrapClaimContentionHasOneWinner",
+		"TestBatchBootstrapClaimRedirectAtTransactionBoundaryFailsClosed",
 	}
 	var output bytes.Buffer
 	for _, name := range tests {
@@ -114,7 +115,7 @@ func TestWorkspaceInstanceRejectsAClone(t *testing.T) {
 		if err := os.MkdirAll(filepath.Join(root, ".beads", "embeddeddolt", "M3"), 0o755); err != nil {
 			t.Fatal(err)
 		}
-		metadata := []byte(`{"project_id":"` + projectID + `","database":"dolt"}`)
+		metadata := []byte(`{"database":"dolt","backend":"dolt","dolt_mode":"embedded","dolt_database":"M3","project_id":"` + projectID + `"}`)
 		if err := os.WriteFile(filepath.Join(root, ".beads", "metadata.json"), metadata, 0o600); err != nil {
 			t.Fatal(err)
 		}
@@ -133,6 +134,74 @@ func TestWorkspaceInstanceRejectsAClone(t *testing.T) {
 	}
 	if originalDigest == cloneDigest {
 		t.Fatal("copied workspace instance was indistinguishable from the canonical instance")
+	}
+}
+
+func TestVerifyWorkspaceRejectsRedirectInEveryForm(t *testing.T) {
+	const projectID = "11111111-2222-3333-4444-555555555555"
+	makeWorkspace := func(t *testing.T) string {
+		t.Helper()
+		root := t.TempDir()
+		if err := os.MkdirAll(filepath.Join(root, ".beads", "embeddeddolt", "M3"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		metadata := []byte(`{"database":"dolt","backend":"dolt","dolt_mode":"embedded","dolt_database":"M3","project_id":"` + projectID + `"}`)
+		if err := os.WriteFile(filepath.Join(root, ".beads", "metadata.json"), metadata, 0o600); err != nil {
+			t.Fatal(err)
+		}
+		return root
+	}
+	config := doctrine.W001BootstrapGrant{AuthorityProjectID: projectID}
+	for _, form := range []string{"regular", "directory", "symlink", "broken-symlink"} {
+		t.Run(form, func(t *testing.T) {
+			root := makeWorkspace(t)
+			redirect := filepath.Join(root, ".beads", "redirect")
+			switch form {
+			case "regular":
+				if err := os.WriteFile(redirect, []byte("../copy/.beads\n"), 0o600); err != nil {
+					t.Fatal(err)
+				}
+			case "directory":
+				if err := os.Mkdir(redirect, 0o700); err != nil {
+					t.Fatal(err)
+				}
+			case "symlink":
+				target := filepath.Join(root, ".beads", "embeddeddolt")
+				if err := os.Symlink(target, redirect); err != nil {
+					t.Fatal(err)
+				}
+			case "broken-symlink":
+				if err := os.Symlink(filepath.Join(root, "missing"), redirect); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if _, err := verifyWorkspace(root, config); err == nil {
+				t.Fatalf("%s redirect was accepted", form)
+			}
+		})
+	}
+}
+
+func TestEffectBoundaryRejectsRedirectInsertedAfterIdentityBinding(t *testing.T) {
+	const projectID = "11111111-2222-3333-4444-555555555555"
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, ".beads", "embeddeddolt", "M3"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	metadata := []byte(`{"database":"dolt","backend":"dolt","dolt_mode":"embedded","dolt_database":"M3","project_id":"` + projectID + `"}`)
+	if err := os.WriteFile(filepath.Join(root, ".beads", "metadata.json"), metadata, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	config := doctrine.W001BootstrapGrant{AuthorityProjectID: projectID}
+	bound, err := verifyWorkspace(root, config)
+	if err != nil || bound == "" {
+		t.Fatalf("initial direct workspace binding failed: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".beads", "redirect"), []byte("../copy/.beads\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if current, err := verifyWorkspace(root, config); err == nil || current == bound {
+		t.Fatal("redirect inserted immediately before effect preserved authority")
 	}
 }
 
@@ -184,12 +253,12 @@ func TestRemoteMainParserRequiresOneCanonicalLowercaseSHA(t *testing.T) {
 }
 
 func TestBeadsCommandEnvironmentRemovesAmbientWorkspaceOverrides(t *testing.T) {
-	for _, key := range []string{"BEADS_DIR", "BEADS_DB", "DOLT_HOST", "BD_CONFIG", "GT_ROOT"} {
+	for _, key := range []string{"BEADS_DIR", "BEADS_DB", "DOLT_HOST", "BD_CONFIG", "GT_ROOT", "MARS3_W001_BOOTSTRAP_DIRECT_BEADS_DIR"} {
 		t.Setenv(key, "attacker-controlled")
 	}
 	for _, value := range beadsCommandEnvironment() {
 		key := strings.ToUpper(strings.SplitN(value, "=", 2)[0])
-		if strings.HasPrefix(key, "BEADS_") || strings.HasPrefix(key, "DOLT_") || strings.HasPrefix(key, "BD_") || strings.HasPrefix(key, "GT_") {
+		if strings.HasPrefix(key, "BEADS_") || strings.HasPrefix(key, "DOLT_") || strings.HasPrefix(key, "BD_") || strings.HasPrefix(key, "GT_") || strings.HasPrefix(key, "MARS3_W001_BOOTSTRAP_") {
 			t.Fatalf("ambient Beads override %q survived sanitization", key)
 		}
 	}

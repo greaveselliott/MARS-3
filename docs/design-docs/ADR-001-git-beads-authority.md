@@ -131,11 +131,16 @@ instance. The helper resolves `main` only from the fixed public GitHub HTTPS
 endpoint using the pinned system Git executable with caller Git, SSH, proxy,
 certificate, replace-object, and user-configuration overrides removed. It
 reloads the signed execution authorization after conformance and rejects any
-field change, then rechecks both expiries, the accepted commit, the direct
-workspace directories and filesystem identity, and the Bead preimage at the
-effect boundary. Beads/Dolt workspace overrides are removed from every client
-invocation. A local branch, mutable remote-tracking ref, copied workspace, or
-swapped authorization is never execution proof.
+field or signed-byte change. The authorization uses one canonical JSON encoding
+and binds both payload and detached-signature digests. The helper then rechecks
+both expiries, the accepted commit, the strict direct embedded workspace
+metadata, database-directory identity, absence of `.beads/redirect`, and the
+Bead preimage at the effect boundary. Beads/Dolt workspace overrides are
+removed from every client invocation. The patched client disables redirect
+resolution for this one operation and repeats the direct-store identity and
+redirect check inside the transaction before mutation. A local branch, mutable
+remote-tracking ref, copied or redirected workspace, or swapped authorization
+is never execution proof.
 
 The helper patches the pinned Beads source in a temporary directory and uses
 the native `ClaimIssueInTx` primitive plus metadata and lifecycle-label updates
@@ -148,10 +153,11 @@ Conformance pins the Go executable and reproducible patched-binary digests,
 uses an isolated allowlisted Go environment with network module resolution
 disabled, resolves versioned ICU `icu4c@78`, disables Ryuk, and starts Dolt by
 the signed image digest. It runs success, stale rollback, post-claim-operation
-rollback, and concurrent one-winner cases, then executes the built binary
-against a disposable copy of the canonical embedded workspace. Success
-requires a verified new Dolt version commit. Any command error is unknown
-acceptance and blocks retry pending separately authorized reconciliation.
+rollback, concurrent one-winner, and redirect-at-transaction-boundary denial
+cases, then executes the built binary against a disposable copy of the
+canonical embedded workspace. Success requires a verified new Dolt version
+commit. Any command error is unknown acceptance and blocks retry pending
+separately authorized reconciliation.
 
 Unknown fields, YAML aliases/anchors/tags/flow syntax, duplicate keys,
 unresolved paths, changed signed bytes, signer drift, stale expected version or

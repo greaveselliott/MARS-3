@@ -279,6 +279,45 @@ not mutate developer or production Git configuration. The v5 tag is not moved
 or reused; the single successor attempt uses
 `mars3/w001-bootstrap-helper-v6` and an entirely fresh public run.
 
+## Preserved v6 Security finding and v7 correction
+
+Independent QA accepted v6 commit
+`b71a9f02311ae71ced793f376f21d9876323adfb`, tree
+`f1e2f801e5b5ad6d5bb745ae2081195e80e75885`, after exact-identity, public-CI,
+signature, deterministic-build, and disposable-conformance checks. Independent
+Security requested changes on that same immutable subject because the helper
+did not reject `.beads/redirect`. Pinned Beads resolves that file before opening
+storage, so a redirect to an exact workspace copy could produce an apparently
+valid claim receipt without changing canonical authority. W-001 and P-001
+remained `open/backlog`, unclaimed, and without a lease.
+
+The bounded v7 correction treats routing as part of authority identity:
+
+- every initial, post-conformance, and immediate pre-effect check rejects a
+  `redirect` path in any filesystem form;
+- the workspace digest schema is v2 and binds the resolved root, project,
+  strict `dolt`/`embedded`/`M3` metadata, and device/inode identity of the root,
+  `.beads`, `metadata.json`, `embeddeddolt`, and `embeddeddolt/M3`;
+- the patched Beads process disables redirect following only for the bounded
+  bootstrap operation and repeats the direct-store metadata, digest, and
+  redirect checks inside the transaction before mutation;
+- conformance adds
+  `TestBatchBootstrapClaimRedirectAtTransactionBoundaryFailsClosed`; and
+- external execution authorization accepts one canonical JSON object with one
+  trailing newline, verifies its detached signature, and compares the exact
+  payload and signature digests after the long-running conformance step.
+
+The corrected public material binds patch SHA-256
+`50128252828352366ced6560371468a5746c2603ef89ea746a33be8994ffceb6`,
+patched-binary SHA-256
+`949e1d535e19ecb39e974b90b7321ef1f7f7d6b77c3958d72edb07e78d9def5a`,
+and helper-library SHA-256
+`d039c787f73e98f059937242e068d76c12753cc9accedc025bf619e1fa63c0fd`.
+The signed successor tag is `mars3/w001-bootstrap-helper-v7`; its exact commit,
+tree, public run, and independent dispositions remain pending until the new
+immutable subject is published and reviewed. No claim is authorized by this
+correction itself.
+
 ## Pending receipt
 
 No claim receipt exists yet. After the authorized effect, append only the

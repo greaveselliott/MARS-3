@@ -1,5 +1,5 @@
 diff --git a/cmd/bd/batch.go b/cmd/bd/batch.go
-index a9255b24..b6dac54d 100644
+index a9255b24..27948434 100644
 --- a/cmd/bd/batch.go
 +++ b/cmd/bd/batch.go
 @@ -5,0 +6,4 @@ import (
@@ -7,24 +7,26 @@ index a9255b24..b6dac54d 100644
 +	"encoding/base64"
 +	"encoding/hex"
 +	"encoding/json"
-@@ -9,0 +14 @@ import (
+@@ -9,0 +14,2 @@ import (
++	"path/filepath"
 +	"sort"
-@@ -11,0 +17 @@ import (
+@@ -11,0 +18,2 @@ import (
++	"syscall"
 +	"time"
-@@ -52,0 +59 @@ Grammar (one command per line):
+@@ -52,0 +61 @@ Grammar (one command per line):
 +  bootstrap-claim <id> <key>=<value> ...
-@@ -255,0 +263,3 @@ func parseBatchScript(r io.Reader) ([]batchOp, error) {
+@@ -255,0 +265,3 @@ func parseBatchScript(r io.Reader) ([]batchOp, error) {
 +		case "bootstrap-claim":
 +			op.cmd = "bootstrap-claim"
 +			op.args = tokens[1:]
-@@ -270 +280 @@ func parseBatchScript(r io.Reader) ([]batchOp, error) {
+@@ -270 +282 @@ func parseBatchScript(r io.Reader) ([]batchOp, error) {
 -			return nil, fmt.Errorf("line %d: unsupported batch command %q (supported: close, update, create, dep add, dep remove)", lineNo, tokens[0])
 +			return nil, fmt.Errorf("line %d: unsupported batch command %q (supported: close, update, create, dep add, dep remove, bootstrap-claim)", lineNo, tokens[0])
-@@ -339,0 +350,3 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
+@@ -339,0 +352,3 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
 +	case "bootstrap-claim":
 +		return runBootstrapClaimBatchOp(ctx, tx, op, actorName)
 +
-@@ -438,0 +452,130 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
+@@ -438,0 +454,256 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
 +type atomicClaimTransaction interface {
 +	ClaimIssue(context.Context, string, string) error
 +}
@@ -46,8 +48,134 @@ index a9255b24..b6dac54d 100644
 +	"add_label":                     true,
 +}
 +
++const (
++	bootstrapDirectBeadsDirEnv  = "MARS3_W001_BOOTSTRAP_DIRECT_BEADS_DIR"
++	bootstrapDirectProjectEnv   = "MARS3_W001_BOOTSTRAP_PROJECT_ID"
++	bootstrapDirectDatabaseEnv  = "MARS3_W001_BOOTSTRAP_DATABASE"
++	bootstrapWorkspaceDigestEnv = "MARS3_W001_BOOTSTRAP_WORKSPACE_SHA256"
++)
++
++type bootstrapWorkspaceMetadata struct {
++	Database     string `json:"database"`
++	Backend      string `json:"backend"`
++	DoltMode     string `json:"dolt_mode"`
++	DoltDatabase string `json:"dolt_database"`
++	ProjectID    string `json:"project_id"`
++}
++
++func verifyBootstrapDirectWorkspace() error {
++	root, err := os.Getwd()
++	if err != nil {
++		return fmt.Errorf("resolve direct bootstrap workspace: %w", err)
++	}
++	resolvedRoot, err := filepath.EvalSymlinks(root)
++	if err != nil {
++		return fmt.Errorf("resolve direct bootstrap workspace: %w", err)
++	}
++	directBeadsDir := filepath.Join(resolvedRoot, ".beads")
++	expectedBeadsDir, err := filepath.EvalSymlinks(os.Getenv(bootstrapDirectBeadsDirEnv))
++	if err != nil || !filepath.IsAbs(expectedBeadsDir) || filepath.Clean(expectedBeadsDir) != filepath.Clean(directBeadsDir) {
++		return fmt.Errorf("bootstrap-claim: direct Beads directory is not authority-bound")
++	}
++	if err := rejectBootstrapRedirect(directBeadsDir); err != nil {
++		return err
++	}
++	metadata, entries, err := bootstrapWorkspaceIdentity(resolvedRoot)
++	if err != nil {
++		return err
++	}
++	if metadata.ProjectID != os.Getenv(bootstrapDirectProjectEnv) || metadata.Database != "dolt" || metadata.Backend != "dolt" ||
++		metadata.DoltMode != "embedded" || metadata.DoltDatabase != os.Getenv(bootstrapDirectDatabaseEnv) || metadata.DoltDatabase != "M3" {
++		return fmt.Errorf("bootstrap-claim: direct embedded authority identity is invalid")
++	}
++	digest, err := bootstrapWorkspaceDigest(resolvedRoot, metadata, entries)
++	if err != nil || digest != os.Getenv(bootstrapWorkspaceDigestEnv) {
++		return fmt.Errorf("bootstrap-claim: direct workspace instance digest is invalid")
++	}
++	return nil
++}
++
++func bootstrapWorkspaceDigest(root string, metadata bootstrapWorkspaceMetadata, entries []bootstrapWorkspaceEntry) (string, error) {
++	payload := struct {
++		SchemaVersion int                       `json:"schemaVersion"`
++		ProjectID     string                    `json:"projectId"`
++		Database      string                    `json:"database"`
++		Backend       string                    `json:"backend"`
++		DoltMode      string                    `json:"doltMode"`
++		DoltDatabase  string                    `json:"doltDatabase"`
++		Root          string                    `json:"root"`
++		Entries       []bootstrapWorkspaceEntry `json:"entries"`
++	}{2, metadata.ProjectID, metadata.Database, metadata.Backend, metadata.DoltMode, metadata.DoltDatabase, filepath.Clean(root), entries}
++	encoded, err := json.Marshal(payload)
++	if err != nil {
++		return "", err
++	}
++	return digestBytes(encoded), nil
++}
++
++type bootstrapWorkspaceEntry struct {
++	Path   string `json:"path"`
++	Kind   string `json:"kind"`
++	Device uint64 `json:"device"`
++	Inode  uint64 `json:"inode"`
++}
++
++func bootstrapWorkspaceIdentity(root string) (bootstrapWorkspaceMetadata, []bootstrapWorkspaceEntry, error) {
++	var metadata bootstrapWorkspaceMetadata
++	paths := []struct {
++		Relative string
++		Kind     string
++	}{
++		{".", "directory"},
++		{".beads", "directory"},
++		{".beads/metadata.json", "file"},
++		{".beads/embeddeddolt", "directory"},
++		{".beads/embeddeddolt/M3", "directory"},
++	}
++	entries := make([]bootstrapWorkspaceEntry, 0, len(paths))
++	for _, required := range paths {
++		path := filepath.Join(root, filepath.FromSlash(required.Relative))
++		info, err := os.Lstat(path)
++		if err != nil || info.Mode()&os.ModeSymlink != 0 || required.Kind == "directory" && !info.IsDir() || required.Kind == "file" && !info.Mode().IsRegular() {
++			return metadata, nil, fmt.Errorf("bootstrap-claim: direct workspace authority path is invalid: %s", required.Relative)
++		}
++		stat, ok := info.Sys().(*syscall.Stat_t)
++		if !ok {
++			return metadata, nil, fmt.Errorf("bootstrap-claim: direct workspace path lacks stable identity: %s", required.Relative)
++		}
++		entries = append(entries, bootstrapWorkspaceEntry{required.Relative, required.Kind, uint64(stat.Dev), uint64(stat.Ino)})
++	}
++	data, err := os.ReadFile(filepath.Join(root, ".beads", "metadata.json"))
++	if err != nil {
++		return metadata, nil, fmt.Errorf("bootstrap-claim: read direct workspace metadata: %w", err)
++	}
++	decoder := json.NewDecoder(strings.NewReader(string(data)))
++	decoder.DisallowUnknownFields()
++	if err := decoder.Decode(&metadata); err != nil {
++		return metadata, nil, fmt.Errorf("bootstrap-claim: direct workspace metadata is invalid: %w", err)
++	}
++	if err := decoder.Decode(&struct{}{}); err != io.EOF {
++		return metadata, nil, fmt.Errorf("bootstrap-claim: direct workspace metadata must be one object")
++	}
++	return metadata, entries, nil
++}
++
++func rejectBootstrapRedirect(beadsDir string) error {
++	_, err := os.Lstat(filepath.Join(beadsDir, "redirect"))
++	if err == nil {
++		return fmt.Errorf("bootstrap-claim: Beads redirect is prohibited")
++	}
++	if !os.IsNotExist(err) {
++		return fmt.Errorf("bootstrap-claim: Beads redirect state is not inspectable: %w", err)
++	}
++	return nil
++}
++
 +func runBootstrapClaimBatchOp(ctx context.Context, tx storage.Transaction, op batchOp, actor string) (batchOpResult, error) {
 +	result := batchOpResult{Line: op.line, Op: op.cmd}
++	if err := verifyBootstrapDirectWorkspace(); err != nil {
++		return result, err
++	}
 +	if len(op.args) != 15 {
 +		return result, fmt.Errorf("bootstrap-claim requires <id> and exactly fourteen key=value arguments")
 +	}
@@ -156,18 +284,50 @@ index a9255b24..b6dac54d 100644
 +}
 +
 diff --git a/cmd/bd/batch_embedded_test.go b/cmd/bd/batch_embedded_test.go
-index aa9d89be..6b6bf6ad 100644
+index aa9d89be..8d2dc65f 100644
 --- a/cmd/bd/batch_embedded_test.go
 +++ b/cmd/bd/batch_embedded_test.go
-@@ -6,0 +7,3 @@ import (
+@@ -6,0 +7,4 @@ import (
 +	"encoding/base64"
 +	"encoding/json"
 +	"fmt"
-@@ -7,0 +11 @@ import (
++	"os"
+@@ -7,0 +12 @@ import (
 +	"sort"
-@@ -9,0 +14 @@ import (
+@@ -9,0 +15 @@ import (
 +	"time"
-@@ -14,0 +20,206 @@ import (
+@@ -14,0 +21,267 @@ import (
++const bootstrapFixtureProjectID = "11111111-2222-3333-4444-555555555555"
++
++func authorizeBootstrapClaimWorkspace(t *testing.T, root string) {
++	t.Helper()
++	t.Chdir(root)
++	databaseDir := filepath.Join(root, ".beads", "embeddeddolt", "M3")
++	if err := os.MkdirAll(databaseDir, 0o755); err != nil {
++		t.Fatal(err)
++	}
++	metadata := []byte(`{"database":"dolt","backend":"dolt","dolt_mode":"embedded","dolt_database":"M3","project_id":"` + bootstrapFixtureProjectID + `"}`)
++	if err := os.WriteFile(filepath.Join(root, ".beads", "metadata.json"), metadata, 0o600); err != nil {
++		t.Fatal(err)
++	}
++	resolved, err := filepath.EvalSymlinks(root)
++	if err != nil {
++		t.Fatal(err)
++	}
++	identity, entries, err := bootstrapWorkspaceIdentity(resolved)
++	if err != nil {
++		t.Fatal(err)
++	}
++	digest, err := bootstrapWorkspaceDigest(resolved, identity, entries)
++	if err != nil {
++		t.Fatal(err)
++	}
++	t.Setenv(bootstrapDirectBeadsDirEnv, filepath.Join(resolved, ".beads"))
++	t.Setenv(bootstrapDirectProjectEnv, bootstrapFixtureProjectID)
++	t.Setenv(bootstrapDirectDatabaseEnv, "M3")
++	t.Setenv(bootstrapWorkspaceDigestEnv, digest)
++}
++
 +func bootstrapClaimScript(t *testing.T, st storage.DoltStorage, ctx context.Context, id, updatedAt string) string {
 +	t.Helper()
 +	issue, err := st.GetIssue(ctx, id)
@@ -231,6 +391,7 @@ index aa9d89be..6b6bf6ad 100644
 +	t.Cleanup(func() { setActor(previousActor) })
 +	tmpDir := t.TempDir()
 +	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	authorizeBootstrapClaimWorkspace(t, tmpDir)
 +	ctx := context.Background()
 +	issue := seedBootstrapClaimFixture(t, st, ctx)
 +	script := bootstrapClaimScript(t, st, ctx, issue.ID, issue.UpdatedAt.UTC().Format(time.RFC3339))
@@ -265,6 +426,7 @@ index aa9d89be..6b6bf6ad 100644
 +	t.Cleanup(func() { setActor(previousActor) })
 +	tmpDir := t.TempDir()
 +	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	authorizeBootstrapClaimWorkspace(t, tmpDir)
 +	ctx := context.Background()
 +	issue := seedBootstrapClaimFixture(t, st, ctx)
 +	script := bootstrapClaimScript(t, st, ctx, issue.ID, "2000-01-01T00:00:00Z")
@@ -299,6 +461,7 @@ index aa9d89be..6b6bf6ad 100644
 +	t.Cleanup(func() { setActor(previousActor) })
 +	tmpDir := t.TempDir()
 +	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	authorizeBootstrapClaimWorkspace(t, tmpDir)
 +	ctx := context.Background()
 +	issue := seedBootstrapClaimFixture(t, st, ctx)
 +	script := bootstrapClaimScript(t, st, ctx, issue.ID, issue.UpdatedAt.UTC().Format(time.RFC3339)) +
@@ -334,6 +497,7 @@ index aa9d89be..6b6bf6ad 100644
 +	t.Cleanup(func() { setActor(previousActor) })
 +	tmpDir := t.TempDir()
 +	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	authorizeBootstrapClaimWorkspace(t, tmpDir)
 +	ctx := context.Background()
 +	issue := seedBootstrapClaimFixture(t, st, ctx)
 +	script := bootstrapClaimScript(t, st, ctx, issue.ID, issue.UpdatedAt.UTC().Format(time.RFC3339))
@@ -365,6 +529,32 @@ index aa9d89be..6b6bf6ad 100644
 +	}
 +}
 +
++func TestBatchBootstrapClaimRedirectAtTransactionBoundaryFailsClosed(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	tmpDir := t.TempDir()
++	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	authorizeBootstrapClaimWorkspace(t, tmpDir)
++	ctx := context.Background()
++	issue := seedBootstrapClaimFixture(t, st, ctx)
++	script := bootstrapClaimScript(t, st, ctx, issue.ID, issue.UpdatedAt.UTC().Format(time.RFC3339))
++	if err := os.WriteFile(filepath.Join(tmpDir, ".beads", "redirect"), []byte("../redirected/.beads\n"), 0o600); err != nil {
++		t.Fatal(err)
++	}
++	if err := runBatchScriptInTx(t, ctx, st, script); err == nil {
++		t.Fatal("redirect inserted after storage setup was accepted")
++	}
++	got, err := st.GetIssue(ctx, issue.ID)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if got.Status != types.StatusOpen || metadataStringForTest(got.Metadata, "lifecycleState") != "backlog" {
++		t.Fatalf("redirect rejection mutated state to %s/%s", got.Status, metadataStringForTest(got.Metadata, "lifecycleState"))
++	}
++}
++
 +func metadataStringForTest(data json.RawMessage, key string) string {
 +	var values map[string]interface{}
 +	if json.Unmarshal(data, &values) != nil {
@@ -374,6 +564,18 @@ index aa9d89be..6b6bf6ad 100644
 +	return value
 +}
 +
+diff --git a/internal/beads/beads.go b/internal/beads/beads.go
+index baf01079..c5b82690 100644
+--- a/internal/beads/beads.go
++++ b/internal/beads/beads.go
+@@ -103,0 +104,7 @@ func FollowRedirect(beadsDir string) string {
++	// The MARS-3 W-001 bootstrap binary receives a helper-derived direct-store
++	// binding. In that one bounded mode redirect resolution is disabled; the
++	// transaction operation independently verifies the exact direct workspace
++	// identity and rejects any redirect that appears before mutation.
++	if os.Getenv("MARS3_W001_BOOTSTRAP_DIRECT_BEADS_DIR") != "" {
++		return beadsDir
++	}
 diff --git a/internal/storage/dolt/transaction.go b/internal/storage/dolt/transaction.go
 index 4c41f70f..49acea08 100644
 --- a/internal/storage/dolt/transaction.go
