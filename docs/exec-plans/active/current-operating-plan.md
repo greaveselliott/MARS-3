@@ -78,6 +78,9 @@ paths and capability leases.
 - Failure ownership: foundation
 - Scenarios: F-001-S1 through F-001-S4
 - Verification order: `qa` → `security-reviewer` → `delivery-orchestrator`
+- Independent review: `qa` and `security-reviewer` accepted exact H-001-E7
+  target `81d42ae007992ad6f65ca8fd2bf52d2fc68af834`; merge and Orchestrator
+  reconciliation remain pending.
 - Branch: `codex/h-001-doctrine-foundation`
 - Expected evidence: all public commit gates, immutable commit identifier,
   generated-provenance scope test, trust-default test, QA review verdict,

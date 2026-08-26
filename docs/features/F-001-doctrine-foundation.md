@@ -56,16 +56,17 @@
 | F-001-S3 | passing | Security | manifest/trust and mutation-denial tests |
 | F-001-S4 | passing | Security | H-001-E7 immutable workflow and public-gate evidence |
 
-All four scenarios have deterministic H-001-E7 candidate evidence. The same
+All four scenarios have deterministic H-001-E7 evidence. The same
 Bead carries typed `featureId: F-001`, all three product decisions, and the
 exact routable order `qa → security-reviewer → delivery-orchestrator`. The
 fresh signed attestation plus negative omission, reordering,
 extra-routable-reviewer, stale-binding, duplicate, malformed, and
 undeclared-reviewer tests bind that contract offline. H-001-E6 received
-`changes-requested`; no earlier verdict carries to a changed commit. Passing
-never means accepted or done: release readiness remains blocked until both
-reviewers accept the same immutable containing commit and Beads records
-reconciliation.
+`changes-requested`; no earlier verdict carries to a changed commit. QA and
+Security independently accepted exact E7 target
+`81d42ae007992ad6f65ca8fd2bf52d2fc68af834`. Accepted review is still not
+`done`: M3-H001 remains `in-review` until merge, completed run disposition, and
+Git/Beads reconciliation.
 
 ### F-001-S1 — One durable delivery route
 
