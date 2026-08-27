@@ -1,0 +1,234 @@
+diff --git a/cmd/bd/batch.go b/cmd/bd/batch.go
+index 27948434..d46e0789 100644
+--- a/cmd/bd/batch.go
++++ b/cmd/bd/batch.go
+@@ -455,0 +456 @@ type atomicClaimTransaction interface {
++	BootstrapAuthority(context.Context) (string, bool, error)
+@@ -506,0 +508,3 @@ func verifyBootstrapDirectWorkspace() error {
++	if err := rejectBootstrapSelectors(directBeadsDir); err != nil {
++		return err
++	}
+@@ -532 +536 @@ func bootstrapWorkspaceDigest(root string, metadata bootstrapWorkspaceMetadata,
+-	}{2, metadata.ProjectID, metadata.Database, metadata.Backend, metadata.DoltMode, metadata.DoltDatabase, filepath.Clean(root), entries}
++	}{3, metadata.ProjectID, metadata.Database, metadata.Backend, metadata.DoltMode, metadata.DoltDatabase, filepath.Clean(root), entries}
+@@ -541,4 +545,5 @@ type bootstrapWorkspaceEntry struct {
+-	Path   string `json:"path"`
+-	Kind   string `json:"kind"`
+-	Device uint64 `json:"device"`
+-	Inode  uint64 `json:"inode"`
++	Path          string `json:"path"`
++	Kind          string `json:"kind"`
++	Device        uint64 `json:"device"`
++	Inode         uint64 `json:"inode"`
++	ContentSHA256 string `json:"contentSHA256,omitempty"`
+@@ -555,0 +561 @@ func bootstrapWorkspaceIdentity(root string) (bootstrapWorkspaceMetadata, []boot
++		{".beads/config.yaml", "file"},
+@@ -570 +576,9 @@ func bootstrapWorkspaceIdentity(root string) (bootstrapWorkspaceMetadata, []boot
+-		entries = append(entries, bootstrapWorkspaceEntry{required.Relative, required.Kind, uint64(stat.Dev), uint64(stat.Ino)})
++		entry := bootstrapWorkspaceEntry{Path: required.Relative, Kind: required.Kind, Device: uint64(stat.Dev), Inode: uint64(stat.Ino)}
++		if required.Kind == "file" {
++			content, readErr := os.ReadFile(path)
++			if readErr != nil {
++				return metadata, nil, fmt.Errorf("bootstrap-claim: direct workspace file cannot be read: %s", required.Relative)
++			}
++			entry.ContentSHA256 = digestBytes(content)
++		}
++		entries = append(entries, entry)
+@@ -597,0 +612,24 @@ func rejectBootstrapRedirect(beadsDir string) error {
++func rejectBootstrapSelectors(beadsDir string) error {
++	if _, err := os.Lstat(filepath.Join(beadsDir, ".env")); err == nil {
++		return fmt.Errorf("bootstrap-claim: Beads environment selector is prohibited")
++	} else if !os.IsNotExist(err) {
++		return fmt.Errorf("bootstrap-claim: Beads environment selector is not inspectable: %w", err)
++	}
++	configPath := filepath.Join(beadsDir, "config.yaml")
++	info, err := os.Lstat(configPath)
++	if err != nil || !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 {
++		return fmt.Errorf("bootstrap-claim: Beads config must be one direct regular file")
++	}
++	data, err := os.ReadFile(configPath)
++	if err != nil {
++		return fmt.Errorf("bootstrap-claim: read Beads config: %w", err)
++	}
++	for _, line := range strings.Split(string(data), "\n") {
++		trimmed := strings.TrimSpace(line)
++		if trimmed != "" && !strings.HasPrefix(trimmed, "#") {
++			return fmt.Errorf("bootstrap-claim: Beads config must contain comments only")
++		}
++	}
++	return nil
++}
++
+@@ -624,0 +663,4 @@ func runBootstrapClaimBatchOp(ctx context.Context, tx storage.Transaction, op ba
++	database, embedded, err := claimTx.BootstrapAuthority(ctx)
++	if err != nil || !embedded || database != "M3" {
++		return result, fmt.Errorf("bootstrap-claim: transaction is not the direct embedded M3 authority")
++	}
+diff --git a/cmd/bd/batch_embedded_test.go b/cmd/bd/batch_embedded_test.go
+index 8d2dc65f..a94d1204 100644
+--- a/cmd/bd/batch_embedded_test.go
++++ b/cmd/bd/batch_embedded_test.go
+@@ -17,0 +18 @@ import (
++	"github.com/steveyegge/beads/internal/storage/embeddeddolt"
+@@ -33,0 +35,3 @@ func authorizeBootstrapClaimWorkspace(t *testing.T, root string) {
++	if err := os.WriteFile(filepath.Join(root, ".beads", "config.yaml"), []byte("# public synthetic bootstrap fixture\n"), 0o600); err != nil {
++		t.Fatal(err)
++	}
+@@ -51,0 +56,14 @@ func authorizeBootstrapClaimWorkspace(t *testing.T, root string) {
++func newEmbeddedBootstrapTestStore(t *testing.T, root string) storage.DoltStorage {
++	t.Helper()
++	store, err := embeddeddolt.Open(t.Context(), filepath.Join(root, ".beads"), "M3", "main")
++	if err != nil {
++		t.Fatalf("open direct embedded M3 fixture: %v", err)
++	}
++	if err := store.SetConfig(t.Context(), "issue_prefix", "tbc"); err != nil {
++		_ = store.Close()
++		t.Fatalf("initialize direct embedded M3 fixture: %v", err)
++	}
++	t.Cleanup(func() { _ = store.Close() })
++	return store
++}
++
+@@ -114 +132 @@ func TestBatchBootstrapClaimIsOneAtomicTransition(t *testing.T) {
+-	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	st := newEmbeddedBootstrapTestStore(t, tmpDir)
+@@ -149 +167 @@ func TestBatchBootstrapClaimPreconditionFailureRollsBack(t *testing.T) {
+-	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	st := newEmbeddedBootstrapTestStore(t, tmpDir)
+@@ -184 +202 @@ func TestBatchBootstrapClaimPostClaimFailureRollsBack(t *testing.T) {
+-	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	st := newEmbeddedBootstrapTestStore(t, tmpDir)
+@@ -220 +238 @@ func TestBatchBootstrapClaimContentionHasOneWinner(t *testing.T) {
+-	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	st := newEmbeddedBootstrapTestStore(t, tmpDir)
+@@ -259 +277 @@ func TestBatchBootstrapClaimRedirectAtTransactionBoundaryFailsClosed(t *testing.
+-	st := newTestStoreWithPrefix(t, filepath.Join(tmpDir, ".beads", "beads.db"), "tbc")
++	st := newEmbeddedBootstrapTestStore(t, tmpDir)
+@@ -278,0 +297,80 @@ func TestBatchBootstrapClaimRedirectAtTransactionBoundaryFailsClosed(t *testing.
++func TestBatchBootstrapClaimSelectorSpliceFailsClosed(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	canonical := newEmbeddedBootstrapTestStore(t, root)
++	alternate, err := embeddeddolt.Open(t.Context(), filepath.Join(root, ".beads"), "M3_SPLICE", "main")
++	if err != nil {
++		t.Fatalf("open alternate embedded fixture: %v", err)
++	}
++	if err := alternate.SetConfig(t.Context(), "issue_prefix", "tbc"); err != nil {
++		_ = alternate.Close()
++		t.Fatalf("initialize alternate embedded fixture: %v", err)
++	}
++	t.Cleanup(func() { _ = alternate.Close() })
++	authorizeBootstrapClaimWorkspace(t, root)
++	ctx := context.Background()
++	canonicalIssue := seedBootstrapClaimFixture(t, canonical, ctx)
++	alternateIssue := seedBootstrapClaimFixture(t, alternate, ctx)
++	script := bootstrapClaimScript(t, canonical, ctx, canonicalIssue.ID, canonicalIssue.UpdatedAt.UTC().Format(time.RFC3339))
++	if err := os.WriteFile(filepath.Join(root, ".beads", ".env"), []byte("BEADS_DOLT_SERVER_DATABASE=M3_SPLICE\n"), 0o600); err != nil {
++		t.Fatal(err)
++	}
++	if err := runBatchScriptInTx(t, ctx, canonical, script); err == nil {
++		t.Fatal("alternate-database environment selector was accepted")
++	}
++	assertBootstrapIssueBacklog(t, canonical, canonicalIssue.ID)
++	assertBootstrapIssueBacklog(t, alternate, alternateIssue.ID)
++}
++
++func TestBatchBootstrapClaimSharedServerConfigFailsClosed(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	store := newEmbeddedBootstrapTestStore(t, root)
++	authorizeBootstrapClaimWorkspace(t, root)
++	ctx := context.Background()
++	issue := seedBootstrapClaimFixture(t, store, ctx)
++	script := bootstrapClaimScript(t, store, ctx, issue.ID, issue.UpdatedAt.UTC().Format(time.RFC3339))
++	if err := os.WriteFile(filepath.Join(root, ".beads", "config.yaml"), []byte("dolt:\n  shared-server: true\n"), 0o600); err != nil {
++		t.Fatal(err)
++	}
++	if err := runBatchScriptInTx(t, ctx, store, script); err == nil {
++		t.Fatal("shared-server config inserted at the transaction boundary was accepted")
++	}
++	assertBootstrapIssueBacklog(t, store, issue.ID)
++}
++
++func TestBatchBootstrapClaimServerTransactionFailsBeforeRead(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	store := newTestStoreWithPrefix(t, filepath.Join(root, ".beads", "beads.db"), "tbc")
++	authorizeBootstrapClaimWorkspace(t, root)
++	ctx := context.Background()
++	issue := seedBootstrapClaimFixture(t, store, ctx)
++	script := bootstrapClaimScript(t, store, ctx, issue.ID, issue.UpdatedAt.UTC().Format(time.RFC3339))
++	wrapped := storage.NewHookFiringStore(store, nil)
++	if err := runBatchScriptInTx(t, ctx, wrapped, script); err == nil {
++		t.Fatal("server-backed transaction received bootstrap claim authority")
++	}
++	assertBootstrapIssueBacklog(t, store, issue.ID)
++}
++
++func assertBootstrapIssueBacklog(t *testing.T, store storage.DoltStorage, id string) {
++	t.Helper()
++	issue, err := store.GetIssue(t.Context(), id)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if issue.Status != types.StatusOpen || metadataStringForTest(issue.Metadata, "lifecycleState") != "backlog" {
++		t.Fatalf("rejected bootstrap authority mutated %s to %s/%s", id, issue.Status, metadataStringForTest(issue.Metadata, "lifecycleState"))
++	}
++}
++
+diff --git a/internal/storage/dolt/transaction.go b/internal/storage/dolt/transaction.go
+index 49acea08..4c41f70f 100644
+--- a/internal/storage/dolt/transaction.go
++++ b/internal/storage/dolt/transaction.go
+@@ -27,10 +26,0 @@ type doltTransaction struct {
+-// ClaimIssue applies Beads' native compare-and-swap claim inside the caller's
+-// existing regular transaction. The method is consumed through a narrow local
+-// interface by the bootstrap batch operation.
+-func (t *doltTransaction) ClaimIssue(ctx context.Context, id, actor string) error {
+-	t.dirty.MarkDirty("issues")
+-	t.dirty.MarkDirty("events")
+-	_, err := issueops.ClaimIssueInTx(ctx, t.regularTx, id, actor)
+-	return err
+-}
+-
+diff --git a/internal/storage/embeddeddolt/transaction.go b/internal/storage/embeddeddolt/transaction.go
+index 0cdf571d..a61912d4 100644
+--- a/internal/storage/embeddeddolt/transaction.go
++++ b/internal/storage/embeddeddolt/transaction.go
+@@ -42,0 +43,10 @@ type embeddedTransaction struct {
++// BootstrapAuthority proves the effective database and embedded transaction
++// identity from the same SQL transaction that will perform the one-shot claim.
++func (t *embeddedTransaction) BootstrapAuthority(ctx context.Context) (string, bool, error) {
++	var database string
++	if err := t.tx.QueryRowContext(ctx, "SELECT DATABASE()").Scan(&database); err != nil {
++		return "", false, err
++	}
++	return database, true, nil
++}
++
+diff --git a/internal/storage/hook_decorator.go b/internal/storage/hook_decorator.go
+index 7af502e4..5ade041b 100644
+--- a/internal/storage/hook_decorator.go
++++ b/internal/storage/hook_decorator.go
+@@ -432,0 +433,12 @@ type hookTrackingTransaction struct {
++// BootstrapAuthority preserves the direct embedded authority proof through
++// the hook decorator. Server-backed transactions deliberately return false.
++func (t *hookTrackingTransaction) BootstrapAuthority(ctx context.Context) (string, bool, error) {
++	authority, ok := t.Transaction.(interface {
++		BootstrapAuthority(context.Context) (string, bool, error)
++	})
++	if !ok {
++		return "", false, nil
++	}
++	return authority.BootstrapAuthority(ctx)
++}
++

@@ -27,79 +27,139 @@ import (
 )
 
 const (
-	wave1PlanningGrantPath          = ".harness/grants/WAVE-1-contract-publication.yaml"
-	wave1PlanningGrantSignature     = ".harness/grants/WAVE-1-contract-publication.yaml.sig"
-	wave1PlanningGrantKey           = ".harness/keys/genesis-signing-key.pub"
-	wave1PlanningGrantNamespace     = "mars3-planning-grant"
-	wave1PlanningGrantBase          = "ee385ce236ae1f99da692d223d7666b80dd9108f"
-	wave1PlanningGrantBranch        = "codex/w-001-work-authority"
-	planningGrantCommitNS           = "git"
-	planningGrantRepository         = "greaveselliott/MARS-3"
-	planningGrantWorkflow           = "Foundation quality"
-	planningGrantWorkflowPath       = ".github/workflows/foundation-quality.yml"
-	planningGrantWorkflowJob        = "public-commit-gate"
-	wave1DispositionPath            = ".harness/grants/WAVE-1-recovery-disposition.yaml"
-	wave1DispositionSignature       = ".harness/grants/WAVE-1-recovery-disposition.yaml.sig"
-	wave1DispositionSnapshot        = ".harness/grants/WAVE-1-authority-recovery-state.json"
-	wave1DispositionNamespace       = "mars3-recovery-disposition"
-	wave1DispositionSnapshotSHA     = "4d3b5c9d90a223c0e9d974e836559309a2f4dac7f209a3966336e9152f57feca"
-	wave1PriorPublicationTag        = "mars3/wave1-contract-publication-v1"
-	wave1PriorPublicationTagMessage = "MARS-3 Wave-1 contract-publication tree attestation v1"
-	wave1PriorPublicationTagObject  = "4bce7e7d4a8b2cc1a5b30b9feaee61232c3cc0de"
-	wave1AddendumPath               = ".harness/grants/WAVE-1-ci-recovery-addendum.yaml"
-	wave1AddendumSignature          = ".harness/grants/WAVE-1-ci-recovery-addendum.yaml.sig"
-	wave1AddendumNamespace          = "mars3-ci-recovery-addendum"
-	wave1AddendumBase               = "a22cfe6fada6f2bc787742eae50bca28cec80c89"
-	wave1AddendumBaseTree           = "3c5befaefab37a8d0a2e3a8af2efd6e1eb1d8cae"
-	wave1V2PublicationTag           = "mars3/wave1-contract-publication-v2"
-	wave1V2PublicationTagMessage    = "MARS-3 Wave-1 contract-publication tree attestation v2"
-	wave1V2PublicationTagObject     = "e334356519188fc0906549515ae57fbffa646829"
-	wave1V3AddendumPath             = ".harness/grants/WAVE-1-ci-recovery-addendum-v3.yaml"
-	wave1V3AddendumSignature        = ".harness/grants/WAVE-1-ci-recovery-addendum-v3.yaml.sig"
-	wave1V3AddendumNamespace        = "mars3-ci-recovery-addendum-v3"
-	wave1V3AddendumBase             = "412a9b857265af250ee40d36d0a6c127714e4ec9"
-	wave1V3AddendumBaseTree         = "8c7f3ccac3e31d0e8b45431934cd95a91e448c0f"
-	wave1V3ObservedStaleMerge       = "fff2bea9bffa9400d3ecfc147b7338849ecfbbb0"
-	wave1PublicationTag             = "mars3/wave1-contract-publication-v3"
-	wave1PublicationTagMessage      = "MARS-3 Wave-1 contract-publication tree attestation v3"
-	wave1PublishedMain              = "265b0b78a19d0ac50611c360f4614ed24d1cfcd7"
-	wave1PublishedTree              = "87dc32acce9c767f01f94aae25936665e26650ab"
-	wave1DirectMainGrantPath        = ".harness/grants/WAVE-1-direct-main-transition.yaml"
-	wave1DirectMainGrantSignature   = ".harness/grants/WAVE-1-direct-main-transition.yaml.sig"
-	wave1DirectMainGrantNamespace   = "mars3-direct-main-transition"
-	wave1PRFallbackPath             = ".harness/grants/WAVE-1-pr-fallback-addendum.yaml"
-	wave1PRFallbackSignature        = ".harness/grants/WAVE-1-pr-fallback-addendum.yaml.sig"
-	wave1PRFallbackNamespace        = "mars3-pr-fallback-addendum"
-	wave1PRFallbackBranch           = "codex/w-001-bootstrap-transition"
-	wave1PRFallbackFirstCommit      = "0602a7e2036f53d2d7b9da10b406d27f87621196"
-	wave1PRFallbackFirstTree        = "69d9ab152f5b0a243855ddf613192c662b52306b"
-	wave1TransitionTag              = "mars3/w001-transition-v1"
-	wave1TransitionTagMessage       = "MARS-3 W-001 transition tree attestation v1"
-	wave1TransitionTagObject        = "394c9ce749142c2222c1b8081b62f43a895be326"
-	wave1TransitionReviewedHead     = "a9e203540a9e280fe7059dfa579a9a4089fc3f52"
-	wave1TransitionReviewedTree     = "c326c5d33f075a2c8b7dc4c41a698d57175c8805"
-	wave1MainCIFixPath              = ".harness/grants/WAVE-1-pr-fallback-main-ci-addendum.yaml"
-	wave1MainCIFixSignature         = ".harness/grants/WAVE-1-pr-fallback-main-ci-addendum.yaml.sig"
-	wave1MainCIFixNamespace         = "mars3-pr-fallback-main-ci-addendum"
-	wave1SuccessorTransitionTag     = "mars3/w001-transition-v2"
-	wave1SuccessorTagMessage        = "MARS-3 W-001 transition tree attestation v2"
-	wave1SuccessorTagObject         = "cd7d6daeea77041167b5aa3763952b47b4ad09c0"
-	wave1CIFixtureReviewedHead      = "b9ca75dfe42001a9632d8c752e2ddb80624fa4ae"
-	wave1CIFixtureReviewedTree      = "f8af794a23f67fec73af71328dc6aeae0fa9e104"
-	wave1CIFixtureFixPath           = ".harness/grants/WAVE-1-pr-fallback-fixture-stabilization-addendum.yaml"
-	wave1CIFixtureFixSignature      = ".harness/grants/WAVE-1-pr-fallback-fixture-stabilization-addendum.yaml.sig"
-	wave1CIFixtureFixNamespace      = "mars3-pr-fallback-fixture-stabilization-addendum"
-	wave1FinalTransitionTag         = "mars3/w001-transition-v3"
-	wave1FinalTransitionTagMessage  = "MARS-3 W-001 transition tree attestation v3"
-	w001BootstrapGrantPath          = ".harness/grants/W-001-bootstrap.yaml"
-	w001BootstrapGrantSignature     = ".harness/grants/W-001-bootstrap.yaml.sig"
-	w001BootstrapGrantNamespace     = "mars3-w001-bootstrap-grant"
-	w001BootstrapExecutionNamespace = "mars3-w001-bootstrap-execution"
-	w001BootstrapBase               = "37b55b912b20715349bc50e0524c85d4b22f1772"
-	w001BootstrapBaseTree           = "f06864b0802cea793cf7a0c08b60b7e734539a94"
-	w001BootstrapBranch             = "codex/w-001-work-authority"
-	w001BootstrapReviewTag          = "mars3/w001-bootstrap-helper-v9"
-	w001BootstrapReviewTagMessage   = "MARS-3 W-001 bootstrap helper tree attestation v9"
+	wave1PlanningGrantPath            = ".harness/grants/WAVE-1-contract-publication.yaml"
+	wave1PlanningGrantSignature       = ".harness/grants/WAVE-1-contract-publication.yaml.sig"
+	wave1PlanningGrantKey             = ".harness/keys/genesis-signing-key.pub"
+	wave1PlanningGrantNamespace       = "mars3-planning-grant"
+	wave1PlanningGrantBase            = "ee385ce236ae1f99da692d223d7666b80dd9108f"
+	wave1PlanningGrantBranch          = "codex/w-001-work-authority"
+	planningGrantCommitNS             = "git"
+	planningGrantRepository           = "greaveselliott/MARS-3"
+	planningGrantWorkflow             = "Foundation quality"
+	planningGrantWorkflowPath         = ".github/workflows/foundation-quality.yml"
+	planningGrantWorkflowJob          = "public-commit-gate"
+	wave1DispositionPath              = ".harness/grants/WAVE-1-recovery-disposition.yaml"
+	wave1DispositionSignature         = ".harness/grants/WAVE-1-recovery-disposition.yaml.sig"
+	wave1DispositionSnapshot          = ".harness/grants/WAVE-1-authority-recovery-state.json"
+	wave1DispositionNamespace         = "mars3-recovery-disposition"
+	wave1DispositionSnapshotSHA       = "4d3b5c9d90a223c0e9d974e836559309a2f4dac7f209a3966336e9152f57feca"
+	wave1PriorPublicationTag          = "mars3/wave1-contract-publication-v1"
+	wave1PriorPublicationTagMessage   = "MARS-3 Wave-1 contract-publication tree attestation v1"
+	wave1PriorPublicationTagObject    = "4bce7e7d4a8b2cc1a5b30b9feaee61232c3cc0de"
+	wave1AddendumPath                 = ".harness/grants/WAVE-1-ci-recovery-addendum.yaml"
+	wave1AddendumSignature            = ".harness/grants/WAVE-1-ci-recovery-addendum.yaml.sig"
+	wave1AddendumNamespace            = "mars3-ci-recovery-addendum"
+	wave1AddendumBase                 = "a22cfe6fada6f2bc787742eae50bca28cec80c89"
+	wave1AddendumBaseTree             = "3c5befaefab37a8d0a2e3a8af2efd6e1eb1d8cae"
+	wave1V2PublicationTag             = "mars3/wave1-contract-publication-v2"
+	wave1V2PublicationTagMessage      = "MARS-3 Wave-1 contract-publication tree attestation v2"
+	wave1V2PublicationTagObject       = "e334356519188fc0906549515ae57fbffa646829"
+	wave1V3AddendumPath               = ".harness/grants/WAVE-1-ci-recovery-addendum-v3.yaml"
+	wave1V3AddendumSignature          = ".harness/grants/WAVE-1-ci-recovery-addendum-v3.yaml.sig"
+	wave1V3AddendumNamespace          = "mars3-ci-recovery-addendum-v3"
+	wave1V3AddendumBase               = "412a9b857265af250ee40d36d0a6c127714e4ec9"
+	wave1V3AddendumBaseTree           = "8c7f3ccac3e31d0e8b45431934cd95a91e448c0f"
+	wave1V3ObservedStaleMerge         = "fff2bea9bffa9400d3ecfc147b7338849ecfbbb0"
+	wave1PublicationTag               = "mars3/wave1-contract-publication-v3"
+	wave1PublicationTagMessage        = "MARS-3 Wave-1 contract-publication tree attestation v3"
+	wave1PublishedMain                = "265b0b78a19d0ac50611c360f4614ed24d1cfcd7"
+	wave1PublishedTree                = "87dc32acce9c767f01f94aae25936665e26650ab"
+	wave1DirectMainGrantPath          = ".harness/grants/WAVE-1-direct-main-transition.yaml"
+	wave1DirectMainGrantSignature     = ".harness/grants/WAVE-1-direct-main-transition.yaml.sig"
+	wave1DirectMainGrantNamespace     = "mars3-direct-main-transition"
+	wave1PRFallbackPath               = ".harness/grants/WAVE-1-pr-fallback-addendum.yaml"
+	wave1PRFallbackSignature          = ".harness/grants/WAVE-1-pr-fallback-addendum.yaml.sig"
+	wave1PRFallbackNamespace          = "mars3-pr-fallback-addendum"
+	wave1PRFallbackBranch             = "codex/w-001-bootstrap-transition"
+	wave1PRFallbackFirstCommit        = "0602a7e2036f53d2d7b9da10b406d27f87621196"
+	wave1PRFallbackFirstTree          = "69d9ab152f5b0a243855ddf613192c662b52306b"
+	wave1TransitionTag                = "mars3/w001-transition-v1"
+	wave1TransitionTagMessage         = "MARS-3 W-001 transition tree attestation v1"
+	wave1TransitionTagObject          = "394c9ce749142c2222c1b8081b62f43a895be326"
+	wave1TransitionReviewedHead       = "a9e203540a9e280fe7059dfa579a9a4089fc3f52"
+	wave1TransitionReviewedTree       = "c326c5d33f075a2c8b7dc4c41a698d57175c8805"
+	wave1MainCIFixPath                = ".harness/grants/WAVE-1-pr-fallback-main-ci-addendum.yaml"
+	wave1MainCIFixSignature           = ".harness/grants/WAVE-1-pr-fallback-main-ci-addendum.yaml.sig"
+	wave1MainCIFixNamespace           = "mars3-pr-fallback-main-ci-addendum"
+	wave1SuccessorTransitionTag       = "mars3/w001-transition-v2"
+	wave1SuccessorTagMessage          = "MARS-3 W-001 transition tree attestation v2"
+	wave1SuccessorTagObject           = "cd7d6daeea77041167b5aa3763952b47b4ad09c0"
+	wave1CIFixtureReviewedHead        = "b9ca75dfe42001a9632d8c752e2ddb80624fa4ae"
+	wave1CIFixtureReviewedTree        = "f8af794a23f67fec73af71328dc6aeae0fa9e104"
+	wave1CIFixtureFixPath             = ".harness/grants/WAVE-1-pr-fallback-fixture-stabilization-addendum.yaml"
+	wave1CIFixtureFixSignature        = ".harness/grants/WAVE-1-pr-fallback-fixture-stabilization-addendum.yaml.sig"
+	wave1CIFixtureFixNamespace        = "mars3-pr-fallback-fixture-stabilization-addendum"
+	wave1FinalTransitionTag           = "mars3/w001-transition-v3"
+	wave1FinalTransitionTagMessage    = "MARS-3 W-001 transition tree attestation v3"
+	w001BootstrapGrantPath            = ".harness/grants/W-001-bootstrap.yaml"
+	w001BootstrapGrantSignature       = ".harness/grants/W-001-bootstrap.yaml.sig"
+	w001BootstrapGrantNamespace       = "mars3-w001-bootstrap-grant"
+	w001BootstrapExecutionNamespace   = "mars3-w001-bootstrap-execution"
+	w001BootstrapBase                 = "37b55b912b20715349bc50e0524c85d4b22f1772"
+	w001BootstrapBaseTree             = "f06864b0802cea793cf7a0c08b60b7e734539a94"
+	w001BootstrapBranch               = "codex/w-001-work-authority"
+	w001BootstrapReviewTag            = "mars3/w001-bootstrap-helper-v9"
+	w001BootstrapReviewTagMessage     = "MARS-3 W-001 bootstrap helper tree attestation v9"
+	w001PostclaimGrantPath            = ".harness/grants/W-001-postclaim-reconciliation.yaml"
+	w001PostclaimGrantSignature       = ".harness/grants/W-001-postclaim-reconciliation.yaml.sig"
+	w001PostclaimGrantNamespace       = "mars3-w001-postclaim-reconciliation"
+	w001PostclaimBase                 = "adfd64feb565fb703a3568122cc032d4d1a450f5"
+	w001PostclaimBaseTree             = "bbfa7f59f7bd29c1a0546ffcb77dd8fa4982ef6d"
+	w001PostclaimBranch               = "codex/w-001-postclaim-reconciliation"
+	w001PostclaimReviewTag            = "mars3/w001-postclaim-reconciliation-v1"
+	w001PostclaimReviewTagMessage     = "MARS-3 W-001 postclaim reconciliation tree attestation v1"
+	w001PostclaimCIFixPath            = ".harness/grants/W-001-postclaim-ci-stabilization-v2.yaml"
+	w001PostclaimCIFixSignature       = ".harness/grants/W-001-postclaim-ci-stabilization-v2.yaml.sig"
+	w001PostclaimCIFixNamespace       = "mars3-w001-postclaim-ci-stabilization-v2"
+	w001PostclaimCIFixBase            = "eda666569de379543a170119ccb7c560478c7346"
+	w001PostclaimCIFixBaseTree        = "b8de9ac4cf26b4561ce26abcf729529f65bd9b9f"
+	w001PostclaimCIFixReviewTag       = "mars3/w001-postclaim-reconciliation-v2"
+	w001PostclaimCIFixTagMessage      = "MARS-3 W-001 postclaim reconciliation tree attestation v2"
+	w001PostclaimV1TagObject          = "7492f63fd88567a284eff43c670098295824aaf8"
+	w001PostclaimV2TagObject          = "684ba6c536e8e8d4c33b587da9e7d05893168958"
+	w001PostclaimSecurityFixPath      = ".harness/grants/W-001-postclaim-security-correction-v3.yaml"
+	w001PostclaimSecurityFixSig       = ".harness/grants/W-001-postclaim-security-correction-v3.yaml.sig"
+	w001PostclaimSecurityFixNS        = "mars3-w001-postclaim-security-correction-v3"
+	w001PostclaimSecurityFixBase      = "20542d8e696abe0a71b6ec3ceb23f042919fbc04"
+	w001PostclaimSecurityFixTree      = "499ea91f5002b32d57d6f20b4ca3ea07dbdc73f5"
+	w001PostclaimSecurityFixTag       = "mars3/w001-postclaim-reconciliation-v3"
+	w001PostclaimSecurityFixTagMsg    = "MARS-3 W-001 postclaim reconciliation tree attestation v3"
+	w001PostclaimSecurityHelperSHA    = "21ff880af1135db6c13ad6dcfac621e9231fee8e635ca7d47e5fcc5c39314f25"
+	w001PostclaimSecurityTestSHA      = "0221972a39c14108719b80a23448f9c42f2b9417a3d4ea3dc4f5c1b2975a0f33"
+	w001PostclaimSecurityBasePatchSHA = "50128252828352366ced6560371468a5746c2603ef89ea746a33be8994ffceb6"
+	w001PostclaimSecurityPatchPath    = "internal/authority/bootstrap/beads-v1.2.2-effective-db-security.patch"
+	w001PostclaimSecurityPatchSHA     = "d48b398a8688d337192ab030c69fd9df0809f72051da7850ff2fdbad5e322d45"
+	w001PostclaimSecurityBinarySHA    = "8d13927671519fd74470820a72c6ff069589655e338649f31db7e654b2b36c00"
+	w001PostclaimHookFixPath          = ".harness/grants/W-001-postclaim-hook-isolation-v4.yaml"
+	w001PostclaimHookFixSig           = ".harness/grants/W-001-postclaim-hook-isolation-v4.yaml.sig"
+	w001PostclaimHookFixNS            = "mars3-w001-postclaim-hook-isolation-v4"
+	w001PostclaimHookFixBase          = "9e8a587f8187c2d385a6c5fa023346405733d7ff"
+	w001PostclaimHookFixTree          = "fb4a0abea8f3e77a92ca86672078d2d68df7a9e0"
+	w001PostclaimHookFixTag           = "mars3/w001-postclaim-reconciliation-v4"
+	w001PostclaimHookFixTagMsg        = "MARS-3 W-001 postclaim reconciliation tree attestation v4"
+	w001PostclaimV3TagObject          = "004fde1244312e088a4397809cb7ab3a81706612"
+	w001PostclaimHookHelperSHA        = "cc8e102d8e4aa26e847f14a6a39522b20f193b6419b147678a01db3eb6bcab21"
+	w001PostclaimHookTestSHA          = "a1be6df7bfddb10ce964471af484b71ecb4399ab840c8062d28696a87662e809"
+	w001PostclaimHookPatchPath        = "internal/authority/bootstrap/beads-v1.2.2-bootstrap-hook-isolation.patch"
+	w001PostclaimHookPatchSHA         = "fc282ebc257fc41c15ab7b8ffdd50a1600f840254cf6e10b6997f9e30a0dc1fc"
+	w001PostclaimHookBinarySHA        = "22042fc0844ab7700417d917c386f2eab4bab5dd6a6404be091cbd5edbe9e154"
+	w001PostclaimPRFixPath            = ".harness/grants/W-001-postclaim-pr-binding-v5.yaml"
+	w001PostclaimPRFixSig             = ".harness/grants/W-001-postclaim-pr-binding-v5.yaml.sig"
+	w001PostclaimPRFixNS              = "mars3-w001-postclaim-pr-binding-v5"
+	w001PostclaimPRFixBase            = "d890a96014f79438d36bde3c8967664163e9d961"
+	w001PostclaimPRFixTree            = "3d3252b0559e664203521af2e85d0d87cdb9fcd1"
+	w001PostclaimPRFixTag             = "mars3/w001-postclaim-reconciliation-v5"
+	w001PostclaimPRFixTagMsg          = "MARS-3 W-001 postclaim reconciliation tree attestation v5"
+	w001PostclaimV4TagObject          = "d50d55bfe49d159979dbee26122319978a7ae612"
+	w001PostclaimActivePR             = 8
+	w001PostclaimChronoFixPath        = ".harness/grants/W-001-postclaim-chronology-correction-v6.yaml"
+	w001PostclaimChronoFixSig         = ".harness/grants/W-001-postclaim-chronology-correction-v6.yaml.sig"
+	w001PostclaimChronoFixNS          = "mars3-w001-postclaim-chronology-correction-v6"
+	w001PostclaimChronoFixBase        = "765a07d3ebe2432227de7ccad65dc9f3b291deba"
+	w001PostclaimChronoFixTree        = "ce8959ecd2e99c5181651fa9f2eca926da971e47"
+	w001PostclaimChronoFixTag         = "mars3/w001-postclaim-reconciliation-v6"
+	w001PostclaimChronoFixTagMsg      = "MARS-3 W-001 postclaim reconciliation tree attestation v6"
+	w001PostclaimV5TagObject          = "31f7de15ef790d795f80de32ca0cf459c192cc5e"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -146,6 +206,10 @@ type W001BootstrapGrant struct {
 	DoltTestImage               string
 	PatchPath                   string
 	PatchSHA256                 string
+	CorrectionPatchPath         string
+	CorrectionPatchSHA256       string
+	HookIsolationPatchPath      string
+	HookIsolationPatchSHA256    string
 	PatchedBinarySHA256         string
 	GoBinarySHA256              string
 	ReviewTag                   string
@@ -1089,6 +1153,694 @@ var w001BootstrapGrantSequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001PostclaimGrantScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001PostclaimReconciliationGrant"},
+	{path: "grant.id", value: "W-001-postclaim-reconciliation"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-26T20:33:58Z"},
+	{path: "grant.expiresAt", value: "2026-08-28T20:33:58Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001PostclaimBase},
+	{path: "grant.baseTree", value: w001PostclaimBaseTree},
+	{path: "grant.workingBranch", value: w001PostclaimBranch},
+	{path: "grant.reviewTag", value: w001PostclaimReviewTag},
+	{path: "grant.reviewTagMessage", value: w001PostclaimReviewTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "reconcile the verified canonical W-001 claim into Git without a lease or implementation authority"},
+	{path: "grant.bead", value: "M3-W001"},
+	{path: "grant.displayId", value: "W-001"},
+	{path: "grant.priorGrant", value: "W-001-bootstrap"},
+	{path: "grant.priorGrantSHA256", value: "37b4b0df773fa6bace2a06af34ff546e12c9e2f42eb8bb5865f1b9405727e34d"},
+	{path: "grant.priorGrantSignatureSHA256", value: "eeba6098de123f4d9d47c33d4349015775591511784d6c29b709ed1d45927e15"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.liveLeaseAsserted", value: "false"},
+	{path: "grant.implementationAllowed", value: "false"},
+	{path: "claim.attemptId", value: "w001-bootstrap-3135f1d1-b0d4-4956-9fc9-1852310bfd77"},
+	{path: "claim.replayReferenceSHA256", value: "321df42aa6cd67c3ae42b687b16927d81fc19b42e124819bd266b84b22c2d1a0"},
+	{path: "claim.executionAuthorizationPayloadSHA256", value: "2a2428537a5e42ed6f69afaa42771b9b404705e5593b554129c6ce45f5aec297"},
+	{path: "claim.executionAuthorizationSignatureSHA256", value: "d7bc5a1c824bde6ee72d755660afccaad569840b2db29971bf3b8b087540ce5c"},
+	{path: "claim.receiptSHA256", value: "04cef4e421a34e0908d392fc794181db3ddb754a134e34599fa41a520c78d126"},
+	{path: "claim.previousDoltCommit", value: "mm6m0b4655k5gpt5eren5cfkgvjtabsm"},
+	{path: "claim.doltCommit", value: "67hmen0cmq0he08n7ujlqpcsmmi94fhb"},
+	{path: "claim.nativeStatus", value: "in_progress"},
+	{path: "claim.lifecycleState", value: "in-progress"},
+	{path: "claim.claimed", value: "true"},
+	{path: "claim.updatedAt", value: "2026-08-26T20:23:37Z"},
+	{path: "claim.metadataSHA256", value: "3a0bbed5ca93acf77d04eedfad6bcaa16a9701f3e6da3f8669eb9928f6d09139"},
+	{path: "claim.labelsSHA256", value: "3e4e77e20ee7a46dd77c4a9884dee51aa9f0fa9f2445099a0cb457d72cb83bbb"},
+	{path: "claim.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "claim.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "claim.issueMutationSequence", value: "1"},
+	{path: "claim.dependencyGraphRevision", value: "1"},
+	{path: "claim.liveLeaseAsserted", value: "false"},
+	{path: "publication.helperFeatureCommit", value: "663d19bf190f9e3bd27edc96ee08acaa6778c853"},
+	{path: "publication.helperFeatureTree", value: w001PostclaimBaseTree},
+	{path: "publication.helperReviewTag", value: w001BootstrapReviewTag},
+	{path: "publication.helperReviewTagObject", value: "6409b5daecb472b415dec60b96b12bfffa3a4cd0"},
+	{path: "publication.helperPullRequest", value: "6"},
+	{path: "publication.helperPullRequestRun", value: "33005091777"},
+	{path: "publication.mergedCommit", value: w001PostclaimBase},
+	{path: "publication.mergedTree", value: w001PostclaimBaseTree},
+	{path: "publication.protectedMainRun", value: "33006386000"},
+	{path: "publication.qaReviewedCommit", value: "663d19bf190f9e3bd27edc96ee08acaa6778c853"},
+	{path: "publication.qaDisposition", value: "accepted"},
+	{path: "publication.securityReviewedCommit", value: "663d19bf190f9e3bd27edc96ee08acaa6778c853"},
+	{path: "publication.securityDisposition", value: "accepted"},
+	{path: "postimage.manifestSHA256", value: "ee37f6262e714aa1f853fe7b81ce9b50a1d299482dde905262e80cbb133d13e6"},
+	{path: "postimage.activePlanSHA256", value: "d5ac48639cd8bd98ce57e1f0f91ddd4c358498eddb45c8255c0ca67ab56abbbc"},
+	{path: "postimage.evidenceSHA256", value: "93dd425ef42e6c929a97d20e08b9d75c339b45303975162cc863dad3764dc1a0"},
+	{path: "postimage.planPhase", value: "delivery"},
+	{path: "postimage.currentBeadState", value: "in-progress"},
+	{path: "postimage.currentBeadClaimed", value: "true"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001PostclaimGrantNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-postclaim-reconciliation.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001PostclaimGrantSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"create-and-verify-this-signed-postclaim-grant",
+		"edit-the-exact-authorized-Git-paths",
+		"bind-the-exact-canonical-claim-receipt-digest-and-bounded-public-summary",
+		"reconcile-the-active-plan-to-delivery-and-W-001-in-progress",
+		"reconcile-the-manifest-to-claimed-in-progress-delivery",
+		"create-pinned-signer-commits-and-one-signed-review-tag",
+		"push-one-review-branch-and-tag-and-open-one-ready-PR",
+		"run-public-gates-and-obtain-independent-QA-and-Security-review",
+		"squash-merge-promptly-with-reviewed-tree-equality",
+	},
+	"grant.authorizedPaths": {
+		w001PostclaimGrantPath,
+		w001PostclaimGrantSignature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-bootstrap-transition.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"canonical-Beads-state-remains-the-work-authority",
+		"claim-receipt-binds-the-signed-execution-authorization-and-accepted-helper",
+		"plan-and-manifest-postimages-exactly-match-the-signed-digests",
+		"every-commit-and-current-change-stays-inside-the-signed-path-set",
+		"every-feature-commit-and-review-tag-use-the-pinned-signer",
+		"reviewed-feature-tree-equals-the-protected-main-squash-tree",
+		"no-live-lease-or-implementation-authority-is-created",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-any-Bead-Dolt-row-dependency-label-comment-or-history",
+		"issue-assert-renew-release-or-revoke-a-live-lease",
+		"edit-gateway-runtime-platform-or-product-implementation",
+		"change-feature-contract-product-decision-goal-or-scenario-schedule",
+		"move-delete-or-reuse-any-existing-review-tag",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+		"credentials-provider-session-customer-data-or-raw-payloads",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001PostclaimCIFixScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001PostclaimCIStabilizationAddendum"},
+	{path: "addendum.id", value: "W-001-postclaim-ci-stabilization-v2"},
+	{path: "addendum.classification", value: "PUBLIC"},
+	{path: "addendum.issuedAt", value: "2026-08-26T20:53:07Z"},
+	{path: "addendum.expiresAt", value: "2026-08-28T20:53:07Z"},
+	{path: "addendum.repository", value: planningGrantRepository},
+	{path: "addendum.baseCommit", value: w001PostclaimCIFixBase},
+	{path: "addendum.baseTree", value: w001PostclaimCIFixBaseTree},
+	{path: "addendum.workingBranch", value: w001PostclaimBranch},
+	{path: "addendum.reviewTag", value: w001PostclaimCIFixReviewTag},
+	{path: "addendum.reviewTagMessage", value: w001PostclaimCIFixTagMessage},
+	{path: "addendum.signerRole", value: "human-bootstrap-authority"},
+	{path: "addendum.coordinator", value: "delivery-orchestrator"},
+	{path: "addendum.failureOwnership", value: "foundation"},
+	{path: "addendum.purpose", value: "isolate repository-local Git fixtures from inherited GitHub runner identity without weakening real checkout admission"},
+	{path: "addendum.priorGrant", value: "W-001-postclaim-reconciliation"},
+	{path: "addendum.priorGrantSHA256", value: "7fb4b9e6aa65661bef80887b95225973e556fe8dbc4cf77fb66aaa0f10da5dfe"},
+	{path: "addendum.priorGrantSignatureSHA256", value: "3afc9d46c8c9ea436246d3bd33c2228e0afc1c1c27ceb6ff44114c761e029edd"},
+	{path: "addendum.priorReviewTag", value: w001PostclaimReviewTag},
+	{path: "addendum.priorReviewTagObject", value: w001PostclaimV1TagObject},
+	{path: "addendum.priorReviewTagTarget", value: w001PostclaimCIFixBase},
+	{path: "addendum.failedRun", value: "33012491197"},
+	{path: "addendum.failedJob", value: "98322099024"},
+	{path: "addendum.failureFingerprint", value: "go-test-fixtures-inherited-github-actions-environment"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001PostclaimCIFixNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-postclaim-ci-stabilization-v2.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001PostclaimCIFixSequences = map[string][]string{
+	"addendum.allowedEffects": {
+		"create-and-verify-this-signed-CI-stabilization-addendum",
+		"clear-GitHub-runner-environment-only-inside-repository-local-Git-fixtures",
+		"add-the-exact-regression-for-the-preserved-CI-failure",
+		"preserve-production-GitHub-checkout-identity-enforcement",
+		"create-pinned-signer-correction-commits-and-one-signed-v2-review-tag",
+		"push-the-existing-review-branch-and-v2-tag-and-rerun-the-ready-PR",
+		"obtain-independent-QA-and-Security-review-before-squash-merge",
+	},
+	"addendum.authorizedPaths": {
+		w001PostclaimCIFixPath,
+		w001PostclaimCIFixSignature,
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"addendum.requiredProperties": {
+		"v1-review-tag-object-and-target-remain-immutable",
+		"v1-failed-run-remains-public-and-unchanged",
+		"fixture-environment-isolation-is-test-only",
+		"real-GitHub-checkout-admission-still-requires-canonical-runner-identity",
+		"every-correction-commit-and-current-change-stays-inside-the-signed-path-set",
+		"every-correction-commit-and-v2-review-tag-use-the-pinned-signer",
+		"reviewed-v2-tree-equals-the-protected-main-squash-tree",
+		"no-Beads-lease-implementation-production-or-policy-effect-is-created",
+	},
+	"addendum.prohibitedEffects": {
+		"move-delete-or-reuse-the-v1-review-tag",
+		"edit-plan-manifest-evidence-feature-or-product-contracts",
+		"mutate-any-Bead-Dolt-row-dependency-label-comment-or-history",
+		"issue-assert-renew-release-or-revoke-a-live-lease",
+		"edit-gateway-runtime-platform-or-product-implementation",
+		"weaken-production-GitHub-runner-event-topology-workflow-or-tag-validation",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+		"credentials-provider-session-customer-data-or-raw-payloads",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001PostclaimSecurityFixScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001PostclaimSecurityCorrectionGrant"},
+	{path: "grant.id", value: "W-001-postclaim-security-correction-v3"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-26T21:21:01Z"},
+	{path: "grant.expiresAt", value: "2026-08-28T21:21:01Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001PostclaimSecurityFixBase},
+	{path: "grant.baseTree", value: w001PostclaimSecurityFixTree},
+	{path: "grant.workingBranch", value: w001PostclaimBranch},
+	{path: "grant.reviewTag", value: w001PostclaimSecurityFixTag},
+	{path: "grant.reviewTagMessage", value: w001PostclaimSecurityFixTagMsg},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "correct the superseded W-001 helper Security disposition and bind effective direct embedded M3 authority without mutating canonical work"},
+	{path: "grant.bead", value: "M3-W001"},
+	{path: "grant.displayId", value: "W-001"},
+	{path: "grant.priorAddendum", value: "W-001-postclaim-ci-stabilization-v2"},
+	{path: "grant.priorAddendumSHA256", value: "526f73a4200fc294bb8cf5ad82bb4e12f6259d1490a8c98316da1ddb44edabef"},
+	{path: "grant.priorAddendumSignatureSHA256", value: "4ad7b094a2328eedd0f24ae671e28a5797026b7bb8f14d89cab4829cc70d244d"},
+	{path: "grant.priorReviewTag", value: w001PostclaimCIFixReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001PostclaimV2TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001PostclaimSecurityFixBase},
+	{path: "grant.successfulRun", value: "33013185662"},
+	{path: "grant.successfulJob", value: "98324496309"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.liveLeaseAsserted", value: "false"},
+	{path: "grant.implementationAllowed", value: "false"},
+	{path: "grant.canonicalWorkMutationAllowed", value: "false"},
+	{path: "finding.helperFeatureCommit", value: "663d19bf190f9e3bd27edc96ee08acaa6778c853"},
+	{path: "finding.helperFeatureTree", value: w001PostclaimBaseTree},
+	{path: "finding.affectedPostclaimHead", value: w001PostclaimSecurityFixBase},
+	{path: "finding.affectedPostclaimTree", value: w001PostclaimSecurityFixTree},
+	{path: "finding.priorSecurityDisposition", value: "accepted"},
+	{path: "finding.currentSecurityDisposition", value: "changes-requested"},
+	{path: "finding.priorSecurityAcceptanceStatus", value: "superseded"},
+	{path: "finding.failureFingerprint", value: "bootstrap-effective-database-selector-splice"},
+	{path: "finding.failureClass", value: "foundation-owned"},
+	{path: "finding.findingScope", value: "helper-admission-and-transaction-authority"},
+	{path: "canonicalEffect.bead", value: "M3-W001"},
+	{path: "canonicalEffect.nativeStatus", value: "in_progress"},
+	{path: "canonicalEffect.lifecycleState", value: "in-progress"},
+	{path: "canonicalEffect.assignee", value: "work-authority-engineer"},
+	{path: "canonicalEffect.updatedAt", value: "2026-08-26T20:23:37Z"},
+	{path: "canonicalEffect.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalEffect.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalEffect.issueMutationSequence", value: "1"},
+	{path: "canonicalEffect.dependencyGraphRevision", value: "1"},
+	{path: "canonicalEffect.claimReceiptSHA256", value: "04cef4e421a34e0908d392fc794181db3ddb754a134e34599fa41a520c78d126"},
+	{path: "canonicalEffect.doltCommit", value: "67hmen0cmq0he08n7ujlqpcsmmi94fhb"},
+	{path: "canonicalEffect.independentlyReadBackFromM3", value: "true"},
+	{path: "canonicalEffect.alternateDatabaseUseObservedInCanonicalEffect", value: "false"},
+	{path: "canonicalEffect.liveLeaseAsserted", value: "false"},
+	{path: "materials.helperLibraryPath", value: "internal/authority/bootstrap/bootstrap.go"},
+	{path: "materials.helperLibrarySHA256", value: w001PostclaimSecurityHelperSHA},
+	{path: "materials.helperTestPath", value: "internal/authority/bootstrap/bootstrap_test.go"},
+	{path: "materials.helperTestSHA256", value: w001PostclaimSecurityTestSHA},
+	{path: "materials.basePatchPath", value: "internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch"},
+	{path: "materials.basePatchSHA256", value: w001PostclaimSecurityBasePatchSHA},
+	{path: "materials.securityPatchPath", value: w001PostclaimSecurityPatchPath},
+	{path: "materials.securityPatchSHA256", value: w001PostclaimSecurityPatchSHA},
+	{path: "materials.patchedBinarySHA256", value: w001PostclaimSecurityBinarySHA},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001PostclaimSecurityFixNS},
+	{path: "integrity.detachedSignature", value: "W-001-postclaim-security-correction-v3.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001PostclaimSecurityFixSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"create-and-verify-this-signed-Security-correction-grant",
+		"record-the-additive-Security-changes-requested-and-supersession-evidence",
+		"reject-or-bind-Beads-selector-files-and-force-effective-direct-embedded-M3",
+		"require-same-transaction-embedded-M3-authority-before-any-bootstrap-read-or-write",
+		"remove-server-transaction-bootstrap-claim-capability",
+		"add-alternate-database-server-backend-and-configuration-race-regressions",
+		"edit-only-the-exact-authorized-Git-paths",
+		"preserve-the-observed-canonical-M3-postimage-as-effect-evidence-not-helper-acceptance",
+		"create-pinned-signer-correction-commits-and-one-signed-v3-review-tag",
+		"push-the-existing-review-branch-and-v3-tag-and-rerun-the-ready-PR",
+		"obtain-fresh-independent-QA-and-Security-review-before-squash-merge",
+	},
+	"grant.authorizedPaths": {
+		w001PostclaimSecurityFixPath,
+		w001PostclaimSecurityFixSig,
+		"docs/evidence/W-001-validation.md",
+		"internal/authority/bootstrap/bootstrap.go",
+		"internal/authority/bootstrap/bootstrap_test.go",
+		"internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch",
+		w001PostclaimSecurityPatchPath,
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"prior-v1-and-v2-grants-signatures-tags-runs-and-history-remain-immutable",
+		"prior-helper-Security-acceptance-is-explicitly-superseded",
+		"actual-canonical-M3-postimage-remains-valid-effect-evidence-only",
+		"helper-selection-and-transaction-authority-both-require-direct-embedded-M3",
+		"selector-file-or-effective-database-change-fails-before-authority-state-mutation",
+		"server-backed-transactions-cannot-implement-bootstrap-claim-authority",
+		"every-correction-commit-and-current-change-stays-inside-the-signed-path-set",
+		"every-correction-commit-and-v3-review-tag-use-the-pinned-signer",
+		"reviewed-v3-tree-equals-the-protected-main-squash-tree",
+		"no-Beads-lease-implementation-production-or-policy-effect-is-created",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-any-Bead-Dolt-row-dependency-label-comment-or-history",
+		"execute-or-replay-the-canonical-W-001-bootstrap-claim",
+		"issue-assert-renew-release-or-revoke-a-live-lease",
+		"begin-gateway-runtime-platform-or-product-implementation",
+		"edit-plan-manifest-feature-product-goal-or-scenario-contracts",
+		"move-delete-or-reuse-any-existing-review-tag",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+		"credentials-provider-session-customer-data-or-raw-payloads",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001PostclaimHookFixScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001PostclaimHookIsolationGrant"},
+	{path: "grant.id", value: "W-001-postclaim-hook-isolation-v4"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-26T23:45:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-28T23:45:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001PostclaimHookFixBase},
+	{path: "grant.baseTree", value: w001PostclaimHookFixTree},
+	{path: "grant.workingBranch", value: w001PostclaimBranch},
+	{path: "grant.reviewTag", value: w001PostclaimHookFixTag},
+	{path: "grant.reviewTagMessage", value: w001PostclaimHookFixTagMsg},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "isolate the one-shot W-001 bootstrap helper from workspace hooks and last-merged local configuration without mutating canonical work"},
+	{path: "grant.bead", value: "M3-W001"},
+	{path: "grant.displayId", value: "W-001"},
+	{path: "grant.priorGrant", value: "W-001-postclaim-security-correction-v3"},
+	{path: "grant.priorGrantSHA256", value: "6ce07a2b1b42b5d3fb3a31b1ec6c71cb80851bd732e52fade781d7c88b0e6caa"},
+	{path: "grant.priorGrantSignatureSHA256", value: "df9dc6d62b70b40e5b0000aa10abf48afcf53fcfed581311f2bf0c61d532dfcf"},
+	{path: "grant.priorReviewTag", value: w001PostclaimSecurityFixTag},
+	{path: "grant.priorReviewTagObject", value: w001PostclaimV3TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001PostclaimHookFixBase},
+	{path: "grant.successfulRun", value: "33018302554"},
+	{path: "grant.successfulJob", value: "98342126652"},
+	{path: "grant.qaDisposition", value: "accepted"},
+	{path: "grant.securityDisposition", value: "changes-requested"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.liveLeaseAsserted", value: "false"},
+	{path: "grant.implementationAllowed", value: "false"},
+	{path: "grant.canonicalWorkMutationAllowed", value: "false"},
+	{path: "finding.affectedPostclaimHead", value: w001PostclaimHookFixBase},
+	{path: "finding.affectedPostclaimTree", value: w001PostclaimHookFixTree},
+	{path: "finding.qaDisposition", value: "accepted"},
+	{path: "finding.securityDisposition", value: "changes-requested"},
+	{path: "finding.failureFingerprint", value: "bootstrap-workspace-hook-postcommit-effect"},
+	{path: "finding.failureClass", value: "foundation-owned"},
+	{path: "finding.findingScope", value: "helper-hook-and-local-configuration-isolation"},
+	{path: "finding.canonicalWorkspaceAffected", value: "false"},
+	{path: "canonicalEffect.bead", value: "M3-W001"},
+	{path: "canonicalEffect.nativeStatus", value: "in_progress"},
+	{path: "canonicalEffect.lifecycleState", value: "in-progress"},
+	{path: "canonicalEffect.assignee", value: "work-authority-engineer"},
+	{path: "canonicalEffect.updatedAt", value: "2026-08-26T20:23:37Z"},
+	{path: "canonicalEffect.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalEffect.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalEffect.issueMutationSequence", value: "1"},
+	{path: "canonicalEffect.dependencyGraphRevision", value: "1"},
+	{path: "canonicalEffect.claimReceiptSHA256", value: "04cef4e421a34e0908d392fc794181db3ddb754a134e34599fa41a520c78d126"},
+	{path: "canonicalEffect.doltCommit", value: "67hmen0cmq0he08n7ujlqpcsmmi94fhb"},
+	{path: "canonicalEffect.independentlyReadBackFromM3", value: "true"},
+	{path: "canonicalEffect.workspaceHookUseObservedInCanonicalEffect", value: "false"},
+	{path: "canonicalEffect.liveLeaseAsserted", value: "false"},
+	{path: "materials.validationEvidencePath", value: "docs/evidence/W-001-validation.md"},
+	{path: "materials.validationEvidenceSHA256", value: "da9533a215fa2f255c242f369cbc0e9818f0c89c7f18281328633d68403aea0f"},
+	{path: "materials.transitionEvidencePath", value: "docs/evidence/W-001-bootstrap-transition.md"},
+	{path: "materials.transitionEvidenceSHA256", value: "ae4fdd2e0c0d03aee305be8cd6b0884cd6b98b597fd865f90c644e47d0130edc"},
+	{path: "materials.helperLibraryPath", value: "internal/authority/bootstrap/bootstrap.go"},
+	{path: "materials.helperLibrarySHA256", value: w001PostclaimHookHelperSHA},
+	{path: "materials.helperTestPath", value: "internal/authority/bootstrap/bootstrap_test.go"},
+	{path: "materials.helperTestSHA256", value: w001PostclaimHookTestSHA},
+	{path: "materials.basePatchPath", value: "internal/authority/bootstrap/beads-v1.2.2-atomic-claim.patch"},
+	{path: "materials.basePatchSHA256", value: w001PostclaimSecurityBasePatchSHA},
+	{path: "materials.securityPatchPath", value: w001PostclaimSecurityPatchPath},
+	{path: "materials.securityPatchSHA256", value: w001PostclaimSecurityPatchSHA},
+	{path: "materials.hookIsolationPatchPath", value: w001PostclaimHookPatchPath},
+	{path: "materials.hookIsolationPatchSHA256", value: w001PostclaimHookPatchSHA},
+	{path: "materials.patchedBinarySHA256", value: w001PostclaimHookBinarySHA},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001PostclaimHookFixNS},
+	{path: "integrity.detachedSignature", value: "W-001-postclaim-hook-isolation-v4.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001PostclaimHookFixSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"create-and-verify-this-signed-hook-isolation-correction-grant",
+		"preserve-v3-QA-acceptance-and-Security-changes-requested-as-additive-evidence",
+		"reject-config-local-selector-files-at-every-bootstrap-boundary",
+		"force-workspace-hooks-disabled-for-every-helper-Beads-command",
+		"deny-bootstrap-authority-through-the-hook-transaction-decorator",
+		"add-local-config-and-workspace-hook-regressions",
+		"correct-the-stale-public-bootstrap-status-without-rewriting-history",
+		"validate-historical-v3-bytes-from-the-immutable-signed-v3-tree-and-current-bytes-from-v4",
+		"edit-only-the-exact-authorized-Git-paths",
+		"preserve-the-observed-canonical-M3-postimage-as-effect-evidence-not-helper-acceptance",
+		"create-pinned-signer-correction-commits-and-one-signed-v4-review-tag",
+		"push-the-existing-review-branch-and-v4-tag-and-rerun-the-ready-PR",
+		"obtain-fresh-independent-QA-and-Security-review-before-squash-merge",
+	},
+	"grant.authorizedPaths": {
+		w001PostclaimHookFixPath,
+		w001PostclaimHookFixSig,
+		"docs/evidence/W-001-validation.md",
+		"docs/evidence/W-001-bootstrap-transition.md",
+		"internal/authority/bootstrap/bootstrap.go",
+		"internal/authority/bootstrap/bootstrap_test.go",
+		w001PostclaimHookPatchPath,
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"prior-v1-through-v3-grants-signatures-tags-runs-and-history-remain-immutable",
+		"v3-QA-acceptance-and-Security-changes-requested-remain-distinct-truthful-records",
+		"actual-canonical-M3-postimage-remains-valid-effect-evidence-only",
+		"config-local-selector-presence-fails-at-initial-fresh-effect-and-transaction-boundaries",
+		"every-helper-Beads-command-forces-hooks-disabled",
+		"hook-decorated-transactions-cannot-implement-bootstrap-claim-authority",
+		"hook-enabled-adversarial-fixture-fails-before-read-write-or-sentinel-effect",
+		"historical-and-current-integrity-bindings-are-both-required-and-neither-substitutes-for-the-other",
+		"every-correction-commit-and-current-change-stays-inside-the-signed-path-set",
+		"every-correction-commit-and-v4-review-tag-use-the-pinned-signer",
+		"reviewed-v4-tree-equals-the-protected-main-squash-tree",
+		"no-Beads-lease-implementation-production-or-policy-effect-is-created",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-any-Bead-Dolt-row-dependency-label-comment-or-history",
+		"execute-or-replay-the-canonical-W-001-bootstrap-claim",
+		"execute-any-workspace-hook-or-plugin",
+		"issue-assert-renew-release-or-revoke-a-live-lease",
+		"begin-gateway-runtime-platform-or-product-implementation",
+		"edit-plan-manifest-feature-product-goal-or-scenario-contracts",
+		"move-delete-or-reuse-any-existing-review-tag",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+		"credentials-provider-session-customer-data-or-raw-payloads",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001PostclaimPRFixScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001PostclaimPRBindingGrant"},
+	{path: "grant.id", value: "W-001-postclaim-pr-binding-v5"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T00:00:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-29T00:00:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001PostclaimPRFixBase},
+	{path: "grant.baseTree", value: w001PostclaimPRFixTree},
+	{path: "grant.workingBranch", value: w001PostclaimBranch},
+	{path: "grant.reviewTag", value: w001PostclaimPRFixTag},
+	{path: "grant.reviewTagMessage", value: w001PostclaimPRFixTagMsg},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "bind the active PR 8 publication vehicle after PR 7 closed without merging"},
+	{path: "grant.bead", value: "M3-W001"},
+	{path: "grant.displayId", value: "W-001"},
+	{path: "grant.priorGrant", value: "W-001-postclaim-hook-isolation-v4"},
+	{path: "grant.priorGrantSHA256", value: "f0c9d5cd782350bdfefae0070b756eca1f481350cb585588a2774f06c0d6be72"},
+	{path: "grant.priorGrantSignatureSHA256", value: "da013f87d13e3572ef3b2c4883ec93fdcc71f4189d6854d63aee91908d70a6f9"},
+	{path: "grant.priorReviewTag", value: w001PostclaimHookFixTag},
+	{path: "grant.priorReviewTagObject", value: w001PostclaimV4TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001PostclaimPRFixBase},
+	{path: "grant.successfulRun", value: "33022606025"},
+	{path: "grant.successfulJob", value: "98356474178"},
+	{path: "grant.activePullRequest", value: "8"},
+	{path: "grant.closedPullRequest", value: "7"},
+	{path: "grant.qaDisposition", value: "changes-requested"},
+	{path: "grant.securityDisposition", value: "changes-requested"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.liveLeaseAsserted", value: "false"},
+	{path: "grant.implementationAllowed", value: "false"},
+	{path: "grant.canonicalWorkMutationAllowed", value: "false"},
+	{path: "finding.affectedPostclaimHead", value: w001PostclaimPRFixBase},
+	{path: "finding.affectedPostclaimTree", value: w001PostclaimPRFixTree},
+	{path: "finding.qaDisposition", value: "changes-requested"},
+	{path: "finding.securityDisposition", value: "changes-requested"},
+	{path: "finding.failureFingerprint", value: "stale-publication-vehicle-binding"},
+	{path: "finding.failureClass", value: "foundation-owned"},
+	{path: "finding.findingScope", value: "public-evidence-publication-identity"},
+	{path: "finding.canonicalWorkspaceAffected", value: "false"},
+	{path: "publication.repository", value: planningGrantRepository},
+	{path: "publication.baseCommit", value: w001PostclaimBase},
+	{path: "publication.closedPullRequest", value: "7"},
+	{path: "publication.closedPullRequestMerged", value: "false"},
+	{path: "publication.activePullRequest", value: "8"},
+	{path: "publication.activePullRequestHead", value: w001PostclaimPRFixBase},
+	{path: "publication.activePullRequestTree", value: w001PostclaimPRFixTree},
+	{path: "publication.successfulRun", value: "33022606025"},
+	{path: "publication.successfulJob", value: "98356474178"},
+	{path: "materials.validationEvidencePath", value: "docs/evidence/W-001-validation.md"},
+	{path: "materials.validationEvidenceSHA256", value: "630a4f450701efaf40a7afce59e69c6722a9551a71e755df22b5b924016702c4"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001PostclaimPRFixNS},
+	{path: "integrity.detachedSignature", value: "W-001-postclaim-pr-binding-v5.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001PostclaimPRFixSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"create-and-verify-this-signed-publication-binding-grant",
+		"preserve-v1-through-v4-grants-signatures-tags-runs-and-review-history",
+		"record-PR-7-as-closed-unmerged-historical-evidence",
+		"bind-PR-8-as-the-sole-active-publication-vehicle",
+		"bind-the-successful-v4-exact-head-pull-request-run-and-job",
+		"edit-only-the-exact-authorized-Git-paths",
+		"create-pinned-signer-correction-commits-and-one-signed-v5-review-tag",
+		"push-the-existing-review-branch-and-v5-tag-and-rerun-PR-8",
+		"obtain-fresh-independent-QA-and-Security-review-before-squash-merge",
+	},
+	"grant.authorizedPaths": {
+		w001PostclaimPRFixPath,
+		w001PostclaimPRFixSig,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v4-head-tree-grant-signature-tag-and-successful-run-remain-immutable",
+		"PR-7-remains-closed-and-unmerged-historical-evidence",
+		"PR-8-is-the-only-current-review-and-merge-vehicle",
+		"historical-v3-and-v4-material-bindings-remain-distinct-and-mandatory",
+		"every-correction-commit-and-current-change-stays-inside-the-signed-path-set",
+		"every-correction-commit-and-v5-review-tag-use-the-pinned-signer",
+		"reviewed-v5-tree-equals-the-protected-main-squash-tree",
+		"no-Beads-lease-implementation-production-or-policy-effect-is-created",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-any-Bead-Dolt-row-dependency-label-comment-or-history",
+		"execute-or-replay-the-canonical-W-001-bootstrap-claim",
+		"execute-any-workspace-hook-or-plugin",
+		"issue-assert-renew-release-or-revoke-a-live-lease",
+		"begin-gateway-runtime-platform-or-product-implementation",
+		"edit-plan-manifest-feature-product-goal-or-scenario-contracts",
+		"reopen-merge-or-mutate-PR-7",
+		"move-delete-or-reuse-any-existing-review-tag",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+		"credentials-provider-session-customer-data-or-raw-payloads",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001PostclaimChronoFixScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001PostclaimChronologyCorrectionGrant"},
+	{path: "grant.id", value: "W-001-postclaim-chronology-correction-v6"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-26T23:47:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-28T23:47:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001PostclaimChronoFixBase},
+	{path: "grant.baseTree", value: w001PostclaimChronoFixTree},
+	{path: "grant.workingBranch", value: w001PostclaimBranch},
+	{path: "grant.reviewTag", value: w001PostclaimChronoFixTag},
+	{path: "grant.reviewTagMessage", value: w001PostclaimChronoFixTagMsg},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "compensate for v4 and v5 public Git effects that preceded their signed grant effective times"},
+	{path: "grant.bead", value: "M3-W001"},
+	{path: "grant.displayId", value: "W-001"},
+	{path: "grant.priorGrant", value: "W-001-postclaim-pr-binding-v5"},
+	{path: "grant.priorGrantSHA256", value: "61b5ef56fac5916e6bd65ce884ca1080e904058688ccdc646b0f0f5502303654"},
+	{path: "grant.priorGrantSignatureSHA256", value: "c040681faf0dbe2af3d231dd2735f67b12c2f166d8e137a8175cfd4ef2af362c"},
+	{path: "grant.priorReviewTag", value: w001PostclaimPRFixTag},
+	{path: "grant.priorReviewTagObject", value: w001PostclaimV5TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001PostclaimChronoFixBase},
+	{path: "grant.activePullRequest", value: "8"},
+	{path: "grant.qaDisposition", value: "accepted"},
+	{path: "grant.securityDisposition", value: "changes-requested"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.liveLeaseAsserted", value: "false"},
+	{path: "grant.implementationAllowed", value: "false"},
+	{path: "grant.canonicalWorkMutationAllowed", value: "false"},
+	{path: "grant.retrospectiveAuthorizationAsserted", value: "false"},
+	{path: "finding.affectedPostclaimHeads", value: "d890a96014f79438d36bde3c8967664163e9d961,765a07d3ebe2432227de7ccad65dc9f3b291deba"},
+	{path: "finding.failureFingerprint", value: "grant-effective-after-governed-effects"},
+	{path: "finding.failureClass", value: "foundation-owned"},
+	{path: "finding.findingScope", value: "public-Git-authority-chronology"},
+	{path: "finding.canonicalWorkspaceAffected", value: "false"},
+	{path: "finding.retrospectiveAuthorizationAsserted", value: "false"},
+	{path: "chronology.v4IssuedAt", value: "2026-08-26T23:45:00Z"},
+	{path: "chronology.v4CommitAt", value: "2026-08-26T22:59:53Z"},
+	{path: "chronology.v4TagAt", value: "2026-08-26T23:00:29Z"},
+	{path: "chronology.v4RunStartedAt", value: "2026-08-26T23:15:21Z"},
+	{path: "chronology.v5IssuedAt", value: "2026-08-27T00:00:00Z"},
+	{path: "chronology.v5CommitAt", value: "2026-08-26T23:38:40Z"},
+	{path: "chronology.v5TagAt", value: "2026-08-26T23:38:54Z"},
+	{path: "chronology.v5RunStartedAt", value: "2026-08-26T23:40:36Z"},
+	{path: "chronology.v4EffectsAuthorizedByV4", value: "false"},
+	{path: "chronology.v5EffectsAuthorizedByV5", value: "false"},
+	{path: "chronology.v6CompensationRequired", value: "true"},
+	{path: "publication.repository", value: planningGrantRepository},
+	{path: "publication.baseCommit", value: w001PostclaimBase},
+	{path: "publication.closedPullRequest", value: "7"},
+	{path: "publication.activePullRequest", value: "8"},
+	{path: "publication.priorRun", value: "33024220053"},
+	{path: "publication.priorJob", value: "98361636648"},
+	{path: "materials.validationEvidencePath", value: "docs/evidence/W-001-validation.md"},
+	{path: "materials.validationEvidenceSHA256", value: "8cf26301222f85537f29b3c8e70ac476c3b6819b91c19366f09b9d199e98fd13"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001PostclaimChronoFixNS},
+	{path: "integrity.detachedSignature", value: "W-001-postclaim-chronology-correction-v6.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001PostclaimChronoFixSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"create-and-verify-this-already-effective-chronology-correction-grant",
+		"preserve-v1-through-v5-grants-signatures-tags-runs-and-review-history",
+		"classify-v4-and-v5-pre-effective-publication-effects-as-foundation-owned-incidents",
+		"preserve-v1-through-v3-as-chronologically-valid-authority-history",
+		"compensate-by-republishing-the-complete-reviewed-tree-under-v6",
+		"bind-PR-8-as-the-sole-active-publication-vehicle",
+		"edit-only-the-exact-authorized-Git-paths",
+		"create-pinned-signer-correction-commits-and-one-signed-v6-review-tag",
+		"push-the-existing-review-branch-and-v6-tag-and-rerun-PR-8",
+		"obtain-fresh-independent-QA-and-Security-review-before-squash-merge",
+	},
+	"grant.authorizedPaths": {
+		w001PostclaimChronoFixPath,
+		w001PostclaimChronoFixSig,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v1-through-v5-heads-trees-grants-signatures-tags-runs-and-reviews-remain-immutable",
+		"v4-and-v5-pre-effective-effects-remain-explicitly-not-retroactively-authorized",
+		"v6-issuedAt-is-no-later-than-every-v6-governed-commit-and-tag-effect",
+		"PR-7-remains-closed-and-unmerged-historical-evidence",
+		"PR-8-is-the-only-current-review-and-merge-vehicle",
+		"every-correction-commit-and-current-change-stays-inside-the-signed-path-set",
+		"every-correction-commit-and-v6-review-tag-use-the-pinned-signer",
+		"reviewed-v6-tree-equals-the-protected-main-squash-tree",
+		"no-Beads-lease-implementation-production-or-policy-effect-is-created",
+	},
+	"grant.prohibitedEffects": {
+		"retroactively-authorize-or-relabel-v4-or-v5-effects",
+		"mutate-any-Bead-Dolt-row-dependency-label-comment-or-history",
+		"execute-or-replay-the-canonical-W-001-bootstrap-claim",
+		"execute-any-workspace-hook-or-plugin",
+		"issue-assert-renew-release-or-revoke-a-live-lease",
+		"begin-gateway-runtime-platform-or-product-implementation",
+		"edit-plan-manifest-feature-product-goal-or-scenario-contracts",
+		"reopen-merge-or-mutate-PR-7",
+		"move-delete-or-reuse-any-existing-review-tag",
+		"mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+		"credentials-provider-session-customer-data-or-raw-payloads",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -1619,6 +2371,18 @@ func checkW001BootstrapGrant(root string, findings *[]Finding) {
 		}
 	}
 
+	securityCorrectionActive := false
+	if _, stateErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimSecurityFixPath))); stateErr == nil {
+		securityCorrectionActive = true
+	} else if !os.IsNotExist(stateErr) {
+		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_state", "postclaim Security-correction state cannot be established")
+	}
+	hookCorrectionActive := false
+	if _, stateErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); stateErr == nil {
+		hookCorrectionActive = true
+	} else if !os.IsNotExist(stateErr) {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_state", "postclaim hook-isolation state cannot be established")
+	}
 	for _, binding := range []struct {
 		pathField string
 		hashField string
@@ -1630,6 +2394,11 @@ func checkW001BootstrapGrant(root string, findings *[]Finding) {
 	} {
 		path := scalarValue(document, binding.pathField)
 		expectedDigest := scalarValue(document, binding.hashField)
+		if hookCorrectionActive && binding.pathField == "toolchain.helperLibraryPath" {
+			expectedDigest = w001PostclaimHookHelperSHA
+		} else if securityCorrectionActive && binding.pathField == "toolchain.helperLibraryPath" {
+			expectedDigest = w001PostclaimSecurityHelperSHA
+		}
 		content, err := readRepoFile(root, path)
 		if err != nil || !sha256Pattern.MatchString(expectedDigest) || fileSHA256(content) != expectedDigest {
 			addFinding(findings, path, binding.code, "bootstrap helper material must match its exact signed SHA-256")
@@ -1651,6 +2420,614 @@ func checkW001BootstrapGrant(root string, findings *[]Finding) {
 			addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_work_version", "postimage metadata must carry the exact bootstrap WorkVersion")
 		}
 	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimGrantPath))); err == nil {
+		checkW001PostclaimGrant(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_state", "W-001 postclaim reconciliation state cannot be established")
+	}
+}
+
+func checkW001PostclaimGrant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001PostclaimGrantPath)
+	if err != nil {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_missing", "signed W-001 postclaim reconciliation grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001PostclaimGrantScalars, w001PostclaimGrantSequences,
+		[]string{"grant", "claim", "publication", "postimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_schema", "%s", message)
+	}
+	for _, expected := range w001PostclaimGrantScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_value", "%s does not match the signed postclaim contract", expected.path)
+		}
+	}
+	for path, expected := range w001PostclaimGrantSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_sequence", "%s must equal the exact ordered postclaim contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "claim", "publication", "postimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_expiry", "postclaim grant must use one RFC3339 interval no longer than 72 hours")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001PostclaimGrantSignature)
+	if signatureErr != nil {
+		addFinding(findings, w001PostclaimGrantSignature, "public.w001_postclaim_signature_missing", "detached postclaim reconciliation signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_postclaim_key", "postclaim reconciliation must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001PostclaimGrantNamespace); err != nil {
+			addFinding(findings, w001PostclaimGrantSignature, "public.w001_postclaim_signature", "%v", err)
+		}
+	}
+
+	for _, binding := range []struct {
+		path    string
+		digest  string
+		code    string
+		message string
+	}{
+		{w001BootstrapGrantPath, scalarValue(document, "grant.priorGrantSHA256"), "public.w001_postclaim_prior_grant", "prior bootstrap grant"},
+		{w001BootstrapGrantSignature, scalarValue(document, "grant.priorGrantSignatureSHA256"), "public.w001_postclaim_prior_grant", "prior bootstrap signature"},
+		{".harness/manifest.yaml", scalarValue(document, "postimage.manifestSHA256"), "public.w001_postclaim_postimage", "manifest postimage"},
+		{canonicalActivePlan, scalarValue(document, "postimage.activePlanSHA256"), "public.w001_postclaim_postimage", "active-plan postimage"},
+		{"docs/evidence/W-001-bootstrap-transition.md", scalarValue(document, "postimage.evidenceSHA256"), "public.w001_postclaim_postimage", "claim-evidence postimage"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		// Additive successor grants never rewrite historical truth. Once v4 is
+		// present, validate the v1 evidence bytes from the exact signed v3 Git
+		// object while v4 independently validates the current evidence bytes.
+		if binding.path == "docs/evidence/W-001-bootstrap-transition.md" {
+			if _, successorErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); successorErr == nil {
+				content, readErr = planningGrantGitOutput(root, "show", w001PostclaimHookFixBase+":"+binding.path)
+			}
+		}
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, binding.code, "%s must match its exact signed SHA-256", binding.message)
+		}
+	}
+
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-bootstrap-transition.md")
+	receiptDigest, receiptErr := extractW001ClaimReceiptDigest(evidence)
+	if evidenceErr != nil || receiptErr != nil || receiptDigest != scalarValue(document, "claim.receiptSHA256") {
+		addFinding(findings, "docs/evidence/W-001-bootstrap-transition.md", "public.w001_postclaim_receipt", "canonical claim receipt must be bound by one exact public SHA-256 reference")
+	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimCIFixPath))); err == nil {
+		checkW001PostclaimCIFixAddendum(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_state", "postclaim CI-stabilization state cannot be established")
+	}
+}
+
+func checkW001PostclaimCIFixAddendum(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001PostclaimCIFixPath)
+	if err != nil {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_missing", "signed postclaim CI-stabilization addendum is required")
+		return
+	}
+	document := parseStrictGrant(data, w001PostclaimCIFixScalars, w001PostclaimCIFixSequences,
+		[]string{"addendum", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_schema", "%s", message)
+	}
+	for _, expected := range w001PostclaimCIFixScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_value", "%s does not match the signed CI-stabilization contract", expected.path)
+		}
+	}
+	for path, expected := range w001PostclaimCIFixSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_sequence", "%s must equal the exact ordered CI-stabilization contract", path)
+		}
+	}
+	for _, section := range []string{"addendum", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "addendum.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "addendum.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_expiry", "CI-stabilization addendum must use one RFC3339 interval no longer than 72 hours")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001PostclaimCIFixSignature)
+	if signatureErr != nil {
+		addFinding(findings, w001PostclaimCIFixSignature, "public.w001_postclaim_ci_signature_missing", "detached CI-stabilization signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_postclaim_ci_key", "CI stabilization must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001PostclaimCIFixNamespace); err != nil {
+			addFinding(findings, w001PostclaimCIFixSignature, "public.w001_postclaim_ci_signature", "%v", err)
+		}
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001PostclaimGrantPath, scalarValue(document, "addendum.priorGrantSHA256")},
+		{w001PostclaimGrantSignature, scalarValue(document, "addendum.priorGrantSignatureSHA256")},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		// Preserve v5's evidence proof against the exact signed v5 tree when
+		// the chronology successor corrects the current public record.
+		if binding.path == "docs/evidence/W-001-validation.md" {
+			if _, successorErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimChronoFixPath))); successorErr == nil {
+				content, readErr = planningGrantGitOutput(root, "show", w001PostclaimChronoFixBase+":"+binding.path)
+			}
+		}
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_postclaim_ci_prior_grant", "prior postclaim grant material must match its exact signed SHA-256")
+		}
+	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimSecurityFixPath))); err == nil {
+		checkW001PostclaimSecurityFix(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_state", "postclaim Security-correction state cannot be established")
+	}
+}
+
+func checkW001PostclaimSecurityFix(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001PostclaimSecurityFixPath)
+	if err != nil {
+		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_missing", "signed postclaim Security-correction grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001PostclaimSecurityFixScalars, w001PostclaimSecurityFixSequences,
+		[]string{"grant", "finding", "canonicalEffect", "materials", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_schema", "%s", message)
+	}
+	for _, expected := range w001PostclaimSecurityFixScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_value", "%s does not match the signed Security-correction contract", expected.path)
+		}
+	}
+	for path, expected := range w001PostclaimSecurityFixSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_sequence", "%s must equal the exact ordered Security-correction contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "finding", "canonicalEffect", "materials", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_expiry", "Security-correction grant must use one RFC3339 interval no longer than 72 hours")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001PostclaimSecurityFixSig)
+	if signatureErr != nil {
+		addFinding(findings, w001PostclaimSecurityFixSig, "public.w001_postclaim_security_signature_missing", "detached Security-correction signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_postclaim_security_key", "Security correction must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001PostclaimSecurityFixNS); err != nil {
+			addFinding(findings, w001PostclaimSecurityFixSig, "public.w001_postclaim_security_signature", "%v", err)
+		}
+	}
+
+	for _, binding := range []struct {
+		path   string
+		digest string
+		code   string
+	}{
+		{w001PostclaimCIFixPath, scalarValue(document, "grant.priorAddendumSHA256"), "public.w001_postclaim_security_prior_addendum"},
+		{w001PostclaimCIFixSignature, scalarValue(document, "grant.priorAddendumSignatureSHA256"), "public.w001_postclaim_security_prior_addendum"},
+		{scalarValue(document, "materials.helperLibraryPath"), scalarValue(document, "materials.helperLibrarySHA256"), "public.w001_postclaim_security_material"},
+		{scalarValue(document, "materials.helperTestPath"), scalarValue(document, "materials.helperTestSHA256"), "public.w001_postclaim_security_material"},
+		{scalarValue(document, "materials.basePatchPath"), scalarValue(document, "materials.basePatchSHA256"), "public.w001_postclaim_security_material"},
+		{scalarValue(document, "materials.securityPatchPath"), scalarValue(document, "materials.securityPatchSHA256"), "public.w001_postclaim_security_material"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		// Preserve the v3 material proof against its exact signed commit. The v4
+		// validator separately binds the successor helper and test bytes.
+		if binding.path == "internal/authority/bootstrap/bootstrap.go" || binding.path == "internal/authority/bootstrap/bootstrap_test.go" {
+			if _, successorErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); successorErr == nil {
+				content, readErr = planningGrantGitOutput(root, "show", w001PostclaimHookFixBase+":"+binding.path)
+			}
+		}
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, binding.code, "Security-correction material must match its exact signed SHA-256")
+		}
+	}
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	if evidenceErr != nil || !bytes.Contains(evidence, []byte("bootstrap-effective-database-selector-splice")) ||
+		!bytes.Contains(evidence, []byte("**Current disposition:** changes-requested")) ||
+		!bytes.Contains(evidence, []byte("earlier Security acceptance")) || !bytes.Contains(evidence, []byte("is superseded")) {
+		addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_postclaim_security_evidence", "Security correction evidence must preserve the exact additive supersession and finding fingerprint")
+	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); err == nil {
+		checkW001PostclaimHookFix(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_state", "postclaim hook-isolation state cannot be established")
+	}
+}
+
+func checkW001PostclaimHookFix(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001PostclaimHookFixPath)
+	if err != nil {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_missing", "signed postclaim hook-isolation grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001PostclaimHookFixScalars, w001PostclaimHookFixSequences,
+		[]string{"grant", "finding", "canonicalEffect", "materials", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_schema", "%s", message)
+	}
+	for _, expected := range w001PostclaimHookFixScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_value", "%s does not match the signed hook-isolation contract", expected.path)
+		}
+	}
+	for path, expected := range w001PostclaimHookFixSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_sequence", "%s must equal the exact ordered hook-isolation contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "finding", "canonicalEffect", "materials", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_expiry", "hook-isolation grant must use one RFC3339 interval no longer than 72 hours")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001PostclaimHookFixSig)
+	if signatureErr != nil {
+		addFinding(findings, w001PostclaimHookFixSig, "public.w001_postclaim_hook_signature_missing", "detached hook-isolation signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_postclaim_hook_key", "hook-isolation correction must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001PostclaimHookFixNS); err != nil {
+			addFinding(findings, w001PostclaimHookFixSig, "public.w001_postclaim_hook_signature", "%v", err)
+		}
+	}
+
+	for _, binding := range []struct {
+		path   string
+		digest string
+		code   string
+	}{
+		{w001PostclaimSecurityFixPath, scalarValue(document, "grant.priorGrantSHA256"), "public.w001_postclaim_hook_prior_grant"},
+		{w001PostclaimSecurityFixSig, scalarValue(document, "grant.priorGrantSignatureSHA256"), "public.w001_postclaim_hook_prior_grant"},
+		{scalarValue(document, "materials.validationEvidencePath"), scalarValue(document, "materials.validationEvidenceSHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.transitionEvidencePath"), scalarValue(document, "materials.transitionEvidenceSHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.helperLibraryPath"), scalarValue(document, "materials.helperLibrarySHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.helperTestPath"), scalarValue(document, "materials.helperTestSHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.basePatchPath"), scalarValue(document, "materials.basePatchSHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.securityPatchPath"), scalarValue(document, "materials.securityPatchSHA256"), "public.w001_postclaim_hook_material"},
+		{scalarValue(document, "materials.hookIsolationPatchPath"), scalarValue(document, "materials.hookIsolationPatchSHA256"), "public.w001_postclaim_hook_material"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		// A publication-binding successor may correct only the current evidence
+		// identity. Keep v4's material proof bound to the exact signed v4 tree.
+		if binding.path == "docs/evidence/W-001-validation.md" {
+			if _, successorErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimPRFixPath))); successorErr == nil {
+				content, readErr = planningGrantGitOutput(root, "show", w001PostclaimPRFixBase+":"+binding.path)
+			}
+		}
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, binding.code, "hook-isolation material must match its exact signed SHA-256")
+		}
+	}
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	transition, transitionErr := readRepoFile(root, "docs/evidence/W-001-bootstrap-transition.md")
+	if evidenceErr != nil || !bytes.Contains(evidence, []byte("bootstrap-workspace-hook-postcommit-effect")) ||
+		!bytes.Contains(evidence, []byte("## v3 Security disposition")) ||
+		!bytes.Contains(evidence, []byte("**Current disposition:** changes-requested")) ||
+		transitionErr != nil || !bytes.Contains(transition, []byte("Canonical claim verified and reconciled; no live lease or implementation capability exists")) {
+		addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_postclaim_hook_evidence", "hook-isolation evidence must preserve the v3 disposition, exact finding fingerprint, and truthful canonical status")
+	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimPRFixPath))); err == nil {
+		checkW001PostclaimPRFix(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_state", "postclaim publication-binding state cannot be established")
+	}
+}
+
+func checkW001PostclaimPRFix(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001PostclaimPRFixPath)
+	if err != nil {
+		addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_missing", "signed postclaim publication-binding grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001PostclaimPRFixScalars, w001PostclaimPRFixSequences,
+		[]string{"grant", "finding", "publication", "materials", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_schema", "%s", message)
+	}
+	for _, expected := range w001PostclaimPRFixScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_value", "%s does not match the signed publication-binding contract", expected.path)
+		}
+	}
+	for path, expected := range w001PostclaimPRFixSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_sequence", "%s must equal the exact ordered publication-binding contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "finding", "publication", "materials", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_expiry", "publication-binding grant must use one RFC3339 interval no longer than 72 hours")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001PostclaimPRFixSig)
+	if signatureErr != nil {
+		addFinding(findings, w001PostclaimPRFixSig, "public.w001_postclaim_pr_binding_signature_missing", "detached publication-binding signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_postclaim_pr_binding_key", "publication binding must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001PostclaimPRFixNS); err != nil {
+			addFinding(findings, w001PostclaimPRFixSig, "public.w001_postclaim_pr_binding_signature", "%v", err)
+		}
+	}
+
+	for _, binding := range []struct {
+		path   string
+		digest string
+		code   string
+	}{
+		{w001PostclaimHookFixPath, scalarValue(document, "grant.priorGrantSHA256"), "public.w001_postclaim_pr_binding_prior_grant"},
+		{w001PostclaimHookFixSig, scalarValue(document, "grant.priorGrantSignatureSHA256"), "public.w001_postclaim_pr_binding_prior_grant"},
+		{scalarValue(document, "materials.validationEvidencePath"), scalarValue(document, "materials.validationEvidenceSHA256"), "public.w001_postclaim_pr_binding_material"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if binding.path == "docs/evidence/W-001-validation.md" {
+			if _, successorErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimChronoFixPath))); successorErr == nil {
+				content, readErr = planningGrantGitOutput(root, "show", w001PostclaimChronoFixBase+":"+binding.path)
+			}
+		}
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, binding.code, "publication-binding material must match its exact signed SHA-256")
+		}
+	}
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	if evidenceErr != nil || !bytes.Contains(evidence, []byte("stale-publication-vehicle-binding")) ||
+		!bytes.Contains(evidence, []byte("PR #7 remains closed and unmerged historical evidence")) ||
+		!bytes.Contains(evidence, []byte("PR #8 is the sole\nactive publication vehicle")) ||
+		!bytes.Contains(evidence, []byte("PR #8 must remain unmerged")) {
+		addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_postclaim_pr_binding_evidence", "publication evidence must preserve PR 7 history and bind PR 8 as the sole active vehicle")
+	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimChronoFixPath))); err == nil {
+		checkW001PostclaimChronoFix(root, findings)
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_state", "postclaim chronology-correction state cannot be established")
+	}
+}
+
+func checkW001PostclaimChronoFix(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001PostclaimChronoFixPath)
+	if err != nil {
+		addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_missing", "signed postclaim chronology-correction grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001PostclaimChronoFixScalars, w001PostclaimChronoFixSequences,
+		[]string{"grant", "finding", "chronology", "publication", "materials", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_schema", "%s", message)
+	}
+	for _, expected := range w001PostclaimChronoFixScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_value", "%s does not match the signed chronology-correction contract", expected.path)
+		}
+	}
+	for path, expected := range w001PostclaimChronoFixSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_sequence", "%s must equal the exact ordered chronology-correction contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "finding", "chronology", "publication", "materials", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_expiry", "chronology-correction grant must use one RFC3339 interval no longer than 72 hours")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001PostclaimChronoFixSig)
+	if signatureErr != nil {
+		addFinding(findings, w001PostclaimChronoFixSig, "public.w001_postclaim_chronology_signature_missing", "detached chronology-correction signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_postclaim_chronology_key", "chronology correction must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001PostclaimChronoFixNS); err != nil {
+			addFinding(findings, w001PostclaimChronoFixSig, "public.w001_postclaim_chronology_signature", "%v", err)
+		}
+	}
+
+	for _, binding := range []struct {
+		path   string
+		digest string
+		code   string
+	}{
+		{w001PostclaimPRFixPath, scalarValue(document, "grant.priorGrantSHA256"), "public.w001_postclaim_chronology_prior_grant"},
+		{w001PostclaimPRFixSig, scalarValue(document, "grant.priorGrantSignatureSHA256"), "public.w001_postclaim_chronology_prior_grant"},
+		{scalarValue(document, "materials.validationEvidencePath"), scalarValue(document, "materials.validationEvidenceSHA256"), "public.w001_postclaim_chronology_material"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, binding.code, "chronology-correction material must match its exact signed SHA-256")
+		}
+	}
+	checkW001PostclaimChronology(root, document, issuedAt, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	if evidenceErr != nil || !bytes.Contains(evidence, []byte("grant-effective-after-governed-effects")) ||
+		!bytes.Contains(evidence, []byte("not retroactively relabelled as\nauthorized")) ||
+		!bytes.Contains(evidence, []byte("complete reviewed tree through a new signed commit, tag, PR #8 run")) ||
+		!bytes.Contains(evidence, []byte("signed v6 tree")) {
+		addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_postclaim_chronology_evidence", "chronology evidence must preserve the incident and compensating v6 publication route")
+	}
+}
+
+func checkW001PostclaimChronology(root string, document strictPlanningGrant, v6IssuedAt time.Time, findings *[]Finding) {
+	type phase struct {
+		name       string
+		issuedPath string
+		commitPath string
+		tagPath    string
+		runPath    string
+		commit     string
+		tag        string
+	}
+	for _, item := range []phase{
+		{name: "v4", issuedPath: "chronology.v4IssuedAt", commitPath: "chronology.v4CommitAt", tagPath: "chronology.v4TagAt", runPath: "chronology.v4RunStartedAt", commit: w001PostclaimPRFixBase, tag: w001PostclaimHookFixTag},
+		{name: "v5", issuedPath: "chronology.v5IssuedAt", commitPath: "chronology.v5CommitAt", tagPath: "chronology.v5TagAt", runPath: "chronology.v5RunStartedAt", commit: w001PostclaimChronoFixBase, tag: w001PostclaimPRFixTag},
+	} {
+		issued, issueErr := time.Parse(time.RFC3339, scalarValue(document, item.issuedPath))
+		committed, commitErr := time.Parse(time.RFC3339, scalarValue(document, item.commitPath))
+		tagged, tagErr := time.Parse(time.RFC3339, scalarValue(document, item.tagPath))
+		runStarted, runErr := time.Parse(time.RFC3339, scalarValue(document, item.runPath))
+		actualCommit, actualCommitErr := planningGrantCommitTime(root, item.commit)
+		actualTag, actualTagErr := planningGrantTagTime(root, item.tag)
+		if issueErr != nil || commitErr != nil || tagErr != nil || runErr != nil || actualCommitErr != nil || actualTagErr != nil ||
+			!actualCommit.Equal(committed) || !actualTag.Equal(tagged) || !committed.Before(issued) || !tagged.Before(issued) || !runStarted.Before(issued) {
+			addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_record", "%s pre-effective publication chronology must match immutable Git objects and server-authoritative evidence", item.name)
+		}
+	}
+	if v6IssuedAt.IsZero() {
+		return
+	}
+	if target, err := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+w001PostclaimChronoFixTag+"^{}"); err == nil {
+		featureHead := strings.TrimSpace(string(target))
+		commitTime, commitErr := planningGrantCommitTime(root, featureHead)
+		tagTime, tagErr := planningGrantTagTime(root, w001PostclaimChronoFixTag)
+		if commitErr != nil || tagErr != nil || commitTime.Before(v6IssuedAt) || tagTime.Before(v6IssuedAt) {
+			addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_effect", "v6 commit and signed tag must not precede the signed grant effective time")
+		}
+	} else if head, headErr := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}"); headErr == nil && strings.TrimSpace(string(head)) != w001PostclaimChronoFixBase {
+		commitTime, commitErr := planningGrantCommitTime(root, strings.TrimSpace(string(head)))
+		if commitErr != nil || commitTime.Before(v6IssuedAt) {
+			addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_effect", "v6 commit must not precede the signed grant effective time")
+		}
+	}
+}
+
+func planningGrantCommitTime(root, commit string) (time.Time, error) {
+	output, err := planningGrantGitOutput(root, "show", "-s", "--format=%cI", commit)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Parse(time.RFC3339, strings.TrimSpace(string(output)))
+}
+
+func planningGrantTagTime(root, tag string) (time.Time, error) {
+	output, err := planningGrantGitOutput(root, "for-each-ref", "--format=%(taggerdate:iso-strict)", "refs/tags/"+tag)
+	if err != nil || strings.TrimSpace(string(output)) == "" {
+		return time.Time{}, errors.New("annotated tag time is unavailable")
+	}
+	return time.Parse(time.RFC3339, strings.TrimSpace(string(output)))
+}
+
+func extractW001ClaimReceiptDigest(evidence []byte) (string, error) {
+	const heading = "## Canonical claim receipt\n"
+	sectionStart := bytes.Index(evidence, []byte(heading))
+	if sectionStart < 0 || bytes.Count(evidence, []byte(heading)) != 1 {
+		return "", errors.New("canonical claim receipt section is missing or duplicated")
+	}
+	section := evidence[sectionStart+len(heading):]
+	if next := bytes.Index(section, []byte("\n## ")); next >= 0 {
+		section = section[:next]
+	}
+	const prefix = "- Receipt SHA-256: `"
+	start := bytes.Index(section, []byte(prefix))
+	if start < 0 || bytes.Count(section, []byte(prefix)) != 1 {
+		return "", errors.New("canonical claim receipt digest is missing or duplicated")
+	}
+	digestStart := start + len(prefix)
+	digestEnd := bytes.IndexByte(section[digestStart:], '`')
+	if digestEnd < 0 {
+		return "", errors.New("canonical claim receipt digest is not closed")
+	}
+	digest := string(section[digestStart : digestStart+digestEnd])
+	if !sha256Pattern.MatchString(digest) {
+		return "", errors.New("canonical claim receipt digest must be lowercase SHA-256")
+	}
+	return digest, nil
 }
 
 func scalarValue(document strictPlanningGrant, path string) string {
@@ -1680,7 +3057,7 @@ func LoadW001BootstrapGrant(repo string) (W001BootstrapGrant, error) {
 	}
 	document := parseStrictGrant(data, w001BootstrapGrantScalars, w001BootstrapGrantSequences,
 		[]string{"grant", "expected", "postimage", "toolchain", "verification", "integrity"})
-	return W001BootstrapGrant{
+	grant := W001BootstrapGrant{
 		ID: scalarValue(document, "grant.id"), AttemptID: scalarValue(document, "grant.attemptId"), IdempotencyKey: scalarValue(document, "grant.replayRef"),
 		Bead: scalarValue(document, "grant.bead"), BaseCommit: scalarValue(document, "grant.baseCommit"), ExpiresAt: scalarValue(document, "grant.expiresAt"),
 		WorkingBranch: scalarValue(document, "grant.workingBranch"), Assignee: scalarValue(document, "expected.assignee"),
@@ -1702,7 +3079,18 @@ func LoadW001BootstrapGrant(repo string) (W001BootstrapGrant, error) {
 		PatchPath: scalarValue(document, "toolchain.patchPath"), PatchSHA256: scalarValue(document, "toolchain.patchSHA256"),
 		PatchedBinarySHA256: scalarValue(document, "toolchain.patchedBinarySHA256"), GoBinarySHA256: scalarValue(document, "toolchain.goBinarySHA256"),
 		ReviewTag: scalarValue(document, "grant.reviewTag"),
-	}, nil
+	}
+	if _, stateErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimSecurityFixPath))); stateErr == nil {
+		grant.CorrectionPatchPath = w001PostclaimSecurityPatchPath
+		grant.CorrectionPatchSHA256 = w001PostclaimSecurityPatchSHA
+		grant.PatchedBinarySHA256 = w001PostclaimSecurityBinarySHA
+	}
+	if _, stateErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); stateErr == nil {
+		grant.HookIsolationPatchPath = w001PostclaimHookPatchPath
+		grant.HookIsolationPatchSHA256 = w001PostclaimHookPatchSHA
+		grant.PatchedBinarySHA256 = w001PostclaimHookBinarySHA
+	}
+	return grant, nil
 }
 
 // LoadW001BootstrapExecutionAuthorization verifies the separately signed,
@@ -1806,6 +3194,7 @@ type planningGrantCommit struct {
 type planningGrantGitHubEvent struct {
 	After      string `json:"after"`
 	Before     string `json:"before"`
+	Number     int    `json:"number"`
 	Ref        string `json:"ref"`
 	HeadCommit *struct {
 		ID string `json:"id"`
@@ -2006,10 +3395,588 @@ func checkWave1PlanningGrantGitDiff(root string, findings *[]Finding) {
 	}
 }
 
+func checkW001PostclaimGrantGitDiff(root string, findings *[]Finding) {
+	ciFixActive := false
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimCIFixPath))); err == nil {
+		ciFixActive = true
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_state", "postclaim CI-stabilization Git state cannot be established")
+		return
+	}
+	securityFixActive := false
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimSecurityFixPath))); err == nil {
+		securityFixActive = true
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_state", "postclaim Security-correction Git state cannot be established")
+		return
+	}
+	if securityFixActive && !ciFixActive {
+		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_ancestry", "Security correction requires the preserved v2 CI stabilization")
+		return
+	}
+	hookFixActive := false
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimHookFixPath))); err == nil {
+		hookFixActive = true
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_state", "postclaim hook-isolation Git state cannot be established")
+		return
+	}
+	if hookFixActive && !securityFixActive {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_ancestry", "hook isolation requires the preserved v3 Security correction")
+		return
+	}
+	prFixActive := false
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimPRFixPath))); err == nil {
+		prFixActive = true
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_state", "postclaim publication-binding Git state cannot be established")
+		return
+	}
+	if prFixActive && !hookFixActive {
+		addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_ancestry", "publication binding requires the preserved v4 hook isolation")
+		return
+	}
+	chronoFixActive := false
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimChronoFixPath))); err == nil {
+		chronoFixActive = true
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_state", "postclaim chronology-correction Git state cannot be established")
+		return
+	}
+	if chronoFixActive && !prFixActive {
+		addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_ancestry", "chronology correction requires the preserved v5 publication binding")
+		return
+	}
+	base, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimBase+"^{commit}")
+	if err != nil || strings.TrimSpace(string(base)) != w001PostclaimBase {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_base", "exact accepted helper squash must resolve locally")
+		return
+	}
+	baseTree, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimBase+"^{tree}")
+	if err != nil || strings.TrimSpace(string(baseTree)) != w001PostclaimBaseTree {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_base", "accepted helper squash tree must match the signed base tree")
+		return
+	}
+	if ciFixActive {
+		fixBase, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimCIFixBase+"^{commit}")
+		fixTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimCIFixBase+"^{tree}")
+		if err != nil || treeErr != nil || strings.TrimSpace(string(fixBase)) != w001PostclaimCIFixBase || strings.TrimSpace(string(fixTree)) != w001PostclaimCIFixBaseTree {
+			addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_base", "CI stabilization must descend from the exact preserved failed head and tree")
+			return
+		}
+		if !checkW001PostclaimPriorReviewTag(root, findings) {
+			return
+		}
+	}
+	if securityFixActive {
+		fixBase, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimSecurityFixBase+"^{commit}")
+		fixTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimSecurityFixBase+"^{tree}")
+		if err != nil || treeErr != nil || strings.TrimSpace(string(fixBase)) != w001PostclaimSecurityFixBase || strings.TrimSpace(string(fixTree)) != w001PostclaimSecurityFixTree {
+			addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_base", "Security correction must descend from the exact accepted v2 head and tree")
+			return
+		}
+		if !checkW001PostclaimPriorV2ReviewTag(root, findings) {
+			return
+		}
+	}
+	if hookFixActive {
+		fixBase, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimHookFixBase+"^{commit}")
+		fixTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimHookFixBase+"^{tree}")
+		if err != nil || treeErr != nil || strings.TrimSpace(string(fixBase)) != w001PostclaimHookFixBase || strings.TrimSpace(string(fixTree)) != w001PostclaimHookFixTree {
+			addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_base", "hook isolation must descend from the exact reviewed v3 head and tree")
+			return
+		}
+		if !checkW001PostclaimPriorV3ReviewTag(root, findings) {
+			return
+		}
+	}
+	if prFixActive {
+		fixBase, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimPRFixBase+"^{commit}")
+		fixTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimPRFixBase+"^{tree}")
+		if err != nil || treeErr != nil || strings.TrimSpace(string(fixBase)) != w001PostclaimPRFixBase || strings.TrimSpace(string(fixTree)) != w001PostclaimPRFixTree {
+			addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_base", "publication binding must descend from the exact reviewed v4 head and tree")
+			return
+		}
+		if !checkW001PostclaimPriorV4ReviewTag(root, findings) {
+			return
+		}
+	}
+	if chronoFixActive {
+		fixBase, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimChronoFixBase+"^{commit}")
+		fixTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001PostclaimChronoFixBase+"^{tree}")
+		if err != nil || treeErr != nil || strings.TrimSpace(string(fixBase)) != w001PostclaimChronoFixBase || strings.TrimSpace(string(fixTree)) != w001PostclaimChronoFixTree {
+			addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_base", "chronology correction must descend from the exact reviewed v5 head and tree")
+			return
+		}
+		if !checkW001PostclaimPriorV5ReviewTag(root, findings) {
+			return
+		}
+	}
+	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
+	head := strings.TrimSpace(string(headOutput))
+	if err != nil || !sha1Pattern.MatchString(head) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_git", "HEAD must resolve to one exact commit")
+		return
+	}
+	branchOutput, branchErr := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
+	branch := strings.TrimSpace(string(branchOutput))
+	featureHead := head
+	requireTag := false
+	mainTreeCheck := false
+	switch {
+	case branchErr == nil && branch == w001PostclaimBranch && os.Getenv("GITHUB_ACTIONS") != "true":
+		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001PostclaimBase, head); err != nil {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_ancestry", "local reconciliation must descend from the exact accepted helper squash")
+			return
+		}
+	case branchErr == nil && branch == "main" && os.Getenv("GITHUB_ACTIONS") != "true":
+		requireTag, mainTreeCheck = true, true
+	case os.Getenv("GITHUB_ACTIONS") == "true":
+		featureHead, requireTag, mainTreeCheck = w001PostclaimGitHubCheckout(root, head, branch, findings)
+		if featureHead == "" {
+			return
+		}
+	default:
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_branch", "postclaim reconciliation requires its signed branch or accepted main")
+		return
+	}
+
+	if requireTag {
+		expected := featureHead
+		if mainTreeCheck {
+			expected = ""
+		}
+		reviewTag := w001PostclaimReviewTag
+		reviewTagMessage := w001PostclaimReviewTagMessage
+		if ciFixActive {
+			reviewTag = w001PostclaimCIFixReviewTag
+			reviewTagMessage = w001PostclaimCIFixTagMessage
+		}
+		if securityFixActive {
+			reviewTag = w001PostclaimSecurityFixTag
+			reviewTagMessage = w001PostclaimSecurityFixTagMsg
+		}
+		if hookFixActive {
+			reviewTag = w001PostclaimHookFixTag
+			reviewTagMessage = w001PostclaimHookFixTagMsg
+		}
+		if prFixActive {
+			reviewTag = w001PostclaimPRFixTag
+			reviewTagMessage = w001PostclaimPRFixTagMsg
+		}
+		if chronoFixActive {
+			reviewTag = w001PostclaimChronoFixTag
+			reviewTagMessage = w001PostclaimChronoFixTagMsg
+		}
+		target, ok := checkW001PostclaimReviewTag(root, expected, reviewTag, reviewTagMessage, findings)
+		if !ok {
+			return
+		}
+		featureHead = target
+	}
+	if mainTreeCheck {
+		parents, err := planningGrantCommitParents(root, head)
+		if err != nil || len(parents) != 1 || parents[0] != w001PostclaimBase {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_main_topology", "accepted reconciliation must be one squash commit over the signed base")
+			return
+		}
+		mainTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", featureHead+"^{tree}")
+		if strings.TrimSpace(string(mainTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_main_tree", "accepted reconciliation tree must equal the signed reviewed feature tree")
+			return
+		}
+	}
+
+	if featureHead != w001PostclaimBase {
+		commits, err := planningGrantCommitRangeFrom(root, w001PostclaimBase, featureHead)
+		if err != nil || len(commits) == 0 {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_history", "reconciliation feature history must be a nonempty linear chain")
+			return
+		}
+		publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+		if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+			addFinding(findings, wave1PlanningGrantKey, "public.w001_postclaim_commit_signature", "reconciliation commits require the pinned genesis signer")
+			return
+		}
+		previous := w001PostclaimBase
+		v1Authorized := w001PostclaimPathSet()
+		fixAuthorized := w001PostclaimCIFixPathSet()
+		securityAuthorized := w001PostclaimSecurityFixPathSet()
+		hookAuthorized := w001PostclaimHookFixPathSet()
+		prAuthorized := w001PostclaimPRFixPathSet()
+		chronoAuthorized := w001PostclaimChronoFixPathSet()
+		for _, commit := range commits {
+			if len(commit.parents) != 1 || commit.parents[0] != previous {
+				addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_topology", "reconciliation feature history must be a contiguous one-parent chain")
+				return
+			}
+			authorized := v1Authorized
+			if ciFixActive {
+				if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", commit.id, w001PostclaimCIFixBase); err != nil {
+					if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001PostclaimCIFixBase, commit.id); err != nil {
+						addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_ancestry", "correction history diverges from the preserved failed head")
+						return
+					}
+					authorized = fixAuthorized
+				}
+			}
+			if securityFixActive {
+				if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", commit.id, w001PostclaimSecurityFixBase); err != nil {
+					if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001PostclaimSecurityFixBase, commit.id); err != nil {
+						addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_ancestry", "Security-correction history diverges from the preserved v2 head")
+						return
+					}
+					authorized = securityAuthorized
+				}
+			}
+			if hookFixActive {
+				if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", commit.id, w001PostclaimHookFixBase); err != nil {
+					if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001PostclaimHookFixBase, commit.id); err != nil {
+						addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_ancestry", "hook-isolation history diverges from the preserved v3 head")
+						return
+					}
+					authorized = hookAuthorized
+				}
+			}
+			if prFixActive {
+				if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", commit.id, w001PostclaimPRFixBase); err != nil {
+					if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001PostclaimPRFixBase, commit.id); err != nil {
+						addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_ancestry", "publication-binding history diverges from the preserved v4 head")
+						return
+					}
+					authorized = prAuthorized
+				}
+			}
+			if chronoFixActive {
+				if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", commit.id, w001PostclaimChronoFixBase); err != nil {
+					if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001PostclaimChronoFixBase, commit.id); err != nil {
+						addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_ancestry", "chronology-correction history diverges from the preserved v5 head")
+						return
+					}
+					authorized = chronoAuthorized
+				}
+			}
+			paths, err := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
+			normalized, normalizeErr := normalizedPlanningGrantGitPaths(paths)
+			if err != nil || normalizeErr != nil || !planningGrantPathsAllowed(normalized, authorized) {
+				addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_scope", "a reconciliation commit includes a path outside its signed scope")
+				return
+			}
+			object, err := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+			if err != nil || verifyPlanningGrantCommit(object, publicKey) != nil {
+				addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_commit_signature", "every reconciliation feature commit must carry the pinned SSH signature")
+				return
+			}
+			previous = commit.id
+		}
+	}
+
+	tracked, err := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
+	if err != nil {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_scope", "current tracked reconciliation paths cannot be enumerated")
+		return
+	}
+	untracked, err := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
+	if err != nil {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_scope", "current untracked reconciliation paths cannot be enumerated")
+		return
+	}
+	paths, err := normalizedPlanningGrantGitPaths(tracked, untracked)
+	currentAuthorized := w001PostclaimPathSet()
+	if ciFixActive {
+		currentAuthorized = w001PostclaimCIFixPathSet()
+	}
+	if securityFixActive {
+		currentAuthorized = w001PostclaimSecurityFixPathSet()
+	}
+	if hookFixActive {
+		currentAuthorized = w001PostclaimHookFixPathSet()
+	}
+	if prFixActive {
+		currentAuthorized = w001PostclaimPRFixPathSet()
+	}
+	if chronoFixActive {
+		currentAuthorized = w001PostclaimChronoFixPathSet()
+	}
+	if err != nil || !planningGrantPathsAllowed(paths, currentAuthorized) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_scope", "current changes include a path outside the signed reconciliation scope")
+	}
+}
+
+func w001PostclaimPathSet() map[string]bool {
+	authorized := make(map[string]bool, len(w001PostclaimGrantSequences["grant.authorizedPaths"]))
+	for _, path := range w001PostclaimGrantSequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return authorized
+}
+
+func w001PostclaimCIFixPathSet() map[string]bool {
+	authorized := make(map[string]bool, len(w001PostclaimCIFixSequences["addendum.authorizedPaths"]))
+	for _, path := range w001PostclaimCIFixSequences["addendum.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return authorized
+}
+
+func w001PostclaimSecurityFixPathSet() map[string]bool {
+	authorized := make(map[string]bool, len(w001PostclaimSecurityFixSequences["grant.authorizedPaths"]))
+	for _, path := range w001PostclaimSecurityFixSequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return authorized
+}
+
+func w001PostclaimHookFixPathSet() map[string]bool {
+	authorized := make(map[string]bool, len(w001PostclaimHookFixSequences["grant.authorizedPaths"]))
+	for _, path := range w001PostclaimHookFixSequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return authorized
+}
+
+func w001PostclaimPRFixPathSet() map[string]bool {
+	authorized := make(map[string]bool, len(w001PostclaimPRFixSequences["grant.authorizedPaths"]))
+	for _, path := range w001PostclaimPRFixSequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return authorized
+}
+
+func w001PostclaimChronoFixPathSet() map[string]bool {
+	authorized := make(map[string]bool, len(w001PostclaimChronoFixSequences["grant.authorizedPaths"]))
+	for _, path := range w001PostclaimChronoFixSequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return authorized
+}
+
+func checkW001PostclaimReviewTag(root, expectedFeatureHead, reviewTag, reviewTagMessage string, findings *[]Finding) (string, bool) {
+	ref := "refs/tags/" + reviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || !sha1Pattern.MatchString(strings.TrimSpace(string(objectID))) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag", "postclaim CI requires the signed immutable review tag")
+		return "", false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", strings.TrimSpace(string(objectID)))
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag", "postclaim review tag cannot be verified with the pinned key")
+		return "", false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, reviewTag, reviewTagMessage)
+	if err != nil {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag", "postclaim review tag must be an exact pinned-signer tree attestation")
+		return "", false
+	}
+	if expectedFeatureHead != "" && expectedFeatureHead != target {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag_target", "postclaim review tag must target the immutable feature head")
+		return "", false
+	}
+	if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001PostclaimBase, target); err != nil || target == w001PostclaimBase {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_tag_target", "postclaim tag target must preserve nonempty reconciliation history")
+		return "", false
+	}
+	return target, true
+}
+
+func checkW001PostclaimPriorReviewTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001PostclaimReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001PostclaimV1TagObject {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_v1_tag", "v1 review tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001PostclaimV1TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_v1_tag", "v1 review tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001PostclaimReviewTag, w001PostclaimReviewTagMessage)
+	if err != nil || target != w001PostclaimCIFixBase {
+		addFinding(findings, w001PostclaimCIFixPath, "public.w001_postclaim_ci_v1_tag", "v1 review tag target and signature must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001PostclaimPriorV2ReviewTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001PostclaimCIFixReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001PostclaimV2TagObject {
+		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_v2_tag", "v2 review tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001PostclaimV2TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_v2_tag", "v2 review tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001PostclaimCIFixReviewTag, w001PostclaimCIFixTagMessage)
+	if err != nil || target != w001PostclaimSecurityFixBase {
+		addFinding(findings, w001PostclaimSecurityFixPath, "public.w001_postclaim_security_v2_tag", "v2 review tag target and signature must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001PostclaimPriorV3ReviewTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001PostclaimSecurityFixTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001PostclaimV3TagObject {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_v3_tag", "v3 review tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001PostclaimV3TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_v3_tag", "v3 review tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001PostclaimSecurityFixTag, w001PostclaimSecurityFixTagMsg)
+	if err != nil || target != w001PostclaimHookFixBase {
+		addFinding(findings, w001PostclaimHookFixPath, "public.w001_postclaim_hook_v3_tag", "v3 review tag target and signature must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001PostclaimPriorV4ReviewTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001PostclaimHookFixTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001PostclaimV4TagObject {
+		addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_v4_tag", "v4 review tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001PostclaimV4TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_v4_tag", "v4 review tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001PostclaimHookFixTag, w001PostclaimHookFixTagMsg)
+	if err != nil || target != w001PostclaimPRFixBase {
+		addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_v4_tag", "v4 review tag target and signature must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001PostclaimPriorV5ReviewTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001PostclaimPRFixTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001PostclaimV5TagObject {
+		addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_v5_tag", "v5 review tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001PostclaimV5TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_v5_tag", "v5 review tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001PostclaimPRFixTag, w001PostclaimPRFixTagMsg)
+	if err != nil || target != w001PostclaimChronoFixBase {
+		addFinding(findings, w001PostclaimChronoFixPath, "public.w001_postclaim_chronology_v5_tag", "v5 review tag target and signature must remain exact")
+		return false
+	}
+	return true
+}
+
+func w001PostclaimGitHubCheckout(root, head, branch string, findings *[]Finding) (string, bool, bool) {
+	if os.Getenv("CI") != "true" || os.Getenv("GITHUB_ACTIONS") != "true" || os.Getenv("RUNNER_ENVIRONMENT") != "github-hosted" ||
+		os.Getenv("GITHUB_REPOSITORY") != planningGrantRepository || os.Getenv("GITHUB_WORKFLOW") != planningGrantWorkflow ||
+		os.Getenv("GITHUB_JOB") != planningGrantWorkflowJob || os.Getenv("GITHUB_SHA") != head ||
+		!samePlanningGrantRepositoryRoot(root, os.Getenv("GITHUB_WORKSPACE")) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_runner", "postclaim GitHub checkout lacks canonical runner identity")
+		return "", false, false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ID")); !ok {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_runner", "postclaim GitHub run ID is invalid")
+		return "", false, false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ATTEMPT")); !ok {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_runner", "postclaim GitHub run attempt is invalid")
+		return "", false, false
+	}
+	workflowRef := os.Getenv("GITHUB_WORKFLOW_REF")
+	workflowPrefix := planningGrantRepository + "/" + planningGrantWorkflowPath + "@"
+	workflow, err := readRepoFile(root, planningGrantWorkflowPath)
+	if err != nil || fileSHA256(workflow) != canonicalFoundationWorkflowSHA256 || !strings.HasPrefix(workflowRef, workflowPrefix) {
+		addFinding(findings, planningGrantWorkflowPath, "public.w001_postclaim_workflow", "postclaim CI requires the pinned protected workflow")
+		return "", false, false
+	}
+	event, ok := readPlanningGrantGitHubEvent(os.Getenv("GITHUB_EVENT_PATH"))
+	if !ok || event.Repository.FullName != planningGrantRepository {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_event", "postclaim CI event identity is invalid")
+		return "", false, false
+	}
+	switch os.Getenv("GITHUB_EVENT_NAME") {
+	case "pull_request":
+		ref := os.Getenv("GITHUB_REF")
+		if branch != "" || !validPlanningGrantPullRequestRef(ref) || os.Getenv("GITHUB_HEAD_REF") != w001PostclaimBranch ||
+			os.Getenv("GITHUB_BASE_REF") != "main" || event.PullRequest == nil || event.PullRequest.Head.Ref != w001PostclaimBranch ||
+			event.PullRequest.Base.Ref != "main" || event.PullRequest.Base.SHA != w001PostclaimBase ||
+			!sha1Pattern.MatchString(event.PullRequest.Head.SHA) || !validAdvisoryPullRequestMergeSHA(event.PullRequest.MergeCommitSHA) {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_event", "pull-request event does not bind the signed postclaim branch and base")
+			return "", false, false
+		}
+		if !w001PostclaimPullRequestNumberAllowed(root, event.Number) {
+			addFinding(findings, w001PostclaimPRFixPath, "public.w001_postclaim_pr_binding_event", "pull-request event must bind the signed active PR 8 publication vehicle")
+			return "", false, false
+		}
+		workflowSuffix := strings.TrimPrefix(workflowRef, workflowPrefix)
+		if workflowSuffix != ref && workflowSuffix != "refs/heads/main" {
+			addFinding(findings, planningGrantWorkflowPath, "public.w001_postclaim_workflow", "pull-request workflow ref is not canonical")
+			return "", false, false
+		}
+		parents, err := planningGrantCommitParents(root, head)
+		if err != nil || len(parents) != 2 || parents[0] != w001PostclaimBase || parents[1] != event.PullRequest.Head.SHA {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_pr_topology", "pull-request checkout must be the exact two-parent synthetic merge")
+			return "", false, false
+		}
+		mergeTree, mergeErr := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, featureErr := planningGrantGitOutput(root, "rev-parse", "--verify", event.PullRequest.Head.SHA+"^{tree}")
+		if mergeErr != nil || featureErr != nil || strings.TrimSpace(string(mergeTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_pr_tree", "pull-request synthetic merge tree must equal the reviewed feature tree")
+			return "", false, false
+		}
+		return event.PullRequest.Head.SHA, true, false
+	case "push":
+		if branch != "" && branch != "main" || os.Getenv("GITHUB_REF") != "refs/heads/main" || os.Getenv("GITHUB_REF_PROTECTED") != "true" ||
+			os.Getenv("GITHUB_HEAD_REF") != "" || os.Getenv("GITHUB_BASE_REF") != "" || workflowRef != workflowPrefix+"refs/heads/main" ||
+			event.Ref != "refs/heads/main" || event.Before != w001PostclaimBase || event.After != head || event.HeadCommit == nil || event.HeadCommit.ID != head || event.PullRequest != nil {
+			addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_event", "protected-main event does not bind the signed reconciliation base and squash")
+			return "", false, false
+		}
+		return head, true, true
+	default:
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_event", "unsupported GitHub event for postclaim reconciliation")
+		return "", false, false
+	}
+}
+
+func w001PostclaimPullRequestNumberAllowed(root string, number int) bool {
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimPRFixPath))); err == nil {
+		return number == w001PostclaimActivePR
+	}
+	return true
+}
+
 func checkW001BootstrapGrantGitDiff(root string, findings *[]Finding) {
 	topLevel, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
 	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(topLevel))) {
 		addFinding(findings, w001BootstrapGrantPath, "public.w001_bootstrap_git", "Git metadata must resolve to the audited repository root")
+		return
+	}
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001PostclaimGrantPath))); err == nil {
+		checkW001PostclaimGrantGitDiff(root, findings)
+		return
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001PostclaimGrantPath, "public.w001_postclaim_state", "postclaim reconciliation Git state cannot be established")
 		return
 	}
 	base, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001BootstrapBase+"^{commit}")

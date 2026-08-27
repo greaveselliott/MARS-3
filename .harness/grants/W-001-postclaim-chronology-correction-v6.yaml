@@ -1,0 +1,125 @@
+schemaVersion: 1
+kind: MARS3W001PostclaimChronologyCorrectionGrant
+
+grant:
+  id: W-001-postclaim-chronology-correction-v6
+  classification: PUBLIC
+  issuedAt: 2026-08-26T23:47:00Z
+  expiresAt: 2026-08-28T23:47:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 765a07d3ebe2432227de7ccad65dc9f3b291deba
+  baseTree: ce8959ecd2e99c5181651fa9f2eca926da971e47
+  workingBranch: codex/w-001-postclaim-reconciliation
+  reviewTag: mars3/w001-postclaim-reconciliation-v6
+  reviewTagMessage: MARS-3 W-001 postclaim reconciliation tree attestation v6
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  failureOwnership: foundation
+  purpose: compensate for v4 and v5 public Git effects that preceded their signed grant effective times
+  bead: M3-W001
+  displayId: W-001
+  priorGrant: W-001-postclaim-pr-binding-v5
+  priorGrantSHA256: 61b5ef56fac5916e6bd65ce884ca1080e904058688ccdc646b0f0f5502303654
+  priorGrantSignatureSHA256: c040681faf0dbe2af3d231dd2735f67b12c2f166d8e137a8175cfd4ef2af362c
+  priorReviewTag: mars3/w001-postclaim-reconciliation-v5
+  priorReviewTagObject: 31f7de15ef790d795f80de32ca0cf459c192cc5e
+  priorReviewTagTarget: 765a07d3ebe2432227de7ccad65dc9f3b291deba
+  activePullRequest: 8
+  qaDisposition: accepted
+  securityDisposition: changes-requested
+  autonomousMutation: false
+  liveLeaseAsserted: false
+  implementationAllowed: false
+  canonicalWorkMutationAllowed: false
+  retrospectiveAuthorizationAsserted: false
+  allowedEffects:
+    - create-and-verify-this-already-effective-chronology-correction-grant
+    - preserve-v1-through-v5-grants-signatures-tags-runs-and-review-history
+    - classify-v4-and-v5-pre-effective-publication-effects-as-foundation-owned-incidents
+    - preserve-v1-through-v3-as-chronologically-valid-authority-history
+    - compensate-by-republishing-the-complete-reviewed-tree-under-v6
+    - bind-PR-8-as-the-sole-active-publication-vehicle
+    - edit-only-the-exact-authorized-Git-paths
+    - create-pinned-signer-correction-commits-and-one-signed-v6-review-tag
+    - push-the-existing-review-branch-and-v6-tag-and-rerun-PR-8
+    - obtain-fresh-independent-QA-and-Security-review-before-squash-merge
+  authorizedPaths:
+    - .harness/grants/W-001-postclaim-chronology-correction-v6.yaml
+    - .harness/grants/W-001-postclaim-chronology-correction-v6.yaml.sig
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v1-through-v5-heads-trees-grants-signatures-tags-runs-and-reviews-remain-immutable
+    - v4-and-v5-pre-effective-effects-remain-explicitly-not-retroactively-authorized
+    - v6-issuedAt-is-no-later-than-every-v6-governed-commit-and-tag-effect
+    - PR-7-remains-closed-and-unmerged-historical-evidence
+    - PR-8-is-the-only-current-review-and-merge-vehicle
+    - every-correction-commit-and-current-change-stays-inside-the-signed-path-set
+    - every-correction-commit-and-v6-review-tag-use-the-pinned-signer
+    - reviewed-v6-tree-equals-the-protected-main-squash-tree
+    - no-Beads-lease-implementation-production-or-policy-effect-is-created
+  prohibitedEffects:
+    - retroactively-authorize-or-relabel-v4-or-v5-effects
+    - mutate-any-Bead-Dolt-row-dependency-label-comment-or-history
+    - execute-or-replay-the-canonical-W-001-bootstrap-claim
+    - execute-any-workspace-hook-or-plugin
+    - issue-assert-renew-release-or-revoke-a-live-lease
+    - begin-gateway-runtime-platform-or-product-implementation
+    - edit-plan-manifest-feature-product-goal-or-scenario-contracts
+    - reopen-merge-or-mutate-PR-7
+    - move-delete-or-reuse-any-existing-review-tag
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+    - credentials-provider-session-customer-data-or-raw-payloads
+
+finding:
+  affectedPostclaimHeads: d890a96014f79438d36bde3c8967664163e9d961,765a07d3ebe2432227de7ccad65dc9f3b291deba
+  failureFingerprint: grant-effective-after-governed-effects
+  failureClass: foundation-owned
+  findingScope: public-Git-authority-chronology
+  canonicalWorkspaceAffected: false
+  retrospectiveAuthorizationAsserted: false
+
+chronology:
+  v4IssuedAt: 2026-08-26T23:45:00Z
+  v4CommitAt: 2026-08-26T22:59:53Z
+  v4TagAt: 2026-08-26T23:00:29Z
+  v4RunStartedAt: 2026-08-26T23:15:21Z
+  v5IssuedAt: 2026-08-27T00:00:00Z
+  v5CommitAt: 2026-08-26T23:38:40Z
+  v5TagAt: 2026-08-26T23:38:54Z
+  v5RunStartedAt: 2026-08-26T23:40:36Z
+  v4EffectsAuthorizedByV4: false
+  v5EffectsAuthorizedByV5: false
+  v6CompensationRequired: true
+
+publication:
+  repository: greaveselliott/MARS-3
+  baseCommit: adfd64feb565fb703a3568122cc032d4d1a450f5
+  closedPullRequest: 7
+  activePullRequest: 8
+  priorRun: 33024220053
+  priorJob: 98361636648
+
+materials:
+  validationEvidencePath: docs/evidence/W-001-validation.md
+  validationEvidenceSHA256: 8cf26301222f85537f29b3c8e70ac476c3b6819b91c19366f09b9d199e98fd13
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-postclaim-chronology-correction-v6
+  detachedSignature: W-001-postclaim-chronology-correction-v6.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

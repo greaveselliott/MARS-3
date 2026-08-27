@@ -1,0 +1,87 @@
+diff --git a/cmd/bd/batch.go b/cmd/bd/batch.go
+index d46e0789..7cb66a80 100644
+--- a/cmd/bd/batch.go
++++ b/cmd/bd/batch.go
+@@ -616,0 +617,5 @@ func rejectBootstrapSelectors(beadsDir string) error {
++	}
++	if _, err := os.Lstat(filepath.Join(beadsDir, "config.local.yaml")); err == nil {
++		return fmt.Errorf("bootstrap-claim: Beads local configuration selector is prohibited")
++	} else if !os.IsNotExist(err) {
++		return fmt.Errorf("bootstrap-claim: Beads local configuration selector is not inspectable: %w", err)
+diff --git a/cmd/bd/batch_embedded_test.go b/cmd/bd/batch_embedded_test.go
+index a94d1204..78f0e66c 100644
+--- a/cmd/bd/batch_embedded_test.go
++++ b/cmd/bd/batch_embedded_test.go
+@@ -16,0 +17 @@ import (
++	"github.com/steveyegge/beads/internal/hooks"
+@@ -347,0 +349,20 @@ func TestBatchBootstrapClaimSharedServerConfigFailsClosed(t *testing.T) {
++func TestBatchBootstrapClaimLocalConfigSelectorFailsClosed(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	store := newEmbeddedBootstrapTestStore(t, root)
++	authorizeBootstrapClaimWorkspace(t, root)
++	ctx := context.Background()
++	issue := seedBootstrapClaimFixture(t, store, ctx)
++	script := bootstrapClaimScript(t, store, ctx, issue.ID, issue.UpdatedAt.UTC().Format(time.RFC3339))
++	if err := os.WriteFile(filepath.Join(root, ".beads", "config.local.yaml"), []byte("dolt:\n  shared-server: true\n"), 0o600); err != nil {
++		t.Fatal(err)
++	}
++	if err := runBatchScriptInTx(t, ctx, store, script); err == nil {
++		t.Fatal("local configuration selector inserted at the transaction boundary was accepted")
++	}
++	assertBootstrapIssueBacklog(t, store, issue.ID)
++}
++
+@@ -365,0 +387,32 @@ func TestBatchBootstrapClaimServerTransactionFailsBeforeRead(t *testing.T) {
++func TestBatchBootstrapClaimHookWrappedTransactionFailsBeforeRead(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	store := newEmbeddedBootstrapTestStore(t, root)
++	authorizeBootstrapClaimWorkspace(t, root)
++	ctx := context.Background()
++	issue := seedBootstrapClaimFixture(t, store, ctx)
++	script := bootstrapClaimScript(t, store, ctx, issue.ID, issue.UpdatedAt.UTC().Format(time.RFC3339))
++	hooksDir := filepath.Join(root, ".beads", "hooks")
++	if err := os.MkdirAll(hooksDir, 0o700); err != nil {
++		t.Fatal(err)
++	}
++	sentinel := filepath.Join(root, "hook-fired")
++	t.Setenv("MARS3_HOOK_SENTINEL", sentinel)
++	hook := []byte("#!/bin/sh\n/usr/bin/touch \"$MARS3_HOOK_SENTINEL\"\n")
++	if err := os.WriteFile(filepath.Join(hooksDir, "on_update"), hook, 0o700); err != nil {
++		t.Fatal(err)
++	}
++	wrapped := storage.NewHookFiringStore(store, hooks.NewRunner(hooksDir))
++	if err := runBatchScriptInTx(t, ctx, wrapped, script); err == nil {
++		t.Fatal("hook-wrapped embedded transaction received bootstrap claim authority")
++	}
++	assertBootstrapIssueBacklog(t, store, issue.ID)
++	time.Sleep(100 * time.Millisecond)
++	if _, err := os.Lstat(sentinel); !os.IsNotExist(err) {
++		t.Fatalf("rejected hook-wrapped transaction executed a workspace hook: %v", err)
++	}
++}
++
+diff --git a/internal/storage/hook_decorator.go b/internal/storage/hook_decorator.go
+index 5ade041b..7af502e4 100644
+--- a/internal/storage/hook_decorator.go
++++ b/internal/storage/hook_decorator.go
+@@ -433,12 +432,0 @@ type hookTrackingTransaction struct {
+-// BootstrapAuthority preserves the direct embedded authority proof through
+-// the hook decorator. Server-backed transactions deliberately return false.
+-func (t *hookTrackingTransaction) BootstrapAuthority(ctx context.Context) (string, bool, error) {
+-	authority, ok := t.Transaction.(interface {
+-		BootstrapAuthority(context.Context) (string, bool, error)
+-	})
+-	if !ok {
+-		return "", false, nil
+-	}
+-	return authority.BootstrapAuthority(ctx)
+-}
+-

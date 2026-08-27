@@ -10,9 +10,9 @@ authority:
   live_lease_system: postgresql-gateway
   execution_system: temporal-non-authoritative
   current_bead: M3-W001
-  current_bead_state: backlog
-  current_bead_claimed: false
-  plan_phase: contract-publication
+  current_bead_state: in-progress
+  current_bead_claimed: true
+  plan_phase: delivery
   durable_product_system: git
   markdown_ticket_authority: prohibited
   genesis_is_provenance_only: true

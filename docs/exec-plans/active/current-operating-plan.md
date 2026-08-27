@@ -3,21 +3,19 @@
 **Status:** Active
 **Owner:** Delivery Orchestrator
 **Updated:** 2026-08-26
-**Phase:** contract-publication
+**Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
 **Current Bead:** M3-W001 (display ID W-001)
 **Authority:** Beads/Dolt for work state; Git for this durable plan
 
 This is the only active execution plan. It is a Git-owned ordering and evidence
-contract, not a second ticket database. During `contract-publication`, the
-current Bead is selected but remains `backlog`; no implementation claim or
-capability lease exists. The signed `WAVE-1-contract-publication` grant permits
-only the exact Git paths and public effects needed for this transition and
-expires on merge. The Orchestrator changes the phase to `delivery` only after
-this plan and its referenced contract are accepted on `main` and a separate
-signed W-001 implementation bootstrap grant binds the canonical claim, base
-commit, attempt, paths, and human-directed publication boundary.
+contract, not a second ticket database. The reviewed helper is accepted on
+`main`, and the signed W-001 bootstrap flow has compare-and-swap claimed the
+canonical Bead as `in-progress`. This `delivery` projection records that
+durable fact; it grants no capability lease and authorizes no implementation.
+A separately signed delivery grant remains required before any gateway source
+change, and the first live lease remains W-001 acceptance evidence.
 
 ## Durable lineage
 
@@ -72,8 +70,9 @@ The walking skeleton is one synthetic public project and one W-001 attempt:
 read a ready Bead, compare-and-swap claim it, issue a scoped lease epoch,
 heartbeat it, reject stale or mismatched writes, append a bounded event, and
 rebuild the read projection without giving Temporal or PostgreSQL ownership of
-the work graph. The current phase publishes that contract only; implementation
-starts after the phase transition to `delivery`.
+the work graph. The current phase schedules delivery against the verified
+claim. Implementation starts only under a separately signed delivery grant;
+no lease exists yet.
 
 ## Scenario priority
 
@@ -88,14 +87,16 @@ The scenarios are ordered to establish read truth before mutation, then prove
 that losing authority blocks the W-001 synthetic effect boundary and defines
 the contract later real brokers must enforce. M3-W001 already
 declares this exact group and required evidence, but implementation of the
-group is not authorized until the later canonical claim and bootstrap grant.
+group is not authorized until the later bounded delivery grant. The canonical
+claim is verified, but the claim itself grants neither a lease nor source-code
+authority.
 
 ## Delivery waves
 
 | Wave | Bead | Owner | Depends on | State | Exit evidence |
 | --- | --- | --- | --- | --- | --- |
 | 0 | H-001 Doctrine foundation | Foundation Maintainer | signed genesis | done | QA/Security accepted E7, verified public merge, completed run, and reconciliation receipt |
-| 1 | W-001 Work Authority | Work Authority Engineer | H-001 | backlog | Beads gateway, CAS claims, PostgreSQL lease epochs, stale-effect denial, and projection recovery |
+| 1 | W-001 Work Authority | Work Authority Engineer | H-001 | in-progress | Beads gateway, CAS claims, PostgreSQL lease epochs, stale-effect denial, and projection recovery |
 | 1 | P-001 Local substrate | Platform Engineer | H-001, W-001 | backlog | Lima/k3s, OIDC, RLS, Temporal, storage, and isolation evidence |
 | 2 | T-001 Trace spine | Trace Engineer | W-001, P-001 | backlog | audit ledger, OTel/Tempo, effect intents, receipts, and replay |
 | 3 | S-001 Rule-of-Two policy | Security Engineer | T-001 | backlog | labels, taint, tool contracts, and hard admission policy |
@@ -116,9 +117,9 @@ contract are accepted. P-001 is deliberately sequenced after W-001 so it can
 use accepted gateway fencing instead of receiving another bootstrap exception.
 The Orchestrator may schedule it only through a later truthful plan transition.
 
-## Current contract-publication transition
+## Current delivery transition
 
-- Canonical work: M3-W001, native `open`, typed lifecycle `backlog`.
+- Canonical work: M3-W001, native `in_progress`, typed lifecycle `in-progress`.
 - Work type: enabler.
 - Intended owner/profile: Work Authority Engineer (`work-authority-engineer`).
 - Coordinator: Delivery Orchestrator.
@@ -126,13 +127,17 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Failure ownership: foundation.
 - Scenarios: F-002-S1 through F-002-S6.
 - Verification order: `qa` → `security-reviewer` → `delivery-orchestrator`.
-- Working branch: `codex/w-001-work-authority`.
-- Claim state: absent by design during `contract-publication`.
-- Required next transition: merge the contract, verify the accepted commit,
-  signed tree tag, and recovery disposition, record the publication receipt,
-  issue and verify a separate signed W-001 bootstrap grant, compare-and-swap
-  claim M3-W001 with the pinned client, then change this plan to `delivery` and
-  W-001 to `in-progress`.
+- Accepted helper commit: `663d19bf190f9e3bd27edc96ee08acaa6778c853`;
+  squash-merged as `adfd64feb565fb703a3568122cc032d4d1a450f5` with
+  reviewed tree equality.
+- Claim state: verified by Dolt commit
+  `67hmen0cmq0he08n7ujlqpcsmmi94fhb`, WorkVersion mutation sequence `1`,
+  dependency-graph revision `1`, and exact signed postimage digests.
+- Live lease: absent by design; the bootstrap claim grants none.
+- Required next transition: independently accept and merge this postclaim Git
+  reconciliation, then issue a separate signed delivery grant for the bounded
+  W-001 implementation paths. The gateway must self-host and issue the first
+  verified lease before later effects may rely on it.
 
 The W-001 bootstrap grant is deliberately not a live lease: it is
 human-directed, binds one base commit and attempt, permits only canonical W-001
