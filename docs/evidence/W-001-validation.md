@@ -386,3 +386,28 @@ generic-key heuristic rejected. It contained no credential and was never
 pushed, tagged, or submitted for review. The local candidate was replaced
 before publication, without changing any implementation commit or weakening
 the scanner configuration.
+
+## Delivery-v2 review-tag admission finding
+
+The signed v2 tag object
+`9eb770c85a1df06dd90e993c9447176c9bbbffd0` immutably targets delivery head
+`ac20b235724b2219e5db230a7a44b507e46d5547`, tree
+`4812b71b88500101688be7c80f41461a79619646`. Its signature uses the pinned
+human-bootstrap-authority key and its synthetic tagger is the Work Authority
+Engineer, matching the v2 grant's principal and explicit permission to create
+one v2 review tag.
+
+Public run `33053544349` nevertheless rejected that tag twice: attempt-one job
+`98454619462` and the single allowed retry job `98454903898` both emitted the
+same `public.w001_delivery_tag_target` finding. Read-back proved the target was
+exact. Code inspection established the normalized foundation failure as
+`delivery-review-tag/release-identity-mismatch`: the shared tag parser required
+the Release Manager identity but reported every parser error as a target
+failure. The retry budget is exhausted; the run will not be retried again.
+
+The signed `W-001-delivery-ci-correction-v3` grant preserves the v2 tag and both
+failed attempts as historical evidence. It authorizes only a fail-closed
+identity/diagnostic correction and one successor Release Manager tag. It does
+not authorize a Beads mutation, lease, runtime behavior change, policy change,
+or production effect. Fresh QA and Security review must bind the final v3 head,
+tree, tag, and successful public run before merge.
