@@ -214,3 +214,41 @@ does not authorize another canonical claim, a lifecycle transition, review or
 terminal disposition, production, destructive work, repository-control
 changes, secrets, private data, or any other Bead. No development lease exists
 at this handoff checkpoint.
+
+## Native gateway CAS implementation checkpoint
+
+Signed delivery commit `85848a524d40e3041199c21b89e82f2cf8910b39`
+adds the normal gateway claim path without replaying the one-shot bootstrap.
+The MARS-3 adapter reads one bounded Beads projection, binds native status,
+assignee, timestamps, canonical metadata, sorted labels, dependency metadata,
+WorkVersion, integrity digests, attempt, idempotency key, base commit, and exact
+post-metadata, then invokes one reviewed native transaction. The transaction
+proves that it is the bare embedded `M3` store, rechecks the direct workspace,
+performs `ClaimIssue`, metadata, and lifecycle-label changes atomically, and
+returns one strict receipt. Direct SQL, ordinary multi-command updates,
+workspace hooks, redirects, selectors, server transactions, and ambient
+configuration remain denied.
+
+The new incremental gateway patch is SHA-256
+`365e192325b79e0df0a2be42a7675b4ba3c511641dbb8b241c16ac099b737b59`.
+It applies with zero context after the three immutable bootstrap patch layers
+listed above to pinned Beads revision
+`6c124203e771433a3550c348771a5b5e27fd3c21`. A fresh composition matched the
+reviewed source byte-for-byte, passed `git diff --check`, and passed both native
+gateway tests:
+
+- one bounded atomic transition with exact postimage; and
+- concurrent identical claims with exactly one winner.
+
+Two clean `go1.26.2` Darwin/arm64 CGO builds, using distinct build caches,
+`-trimpath`, `-buildvcs=false`, and an empty build ID, were byte-identical at
+SHA-256
+`7ac16c8bd399baf5dd91d57345b39cf8136b490aaf51e26948c0ff1dfc3e87b3`.
+That exact binary then passed the repository's public synthetic
+`TestNativeMutatorIntegration`, including the first claim and stale replay
+denial. The full MARS-3 suite passed under the race detector; vet, doctrine,
+plan, DocSync, public, and whitespace gates also passed.
+
+All Beads mutation tests used disposable public synthetic workspaces. This
+checkpoint did not read or mutate canonical M3-W001, did not provision or
+issue a PostgreSQL lease, and did not create an implementation effect.
