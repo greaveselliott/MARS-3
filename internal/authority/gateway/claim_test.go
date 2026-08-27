@@ -350,6 +350,89 @@ func TestClaimInvalidPostimageReturnsNoCapability(t *testing.T) {
 	assertDenial(t, err, authorityv1.ErrorUnknownEffect, ruleClaimPostimage, requiredReconciliation, allowedSagaRead)
 }
 
+func TestReconcileClaimedWorkIssuesFirstLeaseWithoutCanonicalMutation(t *testing.T) {
+	now := time.Date(2026, 8, 27, 1, 0, 0, 0, time.UTC)
+	item := claimedWork("M3-W001", "w001-delivery-attempt")
+	store := &memoryClaimStore{item: item}
+	sagas := newMemorySagaStore(now)
+	events := &fakeEvents{}
+	service := mustClaimService(t, store, sagas, events, now)
+	request := claimRequest(item, item.ClaimAttemptID, "w001-delivery-lease-001")
+	principal := claimant()
+	principal.Capabilities = append(principal.Capabilities, authorityv1.CapabilityLeaseIssue)
+
+	response, err := service.ReconcileClaimedWork(context.Background(), principal, request)
+	if err != nil {
+		t.Fatalf("ReconcileClaimedWork: %v", err)
+	}
+	if store.claimCalls != 0 || !response.Lease.Active || response.Lease.LeaseEpoch != 1 || response.Work.Version != item.Version {
+		t.Fatalf("response=%#v claimCalls=%d", response, store.claimCalls)
+	}
+	if len(events.events) != 3 || events.events[0].Operation != operationClaimReconcileIntent ||
+		events.events[1].Operation != operationClaimReconcilePolicy || events.events[2].Operation != operationClaimReceipt {
+		t.Fatalf("events=%#v", events.events)
+	}
+	replay, err := service.ReconcileClaimedWork(context.Background(), principal, request)
+	if err != nil || !replay.Replayed || replay.ReceiptRef != response.ReceiptRef || store.claimCalls != 0 || len(events.events) != 3 {
+		t.Fatalf("replay=%#v err=%v claimCalls=%d events=%d", replay, err, store.claimCalls, len(events.events))
+	}
+}
+
+func TestReconcileClaimedWorkFailsClosed(t *testing.T) {
+	now := time.Date(2026, 8, 27, 1, 0, 0, 0, time.UTC)
+	base := claimedWork("M3-W001", "w001-delivery-attempt")
+	for name, mutate := range map[string]func(*authorityv1.WorkItem, *authorityv1.Principal, *authorityv1.ClaimRequest){
+		"missing lease capability": func(_ *authorityv1.WorkItem, principal *authorityv1.Principal, _ *authorityv1.ClaimRequest) {
+			principal.Capabilities = []authorityv1.Capability{authorityv1.CapabilityWorkRead, authorityv1.CapabilityWorkClaim}
+		},
+		"backlog work": func(item *authorityv1.WorkItem, _ *authorityv1.Principal, _ *authorityv1.ClaimRequest) {
+			*item = readyWork(item.BeadID)
+		},
+		"wrong attempt": func(_ *authorityv1.WorkItem, _ *authorityv1.Principal, request *authorityv1.ClaimRequest) {
+			request.AttemptID = "attempt-other"
+		},
+		"stale version": func(_ *authorityv1.WorkItem, _ *authorityv1.Principal, request *authorityv1.ClaimRequest) {
+			request.ExpectedVersion.IssueMutationSequence--
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			item := cloneWork(base)
+			request := claimRequest(item, item.ClaimAttemptID, "w001-delivery-lease-001")
+			principal := claimant()
+			principal.Capabilities = append(principal.Capabilities, authorityv1.CapabilityLeaseIssue)
+			mutate(&item, &principal, &request)
+			store := &memoryClaimStore{item: item}
+			sagas := newMemorySagaStore(now)
+			response, err := mustClaimService(t, store, sagas, &fakeEvents{}, now).ReconcileClaimedWork(context.Background(), principal, request)
+			if err == nil || response.Lease.Active || store.claimCalls != 0 || sagas.epoch != 0 {
+				t.Fatalf("response=%#v err=%v claimCalls=%d epoch=%d", response, err, store.claimCalls, sagas.epoch)
+			}
+		})
+	}
+}
+
+func TestReconcileClaimedWorkRecoversCanonicalSagaWithoutMutation(t *testing.T) {
+	now := time.Date(2026, 8, 27, 1, 0, 0, 0, time.UTC)
+	item := claimedWork("M3-W001", "w001-delivery-attempt")
+	store := &memoryClaimStore{item: item}
+	sagas := newMemorySagaStore(now)
+	sagas.issueErr = errors.New("synthetic lease outage")
+	service := mustClaimService(t, store, sagas, &fakeEvents{}, now)
+	request := claimRequest(item, item.ClaimAttemptID, "w001-delivery-lease-001")
+	principal := claimant()
+	principal.Capabilities = append(principal.Capabilities, authorityv1.CapabilityLeaseIssue)
+	if response, err := service.ReconcileClaimedWork(context.Background(), principal, request); err == nil || response.Lease.Active {
+		t.Fatalf("outage response=%#v err=%v", response, err)
+	}
+	sagas.mu.Lock()
+	sagas.issueErr = nil
+	sagas.mu.Unlock()
+	response, err := service.ReconcileClaimedWork(context.Background(), principal, request)
+	if err != nil || !response.Lease.Active || store.claimCalls != 0 {
+		t.Fatalf("recovery response=%#v err=%v claimCalls=%d", response, err, store.claimCalls)
+	}
+}
+
 func mustClaimService(t *testing.T, store ClaimStore, sagas ClaimSagaStore, events EventSink, now time.Time) *Service {
 	t.Helper()
 	service, err := NewWithClaims(store, sagas, events, func() time.Time { return now })
@@ -372,6 +455,17 @@ func claimRequest(item authorityv1.WorkItem, attemptID, idempotencyKey string) a
 		AttemptID: attemptID, BaseSHA: strings.Repeat("a", 40), ExclusivePaths: append([]string(nil), item.ExclusivePaths...),
 		Capability: authorityv1.CapabilityTicketDelivery, IdempotencyKey: idempotencyKey, TraceRef: "trace-claim-001",
 	}
+}
+
+func claimedWork(id, attemptID string) authorityv1.WorkItem {
+	item := readyWork(id)
+	item.NativeStatus = "in_progress"
+	item.LifecycleState = authorityv1.LifecycleInProgress
+	item.Assignee = "work-authority-engineer"
+	item.ClaimAttemptID = attemptID
+	item.Version.IssueMutationSequence++
+	item.Integrity.Lineage = strings.Repeat("b", 64)
+	return item
 }
 
 func cloneWork(item authorityv1.WorkItem) authorityv1.WorkItem {
