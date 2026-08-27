@@ -509,3 +509,70 @@ func issueFixture(t *testing.T, lifecycle authorityv1.LifecycleState, attemptID,
 	}
 	return data
 }
+
+func mutateFixtureMetadata(t *testing.T, raw []byte, mutate func(map[string]any)) []byte {
+	t.Helper()
+	var issues []map[string]any
+	if err := json.Unmarshal(raw, &issues); err != nil || len(issues) != 1 {
+		t.Fatalf("decode fixture: %v", err)
+	}
+	metadata, ok := issues[0]["metadata"].(map[string]any)
+	if !ok {
+		t.Fatal("fixture metadata missing")
+	}
+	mutate(metadata)
+	encoded, err := json.Marshal(issues)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return encoded
+}
+
+func TestProjectionRejectsCaseFoldedClaimAlias(t *testing.T) {
+	raw := issueFixture(t, authorityv1.LifecycleInProgress, "canonical-attempt", "work-authority-engineer", 2, false)
+	raw = mutateFixtureMetadata(t, raw, func(metadata map[string]any) {
+		metadata["workclaim"] = map[string]any{
+			"attemptId": "case-alias-attempt", "idempotencyKey": "case-alias-key",
+			"baseCommit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+		}
+	})
+	if _, err := decodeIssueSnapshot(raw, "tenant-fixture", "project-fixture", []authorityv1.Label{authorityv1.LabelPublicAccepted}); !errors.Is(err, ErrProjectionInvalid) {
+		t.Fatalf("case-folded claim alias error=%v", err)
+	}
+}
+
+func TestProjectionRejectsLegacyTerminalScalarsWithoutDetailedRecords(t *testing.T) {
+	raw := issueFixture(t, authorityv1.LifecycleInProgress, "canonical-attempt", "work-authority-engineer", 2, false)
+	raw = mutateFixtureMetadata(t, raw, func(metadata map[string]any) {
+		metadata["reviewAccepted"] = true
+		metadata["runDisposition"] = "completed"
+		metadata["reconciled"] = true
+	})
+	if _, err := decodeIssueSnapshot(raw, "tenant-fixture", "project-fixture", []authorityv1.Label{authorityv1.LabelPublicAccepted}); !errors.Is(err, ErrProjectionInvalid) {
+		t.Fatalf("orphan legacy lifecycle scalars error=%v", err)
+	}
+}
+
+func TestProjectionRejectsDependencyDetailedLifecycleContradiction(t *testing.T) {
+	raw := issueFixture(t, authorityv1.LifecycleBacklog, "", "", 1, false)
+	var issues []map[string]any
+	if err := json.Unmarshal(raw, &issues); err != nil {
+		t.Fatal(err)
+	}
+	dependency := issues[0]["dependencies"].([]any)[0].(map[string]any)
+	metadata := dependency["metadata"].(map[string]any)
+	metadata["runDispositionRecord"] = map[string]any{
+		"principalProfileId": "delivery-orchestrator", "status": "failed",
+		"headSHA": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "evidenceRefs": []any{"evidence-failed"},
+		"idempotencyKey": "run-failed", "failure": map[string]any{
+			"reason": "runtime-failed", "failure_fingerprint": "runtime-failed", "attempt": float64(1), "next_action": "retry-once",
+		},
+	}
+	encoded, err := json.Marshal(issues)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := decodeIssueSnapshot(encoded, "tenant-fixture", "project-fixture", []authorityv1.Label{authorityv1.LabelPublicAccepted}); !errors.Is(err, ErrProjectionInvalid) {
+		t.Fatalf("dependency scalar/detail contradiction error=%v", err)
+	}
+}

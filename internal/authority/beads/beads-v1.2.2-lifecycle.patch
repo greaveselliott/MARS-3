@@ -1,5 +1,5 @@
 diff --git a/cmd/bd/batch.go b/cmd/bd/batch.go
-index f1a5409a7..244f61e9c 100644
+index f1a5409a7..ea4e2ae68 100644
 --- a/cmd/bd/batch.go
 +++ b/cmd/bd/batch.go
 @@ -63,0 +64 @@ Grammar (one command per line):
@@ -14,7 +14,7 @@ index f1a5409a7..244f61e9c 100644
 @@ -360,0 +365,2 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
 +	case "authority-transition":
 +		return runAuthorityTransitionBatchOp(ctx, tx, op, actorName)
-@@ -906,0 +913,880 @@ func runAuthorityClaimBatchOp(ctx context.Context, tx storage.Transaction, op ba
+@@ -906,0 +913,899 @@ func runAuthorityClaimBatchOp(ctx context.Context, tx storage.Transaction, op ba
 +var authorityTransitionKeys = map[string]bool{
 +	"expected_status":              true,
 +	"expected_assignee":            true,
@@ -267,7 +267,7 @@ index f1a5409a7..244f61e9c 100644
 +	decoder := json.NewDecoder(bytes.NewReader(pre))
 +	decoder.UseNumber()
 +	var values map[string]interface{}
-+	if decoder.Decode(&values) != nil || authorityLifecycleKeyUsed(values, transition.IdempotencyKey) {
++	if decoder.Decode(&values) != nil || !authorityCanonicalMetadataKeys(values) || authorityLifecycleKeyUsed(values, transition.IdempotencyKey) {
 +		return nil, "", "", "", fmt.Errorf("invalid lifecycle metadata")
 +	}
 +	version, ok := authorityObject(values["workVersion"])
@@ -508,6 +508,25 @@ index f1a5409a7..244f61e9c 100644
 +		return bootstrap
 +	}
 +	return nil
++}
++
++func authorityCanonicalMetadataKeys(values map[string]interface{}) bool {
++	allowed := map[string]bool{
++		"schemaVersion": true, "displayId": true, "lifecycleState": true, "goalIds": true,
++		"productDecisionIds": true, "featureId": true, "scenarioIds": true, "exclusivePaths": true,
++		"verificationOrder": true, "workVersion": true, "bootstrapClaim": true, "workClaim": true,
++		"blocker": true, "blockedBy": true, "reviewAccepted": true, "runDisposition": true,
++		"reconciled": true, "handoff": true, "reviewRecords": true, "reviewHistory": true,
++		"runHistory": true, "runDispositionRecord": true, "reconciliationRecord": true,
++		"terminalRecord": true, "risk": true, "workType": true, "coordinator": true,
++		"failureOwnership": true, "publicDisclosure": true, "contractPublicationRequired": true,
++	}
++	for key := range values {
++		if !allowed[key] {
++			return false
++		}
++	}
++	return true
 +}
 +
 +func authorityClaimRecord(value interface{}, bootstrap bool) (map[string]interface{}, bool) {
@@ -896,10 +915,10 @@ index f1a5409a7..244f61e9c 100644
 +}
 +
 diff --git a/cmd/bd/batch_embedded_test.go b/cmd/bd/batch_embedded_test.go
-index 34f2e8fa8..8a1fda8f7 100644
+index 34f2e8fa8..6f557bcb3 100644
 --- a/cmd/bd/batch_embedded_test.go
 +++ b/cmd/bd/batch_embedded_test.go
-@@ -556,0 +557,487 @@ func TestBatchAuthorityClaimContentionHasOneWinner(t *testing.T) {
+@@ -556,0 +557,507 @@ func TestBatchAuthorityClaimContentionHasOneWinner(t *testing.T) {
 +func TestBatchAuthorityLifecycleIsOneBoundedTransitionChain(t *testing.T) {
 +	previousActor := actor
 +	t.Cleanup(func() { setActor(previousActor) })
@@ -1135,6 +1154,23 @@ index 34f2e8fa8..8a1fda8f7 100644
 +	})
 +}
 +
++func TestAuthorityLifecycleRejectsLegacyTerminalScalarsWithoutDetailedRecords(t *testing.T) {
++	var values map[string]interface{}
++	if json.Unmarshal(authorityLifecycleMetadataForTest(), &values) != nil {
++		t.Fatal("decode fixture")
++	}
++	values["reviewAccepted"] = true
++	values["runDisposition"] = "completed"
++	values["reconciled"] = true
++	corrupt, _ := json.Marshal(values)
++	if _, _, _, _, err := authorityTransitionPostMetadata(corrupt, authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt", CanonicalClaimAttemptID: "canonical-attempt",
++		HandoffFenceDigest: strings.Repeat("7", 64), HeadSHA: strings.Repeat("a", 40), EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff",
++	}); err == nil {
++		t.Fatal("transition accepted legacy terminal scalars without detailed lifecycle evidence")
++	}
++}
++
 +func TestAuthorityLifecycleTerminalRejectsMissingOrDualClaimLineage(t *testing.T) {
 +	raw := authorityLifecycleMetadataForTest()
 +	head := strings.Repeat("a", 40)
@@ -1156,6 +1192,9 @@ index 34f2e8fa8..8a1fda8f7 100644
 +		},
 +		"malformed shadow": func(values map[string]interface{}) { values["bootstrapClaim"] = "invalid-shadow-binding" },
 +		"null shadow":      func(values map[string]interface{}) { values["bootstrapClaim"] = nil },
++		"case-folded claim alias": func(values map[string]interface{}) {
++			values["workclaim"] = map[string]interface{}{"attemptId": "case-alias", "idempotencyKey": "case-alias-key", "baseCommit": strings.Repeat("e", 40)}
++		},
 +		"work grant": func(values map[string]interface{}) {
 +			values["workClaim"].(map[string]interface{})["grantId"] = "wrong-claim-type"
 +		},

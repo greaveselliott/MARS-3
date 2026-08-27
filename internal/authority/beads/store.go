@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -393,7 +394,7 @@ func decodeIssueSnapshot(raw []byte, tenantID, projectID string, labels []author
 	var nativeLabels []string
 	var metadata issueMetadata
 	var dependenciesRaw []json.RawMessage
-	if !validRawClaimFields(object["metadata"]) || decodeField(object, "id", &id) != nil || decodeField(object, "status", &status) != nil || decodeOptionalString(object, "assignee", &assignee) != nil ||
+	if !validCanonicalJSONKeys(object["metadata"], reflect.TypeOf(issueMetadata{})) || !validRawClaimFields(object["metadata"]) || decodeField(object, "id", &id) != nil || decodeField(object, "status", &status) != nil || decodeOptionalString(object, "assignee", &assignee) != nil ||
 		decodeField(object, "created_at", &createdAt) != nil || decodeField(object, "updated_at", &updatedAt) != nil ||
 		decodeField(object, "labels", &nativeLabels) != nil || decodeStrictField(object, "metadata", &metadata) != nil ||
 		decodeField(object, "dependencies", &dependenciesRaw) != nil {
@@ -491,12 +492,13 @@ func projectIssue(tenantID, projectID, id, status, assignee string, metadata iss
 		if dependency.DependencyType != "blocks" || !compatibleLifecycle(dependency.Status, dependency.Metadata.LifecycleState) {
 			return authorityv1.WorkItem{}, ErrProjectionInvalid
 		}
+		reviewAccepted, runCompleted, reconciled, valid := dependencyLifecycleState(dependency.Metadata)
+		if !valid {
+			return authorityv1.WorkItem{}, ErrProjectionInvalid
+		}
 		projectedDependencies = append(projectedDependencies, authorityv1.Dependency{
 			BeadID: dependency.ID, LifecycleState: dependency.Metadata.LifecycleState,
-			ReviewAccepted: dependency.Metadata.ReviewAccepted,
-			RunCompleted: dependency.Metadata.RunDisposition == "completed" ||
-				dependency.Metadata.RunDispositionRecord != nil && dependency.Metadata.RunDispositionRecord.Status == authorityv1.RunCompleted,
-			Reconciled: dependency.Metadata.Reconciled || dependency.Metadata.ReconciliationRecord != nil,
+			ReviewAccepted: reviewAccepted, RunCompleted: runCompleted, Reconciled: reconciled,
 		})
 	}
 	sort.Slice(projectedDependencies, func(i, j int) bool { return projectedDependencies[i].BeadID < projectedDependencies[j].BeadID })
@@ -672,31 +674,86 @@ func decodeDependency(raw json.RawMessage) (dependencyProjection, error) {
 }
 
 func decodeDependencyMetadata(raw json.RawMessage, target *issueMetadata) error {
-	var object map[string]json.RawMessage
-	if json.Unmarshal(raw, &object) != nil {
+	if !validCanonicalJSONKeys(raw, reflect.TypeOf(issueMetadata{})) || !validRawClaimFields(raw) {
 		return ErrProjectionInvalid
 	}
-	for key, value := range object {
-		switch key {
-		case "lifecycleState":
-			if json.Unmarshal(value, &target.LifecycleState) != nil {
-				return ErrProjectionInvalid
-			}
-		case "reviewAccepted":
-			if json.Unmarshal(value, &target.ReviewAccepted) != nil {
-				return ErrProjectionInvalid
-			}
-		case "runDisposition":
-			if json.Unmarshal(value, &target.RunDisposition) != nil {
-				return ErrProjectionInvalid
-			}
-		case "reconciled":
-			if json.Unmarshal(value, &target.Reconciled) != nil {
-				return ErrProjectionInvalid
-			}
-		}
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if decoder.Decode(target) != nil {
+		return ErrProjectionInvalid
+	}
+	if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+		return ErrProjectionInvalid
 	}
 	return nil
+}
+
+func validCanonicalJSONKeys(raw json.RawMessage, valueType reflect.Type) bool {
+	for valueType.Kind() == reflect.Pointer {
+		valueType = valueType.Elem()
+	}
+	switch valueType.Kind() {
+	case reflect.Struct:
+		var object map[string]json.RawMessage
+		if json.Unmarshal(raw, &object) != nil {
+			return false
+		}
+		fields := make(map[string]reflect.Type, valueType.NumField())
+		for index := 0; index < valueType.NumField(); index++ {
+			field := valueType.Field(index)
+			name := strings.Split(field.Tag.Get("json"), ",")[0]
+			if name != "" && name != "-" {
+				fields[name] = field.Type
+			}
+		}
+		for key, value := range object {
+			fieldType, ok := fields[key]
+			if !ok {
+				return false
+			}
+			trimmed := bytes.TrimSpace(value)
+			if bytes.Equal(trimmed, []byte("null")) && fieldType.Kind() == reflect.Pointer {
+				continue
+			}
+			if !validCanonicalJSONKeys(value, fieldType) {
+				return false
+			}
+		}
+		return true
+	case reflect.Slice, reflect.Array:
+		var values []json.RawMessage
+		if json.Unmarshal(raw, &values) != nil {
+			return false
+		}
+		for _, value := range values {
+			if !validCanonicalJSONKeys(value, valueType.Elem()) {
+				return false
+			}
+		}
+		return true
+	default:
+		return true
+	}
+}
+
+func lifecycleRecordsPresent(metadata issueMetadata) bool {
+	return metadata.Handoff != nil || len(metadata.ReviewRecords) > 0 || len(metadata.ReviewHistory) > 0 || len(metadata.RunHistory) > 0 || metadata.RunDispositionRecord != nil || metadata.ReconciliationRecord != nil || metadata.TerminalRecord != nil
+}
+
+func dependencyLifecycleState(metadata issueMetadata) (bool, bool, bool, bool) {
+	if lifecycleRecordsPresent(metadata) {
+		if !validLifecycleRecords(metadata) {
+			return false, false, false, false
+		}
+		return metadata.ReviewAccepted,
+			metadata.RunDispositionRecord != nil && metadata.RunDispositionRecord.Status == authorityv1.RunCompleted,
+			metadata.ReconciliationRecord != nil, true
+	}
+	if metadata.LifecycleState != authorityv1.LifecycleDone &&
+		(metadata.ReviewAccepted || metadata.RunDisposition != "" || metadata.Reconciled || metadata.Blocker != "" || len(metadata.BlockedBy) != 0) {
+		return false, false, false, false
+	}
+	return metadata.ReviewAccepted, metadata.RunDisposition == string(authorityv1.RunCompleted), metadata.Reconciled, true
 }
 
 func decodeField(object map[string]json.RawMessage, key string, target any) error {
@@ -872,9 +929,9 @@ func validLifecycleRecords(metadata issueMetadata) bool {
 	} else if !bindingValid {
 		return false
 	}
-	hasDetailed := metadata.Handoff != nil || len(metadata.ReviewRecords) > 0 || len(metadata.ReviewHistory) > 0 || len(metadata.RunHistory) > 0 || metadata.RunDispositionRecord != nil || metadata.ReconciliationRecord != nil || metadata.TerminalRecord != nil
+	hasDetailed := lifecycleRecordsPresent(metadata)
 	if !hasDetailed {
-		return metadata.LifecycleState != authorityv1.LifecycleDone
+		return metadata.LifecycleState != authorityv1.LifecycleDone && !metadata.ReviewAccepted && metadata.RunDisposition == "" && !metadata.Reconciled && metadata.Blocker == "" && len(metadata.BlockedBy) == 0
 	}
 	if binding == nil {
 		return false
