@@ -156,8 +156,8 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the v13 closed-argv lifecycle correction to
-  a signed immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
+- Required next transition: bind the v14 physical-path and transitive-process
+  lifecycle correction to a signed immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
   conformance suites plus independent cold-build reproduction, then route that exact tree through QA and Security. No
   canonical handoff or later lifecycle mutation may execute until the reviewed
   tree is merged and a separate reconciliation authority binds the
@@ -265,6 +265,21 @@ files escaped the nonrecursive process guard
 (`ci.test_process_guard_incomplete`). The signed
 `W-001-lifecycle-ci-hardening-v13` grant permits only exact per-subcommand Git
 argv schemas, recursive closed process admission, the matching adversarial
+regressions, and fresh immutable review. W-001 therefore remains
+`in-progress`; no merge, canonical lifecycle mutation, or live lease is
+authorized by this correction.
+
+Independent QA and Security changes-requested the immutable V13 checkpoint at
+head `ce934054aed66c074e99a032191a6a51c620b947`, tree
+`73cab7fb7b1bd2fc1102dc4b16e9617fd7c26680`, after public run `33112938711`,
+job `98660186954`, passed. A lexically contained clone destination could resolve
+through a symlinked ancestor and write outside the disposable root
+(`ci.test_git_clone_physical_escape`). Doctrine tests could also call the
+production `planningGrantGitOutput` executor directly and bypass the closed
+test wrapper (`ci.test_process_guard_transitive_bypass`). The prospective
+signed `W-001-lifecycle-ci-hardening-v14` grant permits only canonical physical
+clone containment, routing the three historical read-only calls through the
+bounded test wrapper, transitive production-executor denial, their adversarial
 regressions, and fresh immutable review. W-001 therefore remains
 `in-progress`; no merge, canonical lifecycle mutation, or live lease is
 authorized by this correction.

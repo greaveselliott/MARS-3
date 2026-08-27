@@ -964,3 +964,33 @@ and persistence cases and add the exact V12 bypasses. No authority runtime,
 native patch, database schema, API, product contract, workflow, scanner,
 repository setting, Beads state, canonical lifecycle, or live lease is
 changed.
+
+## Lifecycle-correction v13 review and v14 physical boundary
+
+The immutable V13 candidate is head
+`ce934054aed66c074e99a032191a6a51c620b947`, tree
+`73cab7fb7b1bd2fc1102dc4b16e9617fd7c26680`, signed tag object
+`8d50fbb230503f4ad24cfc7301e4e4924be30ec0`. Public run `33112938711`, job
+`98660186954`, passed every required gate. Independent QA and Security both
+returned `changes-requested` for that exact subject:
+
+- `ci.test_git_clone_physical_escape`: lexical `filepath.Rel` containment
+  admitted `root/link/repo` when `root/link` was a symlink to an outside
+  directory, and Git wrote the clone outside the disposable boundary;
+- `ci.test_process_guard_transitive_bypass`: doctrine tests called the
+  production `planningGrantGitOutput` executor directly, so the recursive
+  constructor guard observed no test-side `os/exec` use while arbitrary Git
+  arguments still executed.
+
+The prospective signed `W-001-lifecycle-ci-hardening-v14` grant preserves all
+V9-V13 runtime, qualification, commit, tag, run, and disposition evidence. It
+requires a direct canonical disposable root, admits only a nonexistent direct
+child clone target whose existing parent resolves to that root, and reserves
+the target as a direct directory before Git starts. It routes the three
+historical read-only tag and plan calls through the exact test wrapper and
+rejects `planningGrantGitOutput` identifiers in every recursively enumerated
+doctrine test file. Regressions cover symlinked roots, target ancestors,
+existing target symlinks, and an alternate-file production-executor call. No
+authority runtime, native patch, database schema, API, product contract,
+workflow, scanner, repository setting, Beads state, canonical lifecycle, or
+live lease is changed.
