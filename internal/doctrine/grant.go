@@ -216,6 +216,8 @@ const (
 	w001LifecycleV6TagObject            = "d8637c7443ab04e05892ecf5489f0b45fa41e43d"
 	w001LifecycleCorrectionV7ReviewTag  = "mars3/w001-lifecycle-completion-v7"
 	w001LifecycleCorrectionV7TagMessage = "MARS-3 W-001 lifecycle correction tree attestation v7"
+	w001LifecycleCorrectionV7PatchPath  = "internal/authority/beads/beads-v1.2.2-lifecycle.patch"
+	w001LifecycleCorrectionV7PatchSHA   = "2db1615df7bc1c5b4bd0d2d17cecb22a43b2bf4be72a1ebcf750820170b5ff66"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -4236,17 +4238,7 @@ func checkW001LifecycleCorrectionV7Grant(root string, findings *[]Finding) {
 		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_base", "v7 lifecycle correction must descend from the exact reviewed v6 head and tree")
 	}
 	checkW001LifecycleV6Tag(root, findings)
-	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
-	for _, marker := range []string{
-		"lifecycle.claim_lineage_not_joined",
-		"lifecycle.failure_fingerprint_retry_not_monotonic",
-		"lifecycle.qualification_not_independently_reproducible",
-	} {
-		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
-			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_correction_v7_evidence", "v7 lifecycle evidence must preserve all exact v6 findings")
-			break
-		}
-	}
+	checkW001LifecycleCorrectionV7Evidence(root, findings)
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
 	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-correction-v7`")) ||
 		!bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
@@ -4257,6 +4249,31 @@ func checkW001LifecycleCorrectionV7Grant(root string, findings *[]Finding) {
 		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-correction-v7")) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_correction_v7_manifest", "manifest must project the v7 lifecycle correction and absent live lease")
+	}
+}
+
+func checkW001LifecycleCorrectionV7Evidence(root string, findings *[]Finding) {
+	evidencePath := "docs/evidence/W-001-validation.md"
+	evidence, evidenceErr := readRepoFile(root, evidencePath)
+	for _, marker := range []string{
+		"lifecycle.claim_lineage_not_joined",
+		"lifecycle.failure_fingerprint_retry_not_monotonic",
+		"lifecycle.qualification_not_independently_reproducible",
+		w001LifecycleCorrectionV7PatchSHA,
+		"70dfa9e28546dc0c6dbe8046f5960577514b0bc6793fda98b3383931a50a72d8",
+		"sha256:b1a0cc29a7e13e0595e21087eeb930dc494976b18ba68279bf52c665f3170aa0",
+		"bb8dd437802943670b4e882a3cdc30d5ea5a3b2035171fb765d7d82db7f624de",
+		"canonical-claim attempt on every current",
+		"third occurrence is rejected",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, evidencePath, "public.w001_lifecycle_correction_v7_evidence", "v7 lifecycle evidence must preserve the exact findings and qualification bindings")
+			break
+		}
+	}
+	patch, patchErr := readRepoFile(root, w001LifecycleCorrectionV7PatchPath)
+	if patchErr != nil || fileSHA256(patch) != w001LifecycleCorrectionV7PatchSHA {
+		addFinding(findings, w001LifecycleCorrectionV7PatchPath, "public.w001_lifecycle_correction_v7_patch", "v7 lifecycle patch must match its exact reviewed SHA-256")
 	}
 }
 

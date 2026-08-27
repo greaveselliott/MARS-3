@@ -1088,6 +1088,29 @@ func TestW001LifecycleCorrectionV7GrantAcceptsPinnedSignedContract(t *testing.T)
 	}
 }
 
+func TestW001LifecycleCorrectionV7EvidenceBindingsFailClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCorrectionV7Evidence(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid v7 lifecycle evidence bindings were rejected: %v", findings)
+	}
+	root := t.TempDir()
+	evidence, err := os.ReadFile(filepath.Join(repo, "docs", "evidence", "W-001-validation.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	tamperedEvidence := bytes.Replace(evidence, []byte("bb8dd437802943670b4e882a3cdc30d5ea5a3b2035171fb765d7d82db7f624de"), []byte(strings.Repeat("0", 64)), 1)
+	writePlanningGrantTestFile(t, root, "docs/evidence/W-001-validation.md", tamperedEvidence)
+	writePlanningGrantTestFile(t, root, w001LifecycleCorrectionV7PatchPath, []byte("not-the-reviewed-patch\n"))
+	findings = nil
+	checkW001LifecycleCorrectionV7Evidence(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_correction_v7_evidence") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_correction_v7_patch") {
+		t.Fatalf("tampered v7 evidence bindings were accepted: %v", findings)
+	}
+}
+
 func TestW001LifecycleCorrectionV7GrantFailsClosed(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	read := func(path string) []byte {

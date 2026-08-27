@@ -81,13 +81,20 @@
    implementation lease for that Bead.
 7. `changes-requested` or `blocked` review reopens M3-W001 rather than creating
    a duplicate. Every noncompleted run is recorded with public-safe failure
-   context; an explicit `in-review` run retains review state while other
-   noncompleted outcomes reopen the same Bead. Rehandoff archives the earlier
-   cycle and its run history, and a subsequent attempt receives a newer epoch.
+   context and a normalized fingerprint; an explicit `in-review` run retains
+   review state while other noncompleted outcomes reopen the same Bead. The
+   first occurrence is attempt 1. One equivalent retry is attempt 2 and must
+   become durably `blocked`; a third automatic occurrence is denied across
+   current and archived cycles. Rehandoff archives the earlier cycle and its
+   run history, and a subsequent attempt receives a newer epoch.
    Only the Delivery Orchestrator records the completed run and merge
    reconciliation, then requests `done` after accepted reviews. The terminal
-   record retains exactly one complete canonical claim binding, detailed
-   public-safe evidence, and append-only prior cycles after closure.
+   record retains exactly one complete type-specific WorkClaim or
+   BootstrapClaim, detailed public-safe evidence, and append-only prior cycles
+   after closure. Null, malformed, incomplete, dual, or type-confused claim
+   objects fail closed. Every current and archived handoff must name the sole
+   retained claim attempt, and legacy lifecycle scalars are absent or exactly
+   derived from their detailed records.
 8. Projection consumers replay journal events exactly once in sequence. On an
    irrecoverable gap, truncation, unknown checkpoint, or version conflict, they
    mark the view stale and non-authorizing, discard it, then ask the gateway for
@@ -265,6 +272,10 @@ and opaque trace references.
   exists or a deterministic reconciliation receipt is appended. A different
   request using that key fails. Every handoff record retains the immutable
   canonical-claim attempt and a digest of the complete normalized fence.
+- Every noncompleted run has a public-safe normalized fingerprint. The first
+  occurrence uses attempt 1; the sole equivalent retry uses attempt 2 and
+  records `blocked`; any third equivalent automatic occurrence is rejected,
+  including when earlier occurrences are in archived review cycles.
 - A skill, profile maximum, provider session, Temporal task, or cached event
   does not grant permission.
 

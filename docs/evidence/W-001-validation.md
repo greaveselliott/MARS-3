@@ -600,3 +600,80 @@ three corrections above, their public contracts and tests, hermetic independent
 build qualification, and one fresh v7 review publication. It grants no canonical
 Beads mutation or live lease and cannot merge before fresh QA and Security
 acceptance. Historical v6 materials remain immutable.
+
+The v7 candidate now rejects null, malformed, incomplete, dual, and
+type-confused WorkClaim or BootstrapClaim objects. Exactly one type-specific
+claim is retained, and the canonical-claim attempt on every current and
+archived handoff must equal that claim's attempt. Detailed review, run, and
+reconciliation records are authoritative; legacy lifecycle scalars may be
+absent or exactly derived, but cannot contradict them. Every noncompleted run,
+including `in-review` and `no-work`, retains a normalized public-safe
+fingerprint. The first occurrence is attempt 1; the only equivalent automatic
+retry is attempt 2 and must become `blocked`; a third occurrence is rejected
+across current and archived cycles.
+
+V7 material bindings are:
+
+- lifecycle patch SHA-256:
+  `2db1615df7bc1c5b4bd0d2d17cecb22a43b2bf4be72a1ebcf750820170b5ff66`;
+- full six-file patched-source diff SHA-256 after all five patches:
+  `70dfa9e28546dc0c6dbe8046f5960577514b0bc6793fda98b3383931a50a72d8`;
+- patched-source `go.mod` SHA-256:
+  `82794b69209f2d2e8ad23fccc94a84d07ac46fc99040964a89ff5566e42c8044`;
+- patched-source `go.sum` SHA-256:
+  `ad753874d566d22c81da097ed3d8d59f2f17ff6e69a437aca914ad178a488efb`;
+- official Go 1.26.5 Bookworm image index:
+  `sha256:53eeac89074db483fdf0ab3be1df32bf6e47562263d2d0d6baa7f26acb4957dd`;
+- exact Linux/arm64 builder manifest:
+  `sha256:b1a0cc29a7e13e0595e21087eeb930dc494976b18ba68279bf52c665f3170aa0`;
+- builder `/usr/local/go/bin/go` SHA-256:
+  `22201b57b855105df064a291863c3fc04f22a7431187a9205122aff42a0c825b`;
+- twice-reproduced Linux/arm64 CGO binary SHA-256:
+  `bb8dd437802943670b4e882a3cdc30d5ea5a3b2035171fb765d7d82db7f624de`.
+
+Two independently cloned pinned Beads sources were patched in this exact
+order, always with `git apply --unidiff-zero`: atomic claim, effective database
+security, hook isolation, gateway claim, then lifecycle. Their full source
+diff hashes matched. Each used a different empty module cache, build cache,
+and host source path, all mounted at fixed container paths. Dependencies were
+downloaded through the Go checksum database, then `go mod verify` and the build
+ran with networking disabled. The normalized build operation was:
+
+```text
+cwd: public scratch root
+builder: docker.io/library/golang@sha256:b1a0cc29a7e13e0595e21087eeb930dc494976b18ba68279bf52c665f3170aa0
+platform: linux/arm64
+source mount: <independent-patched-source> -> /src (read-only)
+cache mount: <independent-empty-cache> -> /cache
+
+go mod download
+docker --network=none: go mod verify
+docker --network=none environment:
+  HOME=/tmp/mars3-home GOTOOLCHAIN=local GOFLAGS=-mod=readonly
+  GOMODCACHE=/cache/modcache GOCACHE=/cache/gocache
+  CGO_ENABLED=1 GOOS=linux GOARCH=arm64 GOARM64=v8.0
+  SOURCE_DATE_EPOCH=1787852400 TZ=UTC LANG=C.UTF-8 LC_ALL=C.UTF-8
+docker --network=none command:
+  go build -tags gms_pure_go -trimpath -buildvcs=false
+  -ldflags=-buildid= -o /cache/out/bd ./cmd/bd
+```
+
+Both sequential cold builds produced byte-identical binaries at the bound
+hash. The second binary passed the repository's public synthetic
+`TestNativeMutatorIntegration` inside the same pinned, network-disabled Linux
+builder without a skip. The exact patched source ran every selected native
+`AuthorityLifecycle` case with Docker available and without a skip, including
+direct completion, rework history, rollback/contention, hook denial,
+server-transaction denial, all seven noncompleted statuses, type-specific and
+raw claim corruption, current and archived claim-attempt mismatch, legacy
+shadow contradiction, missing fingerprints, bounded blocked retry, and third
+attempt denial. The server case used the existing digest-pinned Dolt and Ryuk
+images.
+
+The credential-free PostgreSQL suite again ran against an ephemeral,
+loopback-only PostgreSQL 17.11 container at the previously recorded digest.
+`TestPostgresLeaseLifecycleAndRestart` executed without a skip and passed; the
+container was stopped and auto-removed. This verification did not mutate the
+canonical Beads workspace or create a canonical live lease. M3-W001 remains
+`in-progress` at WorkVersion mutation/dependency revisions `1/1`, and M3-P001
+remains `backlog` pending the immutable v7 review chain.

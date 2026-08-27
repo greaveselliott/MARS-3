@@ -173,7 +173,7 @@ values or represent a proposed owner as a current grant.
 
 ## Lifecycle-correction candidate
 
-The v6 bounded candidate retains the typed handoff, ordered review, run,
+The v7 bounded candidate retains the typed handoff, ordered review, run,
 reconciliation, and terminal routes while closing the independent v5 findings.
 Terminal versioned work must retain exactly one complete WorkClaim or
 BootstrapClaim plus detailed lifecycle evidence. Every current or archived
@@ -181,10 +181,13 @@ handoff binds the immutable canonical-claim attempt and a digest of the full
 normalized fence. A replay may report success only after verifying or
 repairing a durable reconciliation receipt. Blocked review and every declared
 noncompleted run retain public-safe reason, blocker, normalized fingerprint,
-attempt, and next action, then reopen the same Bead or remain explicitly
-`in-review` through an append-only recovery route. Completed closure still
-requires QA and Security acceptance, merged evidence, completed run, and
-reconciliation.
+attempt, and next action. The first equivalent failure is attempt 1, the sole
+retry is attempt 2 and becomes durably blocked, and a third automatic attempt
+is denied across current and archived cycles. Null, malformed, incomplete,
+dual, or type-confused claim objects fail closed; every handoff claim attempt
+equals the sole retained claim; and legacy lifecycle scalars cannot contradict
+detailed evidence. Completed closure still requires QA and Security acceptance,
+merged evidence, completed run, and reconciliation.
 
 Independent QA and Security changes-requested the signed v6 checkpoint. They
 confirmed the earlier full-fence replay, missing-receipt, recovery-route, native,

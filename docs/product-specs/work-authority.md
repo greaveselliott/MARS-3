@@ -127,12 +127,19 @@ operation without echoing credentials or payloads.
   `changes-requested` persist their failure context and return the same Bead to
   `in-progress`; `in-review` explicitly retains review state and may later be
   superseded by `completed` after the accepted review chain. Rehandoff archives
-  the earlier cycle and preserves its run history.
+  the earlier cycle and preserves its run history. Every noncompleted run has
+  a normalized fingerprint. Its first occurrence is attempt 1; its sole
+  equivalent automatic retry is attempt 2 and must record `blocked`; a third
+  equivalent automatic attempt is denied across current and archived cycles.
 - `done` requires the accepted review chain, merged immutable Git evidence,
   `completed` run disposition, and a successful reconciliation receipt. Only
   the Delivery Orchestrator can request that terminal transition. Closure uses
   one native transaction and retains the terminal evidence references plus the
-  original canonical claim binding.
+  original canonical claim binding. Every active or terminal versioned work
+  record contains exactly one type-specific WorkClaim or BootstrapClaim. Null,
+  malformed, incomplete, dual, and type-confused claims are invalid; every
+  current and archived handoff names that sole claim attempt; and legacy
+  lifecycle scalars are absent or exactly derived from detailed records.
 - A blocked attempt remains truthful with `blocker`, `blocked_by`, normalized
   failure fingerprint, bounded attempt count, and exact next action. It is not
   silently closed or duplicated.
