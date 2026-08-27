@@ -156,7 +156,7 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the v12 CI-hardened lifecycle correction to
+- Required next transition: bind the v13 closed-argv lifecycle correction to
   a signed immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
   conformance suites plus independent cold-build reproduction, then route that exact tree through QA and Security. No
   canonical handoff or later lifecycle mutation may execute until the reviewed
@@ -253,6 +253,21 @@ The signed `W-001-lifecycle-ci-hardening-v12` grant permits only absolute
 trusted-Git execution, fail-closed argument and environment admission, a
 repository-wide AST process allowlist, adversarial regressions, and fresh
 immutable review.
+
+Independent QA and Security changes-requested the immutable V12 checkpoint at
+head `3c8d55aa39e4e099d8a922f8e13a71efcbe2c78b`, tree
+`c4bb80ab477b7fcbe73a7a237479e44703393952`, after public run `33110339883`,
+job `98651204635`, passed. Exact Git long-option abbreviations, compact
+upload-pack syntax, outside-root Git-directory selection, and config-producing
+subcommands escaped the denylist (`ci.test_git_argv_schema_fail_open`). Direct
+`exec.Cmd` construction, indirect syscall function values, and nested test
+files escaped the nonrecursive process guard
+(`ci.test_process_guard_incomplete`). The signed
+`W-001-lifecycle-ci-hardening-v13` grant permits only exact per-subcommand Git
+argv schemas, recursive closed process admission, the matching adversarial
+regressions, and fresh immutable review. W-001 therefore remains
+`in-progress`; no merge, canonical lifecycle mutation, or live lease is
+authorized by this correction.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation

@@ -934,3 +934,33 @@ fixtures cover aliases, concatenation, `CommandContext`, shells, indirect
 calls, `os.StartProcess`, hostile exec paths, and hostile templates. No
 authority runtime, native patch, database schema, API, product contract,
 workflow, scanner, repository setting, Beads state, or live lease is changed.
+
+## Lifecycle-correction v12 review and v13 closed admission
+
+The immutable V12 candidate is head
+`3c8d55aa39e4e099d8a922f8e13a71efcbe2c78b`, tree
+`c4bb80ab477b7fcbe73a7a237479e44703393952`, signed tag object
+`d0176029978e0c49d795a02ad36f7f7992c3bdfa`. Public run `33110339883`, job
+`98651204635`, passed every required gate. Independent QA and Security both
+returned `changes-requested` for that exact subject:
+
+- `ci.test_git_argv_schema_fail_open`: Git long-option abbreviations
+  (`--upload-p`, `--templ`, and `--conf`), compact `-u/path`,
+  `--separate-git-dir`, and config-producing `remote add` escaped denylist
+  admission and could execute a helper, write outside the fixture, or persist
+  repository configuration;
+- `ci.test_process_guard_incomplete`: direct `exec.Cmd` construction,
+  indirect syscall process function values, and nested doctrine test files
+  escaped the nonrecursive selector guard.
+
+The prospective signed `W-001-lifecycle-ci-hardening-v13` grant preserves all
+V9-V12 runtime, qualification, commit, tag, run, and disposition evidence. It
+replaces Git option denylists with exact per-subcommand argv schemas, rejects
+every unenumerated subcommand or option before execution, recursively walks
+the doctrine test tree, and admits only the two exact synthetic `ssh-keygen`
+calls plus the one `/usr/bin/git` wrapper construction. Regressions retain the
+earlier hostile environment, alias, concatenation, `CommandContext`, shell,
+and persistence cases and add the exact V12 bypasses. No authority runtime,
+native patch, database schema, API, product contract, workflow, scanner,
+repository setting, Beads state, canonical lifecycle, or live lease is
+changed.

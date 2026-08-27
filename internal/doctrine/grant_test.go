@@ -18,6 +18,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -1544,6 +1545,82 @@ func TestW001LifecycleCIHardeningV12PathScope(t *testing.T) {
 	} {
 		if w001LifecycleCIHardeningV12PathsAllowed([]string{path}) {
 			t.Fatalf("out-of-scope v12 lifecycle CI hardening path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCIHardeningV13GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIHardeningV13Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v13 lifecycle CI hardening was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV13GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV13Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCIHardeningV12ReviewTag+":refs/tags/"+w001LifecycleCIHardeningV12ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIHardeningV13Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIHardeningV13Path:      tampered,
+		w001LifecycleCIHardeningV13Signature: read(w001LifecycleCIHardeningV13Signature),
+		w001LifecycleCIHardeningV12Path:      read(w001LifecycleCIHardeningV12Path),
+		w001LifecycleCIHardeningV12Signature: read(w001LifecycleCIHardeningV12Signature),
+		wave1PlanningGrantKey:                read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":  read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                  read(canonicalActivePlan),
+		".harness/manifest.yaml":             read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":    read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIHardeningV13Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v13_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v13_signature") {
+		t.Fatalf("tampered v13 lifecycle CI hardening authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV13PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIHardeningV13Path,
+		w001LifecycleCIHardeningV13Signature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIHardeningV13PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v13 lifecycle CI hardening path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCIHardeningV12Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIHardeningV13PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v13 lifecycle CI hardening path was accepted: %s", path)
 		}
 	}
 }
@@ -3300,6 +3377,9 @@ func planningGrantTestGitCommand(root string, arguments ...string) (*exec.Cmd, e
 	if err := validatePlanningGrantTestGitArguments(arguments); err != nil {
 		return nil, err
 	}
+	if err := validatePlanningGrantTestGitPaths(root, arguments); err != nil {
+		return nil, err
+	}
 	bounded := []string{
 		"-c", "maintenance.auto=false",
 		"-c", "gc.auto=0",
@@ -3310,6 +3390,30 @@ func planningGrantTestGitCommand(root string, arguments ...string) (*exec.Cmd, e
 	command := exec.Command("/usr/bin/git", append(bounded, arguments...)...)
 	command.Env = planningGrantGitEnvironment()
 	return command, nil
+}
+
+func validatePlanningGrantTestGitPaths(root string, arguments []string) error {
+	index := 0
+	for index < len(arguments) && arguments[index] == "-c" {
+		index += 2
+	}
+	if index >= len(arguments) || arguments[index] != "clone" {
+		return nil
+	}
+	target := arguments[len(arguments)-1]
+	if !filepath.IsAbs(target) {
+		return errors.New("Git clone target must be an absolute disposable path")
+	}
+	cleanRoot, err := filepath.Abs(filepath.Clean(root))
+	if err != nil {
+		return fmt.Errorf("resolve disposable Git root: %w", err)
+	}
+	cleanTarget := filepath.Clean(target)
+	relative, err := filepath.Rel(cleanRoot, cleanTarget)
+	if err != nil || relative == "." || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("Git clone target escapes the disposable root: %q", target)
+	}
+	return nil
 }
 
 func validatePlanningGrantTestGitArguments(arguments []string) error {
@@ -3329,7 +3433,10 @@ func validatePlanningGrantTestGitArguments(arguments []string) error {
 	subcommandIndex := -1
 	for index := 0; index < len(arguments); index++ {
 		argument := arguments[index]
-		if subcommand == "" && argument == "-c" {
+		if argument == "-c" {
+			if subcommand != "" {
+				return errors.New("Git subcommand-local configuration override is not admitted")
+			}
 			if index+1 >= len(arguments) {
 				return errors.New("Git -c requires one exact configuration assignment")
 			}
@@ -3339,46 +3446,96 @@ func validatePlanningGrantTestGitArguments(arguments []string) error {
 			}
 			continue
 		}
-		if argument == "-c" {
-			return errors.New("Git subcommand-local configuration override is not admitted")
+		if subcommand == "" && strings.HasPrefix(argument, "-") {
+			return fmt.Errorf("Git global option %q is not admitted", argument)
 		}
-		if strings.HasPrefix(argument, "-c") && argument != "-c" {
-			return fmt.Errorf("compact Git configuration override %q is not admitted", argument)
-		}
-		if argument == "--config-env" || strings.HasPrefix(argument, "--config-env=") {
-			return fmt.Errorf("Git config-env override %q is not admitted", argument)
-		}
-		for _, option := range []string{"-C", "--exec-path", "--template", "--upload-pack", "--git-dir", "--work-tree", "--namespace"} {
-			if argument == option || strings.HasPrefix(argument, option+"=") {
-				return fmt.Errorf("Git execution override %q is not admitted", argument)
-			}
-		}
-		if argument == "-u" {
-			return errors.New("Git upload-pack override is not admitted")
-		}
-		if subcommand == "" && !strings.HasPrefix(argument, "-") {
+		if subcommand == "" {
 			subcommand, subcommandIndex = argument, index
 		}
 	}
 	if subcommand == "" {
 		return errors.New("Git subcommand is required")
 	}
-	if subcommand == "config" {
-		tail := arguments[subcommandIndex+1:]
-		validRead := len(tail) == 2 && tail[0] == "--get" ||
-			len(tail) == 3 && (tail[0] == "--local" || tail[0] == "--global") && tail[1] == "--get"
-		if !validRead {
-			return errors.New("disposable Git config permits exact read-only queries only")
-		}
+	return validatePlanningGrantTestGitSubcommand(subcommand, arguments[subcommandIndex+1:])
+}
+
+func validatePlanningGrantTestGitSubcommand(subcommand string, arguments []string) error {
+	nonOption := func(value string) bool { return value != "" && !strings.HasPrefix(value, "-") }
+	exact := func(want ...string) bool {
+		return len(arguments) == len(want) && slices.Equal(arguments, want)
 	}
-	if subcommand == "clone" {
-		for _, argument := range arguments[subcommandIndex+1:] {
-			if argument == "--config" || strings.HasPrefix(argument, "--config=") {
-				return errors.New("Git clone configuration mutation is not admitted")
+	switch subcommand {
+	case "init":
+		if exact("--quiet") {
+			return nil
+		}
+	case "clone":
+		if len(arguments) == 4 && arguments[0] == "--quiet" && arguments[1] == "--no-local" && nonOption(arguments[2]) && nonOption(arguments[3]) {
+			return nil
+		}
+	case "fetch":
+		if len(arguments) == 4 && arguments[0] == "--quiet" && arguments[1] == "--no-tags" && nonOption(arguments[2]) && nonOption(arguments[3]) {
+			return nil
+		}
+	case "rev-parse":
+		if len(arguments) == 1 && nonOption(arguments[0]) || len(arguments) == 2 && arguments[0] == "--verify" && nonOption(arguments[1]) {
+			return nil
+		}
+	case "commit-tree":
+		if len(arguments) >= 5 && nonOption(arguments[0]) {
+			index := 1
+			parents := 0
+			for index+1 < len(arguments) && arguments[index] == "-p" && nonOption(arguments[index+1]) {
+				parents++
+				index += 2
+			}
+			if parents > 0 && index+2 == len(arguments) && arguments[index] == "-m" && arguments[index+1] != "" {
+				return nil
 			}
 		}
+	case "checkout":
+		valid := len(arguments) == 2 && exact("--quiet", "--detach") ||
+			len(arguments) == 3 && arguments[0] == "--quiet" && arguments[1] == "--detach" && nonOption(arguments[2]) ||
+			len(arguments) == 3 && arguments[0] == "--quiet" && arguments[1] == "-b" && nonOption(arguments[2]) ||
+			len(arguments) == 4 && arguments[0] == "--quiet" && arguments[1] == "-b" && nonOption(arguments[2]) && nonOption(arguments[3]) ||
+			len(arguments) == 4 && arguments[0] == "--quiet" && arguments[1] == "--force" && arguments[2] == "--detach" && nonOption(arguments[3]) ||
+			len(arguments) == 5 && arguments[0] == "--quiet" && arguments[1] == "--force" && arguments[2] == "-B" && nonOption(arguments[3]) && nonOption(arguments[4])
+		if valid {
+			return nil
+		}
+	case "tag":
+		if len(arguments) == 2 && arguments[0] == "-d" && nonOption(arguments[1]) ||
+			len(arguments) == 5 && arguments[0] == "-a" && arguments[1] == "-m" && arguments[2] != "" && nonOption(arguments[3]) && nonOption(arguments[4]) {
+			return nil
+		}
+	case "branch":
+		if len(arguments) == 2 && arguments[0] == "-m" && nonOption(arguments[1]) {
+			return nil
+		}
+	case "add":
+		if len(arguments) >= 2 && arguments[0] == "--" {
+			for _, path := range arguments[1:] {
+				if !nonOption(path) {
+					return fmt.Errorf("Git add path %q is not admitted", path)
+				}
+			}
+			return nil
+		}
+	case "commit":
+		if len(arguments) == 4 && arguments[0] == "--quiet" && arguments[1] == "--no-gpg-sign" && arguments[2] == "-m" && arguments[3] != "" {
+			return nil
+		}
+	case "diff":
+		if len(arguments) == 3 && arguments[0] == "--name-only" && nonOption(arguments[1]) && arguments[2] == "--" {
+			return nil
+		}
+	case "config":
+		if len(arguments) == 2 && arguments[0] == "--get" && nonOption(arguments[1]) ||
+			len(arguments) == 3 && (arguments[0] == "--local" || arguments[0] == "--global") && arguments[1] == "--get" && nonOption(arguments[2]) {
+			return nil
+		}
 	}
-	return nil
+	return fmt.Errorf("Git argv is outside the exact %s fixture schema: %q", subcommand, arguments)
 }
 
 func TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance(t *testing.T) {
@@ -3458,7 +3615,14 @@ func TestPlanningGrantTestGitArgumentsFailClosed(t *testing.T) {
 		{"-C", "/tmp/hostile", "status"},
 		{"--exec-path=/tmp/hostile", "status"},
 		{"clone", "--template=/tmp/hostile", "source", "target"},
+		{"clone", "--templ=/tmp/hostile", "source", "target"},
+		{"clone", "--upload-p=/tmp/hostile-upload-pack", "source", "target"},
+		{"clone", "--conf=maintenance.auto=true", "source", "target"},
 		{"clone", "-u", "/tmp/hostile-upload-pack", "source", "target"},
+		{"clone", "-u/tmp/hostile-upload-pack", "source", "target"},
+		{"clone", "--separate-git-dir=/tmp/outside", "source", "target"},
+		{"clone", "--quiet", "--no-local", "/tmp/source", "/tmp/outside"},
+		{"remote", "add", "hostile", "/tmp/source"},
 		{"config", "--local", "maintenance.auto", "true"},
 		{"config", "--global", "gc.auto", "999"},
 	} {
@@ -3499,6 +3663,18 @@ func TestAttack() { runner := exec.Command; _ = runner("git", "status") }
 import "os"
 func TestAttack() { _, _ = os.StartProcess("/usr/bin/git", []string{"git", "status"}, nil) }
 `,
+		"direct_exec_cmd": `package doctrine_test
+import "os/exec"
+func TestAttack() { _ = (&exec.Cmd{Path: "/usr/bin/git", Args: []string{"git", "status"}}).Run() }
+`,
+		"indirect_syscall": `package doctrine_test
+import "syscall"
+func TestAttack() { runner := syscall.ForkExec; _, _ = runner("/usr/bin/git", []string{"git", "status"}, nil) }
+`,
+		"nested_exec_cmd": `package nested
+import "os/exec"
+func TestAttack() { _ = (&exec.Cmd{Path: "/usr/bin/git", Args: []string{"git", "status"}}).Run() }
+`,
 	}
 	entries, err := os.ReadDir(filepath.Join(repo, "internal", "doctrine"))
 	if err != nil {
@@ -3523,7 +3699,14 @@ func TestAttack() { _, _ = os.StartProcess("/usr/bin/git", []string{"git", "stat
 					t.Fatal(err)
 				}
 			}
-			if err := os.WriteFile(filepath.Join(destination, "process_attack_test.go"), []byte(attack), 0o644); err != nil {
+			attackDestination := destination
+			if name == "nested_exec_cmd" {
+				attackDestination = filepath.Join(destination, "nested")
+				if err := os.MkdirAll(attackDestination, 0o755); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := os.WriteFile(filepath.Join(attackDestination, "process_attack_test.go"), []byte(attack), 0o644); err != nil {
 				t.Fatal(err)
 			}
 			var attackFindings []Finding

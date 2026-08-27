@@ -263,6 +263,14 @@ const (
 	w001LifecycleV11TagObject               = "7313ee2e38dd1d4f4f5ca62237e0be89b0b4f13a"
 	w001LifecycleCIHardeningV12ReviewTag    = "mars3/w001-lifecycle-completion-v12"
 	w001LifecycleCIHardeningV12TagMessage   = "MARS-3 W-001 lifecycle CI hardening tree attestation v12"
+	w001LifecycleCIHardeningV13Path         = ".harness/grants/W-001-lifecycle-ci-hardening-v13.yaml"
+	w001LifecycleCIHardeningV13Signature    = ".harness/grants/W-001-lifecycle-ci-hardening-v13.yaml.sig"
+	w001LifecycleCIHardeningV13Namespace    = "mars3-w001-lifecycle-ci-hardening-v13"
+	w001LifecycleCIHardeningV13Base         = "3c8d55aa39e4e099d8a922f8e13a71efcbe2c78b"
+	w001LifecycleCIHardeningV13BaseTree     = "c4bb80ab477b7fcbe73a7a237479e44703393952"
+	w001LifecycleV12TagObject               = "d0176029978e0c49d795a02ad36f7f7992c3bdfa"
+	w001LifecycleCIHardeningV13ReviewTag    = "mars3/w001-lifecycle-completion-v13"
+	w001LifecycleCIHardeningV13TagMessage   = "MARS-3 W-001 lifecycle CI closed argv and process admission tree attestation v13"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -3136,6 +3144,107 @@ var w001LifecycleCIHardeningV12Sequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001LifecycleCIHardeningV13Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCIHardeningGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-ci-hardening-v13"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T20:00:30Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T20:00:30Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCIHardeningV13Base},
+	{path: "grant.baseTree", value: w001LifecycleCIHardeningV13BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-ci-hardening-v12"},
+	{path: "grant.priorGrantSHA256", value: "9356f21a72ce652b6238be15f6393cf402c34408fe467526e43f2a53c7ca5ab1"},
+	{path: "grant.priorGrantSignatureSHA256", value: "733e67f5ec4807523ab56febc60c21aed3f4a2cfe58253febc58cef3b5d113d1"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCIHardeningV12ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV12TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCIHardeningV13Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCIHardeningV13BaseTree},
+	{path: "grant.priorRun", value: "33110339883"},
+	{path: "grant.priorJob", value: "98651204635"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCIHardeningV13ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCIHardeningV13TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "replace residual Git argument and process invocation denylists with closed admission"},
+	{path: "grant.attemptId", value: "w001-lifecycle-ci-hardening-v13"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.gitFinding", value: "abbreviated compact and config-producing Git arguments escaped the denylist"},
+	{path: "findings.processFinding", value: "direct exec Cmd indirect syscall function values and nested tests escaped process admission"},
+	{path: "findings.nextAction", value: "prospective-closed-argv-and-recursive-process-admission"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCIHardeningV13Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-ci-hardening-v13.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCIHardeningV13Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-runtime-qualification-and-v10-v12-immutable-history-runs-and-dispositions",
+		"replace-disposable-test-Git-option-denylists-with-exact-per-subcommand-argv-schemas",
+		"reject-long-option-abbreviations-compact-options-outside-root-metadata-and-config-producing-subcommands",
+		"recursively-enumerate-the-doctrine-test-tree-for-process-invocation-admission",
+		"reject-direct-exec-Cmd-construction-and-indirect-os-or-syscall-process-function-values",
+		"retain-and-extend-the-hostile-environment-alias-concatenation-command-context-shell-and-persistence-regressions",
+		"update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening",
+		"create-signed-semantic-commits-and-one-signed-v13-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCIHardeningV13Path, w001LifecycleCIHardeningV13Signature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged",
+		"every-disposable-test-Git-command-matches-one-exact-subcommand-and-argv-schema",
+		"Git-long-option-abbreviations-compact-upload-pack-and-outside-root-or-config-effects-are-unrepresentable",
+		"doctrine-test-process-enumeration-is-recursive-and-fails-closed-on-every-unreadable-or-unparseable-file",
+		"direct-exec-Cmd-and-indirect-os-or-syscall-process-construction-or-invocation-are-denied",
+		"only-two-exact-ssh-keygen-test-calls-and-the-one-trusted-Git-wrapper-call-are-admitted",
+		"v12-QA-and-Security-changes-requested-dispositions-remain-durable",
+		"the-next-public-run-uses-the-exact-signed-v13-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-or-move-any-v9-v10-v11-or-v12-commit-tag-or-run",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes":     {"ci.test_git_argv_schema_fail_open", "ci.test_process_guard_incomplete"},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -5298,6 +5407,15 @@ func checkW001LifecycleCIFencingV11Grant(root string, findings *[]Finding) {
 }
 
 func checkW001LifecycleCIHardeningV12Grant(root string, findings *[]Finding) {
+	v13Active := false
+	if _, v13Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV13Path))); v13Err == nil {
+		v13Active = true
+	} else if !os.IsNotExist(v13Err) {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_state", "v13 lifecycle CI hardening state cannot be established")
+	}
+	if v13Active {
+		defer checkW001LifecycleCIHardeningV13Grant(root, findings)
+	}
 	data, err := readRepoFile(root, w001LifecycleCIHardeningV12Path)
 	if err != nil {
 		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_missing", "signed v12 lifecycle CI hardening grant is required")
@@ -5385,28 +5503,144 @@ func checkW001LifecycleCIHardeningV12Grant(root string, findings *[]Finding) {
 	}
 	checkPlanningGrantTestProcessInvocations(root, findings)
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
-	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v12`")) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+	if planErr != nil || (!v13Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v12`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v12_plan", "active plan must select the truthful v12 CI hardening")
 	}
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
-	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-hardening-v12")) ||
-		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-hardening-v12")) ||
+	if manifestErr != nil || (!v13Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-hardening-v12")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-hardening-v12")))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_ci_hardening_v12_manifest", "manifest must project the v12 CI hardening and absent live lease")
 	}
 }
 
+func checkW001LifecycleCIHardeningV13Grant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001LifecycleCIHardeningV13Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_missing", "signed v13 lifecycle CI hardening grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCIHardeningV13Scalars, w001LifecycleCIHardeningV13Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCIHardeningV13Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_value", "%s does not match the signed v13 lifecycle CI hardening contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCIHardeningV13Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_sequence", "%s must equal the exact ordered v13 lifecycle CI hardening contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_expiry", "v13 lifecycle CI hardening grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCIHardeningV13Signature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCIHardeningV13Signature, "public.w001_lifecycle_ci_hardening_v13_signature_missing", "detached v13 lifecycle CI hardening signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_ci_hardening_v13_key", "v13 lifecycle CI hardening must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleCIHardeningV13Namespace); err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV13Signature, "public.w001_lifecycle_ci_hardening_v13_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCIHardeningV12Path, "9356f21a72ce652b6238be15f6393cf402c34408fe467526e43f2a53c7ca5ab1"},
+		{w001LifecycleCIHardeningV12Signature, "733e67f5ec4807523ab56febc60c21aed3f4a2cfe58253febc58cef3b5d113d1"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_ci_hardening_v13_prior_grant", "prior v12 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV13Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV13Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCIHardeningV13Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCIHardeningV13BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_base", "v13 lifecycle CI hardening must descend from the exact immutable v12 head and tree")
+	}
+	checkW001LifecycleV12Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"ci.test_git_argv_schema_fail_open", "ci.test_process_guard_incomplete",
+		w001LifecycleCIHardeningV13Base, w001LifecycleCIHardeningV13BaseTree, "33110339883", "98651204635",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_ci_hardening_v13_evidence", "v13 evidence must preserve the exact v12 findings and bounded hardening")
+			break
+		}
+	}
+	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
+	for _, marker := range []string{
+		"validatePlanningGrantTestGitSubcommand", "--upload-p=/tmp/hostile-upload-pack", "--separate-git-dir=/tmp/outside", "direct_exec_cmd", "indirect_syscall", "nested_exec_cmd",
+	} {
+		if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
+			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_hardening_v13_fixture", "v13 closed Git argv and recursive process regressions are required")
+			break
+		}
+	}
+	checkPlanningGrantTestProcessInvocations(root, findings)
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v13`")) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v13_plan", "active plan must select the truthful v13 CI hardening")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-hardening-v13")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-hardening-v13")) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_ci_hardening_v13_manifest", "manifest must project the v13 CI hardening and absent live lease")
+	}
+}
+
 func checkPlanningGrantTestProcessInvocations(root string, findings *[]Finding) {
-	paths, err := filepath.Glob(filepath.Join(root, "internal", "doctrine", "*_test.go"))
-	if err != nil || len(paths) == 0 {
+	var paths []string
+	doctrineRoot := filepath.Join(root, "internal", "doctrine")
+	walkErr := filepath.Walk(doctrineRoot, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("symlinked doctrine test surface is not admitted: %s", path)
+		}
+		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), "_test.go") {
+			paths = append(paths, path)
+		}
+		return nil
+	})
+	if walkErr != nil || len(paths) == 0 {
 		addFinding(findings, "internal/doctrine", "public.w001_lifecycle_ci_process_guard", "doctrine test process-invocation surface cannot be enumerated")
 		return
 	}
+	sort.Strings(paths)
 	expected := map[string][]string{
 		"grant_test.go:TestVerifyPlanningGrantTagRequiresExactSignedTreeAttestation": {"ssh-keygen", "ssh-keygen"},
 		"grant_test.go:planningGrantTestGitCommand":                                  {"/usr/bin/git"},
 	}
+	expectedCmdTypes := map[string]int{
+		"grant_test.go:planningGrantTestGitCommand": 1,
+	}
 	actual := make(map[string][]string)
+	actualCmdTypes := make(map[string]int)
 	guardFailed := false
 	for _, path := range paths {
 		fileSet := token.NewFileSet()
@@ -5452,6 +5686,8 @@ func checkPlanningGrantTestProcessInvocations(root string, findings *[]Finding) 
 		}
 		fileExecSelectorCount := 0
 		functionExecSelectorCount := 0
+		fileExecCmdTypeCount := 0
+		functionExecCmdTypeCount := 0
 		ast.Inspect(file, func(node ast.Node) bool {
 			switch typed := node.(type) {
 			case *ast.SelectorExpr:
@@ -5459,19 +5695,13 @@ func checkPlanningGrantTestProcessInvocations(root string, findings *[]Finding) 
 				if ok && execAliases[identifier.Name] && (typed.Sel.Name == "Command" || typed.Sel.Name == "CommandContext") {
 					fileExecSelectorCount++
 				}
-			case *ast.CallExpr:
-				selector, ok := typed.Fun.(*ast.SelectorExpr)
-				if !ok {
-					return true
+				if ok && execAliases[identifier.Name] && typed.Sel.Name == "Cmd" {
+					fileExecCmdTypeCount++
 				}
-				identifier, ok := selector.X.(*ast.Ident)
-				if !ok {
-					return true
-				}
-				if osAliases[identifier.Name] && selector.Sel.Name == "StartProcess" {
+				if ok && osAliases[identifier.Name] && typed.Sel.Name == "StartProcess" {
 					guardFailed = true
 				}
-				if syscallAliases[identifier.Name] && (selector.Sel.Name == "Exec" || selector.Sel.Name == "ForkExec" || selector.Sel.Name == "StartProcess") {
+				if ok && syscallAliases[identifier.Name] && (typed.Sel.Name == "Exec" || typed.Sel.Name == "ForkExec" || typed.Sel.Name == "StartProcess") {
 					guardFailed = true
 				}
 			}
@@ -5482,15 +5712,30 @@ func checkPlanningGrantTestProcessInvocations(root string, findings *[]Finding) 
 			if !ok || function.Body == nil {
 				continue
 			}
-			key := filepath.Base(path) + ":" + function.Name.Name
+			relative, relErr := filepath.Rel(doctrineRoot, path)
+			if relErr != nil || strings.HasPrefix(relative, "..") {
+				guardFailed = true
+				continue
+			}
+			key := filepath.ToSlash(relative) + ":" + function.Name.Name
 			execSelectorCount := 0
 			execCallCount := 0
-			ast.Inspect(function.Body, func(node ast.Node) bool {
+			execCmdTypeCount := 0
+			ast.Inspect(function, func(node ast.Node) bool {
 				switch typed := node.(type) {
 				case *ast.SelectorExpr:
 					identifier, isIdentifier := typed.X.(*ast.Ident)
 					if isIdentifier && execAliases[identifier.Name] && (typed.Sel.Name == "Command" || typed.Sel.Name == "CommandContext") {
 						execSelectorCount++
+					}
+					if isIdentifier && execAliases[identifier.Name] && typed.Sel.Name == "Cmd" {
+						execCmdTypeCount++
+					}
+					if isIdentifier && osAliases[identifier.Name] && typed.Sel.Name == "StartProcess" {
+						guardFailed = true
+					}
+					if isIdentifier && syscallAliases[identifier.Name] && (typed.Sel.Name == "Exec" || typed.Sel.Name == "ForkExec" || typed.Sel.Name == "StartProcess") {
+						guardFailed = true
 					}
 				case *ast.CallExpr:
 					selector, isSelector := typed.Fun.(*ast.SelectorExpr)
@@ -5526,8 +5771,15 @@ func checkPlanningGrantTestProcessInvocations(root string, findings *[]Finding) 
 				guardFailed = true
 			}
 			functionExecSelectorCount += execSelectorCount
+			functionExecCmdTypeCount += execCmdTypeCount
+			if execCmdTypeCount > 0 {
+				actualCmdTypes[key] = execCmdTypeCount
+			}
 		}
 		if fileExecSelectorCount != functionExecSelectorCount {
+			guardFailed = true
+		}
+		if fileExecCmdTypeCount != functionExecCmdTypeCount {
 			guardFailed = true
 		}
 	}
@@ -5548,8 +5800,18 @@ func checkPlanningGrantTestProcessInvocations(root string, findings *[]Finding) 
 			guardFailed = true
 		}
 	}
+	for key, count := range actualCmdTypes {
+		if expectedCmdTypes[key] != count {
+			guardFailed = true
+		}
+	}
+	for key, count := range expectedCmdTypes {
+		if actualCmdTypes[key] != count {
+			guardFailed = true
+		}
+	}
 	if guardFailed {
-		addFinding(findings, "internal/doctrine", "public.w001_lifecycle_ci_process_guard", "test process invocations must equal the exact repository-wide AST allowlist: %v", actual)
+		addFinding(findings, "internal/doctrine", "public.w001_lifecycle_ci_process_guard", "test process invocations must equal the exact recursive AST allowlist: calls=%v cmdTypes=%v", actual, actualCmdTypes)
 	}
 }
 
@@ -6517,6 +6779,7 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 	v10Active := false
 	v11Active := false
 	v12Active := false
+	v13Active := false
 	if _, correctionErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionPath))); correctionErr == nil {
 		correctionActive = true
 		if !checkW001LifecycleV5Tag(root, findings) {
@@ -6580,6 +6843,15 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_state", "v12 lifecycle CI hardening Git state cannot be established")
 		return
 	}
+	if _, v13Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV13Path))); v13Err == nil {
+		v13Active = true
+		if !checkW001LifecycleV12Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v13Err) {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_state", "v13 lifecycle CI hardening Git state cannot be established")
+		return
+	}
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
 	head := strings.TrimSpace(string(headOutput))
 	if err != nil || !sha1Pattern.MatchString(head) {
@@ -6635,6 +6907,9 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		if v12Active {
 			reviewTag, reviewMessage = w001LifecycleCIHardeningV12ReviewTag, w001LifecycleCIHardeningV12TagMessage
 		}
+		if v13Active {
+			reviewTag, reviewMessage = w001LifecycleCIHardeningV13ReviewTag, w001LifecycleCIHardeningV13TagMessage
+		}
 		target, ok := checkW001DeliveryReviewTag(root, expected, reviewTag, reviewMessage, findings)
 		if !ok {
 			return
@@ -6662,6 +6937,7 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		v9End := featureHead
 		v10End := featureHead
 		v11End := featureHead
+		v12End := featureHead
 		if correctionActive {
 			v5End = w001LifecycleCorrectionBase
 			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCorrectionBase, featureHead); err != nil {
@@ -6711,6 +6987,13 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 				return
 			}
 		}
+		if v13Active {
+			v12End = w001LifecycleCIHardeningV13Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCIHardeningV13Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_ancestry", "v13 lifecycle CI hardening must descend from the exact immutable v12 head")
+				return
+			}
+		}
 		if !checkW001LifecycleCommitRange(root, w001LifecycleBase, v5End, "2026-08-27T12:05:00Z", "v5", findings) {
 			return
 		}
@@ -6732,7 +7015,10 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		if v11Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIFencingV11Base, v11End, "2026-08-27T19:05:55Z", "v11", findings) {
 			return
 		}
-		if v12Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV12Base, featureHead, "2026-08-27T19:32:00Z", "v12", findings) {
+		if v12Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV12Base, v12End, "2026-08-27T19:32:00Z", "v12", findings) {
+			return
+		}
+		if v13Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV13Base, featureHead, "2026-08-27T20:00:30Z", "v13", findings) {
 			return
 		}
 	}
@@ -6768,6 +7054,9 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 	}
 	if v12Active {
 		allowed = w001LifecycleCIHardeningV12PathsAllowed(paths)
+	}
+	if v13Active {
+		allowed = w001LifecycleCIHardeningV13PathsAllowed(paths)
 	}
 	if err != nil || !allowed {
 		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_scope", "current changes include a path outside the signed lifecycle-completion scope")
@@ -6816,6 +7105,8 @@ func checkW001LifecycleCommitRange(root, base, head, issued, phase string, findi
 			allowed = w001LifecycleCIFencingV11PathsAllowed(normalized)
 		} else if phase == "v12" {
 			allowed = w001LifecycleCIHardeningV12PathsAllowed(normalized)
+		} else if phase == "v13" {
+			allowed = w001LifecycleCIHardeningV13PathsAllowed(normalized)
 		}
 		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
 		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
@@ -6980,6 +7271,21 @@ func w001LifecycleCIFencingV11PathsAllowed(paths []string) bool {
 func w001LifecycleCIHardeningV12PathsAllowed(paths []string) bool {
 	exact := map[string]bool{
 		w001LifecycleCIHardeningV12Path: true, w001LifecycleCIHardeningV12Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCIHardeningV13PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCIHardeningV13Path: true, w001LifecycleCIHardeningV13Signature: true,
 		".harness/manifest.yaml": true, canonicalActivePlan: true,
 		"docs/evidence/W-001-validation.md": true,
 		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
@@ -7488,6 +7794,32 @@ func checkW001LifecycleV11Tag(root string, findings *[]Finding) bool {
 	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
 	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCIHardeningV12BaseTree {
 		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_prior_tag", "v11 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV12Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCIHardeningV12ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV12TagObject {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_prior_tag", "v12 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV12TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_prior_tag", "v12 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCIHardeningV12ReviewTag, w001LifecycleCIHardeningV12TagMessage)
+	if err != nil || target != w001LifecycleCIHardeningV13Base {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_prior_tag", "v12 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCIHardeningV13BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_prior_tag", "v12 lifecycle tag tree must remain exact")
 		return false
 	}
 	return true
