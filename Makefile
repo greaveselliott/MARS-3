@@ -1,10 +1,15 @@
-.PHONY: build test vet verify
+.PHONY: build test test-authority-postgres vet verify
 
 build:
 	go build ./cmd/mars3
 
 test:
 	go test ./...
+
+test-authority-postgres:
+	@test -n "$$MARS3_TEST_POSTGRES_ADMIN_URL" || (echo "MARS3_TEST_POSTGRES_ADMIN_URL is required" >&2; exit 1)
+	@test -n "$$MARS3_TEST_POSTGRES_APP_URL" || (echo "MARS3_TEST_POSTGRES_APP_URL is required" >&2; exit 1)
+	go test ./internal/authority/postgres -run '^TestPostgresLeaseLifecycleAndRestart$$' -count=1 -v
 
 vet:
 	go vet ./...
