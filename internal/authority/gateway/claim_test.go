@@ -21,13 +21,16 @@ import (
 )
 
 type memoryClaimStore struct {
-	mu               sync.Mutex
-	item             authorityv1.WorkItem
-	claimCalls       int
-	invalidPostimage bool
-	getBarrier       chan struct{}
-	getCount         int
-	getErr           error
+	mu                    sync.Mutex
+	item                  authorityv1.WorkItem
+	claimCalls            int
+	lifecycleCalls        int
+	lifecycleErr          error
+	lifecycleApplyThenErr bool
+	invalidPostimage      bool
+	getBarrier            chan struct{}
+	getCount              int
+	getErr                error
 }
 
 func (store *memoryClaimStore) Get(_ context.Context, tenantID, projectID, beadID string) (authorityv1.WorkItem, error) {
@@ -490,6 +493,39 @@ func cloneWork(item authorityv1.WorkItem) authorityv1.WorkItem {
 	item.Blockers = append([]string(nil), item.Blockers...)
 	item.Dependencies = append([]authorityv1.Dependency(nil), item.Dependencies...)
 	item.Labels = append([]authorityv1.Label(nil), item.Labels...)
+	if item.Handoff != nil {
+		value := *item.Handoff
+		value.EvidenceRefs = append([]string(nil), value.EvidenceRefs...)
+		item.Handoff = &value
+	}
+	item.Reviews = append([]authorityv1.ReviewRecord(nil), item.Reviews...)
+	for index := range item.Reviews {
+		item.Reviews[index].EvidenceRefs = append([]string(nil), item.Reviews[index].EvidenceRefs...)
+	}
+	item.ReviewHistory = append([]authorityv1.ReviewCycle(nil), item.ReviewHistory...)
+	for cycleIndex := range item.ReviewHistory {
+		cycle := &item.ReviewHistory[cycleIndex]
+		cycle.Handoff.EvidenceRefs = append([]string(nil), cycle.Handoff.EvidenceRefs...)
+		cycle.Reviews = append([]authorityv1.ReviewRecord(nil), cycle.Reviews...)
+		for reviewIndex := range cycle.Reviews {
+			cycle.Reviews[reviewIndex].EvidenceRefs = append([]string(nil), cycle.Reviews[reviewIndex].EvidenceRefs...)
+		}
+	}
+	if item.RunDisposition != nil {
+		value := *item.RunDisposition
+		value.EvidenceRefs = append([]string(nil), value.EvidenceRefs...)
+		item.RunDisposition = &value
+	}
+	if item.Reconciliation != nil {
+		value := *item.Reconciliation
+		value.EvidenceRefs = append([]string(nil), value.EvidenceRefs...)
+		item.Reconciliation = &value
+	}
+	if item.Terminal != nil {
+		value := *item.Terminal
+		value.EvidenceRefs = append([]string(nil), value.EvidenceRefs...)
+		item.Terminal = &value
+	}
 	return item
 }
 

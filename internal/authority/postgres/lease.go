@@ -48,6 +48,46 @@ func (store *Store) GetLease(ctx context.Context, tenantID, projectID, leaseID s
 	return lease, nil
 }
 
+// ActiveLeaseForBead proves the reviewer boundary: independent lifecycle
+// mutations fail closed while any unexpired implementation lease exists for
+// the same canonical Bead.
+func (store *Store) ActiveLeaseForBead(ctx context.Context, tenantID, projectID, beadID string) (authorityv1.CapabilityLease, bool, error) {
+	tx, err := store.beginScoped(ctx, tenantID, projectID, pgx.ReadCommitted)
+	if err != nil {
+		return authorityv1.CapabilityLease{}, false, err
+	}
+	defer rollback(tx, ctx)
+	if _, err := store.verifyProject(ctx, tx, tenantID, projectID, true); err != nil {
+		return authorityv1.CapabilityLease{}, false, err
+	}
+	now := store.now().UTC()
+	if err := expireProjectLeases(ctx, tx, tenantID, projectID, now); err != nil {
+		return authorityv1.CapabilityLease{}, false, err
+	}
+	var leaseID string
+	err = tx.QueryRow(ctx, `
+		select lease_id from mars3_authority.leases
+		where tenant_id=$1 and project_id=$2 and bead_id=$3 and state='active' and expires_at > $4
+		order by lease_epoch desc limit 1`, tenantID, projectID, beadID, now).Scan(&leaseID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		if err := tx.Commit(ctx); err != nil {
+			return authorityv1.CapabilityLease{}, false, err
+		}
+		return authorityv1.CapabilityLease{}, false, nil
+	}
+	if err != nil {
+		return authorityv1.CapabilityLease{}, false, err
+	}
+	lease, err := loadLease(ctx, tx, tenantID, projectID, leaseID, false)
+	if err != nil {
+		return authorityv1.CapabilityLease{}, false, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return authorityv1.CapabilityLease{}, false, err
+	}
+	return lease, true, nil
+}
+
 // Renew extends only the owning, unexpired exact lease tuple. Generation,
 // epoch, base SHA, capability, paths, labels, and claim version cannot change.
 func (store *Store) Renew(ctx context.Context, fence authorityv1.FencingTuple, newExpiry time.Time) (authorityv1.CapabilityLease, error) {

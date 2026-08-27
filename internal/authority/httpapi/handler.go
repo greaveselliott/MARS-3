@@ -35,6 +35,11 @@ type Gateway interface {
 	Ready(context.Context, authorityv1.Principal, authorityv1.ReadyRequest) (authorityv1.ReadyResponse, error)
 	Claim(context.Context, authorityv1.Principal, authorityv1.ClaimRequest) (authorityv1.ClaimResponse, error)
 	ValidateEffect(context.Context, authorityv1.Principal, authorityv1.EffectValidationRequest) (authorityv1.EffectValidation, error)
+	Handoff(context.Context, authorityv1.Principal, authorityv1.HandoffRequest) (authorityv1.LifecycleMutationResponse, error)
+	RecordReviewVerdict(context.Context, authorityv1.Principal, authorityv1.ReviewVerdictRequest) (authorityv1.LifecycleMutationResponse, error)
+	RecordRunDisposition(context.Context, authorityv1.Principal, authorityv1.RunDispositionRequest) (authorityv1.LifecycleMutationResponse, error)
+	RecordReconciliation(context.Context, authorityv1.Principal, authorityv1.ReconciliationRequest) (authorityv1.LifecycleMutationResponse, error)
+	CloseWork(context.Context, authorityv1.Principal, authorityv1.TerminalTransitionRequest) (authorityv1.LifecycleMutationResponse, error)
 }
 
 type Journal interface {
@@ -80,6 +85,16 @@ func (handler *Handler) ServeHTTP(response http.ResponseWriter, request *http.Re
 		handler.claim(response, request, principal)
 	case request.Method == http.MethodPost && route == "effects/validate":
 		handler.validateEffect(response, request, principal)
+	case request.Method == http.MethodPost && route == "handoffs":
+		handler.handoff(response, request, principal)
+	case request.Method == http.MethodPost && route == "review-verdicts":
+		handler.reviewVerdict(response, request, principal)
+	case request.Method == http.MethodPost && route == "run-dispositions":
+		handler.runDisposition(response, request, principal)
+	case request.Method == http.MethodPost && route == "reconciliations":
+		handler.reconciliation(response, request, principal)
+	case request.Method == http.MethodPost && route == "terminal-transitions":
+		handler.terminalTransition(response, request, principal)
 	case request.Method == http.MethodGet && route == "journal":
 		handler.replay(response, request, principal)
 	default:
@@ -128,6 +143,66 @@ func (handler *Handler) validateEffect(response http.ResponseWriter, request *ht
 		return
 	}
 	result, err := handler.gateway.ValidateEffect(request.Context(), principal, input)
+	writeResult(response, result, err)
+}
+
+func (handler *Handler) handoff(response http.ResponseWriter, request *http.Request, principal authorityv1.Principal) {
+	var input authorityv1.HandoffRequest
+	if !onlyQueryKeys(request) || decodeBody(response, request, &input) != nil {
+		if len(request.URL.Query()) != 0 {
+			writeInvalid(response)
+		}
+		return
+	}
+	result, err := handler.gateway.Handoff(request.Context(), principal, input)
+	writeResult(response, result, err)
+}
+
+func (handler *Handler) reviewVerdict(response http.ResponseWriter, request *http.Request, principal authorityv1.Principal) {
+	var input authorityv1.ReviewVerdictRequest
+	if !onlyQueryKeys(request) || decodeBody(response, request, &input) != nil {
+		if len(request.URL.Query()) != 0 {
+			writeInvalid(response)
+		}
+		return
+	}
+	result, err := handler.gateway.RecordReviewVerdict(request.Context(), principal, input)
+	writeResult(response, result, err)
+}
+
+func (handler *Handler) runDisposition(response http.ResponseWriter, request *http.Request, principal authorityv1.Principal) {
+	var input authorityv1.RunDispositionRequest
+	if !onlyQueryKeys(request) || decodeBody(response, request, &input) != nil {
+		if len(request.URL.Query()) != 0 {
+			writeInvalid(response)
+		}
+		return
+	}
+	result, err := handler.gateway.RecordRunDisposition(request.Context(), principal, input)
+	writeResult(response, result, err)
+}
+
+func (handler *Handler) reconciliation(response http.ResponseWriter, request *http.Request, principal authorityv1.Principal) {
+	var input authorityv1.ReconciliationRequest
+	if !onlyQueryKeys(request) || decodeBody(response, request, &input) != nil {
+		if len(request.URL.Query()) != 0 {
+			writeInvalid(response)
+		}
+		return
+	}
+	result, err := handler.gateway.RecordReconciliation(request.Context(), principal, input)
+	writeResult(response, result, err)
+}
+
+func (handler *Handler) terminalTransition(response http.ResponseWriter, request *http.Request, principal authorityv1.Principal) {
+	var input authorityv1.TerminalTransitionRequest
+	if !onlyQueryKeys(request) || decodeBody(response, request, &input) != nil {
+		if len(request.URL.Query()) != 0 {
+			writeInvalid(response)
+		}
+		return
+	}
+	result, err := handler.gateway.CloseWork(request.Context(), principal, input)
 	writeResult(response, result, err)
 }
 

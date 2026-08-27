@@ -338,7 +338,7 @@ func readyWork(beadID string) authorityv1.WorkItem {
 		FeatureID:          "F-002",
 		ScenarioIDs:        []string{"F-002-S1"},
 		ExclusivePaths:     []string{"internal/authority/"},
-		VerificationOrder:  []string{"qa", "security", "delivery-orchestrator"},
+		VerificationOrder:  []string{"qa", "security-reviewer", "delivery-orchestrator"},
 		Dependencies: []authorityv1.Dependency{{
 			BeadID: "M3-H001", LifecycleState: authorityv1.LifecycleDone, ReviewAccepted: true, RunCompleted: true, Reconciled: true,
 		}},

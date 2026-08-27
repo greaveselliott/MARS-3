@@ -42,6 +42,7 @@ const (
 type LeaseStore interface {
 	LeaseValidator
 	GetLease(context.Context, string, string, string) (authorityv1.CapabilityLease, error)
+	ActiveLeaseForBead(context.Context, string, string, string) (authorityv1.CapabilityLease, bool, error)
 	Renew(context.Context, authorityv1.FencingTuple, time.Time) (authorityv1.CapabilityLease, error)
 	Release(context.Context, authorityv1.FencingTuple) (authorityv1.CapabilityLease, error)
 	Revoke(context.Context, authorityv1.RevokeLeaseRequest) (authorityv1.CapabilityLease, error)

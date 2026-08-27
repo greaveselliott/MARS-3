@@ -69,13 +69,20 @@
    validation before a simulated effect and records a bounded receipt. Earlier
    validation, a Temporal token, or cached projection state is insufficient.
    S-002 later applies this contract to real external-effect brokers.
-6. A handoff releases implementation authority and moves the canonical Bead to
-   `in-review` by expected-version transition. QA and then Security record only
-   their own verdict against the same immutable commit.
-7. `changes-requested` reopens M3-W001 rather than creating a duplicate. A
-   subsequent attempt receives a newer epoch. Only the Delivery Orchestrator
-   requests `done` after accepted reviews, merge, completed run disposition,
-   and reconciliation.
+6. A handoff binds the current execution attempt separately from the immutable
+   canonical claim attempt, releases the exact owning implementation lease,
+   and moves the canonical Bead to `in-review` by one expected-version native
+   transaction. An unknown post-release outcome is re-read from Beads and is
+   retried only with the same idempotency key; the released lease cannot
+   authorize another write. QA and then Security record only their own verdict
+   against the same immutable commit, and every review operation rejects an
+   active implementation lease for that Bead.
+7. `changes-requested` reopens M3-W001 rather than creating a duplicate. The
+   rejected cycle remains append-only history and a subsequent attempt receives
+   a newer epoch. Only the Delivery Orchestrator records the completed run and
+   merge reconciliation, then requests `done` after accepted reviews. The
+   terminal record retains its public-safe evidence references and the
+   canonical claim binding remains inspectable after closure.
 8. Projection consumers replay journal events exactly once in sequence. On an
    irrecoverable gap, truncation, unknown checkpoint, or version conflict, they
    mark the view stale and non-authorizing, discard it, then ask the gateway for
@@ -247,6 +254,9 @@ and opaque trace references.
   immutable commit and may not hold an implementation lease during review.
 - Only the Delivery Orchestrator may record dependency replans, terminal run
   disposition, reconciliation, and a prerequisite-complete `done` transition.
+- Handoff, verdict, run, reconciliation, and terminal idempotency keys are
+  unique across the current and archived review cycles. An exact historical
+  replay returns its verified record; a different request using that key fails.
 - A skill, profile maximum, provider session, Temporal task, or cached event
   does not grant permission.
 

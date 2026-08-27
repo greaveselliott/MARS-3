@@ -221,6 +221,13 @@ func TestPostgresLeaseLifecycleAndRestart(t *testing.T) {
 	if firstSaga.Lease.LeaseEpoch != 1 || firstSaga.Lease.FenceGeneration != generation || firstSaga.Lease.State != authorityv1.LeaseActive {
 		t.Fatalf("first lease = %#v", firstSaga.Lease)
 	}
+	active, found, err := store.ActiveLeaseForBead(ctx, tenantID, projectID, firstSaga.Work.BeadID)
+	if err != nil || !found || !reflect.DeepEqual(active, firstSaga.Lease) {
+		t.Fatalf("active lease=%#v found=%v err=%v", active, found, err)
+	}
+	if _, found, err := store.ActiveLeaseForBead(ctx, "tenant-other", projectID, firstSaga.Work.BeadID); err == nil || found {
+		t.Fatalf("cross-tenant active lease found=%v err=%v", found, err)
+	}
 
 	canonical := &baselineStore{items: []authorityv1.WorkItem{firstSaga.Work}, firstRead: make(chan struct{}), releaseFirst: make(chan struct{})}
 	baselineResult := make(chan authorityv1.AuthorityBaseline, 1)
@@ -326,6 +333,9 @@ func TestPostgresLeaseLifecycleAndRestart(t *testing.T) {
 	if _, err := store.Release(ctx, fence); err != nil {
 		t.Fatalf("Release: %v", err)
 	}
+	if active, found, err := store.ActiveLeaseForBead(ctx, tenantID, projectID, firstSaga.Work.BeadID); err != nil || found {
+		t.Fatalf("released active lease=%#v found=%v err=%v", active, found, err)
+	}
 	if _, err := store.ValidateFence(ctx, fence); !errors.Is(err, ErrLeaseFence) {
 		t.Fatalf("released fence error=%v, want ErrLeaseFence", err)
 	}
@@ -376,6 +386,9 @@ func TestPostgresLeaseLifecycleAndRestart(t *testing.T) {
 	}
 
 	clock = lastSaga.Lease.ExpiresAt.Add(time.Second)
+	if active, found, err := store.ActiveLeaseForBead(ctx, tenantID, projectID, lastSaga.Work.BeadID); err != nil || found {
+		t.Fatalf("expired active lease=%#v found=%v err=%v", active, found, err)
+	}
 	if _, err := store.ValidateFence(ctx, fenceFromLease(lastSaga.Lease)); !errors.Is(err, ErrLeaseFence) {
 		t.Fatalf("expired fence error=%v, want ErrLeaseFence", err)
 	}

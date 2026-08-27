@@ -110,15 +110,20 @@ operation without echoing credentials or payloads.
   version-matched claim and a verified live implementation lease. The sole
   W-001 bootstrap claim is the declared exception below and grants no tool,
   path, or implementation capability.
-- `in-progress -> in-review` requires the owning attempt's public-safe evidence
-  reference and handoff. The implementation lease no longer authorizes writes
-  after handoff.
+- `in-progress -> in-review` requires the owning execution attempt's
+  public-safe evidence, the immutable canonical-claim attempt, and the exact
+  live fence. The gateway releases that lease before one native Beads CAS; a
+  lost receipt is reconciled by canonical readback and the released lease can
+  never authorize a later effect.
 - An ordered reviewer may record only its own verdict against the exact
-  immutable commit. `changes-requested` returns the same Bead to `in-progress`;
-  a fresh implementation lease receives a newer epoch.
+  immutable commit and only while no implementation lease is active.
+  `changes-requested` archives that review cycle and returns the same Bead to
+  `in-progress`; a fresh implementation lease receives a newer epoch.
 - `done` requires the accepted review chain, merged immutable Git evidence,
   `completed` run disposition, and a successful reconciliation receipt. Only
-  the Delivery Orchestrator can request that terminal transition.
+  the Delivery Orchestrator can request that terminal transition. Closure uses
+  one native transaction and retains the terminal evidence references plus the
+  original canonical claim binding.
 - A blocked attempt remains in its truthful lifecycle with `blocker`,
   `blocked_by`, normalized failure fingerprint, and exact next action. It is not
   silently closed or duplicated.
