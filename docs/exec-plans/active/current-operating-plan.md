@@ -156,7 +156,7 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the v11 CI-fenced lifecycle correction to
+- Required next transition: bind the v12 CI-hardened lifecycle correction to
   a signed immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
   conformance suites plus independent cold-build reproduction, then route that exact tree through QA and Security. No
   canonical handoff or later lifecycle mutation may execute until the reviewed
@@ -240,6 +240,19 @@ local maintenance configuration despite the command-local-only contract
 `W-001-lifecycle-ci-fencing-v11` grant permits only routing every disposable
 Git operation through the single bounded wrapper, removing persistent fixture
 configuration, adding fail-closed regressions, and fresh immutable review.
+
+Independent QA accepted the immutable V11 checkpoint at head
+`54f4593b1730ff9ae04a2e5cce0589c6baedfee6`, tree
+`44ba564be30e0db0aa735d76539c3604a5d79e3f`; Security changes-requested the
+same subject after public run `33108126981`, job `98643418071`, passed. The
+remaining findings were caller-overridable maintenance fences
+(`ci.test_git_fences_caller_overridable`), ambient Git exec/template execution
+(`ci.test_git_environment_execution_injection`), and a one-file literal source
+guard that missed equivalent process calls (`ci.test_process_guard_fail_open`).
+The signed `W-001-lifecycle-ci-hardening-v12` grant permits only absolute
+trusted-Git execution, fail-closed argument and environment admission, a
+repository-wide AST process allowlist, adversarial regressions, and fresh
+immutable review.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation

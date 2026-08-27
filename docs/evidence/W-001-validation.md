@@ -901,3 +901,36 @@ absent. A source-level regression permits one raw `exec.Command("git", ...)`
 site only: the audited wrapper itself. No authority runtime, native patch,
 database schema, API, product contract, workflow, scanner, repository setting,
 Beads state, or live lease is changed.
+
+## Lifecycle-correction v11 review and v12 execution hardening
+
+The immutable V11 candidate is head
+`54f4593b1730ff9ae04a2e5cce0589c6baedfee6`, tree
+`44ba564be30e0db0aa735d76539c3604a5d79e3f`, signed tag object
+`7313ee2e38dd1d4f4f5ca62237e0be89b0b4f13a`. Public run `33108126981`, job
+`98643418071`, passed every required gate. QA accepted that exact subject;
+Security returned `changes-requested` after reproducing three additional
+test-process boundary failures:
+
+- `ci.test_git_fences_caller_overridable`: later caller `-c` values could
+  override all four command-local maintenance fences and protected config
+  mutations remained callable;
+- `ci.test_git_environment_execution_injection`: inherited `GIT_EXEC_PATH`
+  and `GIT_TEMPLATE_DIR` could execute a hostile upload-pack helper and a
+  template-installed post-checkout hook;
+- `ci.test_process_guard_fail_open`: the one-file literal counter did not
+  detect aliases, concatenated command names, `CommandContext`, shells, or
+  process calls in another doctrine test file.
+
+The prospective signed `W-001-lifecycle-ci-hardening-v12` grant preserves the
+complete V9-V11 runtime and publication history. The bounded correction pins
+test Git execution to `/usr/bin/git`, strips every inherited `GIT_*` variable
+before adding the exact safe set, admits only the synthetic identity `-c`
+values needed by fixtures, rejects protected config/env/template/upload-pack
+and repository-redirection options, and replaces the literal counter with a
+repository-wide Go AST allowlist. The allowlist admits exactly the two
+synthetic `ssh-keygen` calls and one trusted Git-wrapper call; adversarial
+fixtures cover aliases, concatenation, `CommandContext`, shells, indirect
+calls, `os.StartProcess`, hostile exec paths, and hostile templates. No
+authority runtime, native patch, database schema, API, product contract,
+workflow, scanner, repository setting, Beads state, or live lease is changed.

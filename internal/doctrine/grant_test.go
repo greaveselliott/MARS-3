@@ -13,6 +13,8 @@ package doctrine
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -1468,6 +1470,80 @@ func TestW001LifecycleCIFencingV11PathScope(t *testing.T) {
 	} {
 		if w001LifecycleCIFencingV11PathsAllowed([]string{path}) {
 			t.Fatalf("out-of-scope v11 lifecycle CI fencing path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCIHardeningV12GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIHardeningV12Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v12 lifecycle CI hardening was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV12GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV12Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCIFencingV11ReviewTag+":refs/tags/"+w001LifecycleCIFencingV11ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIHardeningV12Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIHardeningV12Path:      tampered,
+		w001LifecycleCIHardeningV12Signature: read(w001LifecycleCIHardeningV12Signature),
+		w001LifecycleCIFencingV11Path:        read(w001LifecycleCIFencingV11Path),
+		w001LifecycleCIFencingV11Signature:   read(w001LifecycleCIFencingV11Signature),
+		wave1PlanningGrantKey:                read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":  read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                  read(canonicalActivePlan),
+		".harness/manifest.yaml":             read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":    read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIHardeningV12Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v12_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v12_signature") {
+		t.Fatalf("tampered v12 lifecycle CI hardening authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV12PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIHardeningV12Path,
+		w001LifecycleCIHardeningV12Signature,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIHardeningV12PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v12 lifecycle CI hardening path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCIFencingV11Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIHardeningV12PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v12 lifecycle CI hardening path was accepted: %s", path)
 		}
 	}
 }
@@ -3198,7 +3274,10 @@ func writePlanningGrantTestFile(t *testing.T, root, path string, data []byte) {
 
 func runPlanningGrantTestGit(t *testing.T, root string, arguments ...string) {
 	t.Helper()
-	command := planningGrantTestGitCommand(root, arguments...)
+	command, commandErr := planningGrantTestGitCommand(root, arguments...)
+	if commandErr != nil {
+		t.Fatalf("unsafe git %v: %v", arguments, commandErr)
+	}
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("git %v failed: %v: %s", arguments, err, output)
 	}
@@ -3206,7 +3285,10 @@ func runPlanningGrantTestGit(t *testing.T, root string, arguments ...string) {
 
 func planningGrantTestGitOutput(t *testing.T, root string, arguments ...string) string {
 	t.Helper()
-	command := planningGrantTestGitCommand(root, arguments...)
+	command, commandErr := planningGrantTestGitCommand(root, arguments...)
+	if commandErr != nil {
+		t.Fatalf("unsafe git %v: %v", arguments, commandErr)
+	}
 	output, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("git %v failed: %v: %s", arguments, err, output)
@@ -3214,7 +3296,10 @@ func planningGrantTestGitOutput(t *testing.T, root string, arguments ...string) 
 	return strings.TrimSpace(string(output))
 }
 
-func planningGrantTestGitCommand(root string, arguments ...string) *exec.Cmd {
+func planningGrantTestGitCommand(root string, arguments ...string) (*exec.Cmd, error) {
+	if err := validatePlanningGrantTestGitArguments(arguments); err != nil {
+		return nil, err
+	}
 	bounded := []string{
 		"-c", "maintenance.auto=false",
 		"-c", "gc.auto=0",
@@ -3222,9 +3307,78 @@ func planningGrantTestGitCommand(root string, arguments ...string) *exec.Cmd {
 		"-c", "maintenance.autoDetach=false",
 		"-C", root,
 	}
-	command := exec.Command("git", append(bounded, arguments...)...)
+	command := exec.Command("/usr/bin/git", append(bounded, arguments...)...)
 	command.Env = planningGrantGitEnvironment()
-	return command
+	return command, nil
+}
+
+func validatePlanningGrantTestGitArguments(arguments []string) error {
+	if len(arguments) == 0 {
+		return errors.New("Git subcommand is required")
+	}
+	allowedConfig := map[string]string{
+		"user.name=Synthetic Merge Bot":          "",
+		"user.name=Synthetic Release Manager":    "",
+		"user.name=Synthetic Engineer":           "",
+		"user.email=merge-bot@example.com":       "",
+		"user.email=release-manager@example.com": "",
+		"user.email=engineer@example.com":        "",
+		"commit.gpgsign=false":                   "",
+	}
+	subcommand := ""
+	subcommandIndex := -1
+	for index := 0; index < len(arguments); index++ {
+		argument := arguments[index]
+		if subcommand == "" && argument == "-c" {
+			if index+1 >= len(arguments) {
+				return errors.New("Git -c requires one exact configuration assignment")
+			}
+			index++
+			if _, ok := allowedConfig[arguments[index]]; !ok {
+				return fmt.Errorf("Git configuration override %q is not admitted", arguments[index])
+			}
+			continue
+		}
+		if argument == "-c" {
+			return errors.New("Git subcommand-local configuration override is not admitted")
+		}
+		if strings.HasPrefix(argument, "-c") && argument != "-c" {
+			return fmt.Errorf("compact Git configuration override %q is not admitted", argument)
+		}
+		if argument == "--config-env" || strings.HasPrefix(argument, "--config-env=") {
+			return fmt.Errorf("Git config-env override %q is not admitted", argument)
+		}
+		for _, option := range []string{"-C", "--exec-path", "--template", "--upload-pack", "--git-dir", "--work-tree", "--namespace"} {
+			if argument == option || strings.HasPrefix(argument, option+"=") {
+				return fmt.Errorf("Git execution override %q is not admitted", argument)
+			}
+		}
+		if argument == "-u" {
+			return errors.New("Git upload-pack override is not admitted")
+		}
+		if subcommand == "" && !strings.HasPrefix(argument, "-") {
+			subcommand, subcommandIndex = argument, index
+		}
+	}
+	if subcommand == "" {
+		return errors.New("Git subcommand is required")
+	}
+	if subcommand == "config" {
+		tail := arguments[subcommandIndex+1:]
+		validRead := len(tail) == 2 && tail[0] == "--get" ||
+			len(tail) == 3 && (tail[0] == "--local" || tail[0] == "--global") && tail[1] == "--get"
+		if !validRead {
+			return errors.New("disposable Git config permits exact read-only queries only")
+		}
+	}
+	if subcommand == "clone" {
+		for _, argument := range arguments[subcommandIndex+1:] {
+			if argument == "--config" || strings.HasPrefix(argument, "--config=") {
+				return errors.New("Git clone configuration mutation is not admitted")
+			}
+		}
+	}
+	return nil
 }
 
 func TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance(t *testing.T) {
@@ -3254,20 +3408,139 @@ func TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance(t *testing.T) 
 	}
 }
 
-func TestPlanningGrantDisposableGitCallsUseOnlyBoundedWrapper(t *testing.T) {
-	source, err := os.ReadFile("grant_test.go")
+func TestPlanningGrantTestGitCommandRejectsAmbientExecutionInjection(t *testing.T) {
+	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
 	if err != nil {
 		t.Fatal(err)
 	}
-	needle := []byte("exec.Command(" + "\"git\"")
-	if count := bytes.Count(source, needle); count != 1 {
-		t.Fatalf("disposable Git commands must use the single audited wrapper; raw command count=%d", count)
+	root := t.TempDir()
+	execRoot := filepath.Join(root, "hostile-exec")
+	templateRoot := filepath.Join(root, "hostile-template")
+	if err := os.MkdirAll(filepath.Join(templateRoot, "hooks"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(execRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	execSentinel := filepath.Join(root, "exec-path-ran")
+	hookSentinel := filepath.Join(root, "template-hook-ran")
+	uploadPack := []byte(fmt.Sprintf("#!/bin/sh\n: > %q\nexec /usr/bin/git-upload-pack \"$@\"\n", execSentinel))
+	postCheckout := []byte(fmt.Sprintf("#!/bin/sh\n: > %q\n", hookSentinel))
+	if err := os.WriteFile(filepath.Join(execRoot, "git-upload-pack"), uploadPack, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(templateRoot, "hooks", "post-checkout"), postCheckout, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("GIT_EXEC_PATH", execRoot)
+	t.Setenv("GIT_TEMPLATE_DIR", templateRoot)
+	t.Setenv("GIT_CONFIG_COUNT", "1")
+	t.Setenv("GIT_CONFIG_KEY_0", "maintenance.auto")
+	t.Setenv("GIT_CONFIG_VALUE_0", "true")
+	clone := filepath.Join(root, "repo")
+	runPlanningGrantTestGit(t, root, "clone", "--quiet", "--no-local", source, clone)
+	for _, sentinel := range []string{execSentinel, hookSentinel} {
+		if _, err := os.Lstat(sentinel); !os.IsNotExist(err) {
+			t.Fatalf("ambient Git execution injection ran: %s err=%v", sentinel, err)
+		}
+	}
+	if _, err := os.Lstat(filepath.Join(clone, ".git", "hooks", "post-checkout")); !os.IsNotExist(err) {
+		t.Fatalf("ambient Git template installed a hook: %v", err)
+	}
+}
+
+func TestPlanningGrantTestGitArgumentsFailClosed(t *testing.T) {
+	for _, arguments := range [][]string{
+		{"-c", "maintenance.auto=true", "status"},
+		{"-cgc.auto=999", "status"},
+		{"status", "-c", "maintenance.auto=true"},
+		{"--config-env=maintenance.auto=HOSTILE", "status"},
+		{"-C", "/tmp/hostile", "status"},
+		{"--exec-path=/tmp/hostile", "status"},
+		{"clone", "--template=/tmp/hostile", "source", "target"},
+		{"clone", "-u", "/tmp/hostile-upload-pack", "source", "target"},
+		{"config", "--local", "maintenance.auto", "true"},
+		{"config", "--global", "gc.auto", "999"},
+	} {
+		if _, err := planningGrantTestGitCommand(t.TempDir(), arguments...); err == nil {
+			t.Fatalf("unsafe disposable Git arguments were accepted: %v", arguments)
+		}
+	}
+}
+
+func TestPlanningGrantTestProcessInvocationsFailClosedRepositoryWide(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkPlanningGrantTestProcessInvocations(repo, &findings)
+	if findingCodePresent(findings, "public.w001_lifecycle_ci_process_guard") {
+		t.Fatalf("canonical doctrine test process allowlist was rejected: %v", findings)
+	}
+	attacks := map[string]string{
+		"alias_concat": `package doctrine_test
+import e "os/exec"
+func TestAttack() { _ = e.Command("g" + "it", "status") }
+`,
+		"command_context": `package doctrine_test
+import (
+  "context"
+  "os/exec"
+)
+func TestAttack() { _ = exec.CommandContext(context.Background(), "git", "status") }
+`,
+		"shell": `package doctrine_test
+import "os/exec"
+func TestAttack() { _ = exec.Command("sh", "-c", "git status") }
+`,
+		"indirect": `package doctrine_test
+import "os/exec"
+func TestAttack() { runner := exec.Command; _ = runner("git", "status") }
+`,
+		"start_process": `package doctrine_test
+import "os"
+func TestAttack() { _, _ = os.StartProcess("/usr/bin/git", []string{"git", "status"}, nil) }
+`,
+	}
+	entries, err := os.ReadDir(filepath.Join(repo, "internal", "doctrine"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, attack := range attacks {
+		t.Run(name, func(t *testing.T) {
+			root := t.TempDir()
+			destination := filepath.Join(root, "internal", "doctrine")
+			if err := os.MkdirAll(destination, 0o755); err != nil {
+				t.Fatal(err)
+			}
+			for _, entry := range entries {
+				if entry.IsDir() || !strings.HasSuffix(entry.Name(), "_test.go") {
+					continue
+				}
+				content, err := os.ReadFile(filepath.Join(repo, "internal", "doctrine", entry.Name()))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filepath.Join(destination, entry.Name()), content, 0o644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := os.WriteFile(filepath.Join(destination, "process_attack_test.go"), []byte(attack), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			var attackFindings []Finding
+			checkPlanningGrantTestProcessInvocations(root, &attackFindings)
+			if !findingCodePresent(attackFindings, "public.w001_lifecycle_ci_process_guard") {
+				t.Fatalf("repository-wide process attack was accepted: %s", attack)
+			}
+		})
 	}
 }
 
 func assertPlanningGrantTestGitConfigAbsent(t *testing.T, root, scope, key string) {
 	t.Helper()
-	command := planningGrantTestGitCommand(root, "config", scope, "--get", key)
+	command, commandErr := planningGrantTestGitCommand(root, "config", scope, "--get", key)
+	if commandErr != nil {
+		t.Fatal(commandErr)
+	}
 	output, err := command.CombinedOutput()
 	if err == nil || len(bytes.TrimSpace(output)) != 0 {
 		t.Fatalf("disposable Git configuration persisted %s %s: output=%q err=%v", scope, key, output, err)

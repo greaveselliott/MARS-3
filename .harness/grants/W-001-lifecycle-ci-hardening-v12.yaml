@@ -1,0 +1,114 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCIHardeningGrant
+
+grant:
+  id: W-001-lifecycle-ci-hardening-v12
+  classification: PUBLIC
+  issuedAt: 2026-08-27T19:32:00Z
+  expiresAt: 2026-08-30T19:32:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 54f4593b1730ff9ae04a2e5cce0589c6baedfee6
+  baseTree: 44ba564be30e0db0aa735d76539c3604a5d79e3f
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-ci-fencing-v11
+  priorGrantSHA256: 6df1dc4978e6b3657986ef43a41aaa3437567772c95bec4f151d8abcf0e9396b
+  priorGrantSignatureSHA256: 967efc83af964fc5abaf42f28cad1ad0231dc35524eecf5f9a05eae093d80b0e
+  priorReviewTag: mars3/w001-lifecycle-completion-v11
+  priorReviewTagObject: 7313ee2e38dd1d4f4f5ca62237e0be89b0b4f13a
+  priorReviewTagTarget: 54f4593b1730ff9ae04a2e5cce0589c6baedfee6
+  priorReviewTagTree: 44ba564be30e0db0aa735d76539c3604a5d79e3f
+  priorRun: 33108126981
+  priorJob: 98643418071
+  priorQADisposition: accepted
+  priorSecurityDisposition: changes-requested
+  pullRequest: 10
+  successorReviewTag: mars3/w001-lifecycle-completion-v12
+  successorReviewTagMessage: MARS-3 W-001 lifecycle CI hardening tree attestation v12
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: foundation-maintainer
+  failureOwnership: foundation
+  purpose: make disposable test Git execution non-overridable and close ambient process-execution paths
+  attemptId: w001-lifecycle-ci-hardening-v12
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  allowedEffects:
+    - preserve-the-v9-runtime-qualification-and-v10-v11-immutable-history-runs-and-dispositions
+    - pin-disposable-test-Git-execution-to-the-trusted-absolute-binary
+    - strip-all-ambient-Git-environment-variables-before-reintroducing-the-exact-bounded-set
+    - reject-protected-c-config-env-template-upload-pack-exec-path-and-persistent-config-mutations
+    - replace-the-one-file-literal-guard-with-repository-wide-AST-process-invocation-admission
+    - add-adversarial-caller-environment-alias-concatenation-command-context-shell-and-alternate-file-regressions
+    - update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening
+    - create-signed-semantic-commits-and-one-signed-v12-release-manager-review-tag
+    - push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-ci-hardening-v12.yaml
+    - .harness/grants/W-001-lifecycle-ci-hardening-v12.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged
+    - caller-arguments-cannot-override-any-of-the-four-command-local-fences
+    - inherited-Git-exec-template-hook-config-and-repository-redirection-state-is-unavailable
+    - protected-local-global-system-configuration-mutations-and-hostile-clone-options-fail-before-Git-executes
+    - every-test-process-invocation-is-AST-admitted-across-all-doctrine-test-files-and-aliases
+    - only-two-exact-ssh-keygen-test-calls-and-the-one-trusted-Git-wrapper-call-are-admitted
+    - v11-QA-accepted-and-Security-changes-requested-dispositions-remain-durable
+    - the-next-public-run-uses-the-exact-signed-v12-tree-and-tag
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged
+  prohibitedEffects:
+    - modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract
+    - mutate-M3-W001-or-any-other-Bead
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - rerun-or-move-any-v9-v10-or-v11-commit-tag-or-run
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - ci.test_git_fences_caller_overridable
+    - ci.test_git_environment_execution_injection
+    - ci.test_process_guard_fail_open
+  callerOverrideFinding: later caller configuration could override every bounded maintenance fence
+  environmentInjectionFinding: inherited Git exec and template paths could run hostile upload-pack and hook executables
+  guardFinding: the literal one-file guard missed aliases concatenation CommandContext shells and alternate files
+  nextAction: prospective-test-process-and-Git-execution-hardening
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-ci-hardening-v12
+  detachedSignature: W-001-lifecycle-ci-hardening-v12.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
