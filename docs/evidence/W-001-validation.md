@@ -994,3 +994,34 @@ existing target symlinks, and an alternate-file production-executor call. No
 authority runtime, native patch, database schema, API, product contract,
 workflow, scanner, repository setting, Beads state, canonical lifecycle, or
 live lease is changed.
+
+### V14 implementation checkpoint
+
+The signed implementation checkpoint is commit
+`80184b070fcf339e9880486ee330f7f69c80c0ae`, tree
+`a87f9d1c69c20d55ae961a45edf1970590b5ca37`, with sole parent the immutable
+V13 head. Its seven changed paths are exactly the signed V14 grant scope; the
+diff is empty for `api/**`, `internal/authority/**`, `go.mod`, and `go.sum`.
+The commit has a valid pinned ED25519 Git signature.
+
+From a normal disposable clone of that exact commit, all of these commands
+passed with repository-relative working directories:
+
+```text
+mars3 doctrine check --repo .
+mars3 plan check --repo .
+mars3 docsync audit --repo .
+mars3 public-check --repo .
+go test ./... -count=1
+go vet ./...
+git diff --check
+git show --check --oneline --no-renames HEAD
+```
+
+The V14 Git/path/process and tag-admission suite passed ten consecutive runs,
+and the same focused suite passed under the Go race detector. The
+digest-pinned, network-disabled Gitleaks image
+`docker.io/zricethezav/gitleaks@sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba`
+detected the synthetic canary, then found no leak in the exact worktree or all
+89 commits of public history. This checkpoint is implementation evidence, not
+QA or Security acceptance and not merge, lease, or lifecycle authority.
