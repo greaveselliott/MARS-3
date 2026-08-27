@@ -393,7 +393,7 @@ func decodeIssueSnapshot(raw []byte, tenantID, projectID string, labels []author
 	var nativeLabels []string
 	var metadata issueMetadata
 	var dependenciesRaw []json.RawMessage
-	if decodeField(object, "id", &id) != nil || decodeField(object, "status", &status) != nil || decodeOptionalString(object, "assignee", &assignee) != nil ||
+	if !validRawClaimFields(object["metadata"]) || decodeField(object, "id", &id) != nil || decodeField(object, "status", &status) != nil || decodeOptionalString(object, "assignee", &assignee) != nil ||
 		decodeField(object, "created_at", &createdAt) != nil || decodeField(object, "updated_at", &updatedAt) != nil ||
 		decodeField(object, "labels", &nativeLabels) != nil || decodeStrictField(object, "metadata", &metadata) != nil ||
 		decodeField(object, "dependencies", &dependenciesRaw) != nil {
@@ -466,14 +466,16 @@ func projectIssue(tenantID, projectID, id, status, assignee string, metadata iss
 		return authorityv1.WorkItem{}, ErrProjectionInvalid
 	}
 	binding := metadata.WorkClaim
+	bindingValid := validWorkClaimBinding(metadata.WorkClaim)
 	if binding == nil {
 		binding = metadata.BootstrapClaim
+		bindingValid = validBootstrapClaimBinding(metadata.BootstrapClaim)
 	}
 	if metadata.LifecycleState == authorityv1.LifecycleBacklog {
 		if binding != nil {
 			return authorityv1.WorkItem{}, ErrProjectionInvalid
 		}
-	} else if !validClaimBinding(binding) || assignee == "" {
+	} else if !bindingValid || assignee == "" {
 		return authorityv1.WorkItem{}, ErrProjectionInvalid
 	}
 	if binding != nil {
@@ -767,8 +769,62 @@ func compatibleLifecycle(native string, lifecycle authorityv1.LifecycleState) bo
 }
 
 func validClaimBinding(binding *claimBinding) bool {
-	return binding != nil && safeToken(binding.AttemptID) && safeToken(binding.IdempotencyKey) && commitID(binding.BaseCommit) &&
-		(binding.GrantID == "" || safeToken(binding.GrantID))
+	return validWorkClaimBinding(binding) || validBootstrapClaimBinding(binding)
+}
+
+func validWorkClaimBinding(binding *claimBinding) bool {
+	return binding != nil && safeToken(binding.AttemptID) && safeToken(binding.IdempotencyKey) && commitID(binding.BaseCommit) && binding.GrantID == ""
+}
+
+func validBootstrapClaimBinding(binding *claimBinding) bool {
+	return binding != nil && safeToken(binding.AttemptID) && safeToken(binding.IdempotencyKey) && commitID(binding.BaseCommit) && safeToken(binding.GrantID)
+}
+
+func validRawClaimFields(raw json.RawMessage) bool {
+	if len(raw) == 0 || rejectDuplicateJSONKeys(raw) != nil {
+		return false
+	}
+	var object map[string]json.RawMessage
+	if json.Unmarshal(raw, &object) != nil {
+		return false
+	}
+	work, workPresent := object["workClaim"]
+	bootstrap, bootstrapPresent := object["bootstrapClaim"]
+	if workPresent && bootstrapPresent {
+		return false
+	}
+	if workPresent {
+		return validRawClaimObject(work, false)
+	}
+	if bootstrapPresent {
+		return validRawClaimObject(bootstrap, true)
+	}
+	return true
+}
+
+func validRawClaimObject(raw json.RawMessage, bootstrap bool) bool {
+	if bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		return false
+	}
+	var object map[string]json.RawMessage
+	if json.Unmarshal(raw, &object) != nil {
+		return false
+	}
+	expected := []string{"attemptId", "idempotencyKey", "baseCommit"}
+	if bootstrap {
+		expected = append(expected, "grantId")
+	}
+	if !onlyObjectKeys(object, expected...) || len(object) != len(expected) {
+		return false
+	}
+	var binding claimBinding
+	if decodeStrictField(map[string]json.RawMessage{"binding": raw}, "binding", &binding) != nil {
+		return false
+	}
+	if bootstrap {
+		return validBootstrapClaimBinding(&binding)
+	}
+	return validWorkClaimBinding(&binding)
 }
 
 func cloneFailureContext(value *authorityv1.FailureContext) *authorityv1.FailureContext {
@@ -804,21 +860,27 @@ func validLifecycleRecords(metadata issueMetadata) bool {
 		return false
 	}
 	binding := metadata.WorkClaim
+	bindingValid := validWorkClaimBinding(metadata.WorkClaim)
 	if binding == nil {
 		binding = metadata.BootstrapClaim
+		bindingValid = validBootstrapClaimBinding(metadata.BootstrapClaim)
 	}
 	if metadata.LifecycleState == authorityv1.LifecycleBacklog {
 		if binding != nil {
 			return false
 		}
-	} else if !validClaimBinding(binding) {
+	} else if !bindingValid {
 		return false
 	}
 	hasDetailed := metadata.Handoff != nil || len(metadata.ReviewRecords) > 0 || len(metadata.ReviewHistory) > 0 || len(metadata.RunHistory) > 0 || metadata.RunDispositionRecord != nil || metadata.ReconciliationRecord != nil || metadata.TerminalRecord != nil
 	if !hasDetailed {
 		return metadata.LifecycleState != authorityv1.LifecycleDone
 	}
+	if binding == nil {
+		return false
+	}
 	if metadata.Handoff == nil || !validMetadataHandoff(*metadata.Handoff) ||
+		metadata.Handoff.CanonicalClaimAttemptID != binding.AttemptID ||
 		!safeToken(metadata.Handoff.NextProfileID) || !safeToken(metadata.Handoff.IdempotencyKey) || !validEvidenceRefs(metadata.Handoff.EvidenceRefs) {
 		return false
 	}
@@ -835,7 +897,8 @@ func validLifecycleRecords(metadata issueMetadata) bool {
 		return false
 	}
 	for _, cycle := range metadata.ReviewHistory {
-		if !validArchivedReviewCycle(cycle, metadata.VerificationOrder, reviewerCount) || !addLifecycleKey(idempotencyKeys, cycle.Handoff.IdempotencyKey) {
+		if !validArchivedReviewCycle(cycle, metadata.VerificationOrder, reviewerCount) || cycle.Handoff.CanonicalClaimAttemptID != binding.AttemptID ||
+			!addLifecycleKey(idempotencyKeys, cycle.Handoff.IdempotencyKey) {
 			return false
 		}
 		for _, review := range cycle.Reviews {
@@ -890,6 +953,19 @@ func validLifecycleRecords(metadata issueMetadata) bool {
 			return false
 		}
 	}
+	if !validFailureAttemptSequence(metadata) {
+		return false
+	}
+	reviewAccepted := len(metadata.ReviewRecords) == reviewerCount
+	for _, review := range metadata.ReviewRecords {
+		reviewAccepted = reviewAccepted && review.Verdict == authorityv1.ReviewAccepted
+	}
+	if metadata.ReviewAccepted != reviewAccepted ||
+		(metadata.RunDispositionRecord == nil && metadata.RunDisposition != "") ||
+		(metadata.RunDispositionRecord != nil && metadata.RunDisposition != string(metadata.RunDispositionRecord.Status)) ||
+		metadata.Reconciled != (metadata.ReconciliationRecord != nil) {
+		return false
+	}
 	blockedFailure := currentBlockedFailure(metadata)
 	if blockedFailure == nil {
 		if metadata.Blocker != "" || len(metadata.BlockedBy) != 0 {
@@ -931,6 +1007,55 @@ func validLifecycleRecords(metadata issueMetadata) bool {
 		}
 	}
 	return true
+}
+
+func validFailureAttemptSequence(metadata issueMetadata) bool {
+	type fingerprintState struct {
+		count   uint32
+		blocked bool
+	}
+	states := map[string]fingerprintState{}
+	visit := func(run *metadataRunDisposition) bool {
+		if run == nil || run.Status == authorityv1.RunCompleted {
+			return true
+		}
+		if run.Failure == nil || !safeToken(run.Failure.FailureFingerprint) {
+			return false
+		}
+		state := states[run.Failure.FailureFingerprint]
+		switch state.count {
+		case 0:
+			if run.Failure.Attempt != 1 {
+				return false
+			}
+		case 1:
+			if state.blocked || run.Failure.Attempt != 2 || run.Status != authorityv1.RunBlocked {
+				return false
+			}
+		default:
+			return false
+		}
+		state.count++
+		state.blocked = state.blocked || run.Status == authorityv1.RunBlocked
+		states[run.Failure.FailureFingerprint] = state
+		return true
+	}
+	for _, cycle := range metadata.ReviewHistory {
+		for index := range cycle.RunHistory {
+			if !visit(&cycle.RunHistory[index]) {
+				return false
+			}
+		}
+		if !visit(cycle.RunDisposition) {
+			return false
+		}
+	}
+	for index := range metadata.RunHistory {
+		if !visit(&metadata.RunHistory[index]) {
+			return false
+		}
+	}
+	return visit(metadata.RunDispositionRecord)
 }
 
 func validArchivedReviewCycle(cycle metadataReviewCycle, verificationOrder []string, reviewerCount int) bool {
@@ -979,7 +1104,7 @@ func validMetadataRun(run *metadataRunDisposition, headSHA, coordinator string) 
 	if run.Status == authorityv1.RunCompleted {
 		return run.Failure == nil
 	}
-	return validMetadataFailure(run.Failure, run.Status == authorityv1.RunBlocked, run.Status != authorityv1.RunInReview && run.Status != authorityv1.RunNoWork)
+	return validMetadataFailure(run.Failure, run.Status == authorityv1.RunBlocked, true)
 }
 
 func validMetadataFailure(value *authorityv1.FailureContext, requireBlockedBy, requireFingerprint bool) bool {

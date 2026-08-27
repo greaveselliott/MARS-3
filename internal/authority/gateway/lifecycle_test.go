@@ -446,14 +446,48 @@ func TestNonterminalLifecycleOutcomesRemainRecoverable(t *testing.T) {
 }
 
 func failureForStatus(status authorityv1.RunDispositionStatus) *authorityv1.FailureContext {
-	failure := &authorityv1.FailureContext{Reason: "run-" + string(status), Attempt: 2, NextAction: "resume-same-ticket"}
+	failure := &authorityv1.FailureContext{
+		Reason: "run-" + string(status), FailureFingerprint: "fingerprint-" + string(status), Attempt: 1, NextAction: "resume-same-ticket",
+	}
 	if status == authorityv1.RunBlocked {
 		failure.BlockedBy = []string{"M3-P999"}
 	}
-	if status != authorityv1.RunInReview && status != authorityv1.RunNoWork {
-		failure.FailureFingerprint = "fingerprint-" + string(status)
-	}
 	return failure
+}
+
+func TestFailureFingerprintAllowsOneRetryThenRequiresBlockedEscalation(t *testing.T) {
+	fingerprint := "repeatable-failure"
+	first := &authorityv1.FailureContext{Reason: "runtime-failed", FailureFingerprint: fingerprint, Attempt: 1, NextAction: "retry-once"}
+	second := &authorityv1.FailureContext{Reason: "runtime-failed", BlockedBy: []string{"runtime"}, FailureFingerprint: fingerprint, Attempt: 2, NextAction: "escalate"}
+	work := authorityv1.WorkItem{}
+	if !failureAttemptAllowed(work, authorityv1.RunFailed, first) {
+		t.Fatal("first normalized failure was rejected")
+	}
+	work.RunDisposition = &authorityv1.RunDispositionRecord{Status: authorityv1.RunFailed, Failure: first}
+	if failureAttemptAllowed(work, authorityv1.RunFailed, second) {
+		t.Fatal("equivalent retry was accepted without blocked escalation")
+	}
+	if !failureAttemptAllowed(work, authorityv1.RunBlocked, second) {
+		t.Fatal("one equivalent blocked escalation was rejected")
+	}
+	work.RunHistory = []authorityv1.RunDispositionRecord{*work.RunDisposition}
+	work.RunDisposition = &authorityv1.RunDispositionRecord{Status: authorityv1.RunBlocked, Failure: second}
+	third := *second
+	third.Attempt = 2
+	if failureAttemptAllowed(work, authorityv1.RunBlocked, &third) {
+		t.Fatal("third equivalent automatic attempt was accepted")
+	}
+}
+
+func TestEveryNoncompletedRunRequiresFingerprint(t *testing.T) {
+	for _, status := range []authorityv1.RunDispositionStatus{authorityv1.RunInReview, authorityv1.RunNoWork} {
+		t.Run(string(status), func(t *testing.T) {
+			failure := &authorityv1.FailureContext{Reason: "missing-fingerprint", Attempt: 1, NextAction: "resume-same-ticket"}
+			if validFailureForRun(status, failure) {
+				t.Fatal("noncompleted run accepted without a normalized fingerprint")
+			}
+		})
+	}
 }
 
 func lifecycleWork(t *testing.T, store *memoryClaimStore) authorityv1.WorkItem {

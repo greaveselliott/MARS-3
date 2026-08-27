@@ -10,6 +10,7 @@ docs:
 package beads
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -84,6 +85,46 @@ func TestLifecycleMetadataPreservesReworkHistoryAndTerminalPrerequisites(t *test
 	if validLifecycleRecords(dualClaim) {
 		t.Fatal("terminal metadata with dual claim lineage was accepted")
 	}
+	incompleteBootstrap := terminal
+	bootstrap = *terminal.WorkClaim
+	bootstrap.GrantID = ""
+	incompleteBootstrap.WorkClaim, incompleteBootstrap.BootstrapClaim = nil, &bootstrap
+	if validLifecycleRecords(incompleteBootstrap) {
+		t.Fatal("terminal metadata with incomplete bootstrap claim was accepted")
+	}
+	typeConfusedWork := terminal
+	workClaim := *terminal.WorkClaim
+	workClaim.GrantID = "bootstrap-grant"
+	typeConfusedWork.WorkClaim = &workClaim
+	if validLifecycleRecords(typeConfusedWork) {
+		t.Fatal("work claim carrying a bootstrap grant was accepted")
+	}
+	wrongCurrentClaim := terminal
+	currentHandoff := *terminal.Handoff
+	currentHandoff.CanonicalClaimAttemptID = "different-canonical-attempt"
+	wrongCurrentClaim.Handoff = &currentHandoff
+	if validLifecycleRecords(wrongCurrentClaim) {
+		t.Fatal("current handoff detached from canonical claim was accepted")
+	}
+	wrongArchivedClaim := terminal
+	wrongArchivedClaim.ReviewHistory = append([]metadataReviewCycle(nil), terminal.ReviewHistory...)
+	wrongArchivedClaim.ReviewHistory[0].Handoff.CanonicalClaimAttemptID = "different-canonical-attempt"
+	if validLifecycleRecords(wrongArchivedClaim) {
+		t.Fatal("archived handoff detached from canonical claim was accepted")
+	}
+	for name, mutate := range map[string]func(*issueMetadata){
+		"review accepted": func(value *issueMetadata) { value.ReviewAccepted = false },
+		"run disposition": func(value *issueMetadata) { value.RunDisposition = "failed" },
+		"reconciled":      func(value *issueMetadata) { value.Reconciled = false },
+	} {
+		t.Run("legacy shadow "+name, func(t *testing.T) {
+			candidate := terminal
+			mutate(&candidate)
+			if validLifecycleRecords(candidate) {
+				t.Fatal("contradictory legacy lifecycle shadow was accepted")
+			}
+		})
+	}
 	stripped := terminal
 	stripped.Handoff, stripped.RunDispositionRecord, stripped.ReconciliationRecord, stripped.TerminalRecord = nil, nil, nil, nil
 	stripped.ReviewRecords, stripped.ReviewHistory, stripped.RunHistory = nil, nil, nil
@@ -91,6 +132,42 @@ func TestLifecycleMetadataPreservesReworkHistoryAndTerminalPrerequisites(t *test
 		t.Fatal("terminal metadata without detailed evidence was accepted")
 	}
 }
+
+func TestLifecycleProjectionRejectsNullClaimShadow(t *testing.T) {
+	raw := issueFixture(t, authorityv1.LifecycleInProgress, "canonical-attempt", "work-authority-engineer", 2, false)
+	raw = bytes.Replace(raw, []byte(`"workClaim":`), []byte(`"bootstrapClaim":null,"workClaim":`), 1)
+	if _, err := decodeIssueSnapshot(raw, "tenant-fixture", "project-fixture", []authorityv1.Label{authorityv1.LabelPublicAccepted}); !errors.Is(err, ErrProjectionInvalid) {
+		t.Fatalf("null bootstrap shadow error=%v", err)
+	}
+}
+
+func TestFailureAttemptSequenceRequiresBlockedSecondOccurrence(t *testing.T) {
+	failure := func(status authorityv1.RunDispositionStatus, attempt uint32) metadataRunDisposition {
+		return metadataRunDisposition{Status: status, Failure: &authorityv1.FailureContext{
+			Reason: "runtime-failed", FailureFingerprint: "same-failure", Attempt: attempt, NextAction: "retry-or-escalate",
+		}}
+	}
+	metadata := issueMetadata{RunDispositionRecord: metadataRunPointer(failure(authorityv1.RunFailed, 1))}
+	if !validFailureAttemptSequence(metadata) {
+		t.Fatal("first normalized failure was rejected")
+	}
+	metadata.RunHistory = []metadataRunDisposition{failure(authorityv1.RunFailed, 1)}
+	metadata.RunDispositionRecord = metadataRunPointer(failure(authorityv1.RunFailed, 2))
+	if validFailureAttemptSequence(metadata) {
+		t.Fatal("equivalent second failure was accepted without blocked escalation")
+	}
+	metadata.RunDispositionRecord = metadataRunPointer(failure(authorityv1.RunBlocked, 2))
+	if !validFailureAttemptSequence(metadata) {
+		t.Fatal("blocked second occurrence was rejected")
+	}
+	metadata.RunHistory = append(metadata.RunHistory, failure(authorityv1.RunBlocked, 2))
+	metadata.RunDispositionRecord = metadataRunPointer(failure(authorityv1.RunBlocked, 2))
+	if validFailureAttemptSequence(metadata) {
+		t.Fatal("third equivalent automatic attempt was accepted")
+	}
+}
+
+func metadataRunPointer(value metadataRunDisposition) *metadataRunDisposition { return &value }
 
 func TestLifecycleMetadataRejectsWrongCanonicalClaimAndPrematureTerminal(t *testing.T) {
 	raw := lifecycleMetadataFixture(t)

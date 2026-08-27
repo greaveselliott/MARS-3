@@ -21,7 +21,7 @@ import (
 )
 
 func lifecyclePostMetadata(pre []byte, mutation gateway.LifecycleMutation) ([]byte, string, string, string, error) {
-	if rejectDuplicateJSONKeys(pre) != nil || !validLifecycleMutationIdentity(mutation) {
+	if rejectDuplicateJSONKeys(pre) != nil || !validRawClaimFields(pre) || !validLifecycleMutationIdentity(mutation) {
 		return nil, "", "", "", ErrProjectionInvalid
 	}
 	var metadata issueMetadata
@@ -167,11 +167,10 @@ func claimMatchesAttempt(metadata issueMetadata, attemptID string) bool {
 	if metadata.WorkClaim != nil && metadata.BootstrapClaim != nil {
 		return false
 	}
-	binding := metadata.WorkClaim
-	if binding == nil {
-		binding = metadata.BootstrapClaim
+	if metadata.WorkClaim != nil {
+		return validWorkClaimBinding(metadata.WorkClaim) && metadata.WorkClaim.AttemptID == attemptID
 	}
-	return validClaimBinding(binding) && binding.AttemptID == attemptID
+	return validBootstrapClaimBinding(metadata.BootstrapClaim) && metadata.BootstrapClaim.AttemptID == attemptID
 }
 
 func cloneMetadataRun(value *metadataRunDisposition) *metadataRunDisposition {
@@ -201,7 +200,7 @@ func validLifecycleRunFailure(status authorityv1.RunDispositionStatus, failure *
 	if status == authorityv1.RunCompleted {
 		return failure == nil
 	}
-	return validMetadataFailure(failure, status == authorityv1.RunBlocked, status != authorityv1.RunInReview && status != authorityv1.RunNoWork)
+	return validMetadataFailure(failure, status == authorityv1.RunBlocked, true)
 }
 
 func metadataRunDispositionAllowed(metadata issueMetadata, mutation gateway.LifecycleMutation) bool {

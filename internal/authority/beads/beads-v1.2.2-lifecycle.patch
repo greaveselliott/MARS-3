@@ -1,5 +1,5 @@
 diff --git a/cmd/bd/batch.go b/cmd/bd/batch.go
-index f1a5409a7..88ef18f87 100644
+index f1a5409a7..244f61e9c 100644
 --- a/cmd/bd/batch.go
 +++ b/cmd/bd/batch.go
 @@ -63,0 +64 @@ Grammar (one command per line):
@@ -14,7 +14,7 @@ index f1a5409a7..88ef18f87 100644
 @@ -360,0 +365,2 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
 +	case "authority-transition":
 +		return runAuthorityTransitionBatchOp(ctx, tx, op, actorName)
-@@ -906,0 +913,676 @@ func runAuthorityClaimBatchOp(ctx context.Context, tx storage.Transaction, op ba
+@@ -906,0 +913,880 @@ func runAuthorityClaimBatchOp(ctx context.Context, tx storage.Transaction, op ba
 +var authorityTransitionKeys = map[string]bool{
 +	"expected_status":              true,
 +	"expected_assignee":            true,
@@ -241,7 +241,7 @@ index f1a5409a7..88ef18f87 100644
 +	if status == "completed" {
 +		return failure == nil
 +	}
-+	return authorityFailureValid(failure, status == "blocked", status != "in-review" && status != "no-work")
++	return authorityFailureValid(failure, status == "blocked", true)
 +}
 +
 +func authorityFailureValid(value *authorityFailureContext, requireBlockedBy, requireFingerprint bool) bool {
@@ -287,8 +287,7 @@ index f1a5409a7..88ef18f87 100644
 +		return nil, "", "", "", fmt.Errorf("invalid verification order")
 +	}
 +	claim := authorityClaimBinding(values)
-+	if claim == nil || !authorityToken(authorityString(claim["attemptId"])) || !authorityToken(authorityString(claim["idempotencyKey"])) ||
-+		!authorityCommit(authorityString(claim["baseCommit"])) {
++	if claim == nil || !authorityLifecyclePreimageValid(values, verification, authorityString(claim["attemptId"])) {
 +		return nil, "", "", "", fmt.Errorf("invalid claim lineage")
 +	}
 +	postStatus, removeLabel, addLabel := "in_progress", "", ""
@@ -473,6 +472,9 @@ index f1a5409a7..88ef18f87 100644
 +	if transition.RunStatus == "completed" {
 +		return authorityAcceptedReviewChain(values, verification, transition.HeadSHA)
 +	}
++	if !authorityFailureAttemptAllowed(values, transition.RunStatus, transition.Failure) {
++		return false
++	}
 +	lifecycle := authorityString(values["lifecycleState"])
 +	if lifecycle != "in-progress" && lifecycle != "in-review" {
 +		return false
@@ -494,8 +496,8 @@ index f1a5409a7..88ef18f87 100644
 +func authorityClaimBinding(values map[string]interface{}) map[string]interface{} {
 +	workValue, workPresent := values["workClaim"]
 +	bootstrapValue, bootstrapPresent := values["bootstrapClaim"]
-+	work, workValid := authorityObject(workValue)
-+	bootstrap, bootstrapValid := authorityObject(bootstrapValue)
++	work, workValid := authorityClaimRecord(workValue, false)
++	bootstrap, bootstrapValid := authorityClaimRecord(bootstrapValue, true)
 +	if workPresent != workValid || bootstrapPresent != bootstrapValid || workPresent == bootstrapPresent {
 +		return nil
 +	}
@@ -506,6 +508,208 @@ index f1a5409a7..88ef18f87 100644
 +		return bootstrap
 +	}
 +	return nil
++}
++
++func authorityClaimRecord(value interface{}, bootstrap bool) (map[string]interface{}, bool) {
++	record, ok := authorityObject(value)
++	if !ok {
++		return nil, false
++	}
++	expected := map[string]bool{"attemptId": true, "idempotencyKey": true, "baseCommit": true}
++	if bootstrap {
++		expected["grantId"] = true
++	}
++	if len(record) != len(expected) {
++		return nil, false
++	}
++	for key := range record {
++		if !expected[key] {
++			return nil, false
++		}
++	}
++	if !authorityToken(authorityString(record["attemptId"])) || !authorityToken(authorityString(record["idempotencyKey"])) ||
++		!authorityCommit(authorityString(record["baseCommit"])) || bootstrap && !authorityToken(authorityString(record["grantId"])) {
++		return nil, false
++	}
++	return record, true
++}
++
++func authorityLifecyclePreimageValid(values map[string]interface{}, verification []string, claimAttemptID string) bool {
++	if !authorityToken(claimAttemptID) || !authorityHandoffsMatchClaim(values, claimAttemptID) || !authorityFailureAttemptSequenceValid(values) {
++		return false
++	}
++	reviewAccepted := authorityReviewChainComplete(values, verification)
++	legacyReview, reviewPresent := values["reviewAccepted"]
++	legacyReviewValue, reviewBool := legacyReview.(bool)
++	if reviewAccepted != (reviewPresent && reviewBool && legacyReviewValue) || reviewPresent && !reviewBool {
++		return false
++	}
++	run, runPresent := authorityObject(values["runDispositionRecord"])
++	legacyRun, legacyRunPresent := values["runDisposition"]
++	if runPresent != legacyRunPresent || runPresent && authorityString(legacyRun) != authorityString(run["status"]) {
++		return false
++	}
++	_, reconciliationPresent := authorityObject(values["reconciliationRecord"])
++	legacyReconciled, reconciledPresent := values["reconciled"]
++	legacyReconciledValue, reconciledBool := legacyReconciled.(bool)
++	return reconciliationPresent == (reconciledPresent && reconciledBool && legacyReconciledValue) && (!reconciledPresent || reconciledBool)
++}
++
++func authorityHandoffsMatchClaim(values map[string]interface{}, claimAttemptID string) bool {
++	if raw, present := values["handoff"]; present {
++		handoff, ok := authorityObject(raw)
++		if !ok || authorityString(handoff["canonicalClaimAttemptId"]) != claimAttemptID {
++			return false
++		}
++	}
++	history, ok := authorityOptionalArray(values["reviewHistory"])
++	if !ok {
++		return false
++	}
++	for _, raw := range history {
++		cycle, cycleOK := authorityObject(raw)
++		handoff, handoffOK := authorityObject(cycle["handoff"])
++		if !cycleOK || !handoffOK || authorityString(handoff["canonicalClaimAttemptId"]) != claimAttemptID {
++			return false
++		}
++	}
++	return true
++}
++
++func authorityReviewChainComplete(values map[string]interface{}, verification []string) bool {
++	if len(verification) < 2 {
++		return false
++	}
++	handoff, ok := authorityObject(values["handoff"])
++	if !ok {
++		return false
++	}
++	reviews, ok := authorityArray(values["reviewRecords"])
++	if !ok || len(reviews) != len(verification)-1 {
++		return false
++	}
++	head := authorityString(handoff["headSHA"])
++	for index, raw := range reviews {
++		review, reviewOK := authorityObject(raw)
++		if !reviewOK || authorityString(review["reviewerProfileId"]) != verification[index] || authorityString(review["verdict"]) != "accepted" ||
++			authorityString(review["headSHA"]) != head {
++			return false
++		}
++	}
++	return true
++}
++
++func authorityFailureAttemptAllowed(values map[string]interface{}, status string, failure *authorityFailureContext) bool {
++	if failure == nil || !authorityToken(failure.FailureFingerprint) || !authorityFailureAttemptSequenceValid(values) {
++		return false
++	}
++	count, blocked := authorityFailureOccurrences(values, failure.FailureFingerprint)
++	switch count {
++	case 0:
++		return failure.Attempt == 1
++	case 1:
++		return !blocked && failure.Attempt == 2 && status == "blocked"
++	default:
++		return false
++	}
++}
++
++func authorityFailureAttemptSequenceValid(values map[string]interface{}) bool {
++	states := map[string]struct {
++		count   uint32
++		blocked bool
++	}{}
++	return authorityVisitRunRecords(values, func(run map[string]interface{}) bool {
++		status := authorityString(run["status"])
++		if status == "completed" {
++			return true
++		}
++		failure, ok := authorityObject(run["failure"])
++		fingerprint := authorityString(failure["failure_fingerprint"])
++		attempt, attemptOK := authorityFailureAttempt(failure["attempt"])
++		if !ok || !authorityToken(fingerprint) || !attemptOK {
++			return false
++		}
++		state := states[fingerprint]
++		switch state.count {
++		case 0:
++			if attempt != 1 {
++				return false
++			}
++		case 1:
++			if state.blocked || attempt != 2 || status != "blocked" {
++				return false
++			}
++		default:
++			return false
++		}
++		state.count++
++		state.blocked = state.blocked || status == "blocked"
++		states[fingerprint] = state
++		return true
++	})
++}
++
++func authorityFailureOccurrences(values map[string]interface{}, fingerprint string) (int, bool) {
++	count, blocked := 0, false
++	authorityVisitRunRecords(values, func(run map[string]interface{}) bool {
++		failure, ok := authorityObject(run["failure"])
++		if ok && authorityString(failure["failure_fingerprint"]) == fingerprint {
++			count++
++			blocked = blocked || authorityString(run["status"]) == "blocked"
++		}
++		return true
++	})
++	return count, blocked
++}
++
++func authorityVisitRunRecords(values map[string]interface{}, visit func(map[string]interface{}) bool) bool {
++	visitArray := func(raw interface{}) bool {
++		runs, ok := authorityOptionalArray(raw)
++		if !ok {
++			return false
++		}
++		for _, value := range runs {
++			run, runOK := authorityObject(value)
++			if !runOK || !visit(run) {
++				return false
++			}
++		}
++		return true
++	}
++	history, ok := authorityOptionalArray(values["reviewHistory"])
++	if !ok {
++		return false
++	}
++	for _, raw := range history {
++		cycle, cycleOK := authorityObject(raw)
++		if !cycleOK || !visitArray(cycle["runHistory"]) {
++			return false
++		}
++		if run, present := cycle["runDisposition"]; present {
++			record, recordOK := authorityObject(run)
++			if !recordOK || !visit(record) {
++				return false
++			}
++		}
++	}
++	if !visitArray(values["runHistory"]) {
++		return false
++	}
++	if raw, present := values["runDispositionRecord"]; present {
++		run, runOK := authorityObject(raw)
++		return runOK && visit(run)
++	}
++	return true
++}
++
++func authorityFailureAttempt(value interface{}) (uint32, bool) {
++	number, ok := value.(json.Number)
++	if !ok {
++		return 0, false
++	}
++	attempt, err := strconv.ParseUint(number.String(), 10, 32)
++	return uint32(attempt), err == nil && attempt > 0 && attempt <= 2
 +}
 +
 +func authorityLifecycleKeyUsed(values map[string]interface{}, key string) bool {
@@ -692,10 +896,10 @@ index f1a5409a7..88ef18f87 100644
 +}
 +
 diff --git a/cmd/bd/batch_embedded_test.go b/cmd/bd/batch_embedded_test.go
-index 34f2e8fa8..add8e3015 100644
+index 34f2e8fa8..8a1fda8f7 100644
 --- a/cmd/bd/batch_embedded_test.go
 +++ b/cmd/bd/batch_embedded_test.go
-@@ -556,0 +557,376 @@ func TestBatchAuthorityClaimContentionHasOneWinner(t *testing.T) {
+@@ -556,0 +557,487 @@ func TestBatchAuthorityClaimContentionHasOneWinner(t *testing.T) {
 +func TestBatchAuthorityLifecycleIsOneBoundedTransitionChain(t *testing.T) {
 +	previousActor := actor
 +	t.Cleanup(func() { setActor(previousActor) })
@@ -899,12 +1103,9 @@ index 34f2e8fa8..add8e3015 100644
 +	inReview := applyAuthorityMetadataForTest(t, base, handoff)
 +	for _, status := range []string{"blocked", "in-review", "changes-requested", "no-work", "preempted", "cancelled", "failed"} {
 +		t.Run(status, func(t *testing.T) {
-+			failure := &authorityFailureContext{Reason: "run-" + status, Attempt: 2, NextAction: "resume-same-ticket"}
++			failure := &authorityFailureContext{Reason: "run-" + status, FailureFingerprint: "fingerprint-" + status, Attempt: 1, NextAction: "resume-same-ticket"}
 +			if status == "blocked" {
 +				failure.BlockedBy = []string{"M3-P999"}
-+			}
-+			if status != "in-review" && status != "no-work" {
-+				failure.FailureFingerprint = "fingerprint-" + status
 +			}
 +			post := applyAuthorityMetadataForTest(t, inReview, authorityLifecycleTransition{
 +				Operation: "run-disposition", PrincipalProfileID: "delivery-orchestrator", HeadSHA: head, RunStatus: status,
@@ -954,6 +1155,22 @@ index 34f2e8fa8..add8e3015 100644
 +			values["bootstrapClaim"] = map[string]interface{}{"attemptId": "canonical-attempt", "idempotencyKey": "bootstrap-key", "baseCommit": strings.Repeat("d", 40), "grantId": "bootstrap-grant"}
 +		},
 +		"malformed shadow": func(values map[string]interface{}) { values["bootstrapClaim"] = "invalid-shadow-binding" },
++		"null shadow":      func(values map[string]interface{}) { values["bootstrapClaim"] = nil },
++		"work grant": func(values map[string]interface{}) {
++			values["workClaim"].(map[string]interface{})["grantId"] = "wrong-claim-type"
++		},
++		"bootstrap missing grant": func(values map[string]interface{}) {
++			delete(values, "workClaim")
++			values["bootstrapClaim"] = map[string]interface{}{"attemptId": "canonical-attempt", "idempotencyKey": "bootstrap-key", "baseCommit": strings.Repeat("d", 40)}
++		},
++		"current handoff claim mismatch": func(values map[string]interface{}) {
++			values["handoff"].(map[string]interface{})["canonicalClaimAttemptId"] = "different-valid-attempt"
++		},
++		"legacy review contradiction": func(values map[string]interface{}) { values["reviewAccepted"] = false },
++		"legacy run contradiction":    func(values map[string]interface{}) { values["runDisposition"] = "failed" },
++		"legacy reconcile contradiction": func(values map[string]interface{}) {
++			values["reconciled"] = false
++		},
 +	} {
 +		t.Run(name, func(t *testing.T) {
 +			var values map[string]interface{}
@@ -964,6 +1181,104 @@ index 34f2e8fa8..add8e3015 100644
 +			corrupt, _ := json.Marshal(values)
 +			if _, _, _, _, err := authorityTransitionPostMetadata(corrupt, terminal); err == nil {
 +				t.Fatal("terminal transition accepted invalid claim lineage")
++			}
++		})
++	}
++}
++
++func TestAuthorityLifecycleArchivedHandoffMustMatchClaimLineage(t *testing.T) {
++	raw := authorityLifecycleMetadataForTest()
++	firstHead, secondHead := strings.Repeat("a", 40), strings.Repeat("b", 40)
++	raw = applyAuthorityMetadataForTest(t, raw, authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-1", CanonicalClaimAttemptID: "canonical-attempt",
++		HandoffFenceDigest: strings.Repeat("a", 64), HeadSHA: firstHead, EvidenceRefs: []string{"evidence-first"}, NextProfileID: "qa", IdempotencyKey: "handoff-first",
++	})
++	raw = applyAuthorityMetadataForTest(t, raw, authorityLifecycleTransition{
++		Operation: "review-verdict", PrincipalProfileID: "qa", HeadSHA: firstHead, Verdict: "changes-requested",
++		EvidenceRefs: []string{"evidence-changes"}, IdempotencyKey: "review-changes",
++	})
++	raw = applyAuthorityMetadataForTest(t, raw, authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-2", CanonicalClaimAttemptID: "canonical-attempt",
++		HandoffFenceDigest: strings.Repeat("b", 64), HeadSHA: secondHead, EvidenceRefs: []string{"evidence-second"}, NextProfileID: "qa", IdempotencyKey: "handoff-second",
++	})
++	var values map[string]interface{}
++	if json.Unmarshal(raw, &values) != nil {
++		t.Fatal("decode fixture")
++	}
++	history := values["reviewHistory"].([]interface{})
++	history[0].(map[string]interface{})["handoff"].(map[string]interface{})["canonicalClaimAttemptId"] = "different-valid-attempt"
++	corrupt, _ := json.Marshal(values)
++	if _, _, _, _, err := authorityTransitionPostMetadata(corrupt, authorityLifecycleTransition{
++		Operation: "review-verdict", PrincipalProfileID: "qa", HeadSHA: secondHead, Verdict: "accepted",
++		EvidenceRefs: []string{"evidence-qa"}, IdempotencyKey: "review-qa",
++	}); err == nil {
++		t.Fatal("transition accepted archived handoff with different canonical claim")
++	}
++}
++
++func TestAuthorityLifecycleEveryNoncompletedRunRequiresFingerprint(t *testing.T) {
++	base := authorityLifecycleMetadataForTest()
++	head := strings.Repeat("a", 40)
++	inReview := applyAuthorityMetadataForTest(t, base, authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution", CanonicalClaimAttemptID: "canonical-attempt",
++		HandoffFenceDigest: strings.Repeat("c", 64), HeadSHA: head, EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff",
++	})
++	for _, status := range []string{"in-review", "no-work"} {
++		t.Run(status, func(t *testing.T) {
++			_, _, _, _, err := authorityTransitionPostMetadata(inReview, authorityLifecycleTransition{
++				Operation: "run-disposition", PrincipalProfileID: "delivery-orchestrator", HeadSHA: head, RunStatus: status,
++				Failure:      &authorityFailureContext{Reason: "missing-fingerprint", Attempt: 1, NextAction: "resume"},
++				EvidenceRefs: []string{"evidence-run"}, IdempotencyKey: "run-" + status,
++			})
++			if err == nil {
++				t.Fatal("noncompleted run accepted without fingerprint")
++			}
++		})
++	}
++}
++
++func TestAuthorityLifecycleEquivalentFailureAllowsOneRetryThenBlocks(t *testing.T) {
++	base := authorityLifecycleMetadataForTest()
++	head := strings.Repeat("a", 40)
++	inReview := applyAuthorityMetadataForTest(t, base, authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution", CanonicalClaimAttemptID: "canonical-attempt",
++		HandoffFenceDigest: strings.Repeat("d", 64), HeadSHA: head, EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff",
++	})
++	failure := &authorityFailureContext{Reason: "repeatable-failure", FailureFingerprint: "same-fingerprint", Attempt: 1, NextAction: "retry-once"}
++	first := applyAuthorityMetadataForTest(t, inReview, authorityLifecycleTransition{
++		Operation: "run-disposition", PrincipalProfileID: "delivery-orchestrator", HeadSHA: head, RunStatus: "failed", Failure: failure,
++		EvidenceRefs: []string{"evidence-first"}, IdempotencyKey: "run-first",
++	})
++	for _, test := range []struct {
++		name, status string
++		attempt      uint32
++		wantAccepted bool
++	}{
++		{name: "repeat attempt one", status: "failed", attempt: 1},
++		{name: "retry not blocked", status: "failed", attempt: 2},
++		{name: "bounded blocked retry", status: "blocked", attempt: 2, wantAccepted: true},
++	} {
++		t.Run(test.name, func(t *testing.T) {
++			retry := *failure
++			retry.Attempt = test.attempt
++			if test.status == "blocked" {
++				retry.BlockedBy = []string{"M3-P999"}
++			}
++			post, _, _, _, err := authorityTransitionPostMetadata(first, authorityLifecycleTransition{
++				Operation: "run-disposition", PrincipalProfileID: "delivery-orchestrator", HeadSHA: head, RunStatus: test.status, Failure: &retry,
++				EvidenceRefs: []string{"evidence-retry"}, IdempotencyKey: "retry-" + strings.ReplaceAll(test.name, " ", "-"),
++			})
++			if (err == nil) != test.wantAccepted {
++				t.Fatalf("accepted=%v err=%v", err == nil, err)
++			}
++			if test.wantAccepted {
++				third := retry
++				if _, _, _, _, thirdErr := authorityTransitionPostMetadata(post, authorityLifecycleTransition{
++					Operation: "run-disposition", PrincipalProfileID: "delivery-orchestrator", HeadSHA: head, RunStatus: "blocked", Failure: &third,
++					EvidenceRefs: []string{"evidence-third"}, IdempotencyKey: "run-third",
++				}); thirdErr == nil {
++					t.Fatal("third equivalent failure was accepted")
++				}
 +			}
 +		})
 +	}

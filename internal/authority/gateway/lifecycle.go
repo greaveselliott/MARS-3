@@ -464,6 +464,9 @@ func runDispositionAllowed(work authorityv1.WorkItem, mutation LifecycleMutation
 	if mutation.RunStatus == authorityv1.RunCompleted {
 		return acceptedReviews(work, mutation.HeadSHA)
 	}
+	if !failureAttemptAllowed(work, mutation.RunStatus, mutation.Failure) {
+		return false
+	}
 	if work.LifecycleState != authorityv1.LifecycleInProgress && work.LifecycleState != authorityv1.LifecycleInReview {
 		return false
 	}
@@ -474,6 +477,38 @@ func runDispositionAllowed(work authorityv1.WorkItem, mutation LifecycleMutation
 		}
 	}
 	return true
+}
+
+func failureAttemptAllowed(work authorityv1.WorkItem, status authorityv1.RunDispositionStatus, failure *authorityv1.FailureContext) bool {
+	if failure == nil || failure.FailureFingerprint == "" {
+		return false
+	}
+	count := 0
+	priorBlocked := false
+	visit := func(run *authorityv1.RunDispositionRecord) {
+		if run != nil && run.Failure != nil && run.Failure.FailureFingerprint == failure.FailureFingerprint {
+			count++
+			priorBlocked = priorBlocked || run.Status == authorityv1.RunBlocked
+		}
+	}
+	for index := range work.RunHistory {
+		visit(&work.RunHistory[index])
+	}
+	visit(work.RunDisposition)
+	for _, cycle := range work.ReviewHistory {
+		for index := range cycle.RunHistory {
+			visit(&cycle.RunHistory[index])
+		}
+		visit(cycle.RunDisposition)
+	}
+	switch count {
+	case 0:
+		return failure.Attempt == 1
+	case 1:
+		return !priorBlocked && failure.Attempt == 2 && status == authorityv1.RunBlocked
+	default:
+		return false
+	}
 }
 
 func (s *Service) appendLifecycleEvent(ctx context.Context, principal authorityv1.Principal, traceRef string, mutation LifecycleMutation, labels []authorityv1.Label, phase, outcome string, before, after authorityv1.WorkItem) error {
@@ -580,7 +615,7 @@ func validFailureForRun(status authorityv1.RunDispositionStatus, failure *author
 	if status == authorityv1.RunCompleted {
 		return failure == nil
 	}
-	return validFailureContext(failure, status == authorityv1.RunBlocked, status != authorityv1.RunInReview && status != authorityv1.RunNoWork)
+	return validFailureContext(failure, status == authorityv1.RunBlocked, true)
 }
 
 func equalFailureContext(left, right *authorityv1.FailureContext) bool {
