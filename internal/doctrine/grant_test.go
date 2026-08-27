@@ -1398,6 +1398,80 @@ func TestW001LifecycleStabilizationV10PathScope(t *testing.T) {
 	}
 }
 
+func TestW001LifecycleCIFencingV11GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIFencingV11Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v11 lifecycle CI fencing correction was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIFencingV11GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIFencingV11Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleStabilizationV10ReviewTag+":refs/tags/"+w001LifecycleStabilizationV10ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIFencingV11Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIFencingV11Path:          tampered,
+		w001LifecycleCIFencingV11Signature:     read(w001LifecycleCIFencingV11Signature),
+		w001LifecycleStabilizationV10Path:      read(w001LifecycleStabilizationV10Path),
+		w001LifecycleStabilizationV10Signature: read(w001LifecycleStabilizationV10Signature),
+		wave1PlanningGrantKey:                  read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":    read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                    read(canonicalActivePlan),
+		".harness/manifest.yaml":               read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":      read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIFencingV11Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_fencing_v11_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_fencing_v11_signature") {
+		t.Fatalf("tampered v11 lifecycle CI fencing authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIFencingV11PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIFencingV11Path,
+		w001LifecycleCIFencingV11Signature,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIFencingV11PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v11 lifecycle CI fencing path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleStabilizationV10Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIFencingV11PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v11 lifecycle CI fencing path was accepted: %s", path)
+		}
+	}
+}
+
 func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	object, err := planningGrantGitOutput(repo, "cat-file", "tag", w001DeliveryV2TagObject)
@@ -1418,11 +1492,13 @@ func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
 }
 
 func TestW001DeliveryPullRequestCheckoutBindsEventHead(t *testing.T) {
-	repo := filepath.Clean(filepath.Join("..", ".."))
-	root := filepath.Join(t.TempDir(), "repo")
-	if output, err := exec.Command("git", "clone", "--quiet", "--no-local", repo, root).CombinedOutput(); err != nil {
-		t.Fatalf("clone delivery fixture: %v: %s", err, output)
+	repo, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
+	if err != nil {
+		t.Fatal(err)
 	}
+	parent := t.TempDir()
+	root := filepath.Join(parent, "repo")
+	runPlanningGrantTestGit(t, parent, "clone", "--quiet", "--no-local", repo, root)
 	feature := planningGrantTestGitOutput(t, root, "rev-parse", "HEAD^{commit}")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", repo, w001DeliveryBase)
 	tree := planningGrantTestGitOutput(t, root, "rev-parse", feature+"^{tree}")
@@ -1790,7 +1866,6 @@ func writeW001PostclaimGitFixture(t *testing.T) string {
 	}
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimCIFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+w001PostclaimReviewTag+":refs/tags/"+w001PostclaimReviewTag)
@@ -1813,7 +1888,6 @@ func writeW001PostclaimSecurityGitFixture(t *testing.T) string {
 	}
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimSecurityFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
 	for _, tag := range []string{w001PostclaimReviewTag, w001PostclaimCIFixReviewTag} {
@@ -1838,7 +1912,6 @@ func writeW001PostclaimHookGitFixture(t *testing.T) string {
 	}
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimHookFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
 	for _, tag := range []string{w001PostclaimReviewTag, w001PostclaimCIFixReviewTag, w001PostclaimSecurityFixTag} {
@@ -1863,7 +1936,6 @@ func writeW001PostclaimPRBindingGitFixture(t *testing.T) string {
 	}
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimPRFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
 	for _, tag := range []string{w001PostclaimReviewTag, w001PostclaimCIFixReviewTag, w001PostclaimSecurityFixTag, w001PostclaimHookFixTag} {
@@ -1888,7 +1960,6 @@ func writeW001PostclaimChronologyGitFixture(t *testing.T) string {
 	}
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimChronoFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
 	for _, tag := range []string{w001PostclaimReviewTag, w001PostclaimCIFixReviewTag, w001PostclaimSecurityFixTag, w001PostclaimHookFixTag, w001PostclaimPRFixTag} {
@@ -2799,7 +2870,6 @@ func writeWave1TransitionSquashFixture(t *testing.T, parent string) (string, str
 	}
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1PublishedMain)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+wave1TransitionTag+":refs/tags/"+wave1TransitionTag)
 	publicKey, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(wave1PlanningGrantKey)))
@@ -2828,7 +2898,6 @@ func writeWave1PRFallbackMainFixture(t *testing.T, reviewedTree bool) (string, s
 	sourceHead := planningGrantTestGitOutput(t, source, "rev-parse", "HEAD")
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	for _, revision := range []string{wave1PublishedMain, sourceHead} {
 		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, revision)
 	}
@@ -2852,12 +2921,6 @@ func writeWave1PRFallbackMainFixture(t *testing.T, reviewedTree bool) (string, s
 	)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--force", "-B", "main", squash)
 	return root, squash
-}
-
-func disablePlanningGrantTestGitMaintenance(t *testing.T, root string) {
-	t.Helper()
-	runPlanningGrantTestGit(t, root, "config", "maintenance.auto", "false")
-	runPlanningGrantTestGit(t, root, "config", "gc.auto", "0")
 }
 
 func setWave1PRFallbackMainPushFacts(t *testing.T, root, head string) {
@@ -2944,7 +3007,6 @@ func writePlanningGrantGitFixture(t *testing.T) string {
 	}
 	root := t.TempDir()
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1V3AddendumBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--detach", "FETCH_HEAD")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+wave1PriorPublicationTag+":refs/tags/"+wave1PriorPublicationTag)
@@ -2955,13 +3017,11 @@ func writePlanningGrantGitFixture(t *testing.T) string {
 	return root
 }
 
-func TestPlanningGrantGitFixtureDisablesAutoMaintenance(t *testing.T) {
+func TestPlanningGrantGitFixtureDoesNotPersistMaintenanceConfiguration(t *testing.T) {
 	root := writePlanningGrantGitFixture(t)
-	if value := planningGrantTestGitOutput(t, root, "config", "--local", "--get", "maintenance.auto"); value != "false" {
-		t.Fatalf("disposable planning fixture enabled Git maintenance: %q", value)
-	}
-	if value := planningGrantTestGitOutput(t, root, "config", "--local", "--get", "gc.auto"); value != "0" {
-		t.Fatalf("disposable planning fixture enabled Git auto-GC: %q", value)
+	for _, key := range []string{"maintenance.auto", "gc.auto", "gc.autoDetach", "maintenance.autoDetach"} {
+		assertPlanningGrantTestGitConfigAbsent(t, root, "--local", key)
+		assertPlanningGrantTestGitConfigAbsent(t, root, "--global", key)
 	}
 }
 
@@ -3168,8 +3228,18 @@ func planningGrantTestGitCommand(root string, arguments ...string) *exec.Cmd {
 }
 
 func TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance(t *testing.T) {
-	root := t.TempDir()
-	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	parent := t.TempDir()
+	hostileGlobal := filepath.Join(parent, "hostile-global-config")
+	if err := os.WriteFile(hostileGlobal, []byte("[maintenance]\n\tauto = true\n[gc]\n\tauto = 999\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("GIT_CONFIG_GLOBAL", hostileGlobal)
+	root := filepath.Join(parent, "repo")
+	runPlanningGrantTestGit(t, parent, "clone", "--quiet", "--no-local", source, root)
 	for key, want := range map[string]string{
 		"maintenance.auto":       "false",
 		"gc.auto":                "0",
@@ -3179,5 +3249,27 @@ func TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance(t *testing.T) 
 		if got := planningGrantTestGitOutput(t, root, "config", "--get", key); got != want {
 			t.Fatalf("bounded disposable Git config %s=%q, want %q", key, got, want)
 		}
+		assertPlanningGrantTestGitConfigAbsent(t, root, "--local", key)
+		assertPlanningGrantTestGitConfigAbsent(t, root, "--global", key)
+	}
+}
+
+func TestPlanningGrantDisposableGitCallsUseOnlyBoundedWrapper(t *testing.T) {
+	source, err := os.ReadFile("grant_test.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	needle := []byte("exec.Command(" + "\"git\"")
+	if count := bytes.Count(source, needle); count != 1 {
+		t.Fatalf("disposable Git commands must use the single audited wrapper; raw command count=%d", count)
+	}
+}
+
+func assertPlanningGrantTestGitConfigAbsent(t *testing.T, root, scope, key string) {
+	t.Helper()
+	command := planningGrantTestGitCommand(root, "config", scope, "--get", key)
+	output, err := command.CombinedOutput()
+	if err == nil || len(bytes.TrimSpace(output)) != 0 {
+		t.Fatalf("disposable Git configuration persisted %s %s: output=%q err=%v", scope, key, output, err)
 	}
 }

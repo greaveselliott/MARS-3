@@ -156,7 +156,7 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the v10 CI-stabilized lifecycle correction to
+- Required next transition: bind the v11 CI-fenced lifecycle correction to
   a signed immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
   conformance suites plus independent cold-build reproduction, then route that exact tree through QA and Security. No
   canonical handoff or later lifecycle mutation may execute until the reviewed
@@ -227,6 +227,19 @@ race, after authority packages had passed. The signed
 contracts, qualification bytes, tag, and failed runs; it permits only applying
 bounded no-maintenance/no-auto-GC/no-detach configuration to every disposable
 test Git command, updating the validator and evidence, and fresh review.
+
+Independent QA and Security changes-requested the immutable V10 checkpoint at
+head `47b19b2c89d72fbf9eb5356ceefe33783d691aa4`, tree
+`0ebe496c48871b040a7fcd7a286073f2c1d40153`. They verified the V9 runtime and
+qualification remained byte-exact and public run `33105792480`, job
+`98635155160`, passed, but found two test-fixture fencing defects: one raw
+pre-repository clone bypassed the sanitized wrapper
+(`ci.test_git_sanitization_incomplete`), and disposable repositories retained
+local maintenance configuration despite the command-local-only contract
+(`ci.test_git_configuration_persisted`). The signed
+`W-001-lifecycle-ci-fencing-v11` grant permits only routing every disposable
+Git operation through the single bounded wrapper, removing persistent fixture
+configuration, adding fail-closed regressions, and fresh immutable review.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation

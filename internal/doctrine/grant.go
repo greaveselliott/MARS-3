@@ -244,6 +244,14 @@ const (
 	w001LifecycleV9TagObject                = "47933c4957b9af2e8d7a38f971d7a20c5de8122f"
 	w001LifecycleStabilizationV10ReviewTag  = "mars3/w001-lifecycle-completion-v10"
 	w001LifecycleStabilizationV10TagMessage = "MARS-3 W-001 lifecycle CI stabilization tree attestation v10"
+	w001LifecycleCIFencingV11Path           = ".harness/grants/W-001-lifecycle-ci-fencing-v11.yaml"
+	w001LifecycleCIFencingV11Signature      = ".harness/grants/W-001-lifecycle-ci-fencing-v11.yaml.sig"
+	w001LifecycleCIFencingV11Namespace      = "mars3-w001-lifecycle-ci-fencing-v11"
+	w001LifecycleCIFencingV11Base           = "47b19b2c89d72fbf9eb5356ceefe33783d691aa4"
+	w001LifecycleCIFencingV11BaseTree       = "0ebe496c48871b040a7fcd7a286073f2c1d40153"
+	w001LifecycleV10TagObject               = "84672df5f046995bb7efd79cf8f9a333946aecfa"
+	w001LifecycleCIFencingV11ReviewTag      = "mars3/w001-lifecycle-completion-v11"
+	w001LifecycleCIFencingV11TagMessage     = "MARS-3 W-001 lifecycle CI Git fencing correction tree attestation v11"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -2917,6 +2925,104 @@ var w001LifecycleStabilizationV10Sequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001LifecycleCIFencingV11Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCIFencingCorrectionGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-ci-fencing-v11"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T19:05:55Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T19:05:55Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCIFencingV11Base},
+	{path: "grant.baseTree", value: w001LifecycleCIFencingV11BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-ci-stabilization-v10"},
+	{path: "grant.priorGrantSHA256", value: "b6f29734dabbeaff52f96c8d5e0a8910fadf81c841f4d9fd4a7cd799add586f9"},
+	{path: "grant.priorGrantSignatureSHA256", value: "9bc96e8c5a0f35fee3998066bd6fa00b45b671ee1b66debad4f6e21c7341ab32"},
+	{path: "grant.priorReviewTag", value: w001LifecycleStabilizationV10ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV10TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCIFencingV11Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCIFencingV11BaseTree},
+	{path: "grant.priorRun", value: "33105792480"},
+	{path: "grant.priorJob", value: "98635155160"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCIFencingV11ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCIFencingV11TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "route every disposable test Git operation through one sanitized command-local wrapper without persistent repository configuration"},
+	{path: "grant.attemptId", value: "w001-lifecycle-ci-fencing-v11"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.rawCloneFinding", value: "grant_test.go raw git clone bypassed the bounded wrapper and inherited global configuration"},
+	{path: "findings.persistedConfigFinding", value: "disposable fixtures wrote maintenance.auto and gc.auto into repository-local configuration"},
+	{path: "findings.nextAction", value: "prospective-command-local-test-Git-fencing-correction"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCIFencingV11Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-ci-fencing-v11.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCIFencingV11Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-runtime-qualification-and-v10-commit-tree-tag-run-and-dispositions",
+		"route-pre-repository-clone-and-every-other-disposable-test-Git-operation-through-the-bounded-wrapper",
+		"remove-disposable-repository-persistent-maintenance-and-gc-configuration",
+		"assert-effective-command-local-fences-and-absent-local-and-global-persistent-values",
+		"reject-any-raw-disposable-Git-command-outside-the-single-audited-wrapper",
+		"update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-correction",
+		"create-signed-semantic-commits-and-one-signed-v11-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCIFencingV11Path, w001LifecycleCIFencingV11Signature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged",
+		"every-disposable-test-Git-operation-including-pre-repository-clone-uses-the-sanitized-bounded-wrapper",
+		"effective-maintenance-auto-gc-auto-detach-and-maintenance-auto-detach-remain-command-local-and-disabled",
+		"no-disposable-repository-local-global-user-system-or-production-Git-configuration-is-mutated",
+		"v10-QA-and-Security-changes-requested-dispositions-remain-durable",
+		"the-next-public-run-uses-the-exact-signed-v11-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-or-move-any-v9-or-v10-commit-tag-or-run",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes":     {"ci.test_git_sanitization_incomplete", "ci.test_git_configuration_persisted"},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -4860,6 +4966,15 @@ func checkW001LifecycleCorrectionV9Grant(root string, findings *[]Finding) {
 }
 
 func checkW001LifecycleStabilizationV10Grant(root string, findings *[]Finding) {
+	v11Active := false
+	if _, v11Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIFencingV11Path))); v11Err == nil {
+		v11Active = true
+	} else if !os.IsNotExist(v11Err) {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_state", "v11 lifecycle CI fencing state cannot be established")
+	}
+	if v11Active {
+		defer checkW001LifecycleStabilizationV10Successor(root, findings)
+	}
 	data, err := readRepoFile(root, w001LifecycleStabilizationV10Path)
 	if err != nil {
 		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_missing", "signed v10 lifecycle CI stabilization grant is required")
@@ -4944,14 +5059,117 @@ func checkW001LifecycleStabilizationV10Grant(root string, findings *[]Finding) {
 		}
 	}
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
-	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-stabilization-v10`")) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+	if planErr != nil || (!v11Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-stabilization-v10`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_stabilization_v10_plan", "active plan must select the truthful v10 CI stabilization")
 	}
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
-	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-stabilization-v10")) ||
-		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-stabilization-v10")) ||
+	if manifestErr != nil || (!v11Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-stabilization-v10")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-stabilization-v10")))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_stabilization_v10_manifest", "manifest must project the v10 CI stabilization and absent live lease")
+	}
+}
+
+func checkW001LifecycleStabilizationV10Successor(root string, findings *[]Finding) {
+	checkW001LifecycleCIFencingV11Grant(root, findings)
+}
+
+func checkW001LifecycleCIFencingV11Grant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001LifecycleCIFencingV11Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_missing", "signed v11 lifecycle CI fencing grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCIFencingV11Scalars, w001LifecycleCIFencingV11Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCIFencingV11Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_value", "%s does not match the signed v11 lifecycle CI fencing contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCIFencingV11Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_sequence", "%s must equal the exact ordered v11 lifecycle CI fencing contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_expiry", "v11 lifecycle CI fencing grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCIFencingV11Signature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCIFencingV11Signature, "public.w001_lifecycle_ci_fencing_v11_signature_missing", "detached v11 lifecycle CI fencing signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_ci_fencing_v11_key", "v11 lifecycle CI fencing must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleCIFencingV11Namespace); err != nil {
+		addFinding(findings, w001LifecycleCIFencingV11Signature, "public.w001_lifecycle_ci_fencing_v11_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleStabilizationV10Path, "b6f29734dabbeaff52f96c8d5e0a8910fadf81c841f4d9fd4a7cd799add586f9"},
+		{w001LifecycleStabilizationV10Signature, "9bc96e8c5a0f35fee3998066bd6fa00b45b671ee1b66debad4f6e21c7341ab32"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_ci_fencing_v11_prior_grant", "prior v10 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIFencingV11Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIFencingV11Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCIFencingV11Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCIFencingV11BaseTree {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_base", "v11 lifecycle CI fencing must descend from the exact immutable v10 head and tree")
+	}
+	checkW001LifecycleV10Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"ci.test_git_sanitization_incomplete", "ci.test_git_configuration_persisted", w001LifecycleCIFencingV11Base,
+		w001LifecycleCIFencingV11BaseTree, "33105792480", "98635155160", "command-local", "changes-requested",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_ci_fencing_v11_evidence", "v11 evidence must preserve the exact v10 findings and bounded correction")
+			break
+		}
+	}
+	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
+	rawNeedle := []byte("exec.Command(" + "\"git\"")
+	if testsErr != nil || bytes.Count(tests, rawNeedle) != 1 || bytes.Contains(tests, []byte("disablePlanningGrantTestGitMaintenance")) {
+		addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_fencing_v11_wrapper", "all disposable Git operations must use the single audited bounded wrapper without persistent fixture config")
+	}
+	for _, marker := range []string{"TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance", "TestPlanningGrantDisposableGitCallsUseOnlyBoundedWrapper", "TestPlanningGrantGitFixtureDoesNotPersistMaintenanceConfiguration", "--local", "--global"} {
+		if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
+			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_fencing_v11_fixture", "v11 test fencing regressions are required")
+			break
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-fencing-v11`")) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_fencing_v11_plan", "active plan must select the truthful v11 CI fencing correction")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-fencing-v11")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-fencing-v11")) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_ci_fencing_v11_manifest", "manifest must project the v11 CI fencing correction and absent live lease")
 	}
 }
 
@@ -5917,6 +6135,7 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 	v8Active := false
 	v9Active := false
 	v10Active := false
+	v11Active := false
 	if _, correctionErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionPath))); correctionErr == nil {
 		correctionActive = true
 		if !checkW001LifecycleV5Tag(root, findings) {
@@ -5960,6 +6179,15 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		}
 	} else if !os.IsNotExist(v10Err) {
 		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_state", "v10 lifecycle CI stabilization Git state cannot be established")
+		return
+	}
+	if _, v11Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIFencingV11Path))); v11Err == nil {
+		v11Active = true
+		if !checkW001LifecycleV10Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v11Err) {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_state", "v11 lifecycle CI fencing Git state cannot be established")
 		return
 	}
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
@@ -6011,6 +6239,9 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		if v10Active {
 			reviewTag, reviewMessage = w001LifecycleStabilizationV10ReviewTag, w001LifecycleStabilizationV10TagMessage
 		}
+		if v11Active {
+			reviewTag, reviewMessage = w001LifecycleCIFencingV11ReviewTag, w001LifecycleCIFencingV11TagMessage
+		}
 		target, ok := checkW001DeliveryReviewTag(root, expected, reviewTag, reviewMessage, findings)
 		if !ok {
 			return
@@ -6036,6 +6267,7 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		v7End := featureHead
 		v8End := featureHead
 		v9End := featureHead
+		v10End := featureHead
 		if correctionActive {
 			v5End = w001LifecycleCorrectionBase
 			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCorrectionBase, featureHead); err != nil {
@@ -6071,6 +6303,13 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 				return
 			}
 		}
+		if v11Active {
+			v10End = w001LifecycleCIFencingV11Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCIFencingV11Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_ancestry", "v11 lifecycle CI fencing must descend from the exact immutable v10 head")
+				return
+			}
+		}
 		if !checkW001LifecycleCommitRange(root, w001LifecycleBase, v5End, "2026-08-27T12:05:00Z", "v5", findings) {
 			return
 		}
@@ -6086,7 +6325,10 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		if v9Active && !checkW001LifecycleCommitRange(root, w001LifecycleCorrectionV9Base, v9End, "2026-08-27T17:29:00Z", "v9", findings) {
 			return
 		}
-		if v10Active && !checkW001LifecycleCommitRange(root, w001LifecycleStabilizationV10Base, featureHead, "2026-08-27T18:43:00Z", "v10", findings) {
+		if v10Active && !checkW001LifecycleCommitRange(root, w001LifecycleStabilizationV10Base, v10End, "2026-08-27T18:43:00Z", "v10", findings) {
+			return
+		}
+		if v11Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIFencingV11Base, featureHead, "2026-08-27T19:05:55Z", "v11", findings) {
 			return
 		}
 	}
@@ -6116,6 +6358,9 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 	}
 	if v10Active {
 		allowed = w001LifecycleStabilizationV10PathsAllowed(paths)
+	}
+	if v11Active {
+		allowed = w001LifecycleCIFencingV11PathsAllowed(paths)
 	}
 	if err != nil || !allowed {
 		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_scope", "current changes include a path outside the signed lifecycle-completion scope")
@@ -6160,6 +6405,8 @@ func checkW001LifecycleCommitRange(root, base, head, issued, phase string, findi
 			allowed = w001LifecycleCorrectionV9PathsAllowed(normalized)
 		} else if phase == "v10" {
 			allowed = w001LifecycleStabilizationV10PathsAllowed(normalized)
+		} else if phase == "v11" {
+			allowed = w001LifecycleCIFencingV11PathsAllowed(normalized)
 		}
 		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
 		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
@@ -6294,6 +6541,21 @@ func w001LifecycleCorrectionV9PathsAllowed(paths []string) bool {
 func w001LifecycleStabilizationV10PathsAllowed(paths []string) bool {
 	exact := map[string]bool{
 		w001LifecycleStabilizationV10Path: true, w001LifecycleStabilizationV10Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCIFencingV11PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCIFencingV11Path: true, w001LifecycleCIFencingV11Signature: true,
 		".harness/manifest.yaml": true, canonicalActivePlan: true,
 		"docs/evidence/W-001-validation.md": true,
 		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
@@ -6750,6 +7012,32 @@ func checkW001LifecycleV9Tag(root string, findings *[]Finding) bool {
 	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
 	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleStabilizationV10BaseTree {
 		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_prior_tag", "v9 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV10Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleStabilizationV10ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV10TagObject {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_prior_tag", "v10 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV10TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_prior_tag", "v10 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleStabilizationV10ReviewTag, w001LifecycleStabilizationV10TagMessage)
+	if err != nil || target != w001LifecycleCIFencingV11Base {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_prior_tag", "v10 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCIFencingV11BaseTree {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_prior_tag", "v10 lifecycle tag tree must remain exact")
 		return false
 	}
 	return true

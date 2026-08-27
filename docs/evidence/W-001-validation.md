@@ -871,3 +871,33 @@ regression that reads those exact effective values. No user, system, global,
 production, or repository-persistent Git configuration is changed.
 Accordingly, no authority runtime bytes changed in V10. It grants no Beads
 mutation, live lease, merge, production effect, or trust expansion.
+
+## Lifecycle-correction v10 review and v11 Git fencing
+
+The immutable V10 candidate is head
+`47b19b2c89d72fbf9eb5356ceefe33783d691aa4`, tree
+`0ebe496c48871b040a7fcd7a286073f2c1d40153`, signed tag object
+`84672df5f046995bb7efd79cf8f9a333946aecfa`. Public run `33105792480`, job
+`98635155160`, passed every required gate. Independent QA and Security both
+returned `changes-requested` on that exact subject while confirming the V9
+runtime, native patches, product contracts, and qualification bytes remained
+unchanged.
+
+The two findings are additive test-fixture defects:
+
+- `ci.test_git_sanitization_incomplete`: a raw pre-repository `git clone`
+  bypassed the sanitized bounded wrapper and could inherit hostile global Git
+  configuration;
+- `ci.test_git_configuration_persisted`: the fixture helper wrote
+  `maintenance.auto` and `gc.auto` into repository-local configuration despite
+  V10's command-local-only claim.
+
+The prospective signed `W-001-lifecycle-ci-fencing-v11` grant preserves the
+complete V9/V10 history and permits only routing the clone and every other
+disposable Git operation through the single sanitized wrapper, removing all
+persistent fixture configuration, and proving the four effective maintenance
+fences remain command-local while local and global persistent values are
+absent. A source-level regression permits one raw `exec.Command("git", ...)`
+site only: the audited wrapper itself. No authority runtime, native patch,
+database schema, API, product contract, workflow, scanner, repository setting,
+Beads state, or live lease is changed.
