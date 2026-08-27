@@ -1,0 +1,122 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCompletionGrant
+
+grant:
+  id: W-001-lifecycle-completion-v5
+  classification: PUBLIC
+  issuedAt: 2026-08-27T12:05:00Z
+  expiresAt: 2026-08-30T12:05:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 7f35c8a7112946a9569efe6085f49da8fd28530e
+  baseTree: 5a9f006b0cd65364c2fdcfb403efd554f0e34dda
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-delivery-scanner-correction-v4
+  priorGrantSHA256: acf7b9f534b33e5a9cc6d9b439ec1d0249b7cb5116577689e37728f8e745235a
+  priorGrantSignatureSHA256: afa502f4da77e04d84c531899d6324401ae32891c6ac3ca6c43130a1f9a6727b
+  priorReviewTag: mars3/w001-delivery-v4
+  priorReviewTagObject: 98a3f34c24868e49ca4909c8b0303f34c25390f3
+  priorReviewTagTarget: cac4231ddcb69edd298766c5bbe3854c8269fb2a
+  priorReviewTagTree: 5a9f006b0cd65364c2fdcfb403efd554f0e34dda
+  successorReviewTag: mars3/w001-lifecycle-completion-v5
+  successorReviewTagMessage: MARS-3 W-001 lifecycle completion tree attestation v5
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: work-authority-engineer
+  failureOwnership: foundation
+  purpose: complete the governed W-001 lifecycle routes before any terminal disposition
+  attemptId: w001-lifecycle-completion-v5
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: true
+  allowedEffects:
+    - preserve-the-v2-v3-v4-tags-heads-trees-runs-and-review-dispositions
+    - append-one-exact-public-safe-completion-audit-comment-to-M3-W001
+    - update-the-active-plan-feature-spec-evidence-and-manifest-with-the-truthful-finding
+    - implement-governed-handoff-review-run-reconciliation-and-terminal-route-contracts
+    - extend-the-pinned-native-Beads-transaction-with-bounded-lifecycle-CAS
+    - create-only-public-synthetic-development-test-leases-and-fixtures
+    - create-signed-semantic-commits-and-one-signed-v5-release-manager-review-tag
+    - push-one-review-branch-and-tag-and-open-one-ready-pull-request
+    - obtain-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-completion-v5.yaml
+    - .harness/grants/W-001-lifecycle-completion-v5.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/features/F-002-work-authority.md
+    - docs/product-specs/work-authority.md
+    - docs/evidence/W-001-validation.md
+    - api/authority/v1/types.go
+    - internal/authority/beads/**
+    - internal/authority/gateway/**
+    - internal/authority/httpapi/**
+    - internal/authority/postgres/**
+    - database/authority/**
+    - cmd/mars3-authority/**
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - lifecycle-handoff-review-run-reconciliation-and-terminal-effects-use-typed-gateway-routes
+    - each-role-can-record-only-its-own-transition-against-one-immutable-commit
+    - changes-requested-reopens-the-same-Bead-and-never-creates-duplicate-work
+    - done-requires-QA-and-Security-acceptance-merged-SHA-completed-run-and-reconciliation
+    - every-canonical-transition-uses-one-native-Beads-CAS-and-a-monotonic-WorkVersion
+    - cross-store-handoff-and-reconciliation-unknown-outcomes-remain-recoverable-and-non-authorizing
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged-until-fresh-review-and-merge
+    - public-evidence-contains-only-bounded-hashes-identifiers-and-outcomes
+  prohibitedEffects:
+    - mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths-before-final-reconciliation
+    - mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history
+    - issue-a-production-cross-ticket-or-persistent-canonical-lease
+    - claim-create-close-supersede-or-reopen-any-canonical-Bead
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+finding:
+  code: completion.w001.lifecycle_routes_missing
+  normalizedFingerprint: completion-audit/governed-lifecycle-routes-missing
+  currentMain: 7f35c8a7112946a9569efe6085f49da8fd28530e
+  currentTree: 5a9f006b0cd65364c2fdcfb403efd554f0e34dda
+  pullRequest: 9
+  reviewedHead: cac4231ddcb69edd298766c5bbe3854c8269fb2a
+  reviewedTree: 5a9f006b0cd65364c2fdcfb403efd554f0e34dda
+  protectedMainRun: 33069887434
+  protectedMainJob: 98509103754
+  qaDisposition: accepted
+  securityDisposition: accepted
+  missingRoutes: handoff,review-verdict,run-disposition,reconciliation,terminal-transition
+  commentSHA256: d7ddb1c0d4ecb00b93fcbec4d56b740da581a725e91e6381601d2d295203c38d
+  result: changes-requested-same-ticket-remains-in-progress
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  assignee: work-authority-engineer
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-completion-v5
+  detachedSignature: W-001-lifecycle-completion-v5.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

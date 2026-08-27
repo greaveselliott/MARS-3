@@ -16,9 +16,12 @@ canonical Bead as `in-progress`. This `delivery` projection records that
 durable fact. The accepted postclaim tree has been squash-merged with exact
 tree equality, protected-main CI passed, and the Orchestrator recorded the
 bounded reconciliation receipt in M3-W001. The separately signed
-`W-001-delivery-v2` grant now authorizes the Work Authority Engineer's bounded
-implementation; no live lease exists yet, and the first verified development
-lease remains W-001 acceptance evidence.
+`W-001-delivery-v2` grant authorized the merged core implementation. Exact-tree
+QA and Security review and protected-main run `33069887434` accepted that
+checkpoint. The completion audit then found that handoff, ordered review
+verdict, run disposition, reconciliation, and terminal lifecycle routes remain
+absent. W-001 therefore remains `in-progress` under the separately signed
+`W-001-lifecycle-completion-v5` correction; no live lease exists.
 
 ## Durable lineage
 
@@ -75,9 +78,11 @@ heartbeat it, reject stale or mismatched writes, append a bounded event, and
 rebuild the read projection without giving Temporal or PostgreSQL ownership of
 the work graph. The current phase schedules delivery against the verified
 claim. The signed delivery grant is active for its exact attempt, base,
-principal, and paths; no lease exists yet. Its v2 publication route preserves
-the original delivery branch as public foundation-failure evidence and
-republishes from accepted `main` without a scanner exception or history rewrite.
+principal, and paths; no lease exists yet. Its v2 publication route preserved
+the original delivery branch as public foundation-failure evidence and the v4
+correction admitted exactly ten immutable synthetic scanner fingerprints. The
+current completion attempt adds the missing governed lifecycle surface without
+relabeling the accepted core checkpoint as terminally complete.
 
 ## Scenario priority
 
@@ -93,7 +98,7 @@ that losing authority blocks the W-001 synthetic effect boundary and defines
 the contract later real brokers must enforce. M3-W001 already
 declares this exact group and required evidence. The canonical claim itself
 grants neither a lease nor source-code authority; the separately signed
-delivery grant supplies the current bounded source authority.
+lifecycle-completion grant supplies the current bounded source authority.
 
 ## Delivery waves
 

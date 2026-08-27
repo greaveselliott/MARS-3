@@ -3,8 +3,9 @@
 **Classification:** PUBLIC
 **Work authority:** M3-W001
 **Failure ownership:** foundation
-**Correction grant:** `W-001-postclaim-chronology-correction-v6`
-**Current disposition:** postclaim reconciliation accepted, merged, and completed; W-001 delivery is active under a separate signed grant
+**Correction grant:** `W-001-lifecycle-completion-v5`
+**Current disposition:** core gateway accepted and merged; completion audit changes-requested the missing governed lifecycle routes; W-001 remains in-progress
+**Historical disposition:** postclaim reconciliation accepted, merged, and completed
 
 ## Superseded Security disposition
 
@@ -441,3 +442,30 @@ Changed, extra, missing, duplicate, or unresolvable entries must fail closed.
 The v2 and v3 tags and failed runs remain immutable; neither failed head may be
 rerun. No Beads, lease, runtime, production, repository-setting, trust-root, or
 destructive effect is authorized.
+
+## Core delivery merge and completion audit
+
+QA and Security independently accepted delivery-v4 head
+`cac4231ddcb69edd298766c5bbe3854c8269fb2a`, tree
+`5a9f006b0cd65364c2fdcfb403efd554f0e34dda`, and signed tag object
+`98a3f34c24868e49ca4909c8b0303f34c25390f3`. Pull request 9 run/job
+`33068767781/98505346256` passed every public gate. The protected-main squash
+`7f35c8a7112946a9569efe6085f49da8fd28530e` has sole parent
+`59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`, preserves the exact reviewed
+tree, and protected-main run/job `33069887434/98509103754` passed.
+
+That evidence accepts the core gateway, claim, live-lease, effect-fencing, and
+rebaseline implementation, but it does not make W-001 terminal. A completion
+audit found no typed gateway route or native bounded CAS for handoff, ordered
+QA/Security verdicts, run disposition, merge reconciliation, or the guarded
+`done` transition required by F-002. The normalized foundation finding is
+`completion-audit/governed-lifecycle-routes-missing`. W-001 remains the same
+in-progress Bead with WorkVersion mutation/dependency revisions `1/1`, and no
+live lease exists. The exact public-safe Beads status comment is SHA-256
+`d7ddb1c0d4ecb00b93fcbec4d56b740da581a725e91e6381601d2d295203c38d`.
+
+The prospective signed `W-001-lifecycle-completion-v5` grant authorizes only
+the missing lifecycle implementation, public synthetic tests and leases, this
+truthful plan/evidence correction, and one exact status comment. It does not
+authorize a canonical lifecycle transition, another Bead, a production lease,
+repository-control changes, secrets, private data, or destructive work.
