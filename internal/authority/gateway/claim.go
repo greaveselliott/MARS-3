@@ -160,6 +160,9 @@ func NewWithClaims(store ClaimStore, sagas ClaimSagaStore, events EventSink, now
 	if leases, ok := sagas.(LeaseValidator); ok {
 		service.leases = leases
 	}
+	if barrier, ok := sagas.(ProjectBarrier); ok {
+		service.barrier = barrier
+	}
 	return service, nil
 }
 
@@ -185,6 +188,14 @@ func (s *Service) Claim(ctx context.Context, principal authorityv1.Principal, re
 	if err != nil {
 		return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, request.BeadID, traceRef, nil, denialForClaimRule(ruleClaimInvalid, "", traceRef))
 	}
+	release := func() {}
+	if s.barrier != nil {
+		release, err = s.barrier.Enter(ctx, principal.TenantID, principal.ProjectID)
+		if err != nil {
+			return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, request.BeadID, traceRef, nil, newDenial(authorityv1.ErrorAuthorityDown, ruleAuthorityUnavailable, "", requiredReconciliation, allowedSagaRead, traceRef))
+		}
+	}
+	defer release()
 	existing, found, err := s.sagas.Lookup(ctx, principal.TenantID, principal.ProjectID, request.IdempotencyKey)
 	if err != nil {
 		return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, request.BeadID, traceRef, nil, newDenial(authorityv1.ErrorAuthorityDown, ruleAuthorityUnavailable, "", requiredReconciliation, allowedSagaRead, traceRef))
@@ -334,7 +345,7 @@ func (s *Service) finishCanonicalClaim(ctx context.Context, principal authorityv
 	if completed.RequestDigest != requestDigest || completed.Phase != claimPhaseComplete || !validClaimLease(completed.Lease, leaseRequest, s.now().UTC()) || !validID(completed.ReceiptRef) {
 		return authorityv1.ClaimResponse{}, s.unknownAfterEffect(ctx, principal, request, labels, newDenial(authorityv1.ErrorUnknownEffect, ruleLeaseInvalid, completed.Work.LifecycleState, requiredValidLease, allowedSagaRead, request.TraceRef))
 	}
-	if err := s.appendClaimEvent(ctx, principal, request, labels, operationClaimReceipt, outcomeVerified, ruleClaimAllowed, "receipt"); err != nil {
+	if err := s.appendClaimEvent(ctx, principal, request, labels, operationClaimReceipt, outcomeVerified, ruleClaimAllowed, "receipt", claimEventEvidenceFor(request, completed.Work, completed.Lease)); err != nil {
 		return authorityv1.ClaimResponse{}, newDenial(authorityv1.ErrorUnknownEffect, ruleClaimUnknown, completed.Work.LifecycleState, requiredReconciliation, allowedSagaRead, request.TraceRef)
 	}
 	return authorityv1.ClaimResponse{Work: completed.Work, Lease: completed.Lease, ReceiptRef: completed.ReceiptRef}, nil
@@ -350,7 +361,7 @@ func (s *Service) replayCompletedClaim(ctx context.Context, principal authorityv
 	if !validClaimLease(saga.Lease, leaseRequest, s.now().UTC()) || !validID(saga.ReceiptRef) {
 		return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimReceipt, request.BeadID, request.TraceRef, labels, newDenial(authorityv1.ErrorUnknownEffect, ruleLeaseInvalid, saga.Work.LifecycleState, requiredValidLease, allowedSagaRead, request.TraceRef))
 	}
-	if err := s.appendClaimEvent(ctx, principal, request, labels, operationClaimReceipt, outcomeVerified, ruleClaimAllowed, "receipt"); err != nil {
+	if err := s.appendClaimEvent(ctx, principal, request, labels, operationClaimReceipt, outcomeVerified, ruleClaimAllowed, "receipt", claimEventEvidenceFor(request, saga.Work, saga.Lease)); err != nil {
 		return authorityv1.ClaimResponse{}, err
 	}
 	return authorityv1.ClaimResponse{Work: saga.Work, Lease: saga.Lease, Replayed: true, ReceiptRef: saga.ReceiptRef}, nil
@@ -487,16 +498,46 @@ func claimRequestDigest(principal authorityv1.Principal, request authorityv1.Cla
 	return hex.EncodeToString(digest[:]), nil
 }
 
-func (s *Service) appendClaimEvent(ctx context.Context, principal authorityv1.Principal, request authorityv1.ClaimRequest, labels []authorityv1.Label, operation, outcome, rule, phase string) error {
+type claimEventEvidence struct {
+	version    authorityv1.WorkVersion
+	leaseEpoch uint64
+	beforeHash string
+	afterHash  string
+}
+
+func (s *Service) appendClaimEvent(ctx context.Context, principal authorityv1.Principal, request authorityv1.ClaimRequest, labels []authorityv1.Label, operation, outcome, rule, phase string, evidence ...claimEventEvidence) error {
 	event := s.event(principal, operation, request.BeadID, request.TraceRef, outcome, rule, labels)
 	event.AttemptID = request.AttemptID
 	event.IdempotencyKey = request.IdempotencyKey
 	event.EventID = deterministicEventID(request.IdempotencyKey, phase)
+	if len(evidence) == 1 {
+		event.CanonicalVersion = &evidence[0].version
+		event.LeaseEpoch = evidence[0].leaseEpoch
+		event.BeforeHash = evidence[0].beforeHash
+		event.AfterHash = evidence[0].afterHash
+	}
 	receipt, err := s.events.Append(ctx, event)
 	if err != nil || !validEventReceipt(event, receipt) {
 		return newDenial(authorityv1.ErrorAuthorityDown, ruleAuthorityUnavailable, "", requiredReconciliation, allowedSagaRead, request.TraceRef)
 	}
 	return nil
+}
+
+func claimEventEvidenceFor(request authorityv1.ClaimRequest, work authorityv1.WorkItem, lease authorityv1.CapabilityLease) claimEventEvidence {
+	return claimEventEvidence{
+		version: work.Version, leaseEpoch: lease.LeaseEpoch,
+		beforeHash: deterministicJSONDigest(request.ExpectedIntegrity),
+		afterHash:  deterministicJSONDigest(work),
+	}
+}
+
+func deterministicJSONDigest(value any) string {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return ""
+	}
+	digest := sha256.Sum256(data)
+	return hex.EncodeToString(digest[:])
 }
 
 func (s *Service) unknownAfterEffect(ctx context.Context, principal authorityv1.Principal, request authorityv1.ClaimRequest, labels []authorityv1.Label, denial *authorityv1.Denial) error {

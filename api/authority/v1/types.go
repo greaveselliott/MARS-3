@@ -11,7 +11,12 @@ docs:
 // are deliberately absent from every type in this package.
 package v1
 
-import "time"
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"time"
+)
 
 type LifecycleState string
 
@@ -273,19 +278,80 @@ type Denial struct {
 func (d *Denial) Error() string { return string(d.Code) + ": " + d.Rule }
 
 type Event struct {
-	SchemaVersion  uint32    `json:"schema_version"`
-	EventID        string    `json:"event_id"`
-	Sequence       uint64    `json:"sequence"`
-	TraceRef       string    `json:"trace_ref"`
-	TenantID       string    `json:"tenant_id"`
-	ProjectID      string    `json:"project_id"`
-	BeadID         string    `json:"bead_id,omitempty"`
-	AttemptID      string    `json:"attempt_id,omitempty"`
-	IdempotencyKey string    `json:"idempotency_key,omitempty"`
-	PrincipalID    string    `json:"principal_id"`
-	Operation      string    `json:"operation"`
-	Outcome        string    `json:"outcome"`
-	Rule           string    `json:"rule,omitempty"`
-	Labels         []Label   `json:"labels"`
-	OccurredAt     time.Time `json:"occurred_at"`
+	SchemaVersion    uint32       `json:"schema_version"`
+	EventID          string       `json:"event_id"`
+	Sequence         uint64       `json:"sequence"`
+	PreviousHash     string       `json:"previous_hash,omitempty"`
+	EventHash        string       `json:"event_hash,omitempty"`
+	TraceRef         string       `json:"trace_ref"`
+	TenantID         string       `json:"tenant_id"`
+	ProjectID        string       `json:"project_id"`
+	BeadID           string       `json:"bead_id,omitempty"`
+	AttemptID        string       `json:"attempt_id,omitempty"`
+	IdempotencyKey   string       `json:"idempotency_key,omitempty"`
+	PrincipalID      string       `json:"principal_id"`
+	Operation        string       `json:"operation"`
+	Outcome          string       `json:"outcome"`
+	Rule             string       `json:"rule,omitempty"`
+	Labels           []Label      `json:"labels"`
+	CanonicalVersion *WorkVersion `json:"canonical_version,omitempty"`
+	LeaseEpoch       uint64       `json:"lease_epoch,omitempty"`
+	BeforeHash       string       `json:"before_hash,omitempty"`
+	AfterHash        string       `json:"after_hash,omitempty"`
+	OccurredAt       time.Time    `json:"occurred_at"`
+}
+
+// JournalCursor binds a projection checkpoint to both sequence and hash-chain
+// state. Sequence alone cannot distinguish truncation from a valid restart.
+type JournalCursor struct {
+	Sequence  uint64 `json:"sequence"`
+	EventHash string `json:"event_hash,omitempty"`
+}
+
+type JournalPage struct {
+	TenantID       string        `json:"tenant_id"`
+	ProjectID      string        `json:"project_id"`
+	After          JournalCursor `json:"after"`
+	LowestRetained uint64        `json:"lowest_retained"`
+	HighWatermark  JournalCursor `json:"high_watermark"`
+	Events         []Event       `json:"events"`
+}
+
+type ProjectionCheckpoint struct {
+	TenantID          string        `json:"tenant_id"`
+	ProjectID         string        `json:"project_id"`
+	Cursor            JournalCursor `json:"cursor"`
+	BaselineWatermark JournalCursor `json:"baseline_watermark"`
+	Authorizing       bool          `json:"authorizing"`
+	StaleReason       string        `json:"stale_reason,omitempty"`
+}
+
+// AuthorityBaseline is a verified stable cut used only to rebuild disposable
+// projections. It is never a work, lease, or approval authority itself.
+type AuthorityBaseline struct {
+	TenantID            string            `json:"tenant_id"`
+	ProjectID           string            `json:"project_id"`
+	AuthorityGeneration string            `json:"authority_generation"`
+	Watermark           JournalCursor     `json:"watermark"`
+	WorkItems           []WorkItem        `json:"work_items"`
+	LiveLeases          []CapabilityLease `json:"live_leases"`
+	PendingSagaCount    uint32            `json:"pending_saga_count"`
+	BaselineDigest      string            `json:"baseline_digest"`
+	CapturedAt          time.Time         `json:"captured_at"`
+	Verified            bool              `json:"verified"`
+}
+
+// JournalEventHash computes the public canonical hash-chain representation.
+// EventHash is excluded from its own digest; every other public-safe field is
+// bound, including the previous hash and assigned sequence.
+func JournalEventHash(event Event) (string, error) {
+	material := event
+	material.EventHash = ""
+	material.OccurredAt = material.OccurredAt.UTC()
+	data, err := json.Marshal(material)
+	if err != nil {
+		return "", err
+	}
+	digest := sha256.Sum256(data)
+	return hex.EncodeToString(digest[:]), nil
 }

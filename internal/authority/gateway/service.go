@@ -103,15 +103,23 @@ type EventSink interface {
 	Append(context.Context, authorityv1.Event) (authorityv1.Event, error)
 }
 
+// ProjectBarrier holds a shared project operation slot until release. A full
+// rebaseline takes the exclusive side so canonical mutations, lease/journal
+// writes, and pre-effect validation cannot cross its stable-cut boundary.
+type ProjectBarrier interface {
+	Enter(context.Context, string, string) (func(), error)
+}
+
 // Service contains only trusted dependencies; it owns admission and never
 // exposes their handles to callers.
 type Service struct {
-	store  WorkStore
-	claims ClaimStore
-	sagas  ClaimSagaStore
-	leases LeaseValidator
-	events EventSink
-	now    func() time.Time
+	store   WorkStore
+	claims  ClaimStore
+	sagas   ClaimSagaStore
+	leases  LeaseValidator
+	barrier ProjectBarrier
+	events  EventSink
+	now     func() time.Time
 }
 
 func New(store WorkStore, events EventSink, now func() time.Time) (*Service, error) {
@@ -398,7 +406,11 @@ func (s *Service) deny(ctx context.Context, principal authorityv1.Principal, ope
 }
 
 func validEventReceipt(event, receipt authorityv1.Event) bool {
-	return receipt.Sequence > 0 && receipt.SchemaVersion == event.SchemaVersion && receipt.EventID == event.EventID && receipt.TraceRef == event.TraceRef && receipt.TenantID == event.TenantID && receipt.ProjectID == event.ProjectID && receipt.BeadID == event.BeadID && receipt.AttemptID == event.AttemptID && receipt.IdempotencyKey == event.IdempotencyKey && receipt.PrincipalID == event.PrincipalID && receipt.Operation == event.Operation && receipt.Outcome == event.Outcome && receipt.Rule == event.Rule && equalLabels(receipt.Labels, event.Labels) && !receipt.OccurredAt.IsZero() && !receipt.OccurredAt.After(event.OccurredAt)
+	return receipt.Sequence > 0 && receipt.SchemaVersion == event.SchemaVersion && receipt.EventID == event.EventID && receipt.TraceRef == event.TraceRef && receipt.TenantID == event.TenantID && receipt.ProjectID == event.ProjectID && receipt.BeadID == event.BeadID && receipt.AttemptID == event.AttemptID && receipt.IdempotencyKey == event.IdempotencyKey && receipt.PrincipalID == event.PrincipalID && receipt.Operation == event.Operation && receipt.Outcome == event.Outcome && receipt.Rule == event.Rule && equalLabels(receipt.Labels, event.Labels) && equalOptionalWorkVersion(receipt.CanonicalVersion, event.CanonicalVersion) && receipt.LeaseEpoch == event.LeaseEpoch && receipt.BeforeHash == event.BeforeHash && receipt.AfterHash == event.AfterHash && !receipt.OccurredAt.IsZero() && !receipt.OccurredAt.After(event.OccurredAt)
+}
+
+func equalOptionalWorkVersion(left, right *authorityv1.WorkVersion) bool {
+	return (left == nil && right == nil) || (left != nil && right != nil && *left == *right)
 }
 
 func (s *Service) event(principal authorityv1.Principal, operation, beadID, traceRef, outcome, rule string, labels []authorityv1.Label) authorityv1.Event {
@@ -415,6 +427,9 @@ func (s *Service) event(principal authorityv1.Principal, operation, beadID, trac
 	if !validID(beadID) {
 		beadID = ""
 	}
+	if len(labels) == 0 {
+		labels = []authorityv1.Label{authorityv1.LabelExternalUntrusted}
+	}
 	return authorityv1.Event{
 		SchemaVersion: 1,
 		EventID:       deterministicEventID(traceRef, operation+"\x00"+beadID),
@@ -426,7 +441,7 @@ func (s *Service) event(principal authorityv1.Principal, operation, beadID, trac
 		Operation:     operation,
 		Outcome:       outcome,
 		Rule:          rule,
-		Labels:        append([]authorityv1.Label(nil), labels...),
+		Labels:        sortedLabels(labels),
 		OccurredAt:    s.now().UTC(),
 	}
 }

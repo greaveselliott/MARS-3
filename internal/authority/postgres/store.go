@@ -35,6 +35,7 @@ var (
 	ErrLeaseConflict         = errors.New("exclusive path lease conflict")
 	ErrLeaseNotFound         = errors.New("lease not found")
 	ErrLeaseFence            = errors.New("lease fence mismatch")
+	ErrProjectBarrier        = errors.New("authority project rebaseline barrier active")
 )
 
 // Beginner is the narrow pgx pool surface used by Store.
@@ -358,17 +359,22 @@ func (store *Store) beginScoped(ctx context.Context, tenantID, projectID string,
 		_ = tx.Rollback(ctx)
 		return nil, err
 	}
+	if _, err := tx.Exec(ctx, `select pg_advisory_xact_lock_shared(hashtextextended($1, 732041))`, tenantID+"|"+projectID); err != nil {
+		_ = tx.Rollback(ctx)
+		return nil, err
+	}
 	return tx, nil
 }
 
 func (store *Store) verifyProject(ctx context.Context, tx pgx.Tx, tenantID, projectID string, lock bool) (string, error) {
-	query := `select fence_generation, issuance_enabled from mars3_authority.projects where tenant_id=$1 and project_id=$2`
+	query := `select fence_generation, issuance_enabled, barrier_state from mars3_authority.projects where tenant_id=$1 and project_id=$2`
 	if lock {
 		query += ` for update`
 	}
 	var generation string
 	var enabled bool
-	if err := tx.QueryRow(ctx, query, tenantID, projectID).Scan(&generation, &enabled); err != nil {
+	var barrierState string
+	if err := tx.QueryRow(ctx, query, tenantID, projectID).Scan(&generation, &enabled, &barrierState); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return "", ErrProjectNotProvisioned
 		}
@@ -381,7 +387,30 @@ func (store *Store) verifyProject(ctx context.Context, tx pgx.Tx, tenantID, proj
 	if !enabled {
 		return "", ErrIssuanceDisabled
 	}
+	if barrierState != "open" {
+		return "", ErrProjectBarrier
+	}
 	return generation, nil
+}
+
+// Enter holds the shared side of the project barrier across a cross-store
+// gateway operation. Release is idempotent and rolls back the lock-only tx.
+func (store *Store) Enter(ctx context.Context, tenantID, projectID string) (func(), error) {
+	tx, err := store.beginScoped(ctx, tenantID, projectID, pgx.RepeatableRead)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := store.verifyProject(ctx, tx, tenantID, projectID, false); err != nil {
+		_ = tx.Rollback(context.Background())
+		return nil, err
+	}
+	var once bool
+	return func() {
+		if !once {
+			once = true
+			_ = tx.Rollback(context.Background())
+		}
+	}, nil
 }
 
 func loadSaga(ctx context.Context, tx pgx.Tx, tenantID, projectID, key string, lock bool) (gateway.ClaimSaga, error) {

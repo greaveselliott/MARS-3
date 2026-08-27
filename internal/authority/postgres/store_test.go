@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -116,6 +117,44 @@ func TestPostgresLeaseLifecycleAndRestart(t *testing.T) {
 	if err := store.ProvisionProject(ctx, tenantID, projectID); err != nil {
 		t.Fatalf("ProvisionProject: %v", err)
 	}
+	journalEvent := authorityv1.Event{
+		SchemaVersion: 1, EventID: "evt-pg-001", TraceRef: "trace-journal-001",
+		TenantID: tenantID, ProjectID: projectID, BeadID: "M3-W002",
+		PrincipalID: "work-authority-engineer", Operation: "work.claim.intent",
+		Outcome: "intent-recorded", Labels: []authorityv1.Label{authorityv1.LabelPublicAccepted}, OccurredAt: clock,
+	}
+	firstEvent, err := store.Append(ctx, journalEvent)
+	if err != nil || firstEvent.Sequence != 1 || firstEvent.PreviousHash != "" || firstEvent.EventHash == "" {
+		t.Fatalf("first journal event=%#v err=%v", firstEvent, err)
+	}
+	replayedEvent, err := store.Append(ctx, journalEvent)
+	if err != nil || !reflect.DeepEqual(replayedEvent, firstEvent) {
+		t.Fatalf("idempotent event=%#v err=%v", replayedEvent, err)
+	}
+	conflictEvent := journalEvent
+	conflictEvent.Outcome = "denied"
+	if _, err := store.Append(ctx, conflictEvent); !errors.Is(err, ErrJournalConflict) {
+		t.Fatalf("event conflict error=%v, want ErrJournalConflict", err)
+	}
+	journalEvent.EventID = "evt-pg-002"
+	journalEvent.Operation = "work.claim.receipt"
+	journalEvent.Outcome = "verified"
+	journalEvent.OccurredAt = clock.Add(time.Second)
+	secondEvent, err := store.Append(ctx, journalEvent)
+	if err != nil || secondEvent.Sequence != 2 || secondEvent.PreviousHash != firstEvent.EventHash {
+		t.Fatalf("second journal event=%#v err=%v", secondEvent, err)
+	}
+	page, err := store.Replay(ctx, tenantID, projectID, authorityv1.JournalCursor{}, 100)
+	if err != nil || len(page.Events) != 2 || page.HighWatermark.Sequence != 2 || page.HighWatermark.EventHash != secondEvent.EventHash {
+		t.Fatalf("journal page=%#v err=%v", page, err)
+	}
+	page, err = store.Replay(ctx, tenantID, projectID, authorityv1.JournalCursor{Sequence: 1, EventHash: firstEvent.EventHash}, 100)
+	if err != nil || len(page.Events) != 1 || page.Events[0].EventID != secondEvent.EventID {
+		t.Fatalf("cursor page=%#v err=%v", page, err)
+	}
+	if _, err := store.Replay(ctx, tenantID, projectID, authorityv1.JournalCursor{Sequence: 1, EventHash: strings.Repeat("f", 64)}, 100); !errors.Is(err, ErrJournalCheckpoint) {
+		t.Fatalf("wrong checkpoint error=%v, want ErrJournalCheckpoint", err)
+	}
 
 	first := prepareCanonicalSaga(t, ctx, store, tenantID, projectID, "M3-W002", "attempt-001", "idempotency-001", "a")
 	first.MaximumExpiry = clock.Add(10 * time.Minute)
@@ -125,6 +164,49 @@ func TestPostgresLeaseLifecycleAndRestart(t *testing.T) {
 	}
 	if firstSaga.Lease.LeaseEpoch != 1 || firstSaga.Lease.FenceGeneration != generation || firstSaga.Lease.State != authorityv1.LeaseActive {
 		t.Fatalf("first lease = %#v", firstSaga.Lease)
+	}
+
+	canonical := &baselineStore{items: []authorityv1.WorkItem{firstSaga.Work}, firstRead: make(chan struct{}), releaseFirst: make(chan struct{})}
+	baselineResult := make(chan authorityv1.AuthorityBaseline, 1)
+	baselineErrors := make(chan error, 1)
+	go func() {
+		baseline, err := store.CaptureBaseline(ctx, tenantID, projectID, canonical)
+		baselineResult <- baseline
+		baselineErrors <- err
+	}()
+	select {
+	case <-canonical.firstRead:
+	case <-time.After(5 * time.Second):
+		t.Fatal("baseline did not enter canonical read")
+	}
+	journalEvent.EventID = "evt-pg-003"
+	journalEvent.Operation = "work.baseline.concurrent"
+	journalEvent.OccurredAt = clock.Add(2 * time.Second)
+	appendDone := make(chan error, 1)
+	go func() {
+		_, err := store.Append(ctx, journalEvent)
+		appendDone <- err
+	}()
+	select {
+	case err := <-appendDone:
+		t.Fatalf("journal append crossed the exclusive baseline barrier: %v", err)
+	case <-time.After(100 * time.Millisecond):
+	}
+	close(canonical.releaseFirst)
+	baseline := <-baselineResult
+	if err := <-baselineErrors; err != nil {
+		t.Fatalf("CaptureBaseline: %v", err)
+	}
+	if err := <-appendDone; err != nil {
+		t.Fatalf("append after baseline: %v", err)
+	}
+	if !baseline.Verified || baseline.Watermark.Sequence != 2 || baseline.AuthorityGeneration != firstSaga.Work.Version.AuthorityGeneration || len(baseline.WorkItems) != 1 || len(baseline.LiveLeases) != 1 || baseline.BaselineDigest == "" {
+		t.Fatalf("baseline = %#v", baseline)
+	}
+	driftedWork := firstSaga.Work
+	driftedWork.Version.IssueMutationSequence++
+	if _, err := store.CaptureBaseline(ctx, tenantID, projectID, &baselineStore{items: []authorityv1.WorkItem{firstSaga.Work}, second: []authorityv1.WorkItem{driftedWork}}); !errors.Is(err, ErrBaselineInconsistent) {
+		t.Fatalf("drifted baseline error=%v, want ErrBaselineInconsistent", err)
 	}
 
 	restarted, err := New(app, resolver, func() time.Time { return clock }, newID)
@@ -245,6 +327,15 @@ func TestPostgresLeaseLifecycleAndRestart(t *testing.T) {
 	if _, found, err := store.Lookup(ctx, "tenant-other", projectID, "idempotency-002"); err == nil || found {
 		t.Fatalf("cross-tenant lookup found=%v err=%v", found, err)
 	}
+	if _, err := admin.Exec(ctx, `delete from mars3_authority.authority_events where tenant_id=$1 and project_id=$2 and sequence=1`, tenantID, projectID); err != nil {
+		t.Fatalf("simulate journal retention delete: %v", err)
+	}
+	if _, err := admin.Exec(ctx, `update mars3_authority.projects set journal_lowest_retained=2 where tenant_id=$1 and project_id=$2`, tenantID, projectID); err != nil {
+		t.Fatalf("simulate journal retention: %v", err)
+	}
+	if _, err := store.Replay(ctx, tenantID, projectID, authorityv1.JournalCursor{}, 100); !errors.Is(err, ErrJournalTruncated) {
+		t.Fatalf("truncated replay error=%v, want ErrJournalTruncated", err)
+	}
 }
 
 func prepareCanonicalSaga(t *testing.T, ctx context.Context, store *Store, tenantID, projectID, beadID, attemptID, key, digestRune string) gateway.LeaseRequest {
@@ -298,4 +389,47 @@ func fenceFromLease(lease authorityv1.CapabilityLease) authorityv1.FencingTuple 
 		BaseSHA: lease.BaseSHA, Capability: lease.Capability, ExclusivePaths: append([]string(nil), lease.ExclusivePaths...),
 		Labels: append([]authorityv1.Label(nil), lease.Labels...),
 	}
+}
+
+type baselineStore struct {
+	mu           sync.Mutex
+	items        []authorityv1.WorkItem
+	second       []authorityv1.WorkItem
+	firstRead    chan struct{}
+	releaseFirst chan struct{}
+	reads        int
+}
+
+func (store *baselineStore) Get(_ context.Context, tenantID, projectID, beadID string) (authorityv1.WorkItem, error) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	for _, item := range store.items {
+		if item.TenantID == tenantID && item.ProjectID == projectID && item.BeadID == beadID {
+			return item, nil
+		}
+	}
+	return authorityv1.WorkItem{}, gateway.ErrWorkNotFound
+}
+
+func (store *baselineStore) List(_ context.Context, tenantID, projectID string) ([]authorityv1.WorkItem, error) {
+	store.mu.Lock()
+	store.reads++
+	read := store.reads
+	items := store.items
+	if read > 1 && store.second != nil {
+		items = store.second
+	}
+	firstRead, releaseFirst := store.firstRead, store.releaseFirst
+	store.mu.Unlock()
+	if read == 1 && firstRead != nil {
+		close(firstRead)
+		<-releaseFirst
+	}
+	result := make([]authorityv1.WorkItem, 0, len(items))
+	for _, item := range items {
+		if item.TenantID == tenantID && item.ProjectID == projectID {
+			result = append(result, item)
+		}
+	}
+	return result, nil
 }

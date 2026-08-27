@@ -62,6 +62,15 @@ func (s *Service) ValidateEffect(ctx context.Context, principal authorityv1.Prin
 	if !pathWithinLease(request.Path, request.Fence.ExclusivePaths) {
 		return authorityv1.EffectValidation{}, s.deny(ctx, principal, operationEffectIntent, request.Fence.BeadID, traceRef, request.Fence.Labels, newDenial(authorityv1.ErrorPolicyDenied, ruleEffectPath, "", requiredEffectPath, allowedEffectRecheck, traceRef))
 	}
+	release := func() {}
+	if s.barrier != nil {
+		var barrierErr error
+		release, barrierErr = s.barrier.Enter(ctx, principal.TenantID, principal.ProjectID)
+		if barrierErr != nil {
+			return authorityv1.EffectValidation{}, s.deny(ctx, principal, operationEffectIntent, request.Fence.BeadID, traceRef, request.Fence.Labels, newDenial(authorityv1.ErrorAuthorityDown, ruleAuthorityUnavailable, "", requiredStableClaim, allowedEffectRecheck, traceRef))
+		}
+	}
+	defer release()
 
 	first, err := s.claims.Get(ctx, principal.TenantID, principal.ProjectID, request.Fence.BeadID)
 	if err != nil {
@@ -141,6 +150,8 @@ func (s *Service) appendEffectEvent(ctx context.Context, principal authorityv1.P
 	event := s.event(principal, operation, request.Fence.BeadID, request.TraceRef, outcome, rule, labels)
 	event.AttemptID = request.Fence.AttemptID
 	event.IdempotencyKey = request.Fence.IdempotencyKey
+	event.CanonicalVersion = &request.Fence.ClaimVersion
+	event.LeaseEpoch = request.Fence.LeaseEpoch
 	event.EventID = deterministicEventID(request.EffectID, phase)
 	receipt, err := s.events.Append(ctx, event)
 	if err != nil || !validEventReceipt(event, receipt) {

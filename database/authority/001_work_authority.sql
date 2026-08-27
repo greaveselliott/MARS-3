@@ -16,10 +16,20 @@ create table if not exists mars3_authority.projects (
     fence_generation text not null,
     issuance_enabled boolean not null default false,
     generation_anchored_at timestamptz not null,
+    journal_high_watermark bigint not null default 0,
+    journal_chain_hash text not null default '',
+    journal_lowest_retained bigint not null default 1,
+    barrier_state text not null default 'open',
+    barrier_epoch bigint not null default 0,
     primary key (tenant_id, project_id),
     check (tenant_id ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
     check (project_id ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
-    check (fence_generation ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$')
+    check (fence_generation ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
+    check (journal_high_watermark >= 0),
+    check (journal_chain_hash = '' or journal_chain_hash ~ '^[a-f0-9]{64}$'),
+    check (journal_lowest_retained > 0 and journal_lowest_retained <= journal_high_watermark + 1),
+    check (barrier_state in ('open', 'rebaselining')),
+    check (barrier_epoch >= 0)
 );
 
 create table if not exists mars3_authority.claim_sagas (
@@ -118,6 +128,54 @@ create index if not exists leases_active_expiry
     on mars3_authority.leases (tenant_id, project_id, expires_at)
     where state = 'active';
 
+create table if not exists mars3_authority.authority_events (
+    tenant_id text not null,
+    project_id text not null,
+    sequence bigint not null,
+    event_id text not null,
+    schema_version integer not null,
+    previous_hash text not null,
+    event_hash text not null,
+    trace_ref text not null,
+    bead_id text,
+    attempt_id text,
+    idempotency_key text,
+    principal_id text not null,
+    operation text not null,
+    outcome text not null,
+    rule text,
+    labels text[] not null,
+    canonical_version jsonb,
+    lease_epoch bigint,
+    before_hash text,
+    after_hash text,
+    occurred_at timestamptz not null,
+    primary key (tenant_id, project_id, sequence),
+    unique (tenant_id, project_id, event_id),
+    check (sequence > 0),
+    check (schema_version = 1),
+    check (event_id ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
+    check (previous_hash = '' or previous_hash ~ '^[a-f0-9]{64}$'),
+    check (event_hash ~ '^[a-f0-9]{64}$'),
+    check (trace_ref ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
+    check (bead_id is null or bead_id ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
+    check (attempt_id is null or attempt_id ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
+    check (idempotency_key is null or idempotency_key ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
+    check (principal_id ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
+    check (operation ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
+    check (outcome ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
+    check (rule is null or rule ~ '^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$'),
+    check (cardinality(labels) between 1 and 64),
+    check (array_position(labels, null) is null),
+    check (canonical_version is null or jsonb_typeof(canonical_version) = 'object'),
+    check (lease_epoch is null or lease_epoch > 0),
+    check (before_hash is null or before_hash ~ '^[a-f0-9]{64}$'),
+    check (after_hash is null or after_hash ~ '^[a-f0-9]{64}$')
+);
+
+create index if not exists authority_events_event_id
+    on mars3_authority.authority_events (tenant_id, project_id, event_id);
+
 alter table mars3_authority.projects enable row level security;
 alter table mars3_authority.projects force row level security;
 alter table mars3_authority.claim_sagas enable row level security;
@@ -126,6 +184,8 @@ alter table mars3_authority.lease_epochs enable row level security;
 alter table mars3_authority.lease_epochs force row level security;
 alter table mars3_authority.leases enable row level security;
 alter table mars3_authority.leases force row level security;
+alter table mars3_authority.authority_events enable row level security;
+alter table mars3_authority.authority_events force row level security;
 
 drop policy if exists tenant_project_projects on mars3_authority.projects;
 create policy tenant_project_projects on mars3_authority.projects
@@ -162,6 +222,17 @@ create policy tenant_project_lease_epochs on mars3_authority.lease_epochs
 
 drop policy if exists tenant_project_leases on mars3_authority.leases;
 create policy tenant_project_leases on mars3_authority.leases
+    using (
+        tenant_id = current_setting('mars3.tenant_id', true)
+        and project_id = current_setting('mars3.project_id', true)
+    )
+    with check (
+        tenant_id = current_setting('mars3.tenant_id', true)
+        and project_id = current_setting('mars3.project_id', true)
+    );
+
+drop policy if exists tenant_project_authority_events on mars3_authority.authority_events;
+create policy tenant_project_authority_events on mars3_authority.authority_events
     using (
         tenant_id = current_setting('mars3.tenant_id', true)
         and project_id = current_setting('mars3.project_id', true)
