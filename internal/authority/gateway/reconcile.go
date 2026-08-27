@@ -23,12 +23,21 @@ const (
 	allowedReconcilePolicy        = "policy.request(lease.issue)"
 )
 
+// ClaimReconciliationRequest separates the immutable canonical claim attempt
+// from the current execution attempt that owns the new lease. A ticket can
+// have many run attempts without rewriting the original Beads claim.
+type ClaimReconciliationRequest struct {
+	authorityv1.ClaimRequest
+	CanonicalClaimAttemptID string
+}
+
 // ReconcileClaimedWork reconstructs only the operational saga and lease for a
 // canonical claim that already exists. It never invokes the Beads mutator. The
 // route is control-plane-only and intentionally absent from the public HTTP
 // handler; it is used for verified partial-outcome recovery and W-001's first
 // self-host development lease.
-func (s *Service) ReconcileClaimedWork(ctx context.Context, principal authorityv1.Principal, request authorityv1.ClaimRequest) (authorityv1.ClaimResponse, error) {
+func (s *Service) ReconcileClaimedWork(ctx context.Context, principal authorityv1.Principal, reconciliation ClaimReconciliationRequest) (authorityv1.ClaimResponse, error) {
+	request := reconciliation.ClaimRequest
 	traceRef, denial := admitRequest(principal, request.TraceRef, request.ProposedLabels)
 	if denial != nil {
 		return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimReconcileIntent, "", traceRef, nil, denial)
@@ -92,7 +101,7 @@ func (s *Service) ReconcileClaimedWork(ctx context.Context, principal authorityv
 	if !equalStrings(current.ExclusivePaths, request.ExclusivePaths) {
 		return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimReconcileIntent, request.BeadID, traceRef, labels, denialForClaimRule(ruleClaimPaths, current.LifecycleState, traceRef))
 	}
-	if !validStoredClaim(current, principal, request) {
+	if !validReconciliationClaim(current, principal, request, reconciliation.CanonicalClaimAttemptID) {
 		return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimReconcileIntent, request.BeadID, traceRef, labels,
 			newDenial(authorityv1.ErrorPolicyDenied, ruleClaimSagaInvalid, current.LifecycleState, requiredReconciliation, allowedSagaRead, traceRef))
 	}
@@ -150,4 +159,10 @@ func (s *Service) ReconcileClaimedWork(ctx context.Context, principal authorityv
 			newDenial(authorityv1.ErrorUnknownEffect, ruleClaimUnknown, current.LifecycleState, requiredReconciliation, allowedSagaRead, traceRef))
 	}
 	return s.finishCanonicalClaim(ctx, principal, request, labels, requestDigest, saga)
+}
+
+func validReconciliationClaim(work authorityv1.WorkItem, principal authorityv1.Principal, request authorityv1.ClaimRequest, canonicalAttemptID string) bool {
+	return validID(canonicalAttemptID) && work.TenantID == principal.TenantID && work.ProjectID == principal.ProjectID &&
+		work.BeadID == request.BeadID && work.NativeStatus == "in_progress" && work.LifecycleState == authorityv1.LifecycleInProgress &&
+		work.Assignee == principal.ProfileID && work.ClaimAttemptID == canonicalAttemptID && projectionRule(work) == ""
 }

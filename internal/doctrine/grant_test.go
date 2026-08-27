@@ -692,6 +692,7 @@ func TestLoadW001DeliveryGrantReturnsBoundedRuntimeProjection(t *testing.T) {
 		grant.Principal != "work-authority-engineer" || grant.AttemptID != "w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73" ||
 		grant.IdempotencyKey != "w001-delivery-295ebd16-1d32-479e-a620-97a51e62a4c0" || grant.BaseCommit != w001DeliveryBase ||
 		grant.ExpectedNativeStatus != "in_progress" || grant.ExpectedLifecycleState != "in-progress" || grant.ExpectedAssignee != grant.Principal ||
+		grant.CanonicalClaimAttemptID != "w001-bootstrap-3135f1d1-b0d4-4956-9fc9-1852310bfd77" ||
 		grant.WorkVersionGeneration != "6e79ff81-a007-42a5-a178-7ce58dbb718b" ||
 		grant.WorkVersionIncarnation != "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41" ||
 		grant.IssueMutationSequence != 1 || grant.DependencyGraphRevision != 1 || grant.CanonicalWorkMutationAllowed || !grant.DevelopmentLeaseAllowed {

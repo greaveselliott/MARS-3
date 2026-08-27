@@ -274,6 +274,7 @@ type W001DeliveryGrant struct {
 	ExpectedNativeStatus         string
 	ExpectedLifecycleState       string
 	ExpectedAssignee             string
+	CanonicalClaimAttemptID      string
 	WorkVersionGeneration        string
 	WorkVersionIncarnation       string
 	IssueMutationSequence        uint64
@@ -3411,6 +3412,7 @@ func loadW001DeliveryGrant(repo string, now time.Time) (W001DeliveryGrant, error
 	}
 	var findings []Finding
 	checkW001DeliveryGrant(root, &findings)
+	checkW001BootstrapGrant(root, &findings)
 	if len(findings) != 0 {
 		sortFindings(findings)
 		return W001DeliveryGrant{}, fmt.Errorf("W-001 delivery grant validation failed: %s: %s", findings[0].Code, findings[0].Message)
@@ -3421,6 +3423,12 @@ func loadW001DeliveryGrant(repo string, now time.Time) (W001DeliveryGrant, error
 	}
 	document := parseStrictGrant(data, w001DeliveryGrantScalars, w001DeliveryGrantSequences,
 		[]string{"grant", "canonicalPreimage", "publication", "reconciliation", "verification", "integrity"})
+	bootstrapData, err := readRepoFile(root, w001BootstrapGrantPath)
+	if err != nil {
+		return W001DeliveryGrant{}, err
+	}
+	bootstrapDocument := parseStrictGrant(bootstrapData, w001BootstrapGrantScalars, w001BootstrapGrantSequences,
+		[]string{"grant", "expected", "postimage", "toolchain", "verification", "integrity"})
 	expiresAt, err := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
 	if err != nil || !now.Before(expiresAt) {
 		return W001DeliveryGrant{}, errors.New("W-001 delivery grant has expired")
@@ -3438,12 +3446,13 @@ func loadW001DeliveryGrant(repo string, now time.Time) (W001DeliveryGrant, error
 		Bead: scalarValue(document, "grant.bead"), Principal: scalarValue(document, "grant.principal"),
 		AttemptID: scalarValue(document, "grant.attemptId"), IdempotencyKey: scalarValue(document, "grant.idempotencyKey"),
 		BaseCommit: scalarValue(document, "grant.baseCommit"), ExpiresAt: expiresAt,
-		ExpectedNativeStatus:   scalarValue(document, "canonicalPreimage.nativeStatus"),
-		ExpectedLifecycleState: scalarValue(document, "canonicalPreimage.lifecycleState"),
-		ExpectedAssignee:       scalarValue(document, "canonicalPreimage.assignee"),
-		WorkVersionGeneration:  scalarValue(document, "canonicalPreimage.workVersionGeneration"),
-		WorkVersionIncarnation: scalarValue(document, "canonicalPreimage.workVersionIncarnation"),
-		IssueMutationSequence:  mutationSequence, DependencyGraphRevision: graphRevision,
+		ExpectedNativeStatus:    scalarValue(document, "canonicalPreimage.nativeStatus"),
+		ExpectedLifecycleState:  scalarValue(document, "canonicalPreimage.lifecycleState"),
+		ExpectedAssignee:        scalarValue(document, "canonicalPreimage.assignee"),
+		CanonicalClaimAttemptID: scalarValue(bootstrapDocument, "grant.attemptId"),
+		WorkVersionGeneration:   scalarValue(document, "canonicalPreimage.workVersionGeneration"),
+		WorkVersionIncarnation:  scalarValue(document, "canonicalPreimage.workVersionIncarnation"),
+		IssueMutationSequence:   mutationSequence, DependencyGraphRevision: graphRevision,
 		CanonicalWorkMutationAllowed: scalarValue(document, "grant.canonicalWorkMutationAllowed") == "true",
 		DevelopmentLeaseAllowed:      scalarValue(document, "grant.developmentLeaseAllowed") == "true",
 	}, nil

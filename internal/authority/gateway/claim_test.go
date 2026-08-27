@@ -352,16 +352,17 @@ func TestClaimInvalidPostimageReturnsNoCapability(t *testing.T) {
 
 func TestReconcileClaimedWorkIssuesFirstLeaseWithoutCanonicalMutation(t *testing.T) {
 	now := time.Date(2026, 8, 27, 1, 0, 0, 0, time.UTC)
-	item := claimedWork("M3-W001", "w001-delivery-attempt")
+	item := claimedWork("M3-W001", "w001-bootstrap-attempt")
 	store := &memoryClaimStore{item: item}
 	sagas := newMemorySagaStore(now)
 	events := &fakeEvents{}
 	service := mustClaimService(t, store, sagas, events, now)
-	request := claimRequest(item, item.ClaimAttemptID, "w001-delivery-lease-001")
+	request := claimRequest(item, "w001-delivery-attempt", "w001-delivery-lease-001")
+	reconciliation := ClaimReconciliationRequest{ClaimRequest: request, CanonicalClaimAttemptID: item.ClaimAttemptID}
 	principal := claimant()
 	principal.Capabilities = append(principal.Capabilities, authorityv1.CapabilityLeaseIssue)
 
-	response, err := service.ReconcileClaimedWork(context.Background(), principal, request)
+	response, err := service.ReconcileClaimedWork(context.Background(), principal, reconciliation)
 	if err != nil {
 		t.Fatalf("ReconcileClaimedWork: %v", err)
 	}
@@ -372,7 +373,7 @@ func TestReconcileClaimedWorkIssuesFirstLeaseWithoutCanonicalMutation(t *testing
 		events.events[1].Operation != operationClaimReconcilePolicy || events.events[2].Operation != operationClaimReceipt {
 		t.Fatalf("events=%#v", events.events)
 	}
-	replay, err := service.ReconcileClaimedWork(context.Background(), principal, request)
+	replay, err := service.ReconcileClaimedWork(context.Background(), principal, reconciliation)
 	if err != nil || !replay.Replayed || replay.ReceiptRef != response.ReceiptRef || store.claimCalls != 0 || len(events.events) != 3 {
 		t.Fatalf("replay=%#v err=%v claimCalls=%d events=%d", replay, err, store.claimCalls, len(events.events))
 	}
@@ -380,24 +381,27 @@ func TestReconcileClaimedWorkIssuesFirstLeaseWithoutCanonicalMutation(t *testing
 
 func TestReconcileClaimedWorkFailsClosed(t *testing.T) {
 	now := time.Date(2026, 8, 27, 1, 0, 0, 0, time.UTC)
-	base := claimedWork("M3-W001", "w001-delivery-attempt")
-	for name, mutate := range map[string]func(*authorityv1.WorkItem, *authorityv1.Principal, *authorityv1.ClaimRequest){
-		"missing lease capability": func(_ *authorityv1.WorkItem, principal *authorityv1.Principal, _ *authorityv1.ClaimRequest) {
+	base := claimedWork("M3-W001", "w001-bootstrap-attempt")
+	for name, mutate := range map[string]func(*authorityv1.WorkItem, *authorityv1.Principal, *ClaimReconciliationRequest){
+		"missing lease capability": func(_ *authorityv1.WorkItem, principal *authorityv1.Principal, _ *ClaimReconciliationRequest) {
 			principal.Capabilities = []authorityv1.Capability{authorityv1.CapabilityWorkRead, authorityv1.CapabilityWorkClaim}
 		},
-		"backlog work": func(item *authorityv1.WorkItem, _ *authorityv1.Principal, _ *authorityv1.ClaimRequest) {
+		"backlog work": func(item *authorityv1.WorkItem, _ *authorityv1.Principal, _ *ClaimReconciliationRequest) {
 			*item = readyWork(item.BeadID)
 		},
-		"wrong attempt": func(_ *authorityv1.WorkItem, _ *authorityv1.Principal, request *authorityv1.ClaimRequest) {
-			request.AttemptID = "attempt-other"
+		"wrong canonical attempt": func(_ *authorityv1.WorkItem, _ *authorityv1.Principal, request *ClaimReconciliationRequest) {
+			request.CanonicalClaimAttemptID = "attempt-other"
 		},
-		"stale version": func(_ *authorityv1.WorkItem, _ *authorityv1.Principal, request *authorityv1.ClaimRequest) {
-			request.ExpectedVersion.IssueMutationSequence--
+		"stale version": func(_ *authorityv1.WorkItem, _ *authorityv1.Principal, request *ClaimReconciliationRequest) {
+			request.ClaimRequest.ExpectedVersion.IssueMutationSequence--
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			item := cloneWork(base)
-			request := claimRequest(item, item.ClaimAttemptID, "w001-delivery-lease-001")
+			request := ClaimReconciliationRequest{
+				ClaimRequest:            claimRequest(item, "w001-delivery-attempt", "w001-delivery-lease-001"),
+				CanonicalClaimAttemptID: item.ClaimAttemptID,
+			}
 			principal := claimant()
 			principal.Capabilities = append(principal.Capabilities, authorityv1.CapabilityLeaseIssue)
 			mutate(&item, &principal, &request)
@@ -413,12 +417,15 @@ func TestReconcileClaimedWorkFailsClosed(t *testing.T) {
 
 func TestReconcileClaimedWorkRecoversCanonicalSagaWithoutMutation(t *testing.T) {
 	now := time.Date(2026, 8, 27, 1, 0, 0, 0, time.UTC)
-	item := claimedWork("M3-W001", "w001-delivery-attempt")
+	item := claimedWork("M3-W001", "w001-bootstrap-attempt")
 	store := &memoryClaimStore{item: item}
 	sagas := newMemorySagaStore(now)
 	sagas.issueErr = errors.New("synthetic lease outage")
 	service := mustClaimService(t, store, sagas, &fakeEvents{}, now)
-	request := claimRequest(item, item.ClaimAttemptID, "w001-delivery-lease-001")
+	request := ClaimReconciliationRequest{
+		ClaimRequest:            claimRequest(item, "w001-delivery-attempt", "w001-delivery-lease-001"),
+		CanonicalClaimAttemptID: item.ClaimAttemptID,
+	}
 	principal := claimant()
 	principal.Capabilities = append(principal.Capabilities, authorityv1.CapabilityLeaseIssue)
 	if response, err := service.ReconcileClaimedWork(context.Background(), principal, request); err == nil || response.Lease.Active {
