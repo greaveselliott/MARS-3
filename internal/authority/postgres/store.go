@@ -316,12 +316,12 @@ func (store *Store) IssueLease(ctx context.Context, key, digest string, request 
 	labels := labelStrings(request.Labels)
 	if _, err := tx.Exec(ctx, `
 		insert into mars3_authority.leases
-		    (tenant_id, project_id, lease_id, bead_id, attempt_id, idempotency_key,
+		    (tenant_id, project_id, lease_id, bead_id, attempt_id, canonical_claim_attempt_id, idempotency_key,
 		     fence_generation, lease_epoch, claim_version, base_sha, capability,
 		     exclusive_paths, labels, issued_at, expires_at, state, updated_at)
-		values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'active',$14)`,
+		values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'active',$15)`,
 		request.TenantID, request.ProjectID, leaseID, request.BeadID, request.AttemptID,
-		request.IdempotencyKey, generation, nextEpoch, string(claimVersion), request.BaseSHA,
+		request.CanonicalClaimAttemptID, request.IdempotencyKey, generation, nextEpoch, string(claimVersion), request.BaseSHA,
 		string(request.Capability), request.ExclusivePaths, labels, now, request.MaximumExpiry); err != nil {
 		return gateway.ClaimSaga{}, err
 	}
@@ -488,7 +488,7 @@ func loadSaga(ctx context.Context, tx pgx.Tx, tenantID, projectID, key string, l
 
 func loadLease(ctx context.Context, tx pgx.Tx, tenantID, projectID, leaseID string, lock bool) (authorityv1.CapabilityLease, error) {
 	query := `
-		select lease_id, tenant_id, project_id, bead_id, attempt_id, idempotency_key,
+		select lease_id, tenant_id, project_id, bead_id, attempt_id, canonical_claim_attempt_id, idempotency_key,
 		       fence_generation, lease_epoch, claim_version, base_sha, capability,
 		       exclusive_paths, labels, issued_at, expires_at, state
 		from mars3_authority.leases
@@ -502,7 +502,7 @@ func loadLease(ctx context.Context, tx pgx.Tx, tenantID, projectID, leaseID stri
 	var labels []string
 	err := tx.QueryRow(ctx, query, tenantID, projectID, leaseID).Scan(
 		&lease.LeaseID, &lease.TenantID, &lease.ProjectID, &lease.BeadID,
-		&lease.AttemptID, &lease.IdempotencyKey, &lease.FenceGeneration,
+		&lease.AttemptID, &lease.CanonicalClaimAttemptID, &lease.IdempotencyKey, &lease.FenceGeneration,
 		&lease.LeaseEpoch, &claimVersion, &lease.BaseSHA, &capability,
 		&lease.ExclusivePaths, &labels, &lease.IssuedAt, &lease.ExpiresAt, &state,
 	)
@@ -521,7 +521,7 @@ func loadLease(ctx context.Context, tx pgx.Tx, tenantID, projectID, leaseID stri
 
 func sameLeaseRequest(saga gateway.ClaimSaga, request gateway.LeaseRequest) bool {
 	intent := saga.Intent
-	return saga.RequestDigest == request.RequestDigest && intent.TenantID == request.TenantID && intent.ProjectID == request.ProjectID && intent.BeadID == request.BeadID && intent.AttemptID == request.AttemptID && intent.IdempotencyKey == request.IdempotencyKey && intent.BaseSHA == request.BaseSHA && intent.Capability == request.Capability && equalStrings(intent.ExclusivePaths, request.ExclusivePaths) && equalLabels(intent.Labels, request.Labels) && saga.Work.TenantID == request.TenantID && saga.Work.ProjectID == request.ProjectID && saga.Work.BeadID == request.BeadID && saga.Work.ClaimAttemptID == request.AttemptID && saga.Work.Version == request.ClaimVersion
+	return saga.RequestDigest == request.RequestDigest && intent.TenantID == request.TenantID && intent.ProjectID == request.ProjectID && intent.BeadID == request.BeadID && intent.AttemptID == request.AttemptID && intent.IdempotencyKey == request.IdempotencyKey && intent.BaseSHA == request.BaseSHA && intent.Capability == request.Capability && equalStrings(intent.ExclusivePaths, request.ExclusivePaths) && equalLabels(intent.Labels, request.Labels) && saga.Work.TenantID == request.TenantID && saga.Work.ProjectID == request.ProjectID && saga.Work.BeadID == request.BeadID && saga.Work.ClaimAttemptID == request.CanonicalClaimAttemptID && saga.Work.Version == request.ClaimVersion
 }
 
 func sameStoredWork(left, right authorityv1.WorkItem) bool {

@@ -129,6 +129,19 @@ func TestValidateEffectDeniesStaleFenceAndOutOfScopePath(t *testing.T) {
 		}
 	})
 
+	t.Run("changed-canonical-claim-attempt", func(t *testing.T) {
+		request := request
+		request.Fence.CanonicalClaimAttemptID = "other-bootstrap-attempt"
+		store := &effectStore{items: []authorityv1.WorkItem{work}}
+		validator := &effectLeaseValidator{lease: lease}
+		service := mustEffectService(t, store, validator, &fakeEvents{}, now)
+		_, err := service.ValidateEffect(context.Background(), effectPrincipal(), request)
+		assertDenial(t, err, authorityv1.ErrorPolicyDenied, ruleEffectClaim, requiredStableClaim, allowedEffectRecheck)
+		if store.reads != 1 || validator.calls != 0 {
+			t.Fatalf("claim-attempt drift reached lease authority: reads=%d lease=%d", store.reads, validator.calls)
+		}
+	})
+
 	t.Run("path-outside-lease", func(t *testing.T) {
 		request := request
 		request.Path = "docs/private.md"
@@ -201,13 +214,13 @@ func effectFixture(now time.Time) (authorityv1.WorkItem, authorityv1.CapabilityL
 	work.Version.IssueMutationSequence = 2
 	lease := authorityv1.CapabilityLease{
 		LeaseID: "lease-001", TenantID: work.TenantID, ProjectID: work.ProjectID, BeadID: work.BeadID,
-		AttemptID: work.ClaimAttemptID, IdempotencyKey: "idempotency-001", FenceGeneration: "generation-lease-001", LeaseEpoch: 7,
+		AttemptID: "delivery-attempt-001", CanonicalClaimAttemptID: work.ClaimAttemptID, IdempotencyKey: "idempotency-001", FenceGeneration: "generation-lease-001", LeaseEpoch: 7,
 		ClaimVersion: work.Version, BaseSHA: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", Capability: authorityv1.CapabilityTicketDelivery,
 		ExclusivePaths: append([]string(nil), work.ExclusivePaths...), Labels: append([]authorityv1.Label(nil), work.Labels...),
 		IssuedAt: now.Add(-time.Minute), ExpiresAt: now.Add(time.Minute), State: authorityv1.LeaseActive, Active: true,
 	}
 	fence := authorityv1.FencingTuple{
-		TenantID: lease.TenantID, ProjectID: lease.ProjectID, BeadID: lease.BeadID, AttemptID: lease.AttemptID,
+		TenantID: lease.TenantID, ProjectID: lease.ProjectID, BeadID: lease.BeadID, AttemptID: lease.AttemptID, CanonicalClaimAttemptID: lease.CanonicalClaimAttemptID,
 		IdempotencyKey: lease.IdempotencyKey, LeaseID: lease.LeaseID, FenceGeneration: lease.FenceGeneration, LeaseEpoch: lease.LeaseEpoch,
 		ClaimVersion: lease.ClaimVersion, BaseSHA: lease.BaseSHA, Capability: lease.Capability,
 		ExclusivePaths: append([]string(nil), lease.ExclusivePaths...), Labels: append([]authorityv1.Label(nil), lease.Labels...),

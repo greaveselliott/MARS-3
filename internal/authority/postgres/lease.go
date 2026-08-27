@@ -202,7 +202,7 @@ func (store *Store) mutateOwnedLease(ctx context.Context, fence authorityv1.Fenc
 }
 
 func leaseMatchesFence(lease authorityv1.CapabilityLease, fence authorityv1.FencingTuple) bool {
-	return lease.TenantID == fence.TenantID && lease.ProjectID == fence.ProjectID && lease.BeadID == fence.BeadID && lease.AttemptID == fence.AttemptID && lease.IdempotencyKey == fence.IdempotencyKey && lease.LeaseID == fence.LeaseID && lease.FenceGeneration == fence.FenceGeneration && lease.LeaseEpoch == fence.LeaseEpoch && lease.ClaimVersion == fence.ClaimVersion && lease.BaseSHA == fence.BaseSHA && lease.Capability == fence.Capability && equalStrings(lease.ExclusivePaths, fence.ExclusivePaths) && equalLabels(lease.Labels, fence.Labels)
+	return lease.TenantID == fence.TenantID && lease.ProjectID == fence.ProjectID && lease.BeadID == fence.BeadID && lease.AttemptID == fence.AttemptID && lease.CanonicalClaimAttemptID == fence.CanonicalClaimAttemptID && lease.IdempotencyKey == fence.IdempotencyKey && lease.LeaseID == fence.LeaseID && lease.FenceGeneration == fence.FenceGeneration && lease.LeaseEpoch == fence.LeaseEpoch && lease.ClaimVersion == fence.ClaimVersion && lease.BaseSHA == fence.BaseSHA && lease.Capability == fence.Capability && equalStrings(lease.ExclusivePaths, fence.ExclusivePaths) && equalLabels(lease.Labels, fence.Labels)
 }
 
 func expireProjectLeases(ctx context.Context, tx pgx.Tx, tenantID, projectID string, now time.Time) error {

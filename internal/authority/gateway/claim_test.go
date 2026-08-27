@@ -143,7 +143,7 @@ func (store *memorySagaStore) IssueLease(_ context.Context, key, digest string, 
 	saga.Phase = claimPhaseComplete
 	saga.Lease = authorityv1.CapabilityLease{
 		LeaseID: "lease-" + digest[:16], TenantID: request.TenantID, ProjectID: request.ProjectID,
-		BeadID: request.BeadID, AttemptID: request.AttemptID, FenceGeneration: "generation-fixture",
+		BeadID: request.BeadID, AttemptID: request.AttemptID, CanonicalClaimAttemptID: request.CanonicalClaimAttemptID, FenceGeneration: "generation-fixture",
 		IdempotencyKey: request.IdempotencyKey, LeaseEpoch: store.epoch, ClaimVersion: request.ClaimVersion,
 		BaseSHA: request.BaseSHA, Capability: request.Capability,
 		ExclusivePaths: append([]string(nil), request.ExclusivePaths...), Labels: append([]authorityv1.Label(nil), request.Labels...), IssuedAt: store.now,

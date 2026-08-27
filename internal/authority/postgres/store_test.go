@@ -380,7 +380,7 @@ func prepareCanonicalSaga(t *testing.T, ctx context.Context, store *Store, tenan
 	}
 	return gateway.LeaseRequest{
 		RequestDigest: digest, TenantID: tenantID, ProjectID: projectID, BeadID: beadID,
-		AttemptID: attemptID, IdempotencyKey: key, BaseSHA: intent.BaseSHA,
+		AttemptID: attemptID, CanonicalClaimAttemptID: attemptID, IdempotencyKey: key, BaseSHA: intent.BaseSHA,
 		Capability: intent.Capability, ExclusivePaths: paths, Labels: labels,
 		ClaimVersion: work.Version,
 	}
@@ -407,7 +407,8 @@ func fenceFromLease(lease authorityv1.CapabilityLease) authorityv1.FencingTuple 
 	return authorityv1.FencingTuple{
 		TenantID: lease.TenantID, ProjectID: lease.ProjectID, BeadID: lease.BeadID,
 		AttemptID: lease.AttemptID, IdempotencyKey: lease.IdempotencyKey, LeaseID: lease.LeaseID,
-		FenceGeneration: lease.FenceGeneration, LeaseEpoch: lease.LeaseEpoch, ClaimVersion: lease.ClaimVersion,
+		CanonicalClaimAttemptID: lease.CanonicalClaimAttemptID,
+		FenceGeneration:         lease.FenceGeneration, LeaseEpoch: lease.LeaseEpoch, ClaimVersion: lease.ClaimVersion,
 		BaseSHA: lease.BaseSHA, Capability: lease.Capability, ExclusivePaths: append([]string(nil), lease.ExclusivePaths...),
 		Labels: append([]authorityv1.Label(nil), lease.Labels...),
 	}

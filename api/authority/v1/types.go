@@ -166,23 +166,24 @@ type ClaimRequest struct {
 // CapabilityLease is issued only after the canonical compare-and-swap claim
 // is verified. Its full tuple fences every later write.
 type CapabilityLease struct {
-	LeaseID         string      `json:"lease_id"`
-	TenantID        string      `json:"tenant_id"`
-	ProjectID       string      `json:"project_id"`
-	BeadID          string      `json:"bead_id"`
-	AttemptID       string      `json:"attempt_id"`
-	IdempotencyKey  string      `json:"idempotency_key"`
-	FenceGeneration string      `json:"fence_generation"`
-	LeaseEpoch      uint64      `json:"lease_epoch"`
-	ClaimVersion    WorkVersion `json:"claim_version"`
-	BaseSHA         string      `json:"base_sha"`
-	Capability      Capability  `json:"capability"`
-	ExclusivePaths  []string    `json:"exclusive_paths"`
-	Labels          []Label     `json:"labels"`
-	IssuedAt        time.Time   `json:"issued_at"`
-	ExpiresAt       time.Time   `json:"expires_at"`
-	State           LeaseState  `json:"state"`
-	Active          bool        `json:"active"`
+	LeaseID                 string      `json:"lease_id"`
+	TenantID                string      `json:"tenant_id"`
+	ProjectID               string      `json:"project_id"`
+	BeadID                  string      `json:"bead_id"`
+	AttemptID               string      `json:"attempt_id"`
+	CanonicalClaimAttemptID string      `json:"canonical_claim_attempt_id"`
+	IdempotencyKey          string      `json:"idempotency_key"`
+	FenceGeneration         string      `json:"fence_generation"`
+	LeaseEpoch              uint64      `json:"lease_epoch"`
+	ClaimVersion            WorkVersion `json:"claim_version"`
+	BaseSHA                 string      `json:"base_sha"`
+	Capability              Capability  `json:"capability"`
+	ExclusivePaths          []string    `json:"exclusive_paths"`
+	Labels                  []Label     `json:"labels"`
+	IssuedAt                time.Time   `json:"issued_at"`
+	ExpiresAt               time.Time   `json:"expires_at"`
+	State                   LeaseState  `json:"state"`
+	Active                  bool        `json:"active"`
 }
 
 type ClaimResponse struct {
@@ -195,19 +196,20 @@ type ClaimResponse struct {
 // FencingTuple is revalidated immediately before every material write. It is
 // deliberately verbose so no cached token can stand in for current authority.
 type FencingTuple struct {
-	TenantID        string      `json:"tenant_id"`
-	ProjectID       string      `json:"project_id"`
-	BeadID          string      `json:"bead_id"`
-	AttemptID       string      `json:"attempt_id"`
-	IdempotencyKey  string      `json:"idempotency_key"`
-	LeaseID         string      `json:"lease_id"`
-	FenceGeneration string      `json:"fence_generation"`
-	LeaseEpoch      uint64      `json:"lease_epoch"`
-	ClaimVersion    WorkVersion `json:"claim_version"`
-	BaseSHA         string      `json:"base_sha"`
-	Capability      Capability  `json:"capability"`
-	ExclusivePaths  []string    `json:"exclusive_paths"`
-	Labels          []Label     `json:"labels"`
+	TenantID                string      `json:"tenant_id"`
+	ProjectID               string      `json:"project_id"`
+	BeadID                  string      `json:"bead_id"`
+	AttemptID               string      `json:"attempt_id"`
+	CanonicalClaimAttemptID string      `json:"canonical_claim_attempt_id"`
+	IdempotencyKey          string      `json:"idempotency_key"`
+	LeaseID                 string      `json:"lease_id"`
+	FenceGeneration         string      `json:"fence_generation"`
+	LeaseEpoch              uint64      `json:"lease_epoch"`
+	ClaimVersion            WorkVersion `json:"claim_version"`
+	BaseSHA                 string      `json:"base_sha"`
+	Capability              Capability  `json:"capability"`
+	ExclusivePaths          []string    `json:"exclusive_paths"`
+	Labels                  []Label     `json:"labels"`
 }
 
 type RenewLeaseRequest struct {

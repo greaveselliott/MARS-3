@@ -92,7 +92,7 @@ func (fixture *operationalFixture) IssueLease(_ context.Context, key, digest str
 	saga.Phase = gateway.ClaimPhaseComplete
 	saga.Lease = authorityv1.CapabilityLease{
 		LeaseID: fmt.Sprintf("lease-%03d", fixture.epoch), TenantID: request.TenantID, ProjectID: request.ProjectID,
-		BeadID: request.BeadID, AttemptID: request.AttemptID, IdempotencyKey: request.IdempotencyKey,
+		BeadID: request.BeadID, AttemptID: request.AttemptID, CanonicalClaimAttemptID: request.CanonicalClaimAttemptID, IdempotencyKey: request.IdempotencyKey,
 		FenceGeneration: "generation-development", LeaseEpoch: fixture.epoch, ClaimVersion: request.ClaimVersion,
 		BaseSHA: request.BaseSHA, Capability: request.Capability, ExclusivePaths: append([]string(nil), request.ExclusivePaths...),
 		Labels: append([]authorityv1.Label(nil), request.Labels...), IssuedAt: fixture.now, ExpiresAt: request.MaximumExpiry,

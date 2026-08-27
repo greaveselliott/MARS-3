@@ -112,18 +112,19 @@ type ClaimIntent struct {
 }
 
 type LeaseRequest struct {
-	RequestDigest  string
-	TenantID       string
-	ProjectID      string
-	BeadID         string
-	AttemptID      string
-	IdempotencyKey string
-	BaseSHA        string
-	Capability     authorityv1.Capability
-	ExclusivePaths []string
-	Labels         []authorityv1.Label
-	ClaimVersion   authorityv1.WorkVersion
-	MaximumExpiry  time.Time
+	RequestDigest           string
+	TenantID                string
+	ProjectID               string
+	BeadID                  string
+	AttemptID               string
+	CanonicalClaimAttemptID string
+	IdempotencyKey          string
+	BaseSHA                 string
+	Capability              authorityv1.Capability
+	ExclusivePaths          []string
+	Labels                  []authorityv1.Label
+	ClaimVersion            authorityv1.WorkVersion
+	MaximumExpiry           time.Time
 }
 
 // ClaimSaga is a durable PostgreSQL projection of a cross-store claim. It is
@@ -346,7 +347,7 @@ func (s *Service) Claim(ctx context.Context, principal authorityv1.Principal, re
 func (s *Service) finishCanonicalClaim(ctx context.Context, principal authorityv1.Principal, request authorityv1.ClaimRequest, labels []authorityv1.Label, requestDigest string, saga ClaimSaga) (authorityv1.ClaimResponse, error) {
 	leaseRequest := LeaseRequest{
 		RequestDigest: requestDigest, TenantID: principal.TenantID, ProjectID: principal.ProjectID,
-		BeadID: request.BeadID, AttemptID: request.AttemptID, BaseSHA: request.BaseSHA,
+		BeadID: request.BeadID, AttemptID: request.AttemptID, CanonicalClaimAttemptID: saga.Work.ClaimAttemptID, BaseSHA: request.BaseSHA,
 		IdempotencyKey: request.IdempotencyKey, Capability: request.Capability, ExclusivePaths: append([]string(nil), request.ExclusivePaths...), Labels: append([]authorityv1.Label(nil), labels...),
 		ClaimVersion: saga.Work.Version, MaximumExpiry: s.now().UTC().Add(maximumInitialLeaseDuration),
 	}
@@ -366,7 +367,7 @@ func (s *Service) finishCanonicalClaim(ctx context.Context, principal authorityv
 func (s *Service) replayCompletedClaim(ctx context.Context, principal authorityv1.Principal, request authorityv1.ClaimRequest, labels []authorityv1.Label, saga ClaimSaga) (authorityv1.ClaimResponse, error) {
 	leaseRequest := LeaseRequest{
 		RequestDigest: saga.RequestDigest, TenantID: principal.TenantID, ProjectID: principal.ProjectID,
-		BeadID: request.BeadID, AttemptID: request.AttemptID, BaseSHA: request.BaseSHA,
+		BeadID: request.BeadID, AttemptID: request.AttemptID, CanonicalClaimAttemptID: saga.Work.ClaimAttemptID, BaseSHA: request.BaseSHA,
 		IdempotencyKey: request.IdempotencyKey, Capability: request.Capability, ExclusivePaths: request.ExclusivePaths, Labels: append([]authorityv1.Label(nil), labels...),
 		ClaimVersion: saga.Work.Version, MaximumExpiry: saga.Lease.ExpiresAt,
 	}
@@ -446,7 +447,7 @@ func equalWorkItems(left, right authorityv1.WorkItem) bool {
 }
 
 func validClaimLease(lease authorityv1.CapabilityLease, request LeaseRequest, now time.Time) bool {
-	return validID(lease.LeaseID) && lease.TenantID == request.TenantID && lease.ProjectID == request.ProjectID && lease.BeadID == request.BeadID && lease.AttemptID == request.AttemptID && lease.IdempotencyKey == request.IdempotencyKey && validID(lease.FenceGeneration) && lease.LeaseEpoch > 0 && lease.ClaimVersion == request.ClaimVersion && lease.BaseSHA == request.BaseSHA && lease.Capability == request.Capability && equalStrings(lease.ExclusivePaths, request.ExclusivePaths) && equalLabels(lease.Labels, request.Labels) && lease.State == authorityv1.LeaseActive && lease.Active && !lease.IssuedAt.After(now) && lease.ExpiresAt.After(now) && !lease.ExpiresAt.After(request.MaximumExpiry)
+	return validID(lease.LeaseID) && lease.TenantID == request.TenantID && lease.ProjectID == request.ProjectID && lease.BeadID == request.BeadID && lease.AttemptID == request.AttemptID && lease.CanonicalClaimAttemptID == request.CanonicalClaimAttemptID && validID(lease.CanonicalClaimAttemptID) && lease.IdempotencyKey == request.IdempotencyKey && validID(lease.FenceGeneration) && lease.LeaseEpoch > 0 && lease.ClaimVersion == request.ClaimVersion && lease.BaseSHA == request.BaseSHA && lease.Capability == request.Capability && equalStrings(lease.ExclusivePaths, request.ExclusivePaths) && equalLabels(lease.Labels, request.Labels) && lease.State == authorityv1.LeaseActive && lease.Active && !lease.IssuedAt.After(now) && lease.ExpiresAt.After(now) && !lease.ExpiresAt.After(request.MaximumExpiry)
 }
 
 func equalWorkVersion(left, right authorityv1.WorkVersion) bool { return left == right }
