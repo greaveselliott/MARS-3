@@ -1,5 +1,5 @@
 diff --git a/cmd/bd/batch.go b/cmd/bd/batch.go
-index f1a5409a7..ea4e2ae68 100644
+index f1a5409a7..ee61bb1b5 100644
 --- a/cmd/bd/batch.go
 +++ b/cmd/bd/batch.go
 @@ -63,0 +64 @@ Grammar (one command per line):
@@ -14,7 +14,7 @@ index f1a5409a7..ea4e2ae68 100644
 @@ -360,0 +365,2 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
 +	case "authority-transition":
 +		return runAuthorityTransitionBatchOp(ctx, tx, op, actorName)
-@@ -906,0 +913,899 @@ func runAuthorityClaimBatchOp(ctx context.Context, tx storage.Transaction, op ba
+@@ -906,0 +913,1083 @@ func runAuthorityClaimBatchOp(ctx context.Context, tx storage.Transaction, op ba
 +var authorityTransitionKeys = map[string]bool{
 +	"expected_status":              true,
 +	"expected_assignee":            true,
@@ -511,22 +511,206 @@ index f1a5409a7..ea4e2ae68 100644
 +}
 +
 +func authorityCanonicalMetadataKeys(values map[string]interface{}) bool {
-+	allowed := map[string]bool{
-+		"schemaVersion": true, "displayId": true, "lifecycleState": true, "goalIds": true,
-+		"productDecisionIds": true, "featureId": true, "scenarioIds": true, "exclusivePaths": true,
-+		"verificationOrder": true, "workVersion": true, "bootstrapClaim": true, "workClaim": true,
-+		"blocker": true, "blockedBy": true, "reviewAccepted": true, "runDisposition": true,
-+		"reconciled": true, "handoff": true, "reviewRecords": true, "reviewHistory": true,
-+		"runHistory": true, "runDispositionRecord": true, "reconciliationRecord": true,
-+		"terminalRecord": true, "risk": true, "workType": true, "coordinator": true,
-+		"failureOwnership": true, "publicDisclosure": true, "contractPublicationRequired": true,
++	if !authorityCanonicalObjectKeys(values,
++		"schemaVersion", "displayId", "lifecycleState", "goalIds",
++		"productDecisionIds", "featureId", "scenarioIds", "exclusivePaths",
++		"verificationOrder", "workVersion", "bootstrapClaim", "workClaim",
++		"blocker", "blockedBy", "reviewAccepted", "runDisposition",
++		"reconciled", "handoff", "reviewRecords", "reviewHistory",
++		"runHistory", "runDispositionRecord", "reconciliationRecord",
++		"terminalRecord", "risk", "workType", "coordinator",
++		"failureOwnership", "publicDisclosure", "contractPublicationRequired",
++	) {
++		return false
 +	}
-+	for key := range values {
-+		if !allowed[key] {
++	workVersion, ok := authorityRequiredObject(values, "workVersion")
++	if !ok || !authorityCanonicalObjectKeys(workVersion,
++		"authorityGeneration", "issueIncarnation", "issueMutationSequence", "dependencyGraphRevision",
++	) {
++		return false
++	}
++	if value, present := values["workClaim"]; present {
++		if _, ok := authorityClaimRecord(value, false); !ok {
++			return false
++		}
++	}
++	if value, present := values["bootstrapClaim"]; present {
++		if _, ok := authorityClaimRecord(value, true); !ok {
++			return false
++		}
++	}
++	handoff, ok := authorityOptionalObject(values, "handoff")
++	if !ok || handoff != nil && !authorityCanonicalHandoff(handoff) {
++		return false
++	}
++	reviews, ok := authorityOptionalObjects(values, "reviewRecords")
++	if !ok {
++		return false
++	}
++	for _, review := range reviews {
++		if !authorityCanonicalReview(review) {
++			return false
++		}
++	}
++	reviewHistory, ok := authorityOptionalObjects(values, "reviewHistory")
++	if !ok {
++		return false
++	}
++	for _, cycle := range reviewHistory {
++		if !authorityCanonicalReviewCycle(cycle) {
++			return false
++		}
++	}
++	runHistory, ok := authorityOptionalObjects(values, "runHistory")
++	if !ok {
++		return false
++	}
++	for _, run := range runHistory {
++		if !authorityCanonicalRun(run) {
++			return false
++		}
++	}
++	run, ok := authorityOptionalObject(values, "runDispositionRecord")
++	if !ok || run != nil && !authorityCanonicalRun(run) {
++		return false
++	}
++	reconciliation, ok := authorityOptionalObject(values, "reconciliationRecord")
++	if !ok || reconciliation != nil && !authorityCanonicalReconciliation(reconciliation) {
++		return false
++	}
++	terminal, ok := authorityOptionalObject(values, "terminalRecord")
++	if !ok || terminal != nil && !authorityCanonicalTerminal(terminal) {
++		return false
++	}
++	return true
++}
++
++func authorityCanonicalObjectKeys(value map[string]interface{}, allowed ...string) bool {
++	for key := range value {
++		matched := false
++		for _, expected := range allowed {
++			if key == expected {
++				matched = true
++				break
++			}
++		}
++		if !matched {
 +			return false
 +		}
 +	}
 +	return true
++}
++
++func authorityRequiredObject(parent map[string]interface{}, key string) (map[string]interface{}, bool) {
++	value, present := parent[key]
++	if !present {
++		return nil, false
++	}
++	return authorityObject(value)
++}
++
++func authorityOptionalObject(parent map[string]interface{}, key string) (map[string]interface{}, bool) {
++	value, present := parent[key]
++	if !present {
++		return nil, true
++	}
++	return authorityObject(value)
++}
++
++func authorityOptionalObjects(parent map[string]interface{}, key string) ([]map[string]interface{}, bool) {
++	value, present := parent[key]
++	if !present {
++		return nil, true
++	}
++	items, ok := authorityArray(value)
++	if !ok {
++		return nil, false
++	}
++	objects := make([]map[string]interface{}, 0, len(items))
++	for _, item := range items {
++		object, objectOK := authorityObject(item)
++		if !objectOK {
++			return nil, false
++		}
++		objects = append(objects, object)
++	}
++	return objects, true
++}
++
++func authorityCanonicalHandoff(value map[string]interface{}) bool {
++	return authorityCanonicalObjectKeys(value,
++		"attemptId", "canonicalClaimAttemptId", "fenceDigest", "headSHA",
++		"evidenceRefs", "nextProfileId", "idempotencyKey",
++	)
++}
++
++func authorityCanonicalFailure(value map[string]interface{}) bool {
++	return authorityCanonicalObjectKeys(value,
++		"reason", "blocked_by", "failure_fingerprint", "attempt", "next_action",
++	)
++}
++
++func authorityCanonicalReview(value map[string]interface{}) bool {
++	if !authorityCanonicalObjectKeys(value,
++		"reviewerProfileId", "verdict", "headSHA", "evidenceRefs", "idempotencyKey", "failure",
++	) {
++		return false
++	}
++	failure, ok := authorityOptionalObject(value, "failure")
++	return ok && (failure == nil || authorityCanonicalFailure(failure))
++}
++
++func authorityCanonicalRun(value map[string]interface{}) bool {
++	if !authorityCanonicalObjectKeys(value,
++		"principalProfileId", "status", "headSHA", "evidenceRefs", "idempotencyKey", "failure",
++	) {
++		return false
++	}
++	failure, ok := authorityOptionalObject(value, "failure")
++	return ok && (failure == nil || authorityCanonicalFailure(failure))
++}
++
++func authorityCanonicalReviewCycle(value map[string]interface{}) bool {
++	if !authorityCanonicalObjectKeys(value, "handoff", "reviews", "runHistory", "runDisposition") {
++		return false
++	}
++	handoff, ok := authorityOptionalObject(value, "handoff")
++	if !ok || handoff != nil && !authorityCanonicalHandoff(handoff) {
++		return false
++	}
++	reviews, ok := authorityOptionalObjects(value, "reviews")
++	if !ok {
++		return false
++	}
++	for _, review := range reviews {
++		if !authorityCanonicalReview(review) {
++			return false
++		}
++	}
++	runs, ok := authorityOptionalObjects(value, "runHistory")
++	if !ok {
++		return false
++	}
++	for _, run := range runs {
++		if !authorityCanonicalRun(run) {
++			return false
++		}
++	}
++	run, ok := authorityOptionalObject(value, "runDisposition")
++	return ok && (run == nil || authorityCanonicalRun(run))
++}
++
++func authorityCanonicalReconciliation(value map[string]interface{}) bool {
++	return authorityCanonicalObjectKeys(value,
++		"principalProfileId", "headSHA", "mergedSHA", "mergedTree",
++		"pullRequestId", "protectedMainRunId", "evidenceRefs", "idempotencyKey",
++	)
++}
++
++func authorityCanonicalTerminal(value map[string]interface{}) bool {
++	return authorityCanonicalObjectKeys(value,
++		"principalProfileId", "headSHA", "evidenceRefs", "idempotencyKey",
++	)
 +}
 +
 +func authorityClaimRecord(value interface{}, bootstrap bool) (map[string]interface{}, bool) {
@@ -915,10 +1099,12 @@ index f1a5409a7..ea4e2ae68 100644
 +}
 +
 diff --git a/cmd/bd/batch_embedded_test.go b/cmd/bd/batch_embedded_test.go
-index 34f2e8fa8..6f557bcb3 100644
+index 34f2e8fa8..fca090b93 100644
 --- a/cmd/bd/batch_embedded_test.go
 +++ b/cmd/bd/batch_embedded_test.go
-@@ -556,0 +557,507 @@ func TestBatchAuthorityClaimContentionHasOneWinner(t *testing.T) {
+@@ -5,0 +6 @@ import (
++	"bytes"
+@@ -556,0 +558,574 @@ func TestBatchAuthorityClaimContentionHasOneWinner(t *testing.T) {
 +func TestBatchAuthorityLifecycleIsOneBoundedTransitionChain(t *testing.T) {
 +	previousActor := actor
 +	t.Cleanup(func() { setActor(previousActor) })
@@ -1168,6 +1354,73 @@ index 34f2e8fa8..6f557bcb3 100644
 +		HandoffFenceDigest: strings.Repeat("7", 64), HeadSHA: strings.Repeat("a", 40), EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff",
 +	}); err == nil {
 +		t.Fatal("transition accepted legacy terminal scalars without detailed lifecycle evidence")
++	}
++}
++
++func TestAuthorityLifecycleRejectsRecursiveCanonicalKeyAliases(t *testing.T) {
++	for name, mutate := range map[string]func(map[string]interface{}){
++		"work version": func(values map[string]interface{}) {
++			values["workVersion"].(map[string]interface{})["issuemutationsequence"] = json.Number("2")
++		},
++		"work claim": func(values map[string]interface{}) {
++			values["workClaim"].(map[string]interface{})["attemptid"] = "alias-attempt"
++		},
++		"bootstrap claim": func(values map[string]interface{}) {
++			delete(values, "workClaim")
++			values["bootstrapClaim"] = map[string]interface{}{
++				"attemptId": "canonical-attempt", "idempotencyKey": "bootstrap-key",
++				"baseCommit": strings.Repeat("a", 40), "grantId": "bootstrap-grant", "grantid": "alias-grant",
++			}
++		},
++		"handoff": func(values map[string]interface{}) {
++			values["handoff"] = map[string]interface{}{"canonicalclaimattemptid": "alias-attempt"}
++		},
++		"review": func(values map[string]interface{}) {
++			values["reviewRecords"] = []interface{}{map[string]interface{}{"reviewerprofileid": "qa"}}
++		},
++		"review failure": func(values map[string]interface{}) {
++			values["reviewRecords"] = []interface{}{map[string]interface{}{"failure": map[string]interface{}{"nextAction": "alias-action"}}}
++		},
++		"review history": func(values map[string]interface{}) {
++			values["reviewHistory"] = []interface{}{map[string]interface{}{"runhistory": []interface{}{}}}
++		},
++		"archived handoff": func(values map[string]interface{}) {
++			values["reviewHistory"] = []interface{}{map[string]interface{}{"handoff": map[string]interface{}{"canonicalclaimattemptid": "alias-attempt"}}}
++		},
++		"archived review": func(values map[string]interface{}) {
++			values["reviewHistory"] = []interface{}{map[string]interface{}{"reviews": []interface{}{map[string]interface{}{"headsha": strings.Repeat("a", 40)}}}}
++		},
++		"archived run": func(values map[string]interface{}) {
++			values["reviewHistory"] = []interface{}{map[string]interface{}{"runHistory": []interface{}{map[string]interface{}{"idempotencykey": "alias-key"}}}}
++		},
++		"run history": func(values map[string]interface{}) {
++			values["runHistory"] = []interface{}{map[string]interface{}{"principalprofileid": "delivery-orchestrator"}}
++		},
++		"run disposition": func(values map[string]interface{}) {
++			values["runDispositionRecord"] = map[string]interface{}{"headsha": strings.Repeat("a", 40)}
++		},
++		"run failure": func(values map[string]interface{}) {
++			values["runDispositionRecord"] = map[string]interface{}{"failure": map[string]interface{}{"failureFingerprint": "alias-fingerprint"}}
++		},
++		"reconciliation": func(values map[string]interface{}) {
++			values["reconciliationRecord"] = map[string]interface{}{"mergedsha": strings.Repeat("a", 40)}
++		},
++		"terminal": func(values map[string]interface{}) {
++			values["terminalRecord"] = map[string]interface{}{"principalprofileid": "delivery-orchestrator"}
++		},
++	} {
++		t.Run(name, func(t *testing.T) {
++			decoder := json.NewDecoder(bytes.NewReader(authorityLifecycleMetadataForTest()))
++			decoder.UseNumber()
++			var values map[string]interface{}
++			if decoder.Decode(&values) != nil {
++				t.Fatal("decode fixture")
++			}
++			mutate(values)
++			if authorityCanonicalMetadataKeys(values) {
++				t.Fatal("recursive noncanonical authority key was accepted")
++			}
++		})
 +	}
 +}
 +

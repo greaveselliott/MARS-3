@@ -350,11 +350,12 @@ type claimBinding struct {
 }
 
 type dependencyProjection struct {
-	ID             string
-	Status         string
-	DependencyType string
-	Metadata       issueMetadata
-	MetadataSHA256 string
+	ID                        string
+	Status                    string
+	DependencyType            string
+	Metadata                  issueMetadata
+	MetadataSHA256            string
+	DetailedLifecycleRequired bool
 }
 
 type authorityDependencyCondition struct {
@@ -492,7 +493,7 @@ func projectIssue(tenantID, projectID, id, status, assignee string, metadata iss
 		if dependency.DependencyType != "blocks" || !compatibleLifecycle(dependency.Status, dependency.Metadata.LifecycleState) {
 			return authorityv1.WorkItem{}, ErrProjectionInvalid
 		}
-		reviewAccepted, runCompleted, reconciled, valid := dependencyLifecycleState(dependency.Metadata)
+		reviewAccepted, runCompleted, reconciled, valid := dependencyLifecycleState(dependency.Metadata, dependency.DetailedLifecycleRequired)
 		if !valid {
 			return authorityv1.WorkItem{}, ErrProjectionInvalid
 		}
@@ -663,7 +664,12 @@ func decodeDependency(raw json.RawMessage) (dependencyProjection, error) {
 		return dependencyProjection{}, ErrProjectionInvalid
 	}
 	var result dependencyProjection
-	if decodeField(object, "id", &result.ID) != nil || decodeField(object, "status", &result.Status) != nil || decodeField(object, "dependency_type", &result.DependencyType) != nil || decodeDependencyMetadata(object["metadata"], &result.Metadata) != nil {
+	var metadataErr error
+	if decodeField(object, "id", &result.ID) != nil || decodeField(object, "status", &result.Status) != nil || decodeField(object, "dependency_type", &result.DependencyType) != nil {
+		return dependencyProjection{}, ErrProjectionInvalid
+	}
+	result.DetailedLifecycleRequired, metadataErr = decodeDependencyMetadata(object["metadata"], &result.Metadata)
+	if metadataErr != nil {
 		return dependencyProjection{}, ErrProjectionInvalid
 	}
 	result.MetadataSHA256 = canonicalJSONDigest(object["metadata"])
@@ -673,19 +679,33 @@ func decodeDependency(raw json.RawMessage) (dependencyProjection, error) {
 	return result, nil
 }
 
-func decodeDependencyMetadata(raw json.RawMessage, target *issueMetadata) error {
+func decodeDependencyMetadata(raw json.RawMessage, target *issueMetadata) (bool, error) {
 	if !validCanonicalJSONKeys(raw, reflect.TypeOf(issueMetadata{})) || !validRawClaimFields(raw) {
-		return ErrProjectionInvalid
+		return false, ErrProjectionInvalid
+	}
+	var object map[string]json.RawMessage
+	if json.Unmarshal(raw, &object) != nil {
+		return false, ErrProjectionInvalid
+	}
+	detailedRequired := false
+	for _, key := range []string{
+		"workVersion", "workClaim", "bootstrapClaim", "handoff", "reviewRecords", "reviewHistory",
+		"runHistory", "runDispositionRecord", "reconciliationRecord", "terminalRecord",
+	} {
+		if _, present := object[key]; present {
+			detailedRequired = true
+			break
+		}
 	}
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
 	if decoder.Decode(target) != nil {
-		return ErrProjectionInvalid
+		return false, ErrProjectionInvalid
 	}
 	if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
-		return ErrProjectionInvalid
+		return false, ErrProjectionInvalid
 	}
-	return nil
+	return detailedRequired, nil
 }
 
 func validCanonicalJSONKeys(raw json.RawMessage, valueType reflect.Type) bool {
@@ -740,8 +760,11 @@ func lifecycleRecordsPresent(metadata issueMetadata) bool {
 	return metadata.Handoff != nil || len(metadata.ReviewRecords) > 0 || len(metadata.ReviewHistory) > 0 || len(metadata.RunHistory) > 0 || metadata.RunDispositionRecord != nil || metadata.ReconciliationRecord != nil || metadata.TerminalRecord != nil
 }
 
-func dependencyLifecycleState(metadata issueMetadata) (bool, bool, bool, bool) {
-	if lifecycleRecordsPresent(metadata) {
+func dependencyLifecycleState(metadata issueMetadata, detailedRequired bool) (bool, bool, bool, bool) {
+	if detailedRequired {
+		if !lifecycleRecordsPresent(metadata) {
+			return false, false, false, false
+		}
 		if !validLifecycleRecords(metadata) {
 			return false, false, false, false
 		}

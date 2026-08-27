@@ -144,8 +144,12 @@ operation without echoing credentials or payloads.
   so case-folded aliases cannot overwrite validated fields. Active records
   without detailed evidence must have empty legacy terminal/blocker state.
   Dependency readiness derives from valid detailed review, run, and
-  reconciliation evidence whenever it exists and rejects conflicting legacy
-  completion scalars.
+  reconciliation evidence whenever the record is versioned, claim-bearing, or
+  contains any raw detailed-lifecycle key, including an empty or null key. The
+  sparse legacy scalar fallback is limited to explicitly unversioned,
+  unclaimed records with no detailed-lifecycle key. Stripping detailed proof
+  therefore fails closed, and conflicting legacy completion scalars are
+  rejected.
 - A blocked attempt remains truthful with `blocker`, `blocked_by`, normalized
   failure fingerprint, bounded attempt count, and exact next action. It is not
   silently closed or duplicated.

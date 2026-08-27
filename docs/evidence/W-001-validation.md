@@ -759,3 +759,88 @@ ephemeral loopback-only PostgreSQL 17.11 container at digest
 It passed and the container was stopped and auto-removed. No canonical Beads
 metadata or live lease was created; W-001 remains `in-progress` pending fresh
 immutable v8 QA and Security review.
+
+## Lifecycle-correction v8 review disposition
+
+Independent QA and Security changes-requested exact v8 head
+`6d6b90ef495cd64286e755e90d199a3cb622cd54`, tree
+`f596e2a148f055bcac90960419b2e22928bd471c`, signed tag object
+`fb99ef24abb1176e7bcec01bddffe305979d8464`, and successful run/job
+`33097381660/98606506699`. The immutable v8 bytes remain historical evidence.
+The two normalized findings were:
+
+- `lifecycle.native_recursive_key_alias_not_canonical`: the native transition
+  rejected unknown top-level keys but admitted noncanonical case-folded keys
+  inside WorkVersion, claims, handoffs, reviews, runs, failures,
+  reconciliation, terminal evidence, and archived cycles;
+- `lifecycle.dependency_lineage_stripping`: a dependency with WorkVersion,
+  claim, or raw detailed-lifecycle keys could omit or empty/null its detailed
+  proof and project ready through the sparse legacy compatibility path.
+
+Neither review performed a canonical lifecycle or lease effect. M3-W001
+remained `in-progress`, and the signed `W-001-lifecycle-correction-v9` grant
+prospectively bounded only these corrections, qualification, public evidence,
+and fresh immutable review.
+
+## Lifecycle-correction v9 candidate
+
+The v9 project adapter treats WorkVersion, either claim variant, or any raw
+detailed-lifecycle key as an irreversible detailed-proof boundary for
+dependency projection. Even omitted detailed records after a retained version
+or claim, and explicitly empty or null detailed fields, fail closed. Sparse
+The sparse legacy dependency compatibility path is available only to an unversioned,
+unclaimed record with no detailed key.
+
+The v9 native patch performs recursive canonical-key rejection before semantic
+parsing across WorkVersion, WorkClaim, BootstrapClaim, handoff, review,
+failure, run, reconciliation, terminal, and current and archived history
+objects. Its adversarial corpus changes one nested key at a time and proves
+every case-fold alias is rejected. The first callback-oriented implementation
+encountered bounded linker output-capacity failures. It was replaced with
+explicit object traversal without changing the schema contract; the same
+recursive corpus passed before qualification resumed.
+
+V9 material bindings are:
+
+- v8 base head/tree:
+  `6d6b90ef495cd64286e755e90d199a3cb622cd54` /
+  `f596e2a148f055bcac90960419b2e22928bd471c`;
+- lifecycle patch SHA-256:
+  `6cca8ab8bd5bd0d5f179612ece7e68e002caa69c455c80cdb00335d5e75a31c4`;
+- full six-file patched-source diff SHA-256 after all five patches:
+  `91b3e8dd5c8c0c01b5953c4c38ca508a150b05cd719f4e80fec293365afddf7f`;
+- unchanged patched-source `go.mod` SHA-256:
+  `82794b69209f2d2e8ad23fccc94a84d07ac46fc99040964a89ff5566e42c8044`;
+- unchanged patched-source `go.sum` SHA-256:
+  `ad753874d566d22c81da097ed3d8d59f2f17ff6e69a437aca914ad178a488efb`;
+- exact Linux/arm64 builder manifest:
+  `sha256:b1a0cc29a7e13e0595e21087eeb930dc494976b18ba68279bf52c665f3170aa0`;
+- twice-reproduced Linux/arm64 patched binary SHA-256:
+  `d72ab6b406a62930083cb9801d74336ea10fd7e871453c19f935252a77dccb18`.
+
+Two independently composed pinned Beads source trees applied the five patches
+in the documented order with `git apply --unidiff-zero`. Each used a distinct,
+previously independently populated module cache that passed network-disabled
+`go mod verify`, a fresh build cache, and the v7 normalized builder command.
+Both outputs were byte-identical.
+
+The exact patched source executed every selected bootstrap, authority-claim,
+and authority-lifecycle Docker/Dolt case with Docker available and no skip.
+This included atomicity, rollback, contention, redirect and selector denial,
+hook and server-transaction denial, every noncompleted outcome, bounded
+equivalent-failure retry, claim lineage, legacy-scalar denial, and the full
+recursive canonical-key corpus. The reproduced binary passed
+`TestNativeMutatorIntegration` inside the pinned network-disabled builder
+without a skip.
+
+The PostgreSQL lifecycle/restart suite executed without a skip against an
+ephemeral loopback-only PostgreSQL 17.11 container at digest
+`sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0`.
+It passed and the container was stopped and auto-removed. The candidate makes
+no canonical Beads or live-lease effect. A fresh sanitized, read-only canonical
+projection showed W-001 still `in_progress` / `in-progress` with generation
+`6e79ff81-a007-42a5-a178-7ce58dbb718b`, incarnation
+`e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41`,
+mutation sequence `1`, and dependency revision `1`; P-001 remained
+`open` / `backlog` without WorkVersion. W-001 remains pending fresh immutable
+v9 QA and Security review.

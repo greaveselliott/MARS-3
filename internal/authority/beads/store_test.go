@@ -576,3 +576,43 @@ func TestProjectionRejectsDependencyDetailedLifecycleContradiction(t *testing.T)
 		t.Fatalf("dependency scalar/detail contradiction error=%v", err)
 	}
 }
+
+func TestProjectionRejectsVersionedDependencyWithStrippedLifecycleEvidence(t *testing.T) {
+	for _, fixture := range []struct {
+		name       string
+		emptyProof bool
+	}{
+		{name: "omitted-detailed-keys"},
+		{name: "empty-and-null-detailed-keys", emptyProof: true},
+	} {
+		t.Run(fixture.name, func(t *testing.T) {
+			raw := issueFixture(t, authorityv1.LifecycleBacklog, "", "", 1, false)
+			var issues []map[string]any
+			if err := json.Unmarshal(raw, &issues); err != nil {
+				t.Fatal(err)
+			}
+			dependency := issues[0]["dependencies"].([]any)[0].(map[string]any)
+			metadata := dependency["metadata"].(map[string]any)
+			metadata["workVersion"] = map[string]any{
+				"authorityGeneration": "dependency-generation", "issueIncarnation": "dependency-incarnation",
+				"issueMutationSequence": float64(8), "dependencyGraphRevision": float64(3),
+			}
+			metadata["workClaim"] = map[string]any{
+				"attemptId": "dependency-attempt", "idempotencyKey": "dependency-claim",
+				"baseCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			}
+			if fixture.emptyProof {
+				metadata["reviewRecords"] = []any{}
+				metadata["runDispositionRecord"] = nil
+				metadata["terminalRecord"] = nil
+			}
+			encoded, err := json.Marshal(issues)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := decodeIssueSnapshot(encoded, "tenant-fixture", "project-fixture", []authorityv1.Label{authorityv1.LabelPublicAccepted}); !errors.Is(err, ErrProjectionInvalid) {
+				t.Fatalf("versioned dependency with stripped lifecycle evidence error=%v", err)
+			}
+		})
+	}
+}

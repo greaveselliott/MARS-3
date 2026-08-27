@@ -383,6 +383,9 @@ equivalent repeated failure is recorded and escalated rather than looped.
   stable error response.
 - A deterministic ready-set fixture proving lineage, dependency, blocker, role,
   and lifecycle validation against canonical Beads versions.
+- Recursive canonical-key fixtures for every native authority metadata object,
+  plus dependency fixtures proving that versioned, claim-bearing, empty/null,
+  and detail-key-bearing records cannot downgrade to sparse legacy readiness.
 - A→B→A fixtures for issue fields and dependency edges, plus delete/recreate of
   the same display ID, proving mutation sequence, graph revision, and
   incarnation—not content digests—make every old observation stale.

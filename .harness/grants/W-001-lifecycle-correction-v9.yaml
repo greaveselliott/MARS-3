@@ -1,0 +1,119 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCorrectionGrant
+
+grant:
+  id: W-001-lifecycle-correction-v9
+  classification: PUBLIC
+  issuedAt: 2026-08-27T17:29:00Z
+  expiresAt: 2026-08-30T17:29:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 6d6b90ef495cd64286e755e90d199a3cb622cd54
+  baseTree: f596e2a148f055bcac90960419b2e22928bd471c
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-correction-v8
+  priorGrantSHA256: bfd0f0e623d5640eeb1f1dce7d2d88fee5034052e73e446979ec7dfdd238a699
+  priorGrantSignatureSHA256: e55db7343aad3d2f81a4626e082501dbf9bc693056222b9514ea378456ec7296
+  priorReviewTag: mars3/w001-lifecycle-completion-v8
+  priorReviewTagObject: fb99ef24abb1176e7bcec01bddffe305979d8464
+  priorReviewTagTarget: 6d6b90ef495cd64286e755e90d199a3cb622cd54
+  priorReviewTagTree: f596e2a148f055bcac90960419b2e22928bd471c
+  pullRequest: 10
+  priorRun: 33097381660
+  priorJob: 98606506699
+  priorQADisposition: changes-requested
+  priorSecurityDisposition: changes-requested
+  successorReviewTag: mars3/w001-lifecycle-completion-v9
+  successorReviewTagMessage: MARS-3 W-001 lifecycle correction tree attestation v9
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: work-authority-engineer
+  failureOwnership: foundation
+  purpose: close the exact v8 recursive-native-key and dependency-lineage-stripping findings without canonical mutation
+  attemptId: w001-lifecycle-correction-v9
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: true
+  allowedEffects:
+    - preserve-the-v8-commits-tag-run-and-changes-requested-dispositions
+    - enforce-recursive-exact-schema-keys-at-every-native-authority-metadata-object-boundary
+    - deny-sparse-legacy-readiness-for-versioned-claim-bearing-or-detailed-key-bearing-dependencies
+    - execute-the-full-recursive-native-key-and-dependency-lineage-stripping-regression-corpus
+    - execute-non-skipped-native-Beads-and-PostgreSQL-qualification
+    - preserve-an-independent-reproducible-patched-Beads-source-digest-and-binary-hash
+    - update-the-active-plan-feature-spec-evidence-and-manifest-with-the-truthful-v9-correction
+    - create-signed-semantic-commits-and-one-signed-v9-release-manager-review-tag
+    - push-the-existing-review-branch-and-tag-and-update-pull-request-10
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-correction-v9.yaml
+    - .harness/grants/W-001-lifecycle-correction-v9.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/features/F-002-work-authority.md
+    - docs/product-specs/work-authority.md
+    - docs/evidence/W-001-validation.md
+    - internal/authority/beads/**
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - native-authority-metadata-object-keys-are-unique-and-canonical-recursively-before-semantic-parsing
+    - recursive-native-key-validation-covers-work-version-claims-handoffs-reviews-runs-failures-reconciliation-terminal-and-history
+    - legacy-dependency-readiness-is-limited-to-an-explicitly-unversioned-unclaimed-and-detail-key-absent-shape
+    - versioned-claim-bearing-or-detailed-key-bearing-dependencies-require-the-complete-valid-terminal-chain
+    - project-adapter-and-native-transaction-enforce-the-same-fail-closed-contract
+    - native-and-PostgreSQL-qualification-execute-without-skips
+    - independent-cold-builds-reproduce-the-bound-patched-Beads-binary
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged-until-fresh-review-and-merge
+  prohibitedEffects:
+    - mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths
+    - mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - move-delete-or-reuse-the-v8-review-tag
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - lifecycle.native_recursive_key_alias_not_canonical
+    - lifecycle.dependency_lineage_stripping
+  normalizedFingerprint: pr10-v8/native-recursive-key-dependency-lineage-correction
+  reviewedHead: 6d6b90ef495cd64286e755e90d199a3cb622cd54
+  reviewedTree: f596e2a148f055bcac90960419b2e22928bd471c
+  result: changes-requested-same-ticket-remains-in-progress
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  assignee: work-authority-engineer
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  nativeBeadsNoSkipRequired: true
+  postgresNoSkipRequired: true
+  independentColdBuildsRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-correction-v9
+  detachedSignature: W-001-lifecycle-correction-v9.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
