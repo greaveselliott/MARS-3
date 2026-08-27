@@ -132,11 +132,13 @@ type nativeLifecycleIntent struct {
 	PrincipalProfileID      string                           `json:"principalProfileId"`
 	AttemptID               string                           `json:"attemptId,omitempty"`
 	CanonicalClaimAttemptID string                           `json:"canonicalClaimAttemptId,omitempty"`
+	HandoffFenceDigest      string                           `json:"handoffFenceDigest,omitempty"`
 	HeadSHA                 string                           `json:"headSHA"`
 	EvidenceRefs            []string                         `json:"evidenceRefs"`
 	NextProfileID           string                           `json:"nextProfileId,omitempty"`
 	Verdict                 authorityv1.ReviewVerdict        `json:"verdict,omitempty"`
 	RunStatus               authorityv1.RunDispositionStatus `json:"runStatus,omitempty"`
+	Failure                 *authorityv1.FailureContext      `json:"failure,omitempty"`
 	MergedSHA               string                           `json:"mergedSHA,omitempty"`
 	MergedTree              string                           `json:"mergedTree,omitempty"`
 	PullRequestID           string                           `json:"pullRequestId,omitempty"`
@@ -147,10 +149,11 @@ type nativeLifecycleIntent struct {
 func lifecycleIntent(transition gateway.LifecycleMutation) nativeLifecycleIntent {
 	return nativeLifecycleIntent{
 		Operation: string(transition.Operation), PrincipalProfileID: transition.PrincipalProfileID,
-		AttemptID: transition.AttemptID, CanonicalClaimAttemptID: transition.CanonicalClaimAttemptID, HeadSHA: transition.HeadSHA, EvidenceRefs: append([]string(nil), transition.EvidenceRefs...),
+		AttemptID: transition.AttemptID, CanonicalClaimAttemptID: transition.CanonicalClaimAttemptID, HandoffFenceDigest: transition.HandoffFenceDigest,
+		HeadSHA: transition.HeadSHA, EvidenceRefs: append([]string(nil), transition.EvidenceRefs...),
 		NextProfileID: transition.NextProfileID, Verdict: transition.Verdict, RunStatus: transition.RunStatus,
 		MergedSHA: transition.MergedSHA, MergedTree: transition.MergedTree, PullRequestID: transition.PullRequestID,
-		ProtectedMainRunID: transition.ProtectedMainRunID, IdempotencyKey: transition.IdempotencyKey,
+		ProtectedMainRunID: transition.ProtectedMainRunID, IdempotencyKey: transition.IdempotencyKey, Failure: cloneFailureContext(transition.Failure),
 	}
 }
 
@@ -174,11 +177,17 @@ func validAtomicLifecycleTransition(transition AtomicLifecycleTransition) bool {
 	case gateway.LifecycleHandoff:
 		return transition.PostStatus == "in_progress" && transition.RemoveLabel == "in-progress" && transition.AddLabel == "in-review"
 	case gateway.LifecycleReview:
-		if transition.Transition.Verdict == authorityv1.ReviewChangesRequested {
+		if transition.Transition.Verdict == authorityv1.ReviewChangesRequested || transition.Transition.Verdict == authorityv1.ReviewBlocked {
 			return transition.PostStatus == "in_progress" && transition.RemoveLabel == "in-review" && transition.AddLabel == "in-progress"
 		}
 		return transition.PostStatus == "in_progress" && transition.RemoveLabel == "" && transition.AddLabel == ""
-	case gateway.LifecycleRun, gateway.LifecycleReconcile:
+	case gateway.LifecycleRun:
+		if transition.Transition.RunStatus != authorityv1.RunCompleted && transition.Transition.RunStatus != authorityv1.RunInReview {
+			return transition.PostStatus == "in_progress" &&
+				(transition.RemoveLabel == "" && transition.AddLabel == "" || transition.RemoveLabel == "in-review" && transition.AddLabel == "in-progress")
+		}
+		return transition.PostStatus == "in_progress" && transition.RemoveLabel == "" && transition.AddLabel == ""
+	case gateway.LifecycleReconcile:
 		return transition.PostStatus == "in_progress" && transition.RemoveLabel == "" && transition.AddLabel == ""
 	case gateway.LifecycleTerminal:
 		return transition.PostStatus == "closed" && transition.RemoveLabel == "in-review" && transition.AddLabel == "done"
@@ -188,21 +197,22 @@ func validAtomicLifecycleTransition(transition AtomicLifecycleTransition) bool {
 }
 
 func validLifecycleIntent(intent nativeLifecycleIntent) bool {
-	noAttempt := intent.AttemptID == "" && intent.CanonicalClaimAttemptID == ""
+	noAttempt := intent.AttemptID == "" && intent.CanonicalClaimAttemptID == "" && intent.HandoffFenceDigest == ""
 	noMerge := intent.MergedSHA == "" && intent.MergedTree == "" && intent.PullRequestID == "" && intent.ProtectedMainRunID == ""
 	switch gateway.LifecycleOperation(intent.Operation) {
 	case gateway.LifecycleHandoff:
-		return safeToken(intent.AttemptID) && safeToken(intent.CanonicalClaimAttemptID) && safeToken(intent.NextProfileID) && intent.Verdict == "" && intent.RunStatus == "" && noMerge
+		return safeToken(intent.AttemptID) && safeToken(intent.CanonicalClaimAttemptID) && isLowerHex(intent.HandoffFenceDigest, 64) &&
+			safeToken(intent.NextProfileID) && intent.Verdict == "" && intent.RunStatus == "" && intent.Failure == nil && noMerge
 	case gateway.LifecycleReview:
-		return noAttempt && intent.NextProfileID == "" && knownReviewVerdict(intent.Verdict) && intent.RunStatus == "" && noMerge
+		return noAttempt && intent.NextProfileID == "" && validLifecycleReviewFailure(intent.Verdict, intent.Failure) && intent.RunStatus == "" && noMerge
 	case gateway.LifecycleRun:
-		return noAttempt && intent.NextProfileID == "" && intent.Verdict == "" && knownRunDisposition(intent.RunStatus) && noMerge
+		return noAttempt && intent.NextProfileID == "" && intent.Verdict == "" && validLifecycleRunFailure(intent.RunStatus, intent.Failure) && noMerge
 	case gateway.LifecycleReconcile:
-		return noAttempt && intent.NextProfileID == "" && intent.Verdict == "" && intent.RunStatus == "" &&
+		return noAttempt && intent.NextProfileID == "" && intent.Verdict == "" && intent.RunStatus == "" && intent.Failure == nil &&
 			(isLowerHex(intent.MergedSHA, 40) || isLowerHex(intent.MergedSHA, 64)) &&
 			(isLowerHex(intent.MergedTree, 40) || isLowerHex(intent.MergedTree, 64)) && safeToken(intent.PullRequestID) && safeToken(intent.ProtectedMainRunID)
 	case gateway.LifecycleTerminal:
-		return noAttempt && intent.NextProfileID == "" && intent.Verdict == "" && intent.RunStatus == "" && noMerge
+		return noAttempt && intent.NextProfileID == "" && intent.Verdict == "" && intent.RunStatus == "" && intent.Failure == nil && noMerge
 	default:
 		return false
 	}

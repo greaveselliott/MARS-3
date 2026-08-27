@@ -55,11 +55,17 @@ type fakeEvents struct {
 	err            error
 	failAt         int
 	invalidReceipt bool
+	failOperation  string
+	failedOnce     bool
 }
 
 func (sink *fakeEvents) Append(_ context.Context, event authorityv1.Event) (authorityv1.Event, error) {
 	sink.mu.Lock()
 	defer sink.mu.Unlock()
+	if sink.failOperation != "" && event.Operation == sink.failOperation && !sink.failedOnce {
+		sink.failedOnce = true
+		return authorityv1.Event{}, errors.New("synthetic bounded event append failure")
+	}
 	if sink.err != nil || (sink.failAt > 0 && len(sink.events)+1 == sink.failAt) {
 		return authorityv1.Event{}, sink.err
 	}

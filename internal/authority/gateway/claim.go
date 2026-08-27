@@ -460,10 +460,11 @@ func lifecycleRecordsDigest(item authorityv1.WorkItem) string {
 		Handoff        *authorityv1.HandoffRecord
 		Reviews        []authorityv1.ReviewRecord
 		ReviewHistory  []authorityv1.ReviewCycle
+		RunHistory     []authorityv1.RunDispositionRecord
 		RunDisposition *authorityv1.RunDispositionRecord
 		Reconciliation *authorityv1.ReconciliationRecord
 		Terminal       *authorityv1.TerminalRecord
-	}{item.Handoff, item.Reviews, item.ReviewHistory, item.RunDisposition, item.Reconciliation, item.Terminal})
+	}{item.Handoff, item.Reviews, item.ReviewHistory, item.RunHistory, item.RunDisposition, item.Reconciliation, item.Terminal})
 }
 
 func validClaimLease(lease authorityv1.CapabilityLease, request LeaseRequest, now time.Time) bool {

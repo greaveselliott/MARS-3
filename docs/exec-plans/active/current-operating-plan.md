@@ -20,8 +20,12 @@ bounded reconciliation receipt in M3-W001. The separately signed
 QA and Security review and protected-main run `33069887434` accepted that
 checkpoint. The completion audit then found that handoff, ordered review
 verdict, run disposition, reconciliation, and terminal lifecycle routes remain
-absent. W-001 therefore remains `in-progress` under the separately signed
-`W-001-lifecycle-completion-v5` correction; no live lease exists.
+absent. W-001 therefore remains `in-progress`. Independent review of the
+immutable v5 candidate requested changes for terminal claim lineage,
+full-fence replay, missing-receipt recovery, truthful nonterminal convergence,
+and reproducible qualification. The separately signed
+`W-001-lifecycle-correction-v6` authorizes only those bounded corrections; no
+live lease exists.
 
 ## Durable lineage
 
@@ -81,8 +85,8 @@ claim. The signed delivery grant is active for its exact attempt, base,
 principal, and paths; no lease exists yet. Its v2 publication route preserved
 the original delivery branch as public foundation-failure evidence and the v4
 correction admitted exactly ten immutable synthetic scanner fingerprints. The
-current completion attempt adds the missing governed lifecycle surface without
-relabeling the accepted core checkpoint as terminally complete.
+current correction attempt closes the exact v5 findings without relabeling the
+accepted core checkpoint or the unaccepted v5 candidate as terminally complete.
 
 ## Scenario priority
 
@@ -97,8 +101,8 @@ The scenarios are ordered to establish read truth before mutation, then prove
 that losing authority blocks the W-001 synthetic effect boundary and defines
 the contract later real brokers must enforce. M3-W001 already
 declares this exact group and required evidence. The canonical claim itself
-grants neither a lease nor source-code authority; the separately signed
-lifecycle-completion grant supplies the current bounded source authority.
+grants neither a lease nor source-code authority; the separately signed v6
+lifecycle-correction grant supplies the current bounded source authority.
 
 ## Delivery waves
 
@@ -152,12 +156,12 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the lifecycle-completion implementation to a
-  signed immutable checkpoint, execute the non-skipped native Beads and
-  PostgreSQL conformance suites, then route that exact tree through QA and
-  Security. No canonical handoff or later lifecycle mutation may execute until
-  the reviewed tree is merged and a separate reconciliation authority binds
-  the protected-main result.
+- Required next transition: bind the v6 lifecycle correction to a signed
+  immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
+  conformance suites, then route that exact tree through QA and Security. No
+  canonical handoff or later lifecycle mutation may execute until the reviewed
+  tree is merged and a separate reconciliation authority binds the
+  protected-main result.
 
 The W-001 bootstrap grant is deliberately not a live lease: it is
 human-directed, binds one base commit and attempt, permits only canonical W-001
@@ -167,18 +171,20 @@ not a prerequisite for building the epoch service. The authoritative Bead
 holds exclusive paths and mutable lifecycle; this plan does not copy lease
 values or represent a proposed owner as a current grant.
 
-## Lifecycle-completion candidate
+## Lifecycle-correction candidate
 
-The current bounded candidate adds typed handoff, ordered review verdict, run
-disposition, merge reconciliation, and terminal routes. Each canonical change
-uses one expected-version native Beads transaction. Handoff releases the exact
-owning development lease first, separates the current execution attempt from
-the immutable canonical claim attempt, and recovers unknown outcomes through
-canonical readback and idempotent retry. Review and disposition routes reject
-any active implementation lease. `changes-requested` preserves the rejected
-cycle and reopens the same Bead; terminal closure requires QA and Security
-acceptance, a completed run, merge evidence, and reconciliation, and retains
-evidence references plus claim lineage after close.
+The v6 bounded candidate retains the typed handoff, ordered review, run,
+reconciliation, and terminal routes while closing the independent v5 findings.
+Terminal versioned work must retain exactly one complete WorkClaim or
+BootstrapClaim plus detailed lifecycle evidence. Every current or archived
+handoff binds the immutable canonical-claim attempt and a digest of the full
+normalized fence. A replay may report success only after verifying or
+repairing a durable reconciliation receipt. Blocked review and every declared
+noncompleted run retain public-safe reason, blocker, normalized fingerprint,
+attempt, and next action, then reopen the same Bead or remain explicitly
+`in-review` through an append-only recovery route. Completed closure still
+requires QA and Security acceptance, merged evidence, completed run, and
+reconciliation.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation

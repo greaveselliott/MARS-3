@@ -38,61 +38,86 @@ func lifecyclePostMetadata(pre []byte, mutation gateway.LifecycleMutation) ([]by
 	switch mutation.Operation {
 	case gateway.LifecycleHandoff:
 		if metadata.LifecycleState != authorityv1.LifecycleInProgress || mutation.PrincipalProfileID == "" ||
-			mutation.AttemptID == "" || mutation.NextProfileID == "" || mutation.Verdict != "" || mutation.RunStatus != "" ||
+			mutation.AttemptID == "" || mutation.NextProfileID == "" || mutation.Verdict != "" || mutation.RunStatus != "" || mutation.Failure != nil ||
 			mutation.MergedSHA != "" || mutation.MergedTree != "" || mutation.PullRequestID != "" || mutation.ProtectedMainRunID != "" ||
-			metadata.VerificationOrder[0] != mutation.NextProfileID || !claimMatchesAttempt(metadata, mutation.CanonicalClaimAttemptID) {
+			metadata.VerificationOrder[0] != mutation.NextProfileID || !claimMatchesAttempt(metadata, mutation.CanonicalClaimAttemptID) || !isLowerHex(mutation.HandoffFenceDigest, 64) {
 			return nil, "", "", "", ErrProjectionInvalid
 		}
 		if metadata.Handoff != nil {
-			if len(metadata.ReviewRecords) == 0 || metadata.ReviewRecords[len(metadata.ReviewRecords)-1].Verdict != authorityv1.ReviewChangesRequested {
+			lastReviewNonAccepted := len(metadata.ReviewRecords) > 0 && metadata.ReviewRecords[len(metadata.ReviewRecords)-1].Verdict != authorityv1.ReviewAccepted
+			lastRunNonCompleted := metadata.RunDispositionRecord != nil && metadata.RunDispositionRecord.Status != authorityv1.RunCompleted
+			if !lastReviewNonAccepted && !lastRunNonCompleted {
 				return nil, "", "", "", ErrProjectionInvalid
 			}
 			metadata.ReviewHistory = append(metadata.ReviewHistory, metadataReviewCycle{
 				Handoff: *metadata.Handoff, Reviews: append([]metadataReview(nil), metadata.ReviewRecords...),
+				RunHistory: append([]metadataRunDisposition(nil), metadata.RunHistory...), RunDisposition: cloneMetadataRun(metadata.RunDispositionRecord),
 			})
 		}
 		metadata.LifecycleState = authorityv1.LifecycleInReview
 		metadata.Handoff = &metadataHandoff{
-			AttemptID: mutation.AttemptID, HeadSHA: mutation.HeadSHA, EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...),
+			AttemptID: mutation.AttemptID, CanonicalClaimAttemptID: mutation.CanonicalClaimAttemptID, FenceDigest: mutation.HandoffFenceDigest,
+			HeadSHA: mutation.HeadSHA, EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...),
 			NextProfileID: mutation.NextProfileID, IdempotencyKey: mutation.IdempotencyKey,
 		}
 		metadata.ReviewRecords = nil
+		metadata.RunHistory = nil
 		metadata.ReviewAccepted = false
 		metadata.RunDisposition = ""
 		metadata.RunDispositionRecord = nil
 		metadata.Reconciled = false
 		metadata.ReconciliationRecord = nil
 		metadata.TerminalRecord = nil
+		metadata.Blocker, metadata.BlockedBy = "", nil
 		removeLabel, addLabel = "in-progress", "in-review"
 	case gateway.LifecycleReview:
 		if metadata.LifecycleState != authorityv1.LifecycleInReview || metadata.Handoff == nil || mutation.HeadSHA != metadata.Handoff.HeadSHA ||
 			mutation.AttemptID != "" || mutation.CanonicalClaimAttemptID != "" || mutation.NextProfileID != "" || mutation.RunStatus != "" || mutation.MergedSHA != "" ||
 			mutation.MergedTree != "" || mutation.PullRequestID != "" || mutation.ProtectedMainRunID != "" ||
 			len(metadata.ReviewRecords) >= len(metadata.VerificationOrder)-1 || metadata.VerificationOrder[len(metadata.ReviewRecords)] != mutation.PrincipalProfileID ||
-			!knownReviewVerdict(mutation.Verdict) {
+			!validLifecycleReviewFailure(mutation.Verdict, mutation.Failure) {
 			return nil, "", "", "", ErrProjectionInvalid
 		}
 		metadata.ReviewRecords = append(metadata.ReviewRecords, metadataReview{
 			ReviewerProfileID: mutation.PrincipalProfileID, Verdict: mutation.Verdict, HeadSHA: mutation.HeadSHA,
-			EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...), IdempotencyKey: mutation.IdempotencyKey,
+			EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...), IdempotencyKey: mutation.IdempotencyKey, Failure: cloneFailureContext(mutation.Failure),
 		})
-		if mutation.Verdict == authorityv1.ReviewChangesRequested {
+		if mutation.Verdict == authorityv1.ReviewChangesRequested || mutation.Verdict == authorityv1.ReviewBlocked {
 			metadata.LifecycleState = authorityv1.LifecycleInProgress
 			metadata.ReviewAccepted = false
+			metadata.Blocker, metadata.BlockedBy = "", nil
+			if mutation.Verdict == authorityv1.ReviewBlocked {
+				metadata.Blocker = mutation.Failure.Reason
+				metadata.BlockedBy = append([]string(nil), mutation.Failure.BlockedBy...)
+			}
 			removeLabel, addLabel = "in-review", "in-progress"
 		} else if mutation.Verdict == authorityv1.ReviewAccepted && len(metadata.ReviewRecords) == len(metadata.VerificationOrder)-1 {
 			metadata.ReviewAccepted = true
 		}
 	case gateway.LifecycleRun:
-		if !acceptedReviewChain(metadata, mutation.HeadSHA) || mutation.PrincipalProfileID != metadata.Coordinator ||
+		if !metadataRunDispositionAllowed(metadata, mutation) ||
 			mutation.AttemptID != "" || mutation.CanonicalClaimAttemptID != "" || mutation.NextProfileID != "" || mutation.Verdict != "" || mutation.MergedSHA != "" ||
-			mutation.MergedTree != "" || mutation.PullRequestID != "" || mutation.ProtectedMainRunID != "" || !knownRunDisposition(mutation.RunStatus) {
+			mutation.MergedTree != "" || mutation.PullRequestID != "" || mutation.ProtectedMainRunID != "" || !validLifecycleRunFailure(mutation.RunStatus, mutation.Failure) {
 			return nil, "", "", "", ErrProjectionInvalid
+		}
+		if metadata.RunDispositionRecord != nil {
+			metadata.RunHistory = append(metadata.RunHistory, *metadata.RunDispositionRecord)
 		}
 		metadata.RunDisposition = string(mutation.RunStatus)
 		metadata.RunDispositionRecord = &metadataRunDisposition{
 			PrincipalProfileID: mutation.PrincipalProfileID, Status: mutation.RunStatus, HeadSHA: mutation.HeadSHA,
-			EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...), IdempotencyKey: mutation.IdempotencyKey,
+			EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...), IdempotencyKey: mutation.IdempotencyKey, Failure: cloneFailureContext(mutation.Failure),
+		}
+		metadata.Blocker, metadata.BlockedBy = "", nil
+		if mutation.RunStatus == authorityv1.RunBlocked {
+			metadata.Blocker = mutation.Failure.Reason
+			metadata.BlockedBy = append([]string(nil), mutation.Failure.BlockedBy...)
+		}
+		if mutation.RunStatus != authorityv1.RunCompleted && mutation.RunStatus != authorityv1.RunInReview {
+			if metadata.LifecycleState == authorityv1.LifecycleInReview {
+				removeLabel, addLabel = "in-review", "in-progress"
+			}
+			metadata.LifecycleState = authorityv1.LifecycleInProgress
 		}
 	case gateway.LifecycleReconcile:
 		if !acceptedReviewChain(metadata, mutation.HeadSHA) || metadata.RunDispositionRecord == nil ||
@@ -139,11 +164,65 @@ func validLifecycleMutationIdentity(mutation gateway.LifecycleMutation) bool {
 }
 
 func claimMatchesAttempt(metadata issueMetadata, attemptID string) bool {
+	if metadata.WorkClaim != nil && metadata.BootstrapClaim != nil {
+		return false
+	}
 	binding := metadata.WorkClaim
 	if binding == nil {
 		binding = metadata.BootstrapClaim
 	}
-	return binding != nil && binding.AttemptID == attemptID
+	return validClaimBinding(binding) && binding.AttemptID == attemptID
+}
+
+func cloneMetadataRun(value *metadataRunDisposition) *metadataRunDisposition {
+	if value == nil {
+		return nil
+	}
+	clone := *value
+	clone.EvidenceRefs = append([]string(nil), value.EvidenceRefs...)
+	clone.Failure = cloneFailureContext(value.Failure)
+	return &clone
+}
+
+func validLifecycleReviewFailure(verdict authorityv1.ReviewVerdict, failure *authorityv1.FailureContext) bool {
+	if !knownReviewVerdict(verdict) {
+		return false
+	}
+	if verdict == authorityv1.ReviewBlocked {
+		return validMetadataFailure(failure, true, true)
+	}
+	return failure == nil
+}
+
+func validLifecycleRunFailure(status authorityv1.RunDispositionStatus, failure *authorityv1.FailureContext) bool {
+	if !knownRunDisposition(status) {
+		return false
+	}
+	if status == authorityv1.RunCompleted {
+		return failure == nil
+	}
+	return validMetadataFailure(failure, status == authorityv1.RunBlocked, status != authorityv1.RunInReview && status != authorityv1.RunNoWork)
+}
+
+func metadataRunDispositionAllowed(metadata issueMetadata, mutation gateway.LifecycleMutation) bool {
+	if mutation.PrincipalProfileID != metadata.Coordinator || metadata.Handoff == nil || metadata.Handoff.HeadSHA != mutation.HeadSHA ||
+		metadata.ReconciliationRecord != nil || metadata.TerminalRecord != nil ||
+		metadata.RunDispositionRecord != nil && metadata.RunDispositionRecord.Status == authorityv1.RunCompleted {
+		return false
+	}
+	if mutation.RunStatus == authorityv1.RunCompleted {
+		return acceptedReviewChain(metadata, mutation.HeadSHA)
+	}
+	if metadata.LifecycleState != authorityv1.LifecycleInProgress && metadata.LifecycleState != authorityv1.LifecycleInReview {
+		return false
+	}
+	for index, review := range metadata.ReviewRecords {
+		if index >= len(metadata.VerificationOrder)-1 || review.ReviewerProfileID != metadata.VerificationOrder[index] || review.HeadSHA != mutation.HeadSHA ||
+			(index < len(metadata.ReviewRecords)-1 && review.Verdict != authorityv1.ReviewAccepted) {
+			return false
+		}
+	}
+	return true
 }
 
 func acceptedReviewChain(metadata issueMetadata, headSHA string) bool {
@@ -174,17 +253,25 @@ func validLifecyclePostimage(pre, post authorityv1.WorkItem, mutation gateway.Li
 			historyIncrement = 1
 		}
 		return post.LifecycleState == authorityv1.LifecycleInReview && post.NativeStatus == "in_progress" && post.Handoff != nil &&
-			post.Handoff.IdempotencyKey == mutation.IdempotencyKey && len(post.ReviewHistory) == len(pre.ReviewHistory)+historyIncrement
+			post.Handoff.IdempotencyKey == mutation.IdempotencyKey && post.Handoff.CanonicalClaimAttemptID == mutation.CanonicalClaimAttemptID &&
+			post.Handoff.FenceDigest == mutation.HandoffFenceDigest && len(post.ReviewHistory) == len(pre.ReviewHistory)+historyIncrement
 	case gateway.LifecycleReview:
 		if len(post.Reviews) != len(pre.Reviews)+1 || post.Reviews[len(post.Reviews)-1].IdempotencyKey != mutation.IdempotencyKey {
 			return false
 		}
-		if mutation.Verdict == authorityv1.ReviewChangesRequested {
+		if mutation.Verdict == authorityv1.ReviewChangesRequested || mutation.Verdict == authorityv1.ReviewBlocked {
 			return post.LifecycleState == authorityv1.LifecycleInProgress
 		}
 		return post.LifecycleState == authorityv1.LifecycleInReview
 	case gateway.LifecycleRun:
-		return post.RunDisposition != nil && post.RunDisposition.IdempotencyKey == mutation.IdempotencyKey
+		if post.RunDisposition == nil || post.RunDisposition.IdempotencyKey != mutation.IdempotencyKey ||
+			len(post.RunHistory) != len(pre.RunHistory)+boolToInt(pre.RunDisposition != nil) {
+			return false
+		}
+		if mutation.RunStatus != authorityv1.RunCompleted && mutation.RunStatus != authorityv1.RunInReview {
+			return post.LifecycleState == authorityv1.LifecycleInProgress
+		}
+		return post.LifecycleState == authorityv1.LifecycleInReview
 	case gateway.LifecycleReconcile:
 		return post.Reconciliation != nil && post.Reconciliation.IdempotencyKey == mutation.IdempotencyKey
 	case gateway.LifecycleTerminal:
@@ -193,6 +280,13 @@ func validLifecyclePostimage(pre, post authorityv1.WorkItem, mutation gateway.Li
 	default:
 		return false
 	}
+}
+
+func boolToInt(value bool) int {
+	if value {
+		return 1
+	}
+	return 0
 }
 
 func equalStringSlices(left, right []string) bool {

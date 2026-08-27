@@ -26,7 +26,7 @@ func TestLifecycleMetadataPreservesReworkHistoryAndTerminalPrerequisites(t *test
 
 	raw = applyLifecycleMetadata(t, raw, gateway.LifecycleMutation{
 		Operation: gateway.LifecycleHandoff, PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1",
-		CanonicalClaimAttemptID: "canonical-attempt", HeadSHA: firstHead, EvidenceRefs: []string{"evidence-first"},
+		CanonicalClaimAttemptID: "canonical-attempt", HandoffFenceDigest: strings.Repeat("1", 64), HeadSHA: firstHead, EvidenceRefs: []string{"evidence-first"},
 		NextProfileID: "qa", IdempotencyKey: "handoff-first",
 	}, "in_progress", "in-progress", "in-review")
 	raw = applyLifecycleMetadata(t, raw, gateway.LifecycleMutation{
@@ -35,7 +35,7 @@ func TestLifecycleMetadataPreservesReworkHistoryAndTerminalPrerequisites(t *test
 	}, "in_progress", "in-review", "in-progress")
 	raw = applyLifecycleMetadata(t, raw, gateway.LifecycleMutation{
 		Operation: gateway.LifecycleHandoff, PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-2",
-		CanonicalClaimAttemptID: "canonical-attempt", HeadSHA: secondHead, EvidenceRefs: []string{"evidence-second"},
+		CanonicalClaimAttemptID: "canonical-attempt", HandoffFenceDigest: strings.Repeat("2", 64), HeadSHA: secondHead, EvidenceRefs: []string{"evidence-second"},
 		NextProfileID: "qa", IdempotencyKey: "handoff-second",
 	}, "in_progress", "in-progress", "in-review")
 
@@ -72,13 +72,31 @@ func TestLifecycleMetadataPreservesReworkHistoryAndTerminalPrerequisites(t *test
 		terminal.WorkVersion.IssueMutationSequence != 10 || terminal.TerminalRecord == nil || len(terminal.ReviewHistory) != 1 {
 		t.Fatalf("terminal metadata=%#v", terminal)
 	}
+	missingClaim := terminal
+	missingClaim.WorkClaim, missingClaim.BootstrapClaim = nil, nil
+	if validLifecycleRecords(missingClaim) {
+		t.Fatal("terminal metadata without claim lineage was accepted")
+	}
+	dualClaim := terminal
+	bootstrap := *terminal.WorkClaim
+	bootstrap.GrantID = "bootstrap-grant"
+	dualClaim.BootstrapClaim = &bootstrap
+	if validLifecycleRecords(dualClaim) {
+		t.Fatal("terminal metadata with dual claim lineage was accepted")
+	}
+	stripped := terminal
+	stripped.Handoff, stripped.RunDispositionRecord, stripped.ReconciliationRecord, stripped.TerminalRecord = nil, nil, nil, nil
+	stripped.ReviewRecords, stripped.ReviewHistory, stripped.RunHistory = nil, nil, nil
+	if validLifecycleRecords(stripped) {
+		t.Fatal("terminal metadata without detailed evidence was accepted")
+	}
 }
 
 func TestLifecycleMetadataRejectsWrongCanonicalClaimAndPrematureTerminal(t *testing.T) {
 	raw := lifecycleMetadataFixture(t)
 	_, _, _, _, err := lifecyclePostMetadata(raw, gateway.LifecycleMutation{
 		BeadID: "M3-W002", Operation: gateway.LifecycleHandoff, PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt",
-		CanonicalClaimAttemptID: "wrong-canonical-attempt", HeadSHA: strings.Repeat("a", 40), EvidenceRefs: []string{"evidence-handoff"},
+		CanonicalClaimAttemptID: "wrong-canonical-attempt", HandoffFenceDigest: strings.Repeat("3", 64), HeadSHA: strings.Repeat("a", 40), EvidenceRefs: []string{"evidence-handoff"},
 		NextProfileID: "qa", IdempotencyKey: "handoff-wrong",
 	})
 	if !errors.Is(err, ErrProjectionInvalid) {

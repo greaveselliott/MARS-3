@@ -1,0 +1,128 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCorrectionGrant
+
+grant:
+  id: W-001-lifecycle-correction-v6
+  classification: PUBLIC
+  issuedAt: 2026-08-27T13:50:00Z
+  expiresAt: 2026-08-30T13:50:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 523ead6f899c413cb0a388c60a30b33aed88b8b6
+  baseTree: aaff531b1b0fee9dfa907a5a52c0afd98abf050c
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-completion-v5
+  priorGrantSHA256: ee7e384447d567222975f065283d8914d4a4c1bba059888c076dbc6caac58d69
+  priorGrantSignatureSHA256: e6ed28780504b9e931c2e8785b4508524ee54798eb7b9401cb265e16624bc4dd
+  priorReviewTag: mars3/w001-lifecycle-completion-v5
+  priorReviewTagObject: 15dbd1be9d1d098eb2f5da3dbafe824064dbff1f
+  priorReviewTagTarget: 523ead6f899c413cb0a388c60a30b33aed88b8b6
+  priorReviewTagTree: aaff531b1b0fee9dfa907a5a52c0afd98abf050c
+  pullRequest: 10
+  priorRun: 33077554760
+  priorJob: 98535652734
+  priorQADisposition: changes-requested
+  priorSecurityDisposition: changes-requested
+  successorReviewTag: mars3/w001-lifecycle-completion-v6
+  successorReviewTagMessage: MARS-3 W-001 lifecycle correction tree attestation v6
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: work-authority-engineer
+  failureOwnership: foundation
+  purpose: close the exact v5 lifecycle authority and convergence findings without canonical mutation
+  attemptId: w001-lifecycle-correction-v6
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: true
+  allowedEffects:
+    - preserve-the-v5-commits-tag-run-and-changes-requested-dispositions
+    - require-exactly-one-complete-claim-binding-for-active-and-terminal-versioned-work
+    - bind-handoff-and-replay-to-the-complete-normalized-authority-fence
+    - repair-or-reconcile-a-missing-lifecycle-receipt-before-reporting-replay-success
+    - add-truthful-blocked-and-nonterminal-disposition-details-and-append-only-recovery
+    - preserve-an-exact-reproducible-patched-Beads-build-recipe-and-hash
+    - execute-non-skipped-native-Beads-and-PostgreSQL-qualification
+    - update-the-active-plan-feature-spec-evidence-and-manifest-with-the-truthful-correction
+    - create-signed-semantic-commits-and-one-signed-v6-release-manager-review-tag
+    - push-the-existing-review-branch-and-tag-and-update-pull-request-10
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-correction-v6.yaml
+    - .harness/grants/W-001-lifecycle-correction-v6.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/features/F-002-work-authority.md
+    - docs/product-specs/work-authority.md
+    - docs/evidence/W-001-validation.md
+    - api/authority/v1/types.go
+    - internal/authority/beads/**
+    - internal/authority/gateway/**
+    - internal/authority/httpapi/**
+    - internal/authority/postgres/**
+    - database/authority/**
+    - cmd/mars3-authority/**
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - terminal-work-retains-exactly-one-complete-valid-claim-binding-and-detailed-evidence
+    - current-and-archived-handoffs-retain-canonical-claim-and-full-fence-digest
+    - replay-success-proves-or-repairs-the-durable-trace-receipt
+    - blocked-review-and-every-declared-noncompleted-run-have-a-recoverable-append-only-route
+    - blocker-fingerprint-next-action-and-attempt-state-remain-public-safe-and-durable
+    - completed-run-reconciliation-and-terminal-still-require-QA-and-Security-acceptance
+    - native-and-PostgreSQL-qualification-execute-without-skips-and-reproduce-bound-hashes
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged-until-fresh-review-and-merge
+  prohibitedEffects:
+    - mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths
+    - mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - move-delete-or-reuse-the-v5-review-tag
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - lifecycle.terminal_claim_binding_fail_open
+    - lifecycle.handoff_replay_fence_splice
+    - lifecycle.missing_receipt_replay_success
+    - lifecycle.nonterminal_convergence_deadlock
+    - lifecycle.qualification_not_reproducible
+  normalizedFingerprint: pr10-v5/lifecycle-authority-convergence-correction
+  reviewedHead: 523ead6f899c413cb0a388c60a30b33aed88b8b6
+  reviewedTree: aaff531b1b0fee9dfa907a5a52c0afd98abf050c
+  result: changes-requested-same-ticket-remains-in-progress
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  assignee: work-authority-engineer
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  nativeBeadsNoSkipRequired: true
+  postgresNoSkipRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-correction-v6
+  detachedSignature: W-001-lifecycle-correction-v6.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

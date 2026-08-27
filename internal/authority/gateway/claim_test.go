@@ -501,6 +501,7 @@ func cloneWork(item authorityv1.WorkItem) authorityv1.WorkItem {
 	item.Reviews = append([]authorityv1.ReviewRecord(nil), item.Reviews...)
 	for index := range item.Reviews {
 		item.Reviews[index].EvidenceRefs = append([]string(nil), item.Reviews[index].EvidenceRefs...)
+		item.Reviews[index].Failure = normalizedFailureContext(item.Reviews[index].Failure)
 	}
 	item.ReviewHistory = append([]authorityv1.ReviewCycle(nil), item.ReviewHistory...)
 	for cycleIndex := range item.ReviewHistory {
@@ -509,11 +510,29 @@ func cloneWork(item authorityv1.WorkItem) authorityv1.WorkItem {
 		cycle.Reviews = append([]authorityv1.ReviewRecord(nil), cycle.Reviews...)
 		for reviewIndex := range cycle.Reviews {
 			cycle.Reviews[reviewIndex].EvidenceRefs = append([]string(nil), cycle.Reviews[reviewIndex].EvidenceRefs...)
+			cycle.Reviews[reviewIndex].Failure = normalizedFailureContext(cycle.Reviews[reviewIndex].Failure)
 		}
+		cycle.RunHistory = append([]authorityv1.RunDispositionRecord(nil), cycle.RunHistory...)
+		for runIndex := range cycle.RunHistory {
+			cycle.RunHistory[runIndex].EvidenceRefs = append([]string(nil), cycle.RunHistory[runIndex].EvidenceRefs...)
+			cycle.RunHistory[runIndex].Failure = normalizedFailureContext(cycle.RunHistory[runIndex].Failure)
+		}
+		if cycle.RunDisposition != nil {
+			value := *cycle.RunDisposition
+			value.EvidenceRefs = append([]string(nil), value.EvidenceRefs...)
+			value.Failure = normalizedFailureContext(value.Failure)
+			cycle.RunDisposition = &value
+		}
+	}
+	item.RunHistory = append([]authorityv1.RunDispositionRecord(nil), item.RunHistory...)
+	for index := range item.RunHistory {
+		item.RunHistory[index].EvidenceRefs = append([]string(nil), item.RunHistory[index].EvidenceRefs...)
+		item.RunHistory[index].Failure = normalizedFailureContext(item.RunHistory[index].Failure)
 	}
 	if item.RunDisposition != nil {
 		value := *item.RunDisposition
 		value.EvidenceRefs = append([]string(nil), value.EvidenceRefs...)
+		value.Failure = normalizedFailureContext(value.Failure)
 		item.RunDisposition = &value
 	}
 	if item.Reconciliation != nil {

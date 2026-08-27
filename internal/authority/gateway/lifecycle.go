@@ -39,11 +39,13 @@ type LifecycleMutation struct {
 	PrincipalProfileID      string
 	AttemptID               string
 	CanonicalClaimAttemptID string
+	HandoffFenceDigest      string
 	HeadSHA                 string
 	EvidenceRefs            []string
 	NextProfileID           string
 	Verdict                 authorityv1.ReviewVerdict
 	RunStatus               authorityv1.RunDispositionStatus
+	Failure                 *authorityv1.FailureContext
 	MergedSHA               string
 	MergedTree              string
 	PullRequestID           string
@@ -73,10 +75,12 @@ func (s *Service) Handoff(ctx context.Context, principal authorityv1.Principal, 
 	request.EvidenceRefs = sortedStrings(request.EvidenceRefs)
 	request.Fence.ExclusivePaths = sortedStrings(request.Fence.ExclusivePaths)
 	request.Fence.Labels = sortedLabels(request.Fence.Labels)
+	fenceDigest := deterministicJSONDigest(request.Fence)
 	mutation := LifecycleMutation{
 		TenantID: principal.TenantID, ProjectID: principal.ProjectID, BeadID: request.BeadID,
 		ExpectedVersion: request.ExpectedVersion, ExpectedIntegrity: request.ExpectedIntegrity, Operation: LifecycleHandoff,
-		PrincipalProfileID: principal.ProfileID, AttemptID: request.Fence.AttemptID, CanonicalClaimAttemptID: request.Fence.CanonicalClaimAttemptID, HeadSHA: request.HeadSHA,
+		PrincipalProfileID: principal.ProfileID, AttemptID: request.Fence.AttemptID, CanonicalClaimAttemptID: request.Fence.CanonicalClaimAttemptID,
+		HandoffFenceDigest: fenceDigest, HeadSHA: request.HeadSHA,
 		EvidenceRefs: request.EvidenceRefs, NextProfileID: request.NextProfileID, IdempotencyKey: request.IdempotencyKey,
 	}
 	return s.mutateLifecycle(ctx, principal, request.TraceRef, mutation, &request.Fence, authorityv1.CapabilityWorkHandoff)
@@ -84,22 +88,24 @@ func (s *Service) Handoff(ctx context.Context, principal authorityv1.Principal, 
 
 func (s *Service) RecordReviewVerdict(ctx context.Context, principal authorityv1.Principal, request authorityv1.ReviewVerdictRequest) (authorityv1.LifecycleMutationResponse, error) {
 	request.EvidenceRefs = sortedStrings(request.EvidenceRefs)
+	failure := normalizedFailureContext(request.Failure)
 	mutation := LifecycleMutation{
 		TenantID: principal.TenantID, ProjectID: principal.ProjectID, BeadID: request.BeadID,
 		ExpectedVersion: request.ExpectedVersion, ExpectedIntegrity: request.ExpectedIntegrity, Operation: LifecycleReview,
 		PrincipalProfileID: principal.ProfileID, HeadSHA: request.HeadSHA, Verdict: request.Verdict,
-		EvidenceRefs: request.EvidenceRefs, IdempotencyKey: request.IdempotencyKey,
+		EvidenceRefs: request.EvidenceRefs, IdempotencyKey: request.IdempotencyKey, Failure: failure,
 	}
 	return s.mutateLifecycle(ctx, principal, request.TraceRef, mutation, nil, authorityv1.CapabilityReviewRecord)
 }
 
 func (s *Service) RecordRunDisposition(ctx context.Context, principal authorityv1.Principal, request authorityv1.RunDispositionRequest) (authorityv1.LifecycleMutationResponse, error) {
 	request.EvidenceRefs = sortedStrings(request.EvidenceRefs)
+	failure := normalizedFailureContext(request.Failure)
 	mutation := LifecycleMutation{
 		TenantID: principal.TenantID, ProjectID: principal.ProjectID, BeadID: request.BeadID,
 		ExpectedVersion: request.ExpectedVersion, ExpectedIntegrity: request.ExpectedIntegrity, Operation: LifecycleRun,
 		PrincipalProfileID: principal.ProfileID, HeadSHA: request.HeadSHA, RunStatus: request.Status,
-		EvidenceRefs: request.EvidenceRefs, IdempotencyKey: request.IdempotencyKey,
+		EvidenceRefs: request.EvidenceRefs, IdempotencyKey: request.IdempotencyKey, Failure: failure,
 	}
 	return s.mutateLifecycle(ctx, principal, request.TraceRef, mutation, nil, authorityv1.CapabilityRunDisposition)
 }
@@ -169,7 +175,11 @@ func (s *Service) mutateLifecycle(ctx context.Context, principal authorityv1.Pri
 		return authorityv1.LifecycleMutationResponse{}, s.deny(ctx, principal, operation+".policy", mutation.BeadID, traceRef, labels, labelDenial)
 	}
 	if lifecycleReplayMatches(work, mutation) {
-		return authorityv1.LifecycleMutationResponse{Work: work, Replayed: true, ReceiptRef: lifecycleReceiptRef(mutation)}, nil
+		receiptRef, receiptErr := s.appendLifecycleReconciliationReceipt(ctx, principal, traceRef, mutation, labels, work)
+		if receiptErr != nil {
+			return authorityv1.LifecycleMutationResponse{}, receiptErr
+		}
+		return authorityv1.LifecycleMutationResponse{Work: work, Replayed: true, ReceiptRef: receiptRef}, nil
 	}
 	if lifecycleIdempotencyUsed(work, mutation.IdempotencyKey) {
 		return authorityv1.LifecycleMutationResponse{}, s.deny(ctx, principal, operation+".policy", mutation.BeadID, traceRef, labels,
@@ -209,7 +219,11 @@ func (s *Service) mutateLifecycle(ctx context.Context, principal authorityv1.Pri
 		fresh, readErr := s.lifecycle.Get(ctx, principal.TenantID, principal.ProjectID, mutation.BeadID)
 		fresh = normalizeWorkItem(fresh)
 		if readErr == nil && lifecycleReplayMatches(fresh, mutation) {
-			post = fresh
+			receiptRef, receiptErr := s.appendLifecycleReconciliationReceipt(ctx, principal, traceRef, mutation, labels, fresh)
+			if receiptErr != nil {
+				return authorityv1.LifecycleMutationResponse{}, receiptErr
+			}
+			return authorityv1.LifecycleMutationResponse{Work: fresh, Replayed: true, ReceiptRef: receiptRef}, nil
 		} else if errors.Is(err, ErrStaleWorkVersion) {
 			return authorityv1.LifecycleMutationResponse{}, s.deny(ctx, principal, operation+".receipt", mutation.BeadID, traceRef, labels,
 				newDenial(authorityv1.ErrorStaleVersion, ruleLifecycleStale, work.LifecycleState, requiredLifecycleRead, "work.read", traceRef))
@@ -243,16 +257,19 @@ func validLifecycleMutation(mutation LifecycleMutation) bool {
 	}
 	switch mutation.Operation {
 	case LifecycleHandoff:
-		return validID(mutation.AttemptID) && validID(mutation.CanonicalClaimAttemptID) && validID(mutation.NextProfileID) && mutation.Verdict == "" && mutation.RunStatus == "" && noMergeFields(mutation)
+		return validID(mutation.AttemptID) && validID(mutation.CanonicalClaimAttemptID) && hexDigest.MatchString(mutation.HandoffFenceDigest) &&
+			validID(mutation.NextProfileID) && mutation.Verdict == "" && mutation.RunStatus == "" && mutation.Failure == nil && noMergeFields(mutation)
 	case LifecycleReview:
-		return noAttemptFields(mutation) && mutation.NextProfileID == "" && knownReviewVerdict(mutation.Verdict) && mutation.RunStatus == "" && noMergeFields(mutation)
+		return noAttemptFields(mutation) && mutation.NextProfileID == "" && knownReviewVerdict(mutation.Verdict) && mutation.RunStatus == "" &&
+			validFailureForReview(mutation.Verdict, mutation.Failure) && noMergeFields(mutation)
 	case LifecycleRun:
-		return noAttemptFields(mutation) && mutation.NextProfileID == "" && mutation.Verdict == "" && knownRunStatus(mutation.RunStatus) && noMergeFields(mutation)
+		return noAttemptFields(mutation) && mutation.NextProfileID == "" && mutation.Verdict == "" && knownRunStatus(mutation.RunStatus) &&
+			validFailureForRun(mutation.RunStatus, mutation.Failure) && noMergeFields(mutation)
 	case LifecycleReconcile:
 		return noAttemptFields(mutation) && mutation.NextProfileID == "" && mutation.Verdict == "" && mutation.RunStatus == "" &&
-			commitSHA.MatchString(mutation.MergedSHA) && commitSHA.MatchString(mutation.MergedTree) && validID(mutation.PullRequestID) && validID(mutation.ProtectedMainRunID)
+			mutation.Failure == nil && commitSHA.MatchString(mutation.MergedSHA) && commitSHA.MatchString(mutation.MergedTree) && validID(mutation.PullRequestID) && validID(mutation.ProtectedMainRunID)
 	case LifecycleTerminal:
-		return noAttemptFields(mutation) && mutation.NextProfileID == "" && mutation.Verdict == "" && mutation.RunStatus == "" && noMergeFields(mutation)
+		return noAttemptFields(mutation) && mutation.NextProfileID == "" && mutation.Verdict == "" && mutation.RunStatus == "" && mutation.Failure == nil && noMergeFields(mutation)
 	default:
 		return false
 	}
@@ -275,7 +292,7 @@ func lifecycleAdmissionRule(work authorityv1.WorkItem, mutation LifecycleMutatio
 			return ruleLifecycleOrder
 		}
 	case LifecycleRun:
-		if mutation.PrincipalProfileID != orchestrator || !acceptedReviews(work, mutation.HeadSHA) || work.RunDisposition != nil {
+		if mutation.PrincipalProfileID != orchestrator || !runDispositionAllowed(work, mutation) {
 			return ruleLifecyclePrerequisite
 		}
 	case LifecycleReconcile:
@@ -338,9 +355,24 @@ func lifecycleReplayMatches(work authorityv1.WorkItem, mutation LifecycleMutatio
 			}
 		}
 	case LifecycleRun:
-		return work.RunDisposition != nil && work.RunDisposition.IdempotencyKey == mutation.IdempotencyKey &&
-			work.RunDisposition.PrincipalProfileID == mutation.PrincipalProfileID && work.RunDisposition.HeadSHA == mutation.HeadSHA &&
-			work.RunDisposition.Status == mutation.RunStatus && equalStrings(work.RunDisposition.EvidenceRefs, mutation.EvidenceRefs)
+		if runReplayMatches(work.RunDisposition, mutation) {
+			return true
+		}
+		for index := range work.RunHistory {
+			if runReplayMatches(&work.RunHistory[index], mutation) {
+				return true
+			}
+		}
+		for _, cycle := range work.ReviewHistory {
+			if runReplayMatches(cycle.RunDisposition, mutation) {
+				return true
+			}
+			for index := range cycle.RunHistory {
+				if runReplayMatches(&cycle.RunHistory[index], mutation) {
+					return true
+				}
+			}
+		}
 	case LifecycleReconcile:
 		return work.Reconciliation != nil && work.Reconciliation.IdempotencyKey == mutation.IdempotencyKey &&
 			work.Reconciliation.PrincipalProfileID == mutation.PrincipalProfileID && work.Reconciliation.HeadSHA == mutation.HeadSHA &&
@@ -356,14 +388,22 @@ func lifecycleReplayMatches(work authorityv1.WorkItem, mutation LifecycleMutatio
 }
 
 func handoffReplayMatches(handoff *authorityv1.HandoffRecord, mutation LifecycleMutation) bool {
-	return handoff != nil && handoff.AttemptID == mutation.AttemptID && handoff.HeadSHA == mutation.HeadSHA &&
+	return handoff != nil && handoff.AttemptID == mutation.AttemptID && handoff.CanonicalClaimAttemptID == mutation.CanonicalClaimAttemptID &&
+		handoff.FenceDigest == mutation.HandoffFenceDigest && handoff.HeadSHA == mutation.HeadSHA &&
 		handoff.NextProfileID == mutation.NextProfileID && handoff.IdempotencyKey == mutation.IdempotencyKey &&
 		equalStrings(handoff.EvidenceRefs, mutation.EvidenceRefs)
 }
 
 func reviewReplayMatches(review authorityv1.ReviewRecord, mutation LifecycleMutation) bool {
 	return review.IdempotencyKey == mutation.IdempotencyKey && review.ReviewerProfileID == mutation.PrincipalProfileID &&
-		review.HeadSHA == mutation.HeadSHA && review.Verdict == mutation.Verdict && equalStrings(review.EvidenceRefs, mutation.EvidenceRefs)
+		review.HeadSHA == mutation.HeadSHA && review.Verdict == mutation.Verdict && equalStrings(review.EvidenceRefs, mutation.EvidenceRefs) &&
+		equalFailureContext(review.Failure, mutation.Failure)
+}
+
+func runReplayMatches(run *authorityv1.RunDispositionRecord, mutation LifecycleMutation) bool {
+	return run != nil && run.IdempotencyKey == mutation.IdempotencyKey && run.PrincipalProfileID == mutation.PrincipalProfileID &&
+		run.HeadSHA == mutation.HeadSHA && run.Status == mutation.RunStatus && equalStrings(run.EvidenceRefs, mutation.EvidenceRefs) &&
+		equalFailureContext(run.Failure, mutation.Failure)
 }
 
 func lifecycleIdempotencyUsed(work authorityv1.WorkItem, key string) bool {
@@ -384,6 +424,19 @@ func lifecycleIdempotencyUsed(work authorityv1.WorkItem, key string) bool {
 				return true
 			}
 		}
+		for _, run := range cycle.RunHistory {
+			if run.IdempotencyKey == key {
+				return true
+			}
+		}
+		if cycle.RunDisposition != nil && cycle.RunDisposition.IdempotencyKey == key {
+			return true
+		}
+	}
+	for _, run := range work.RunHistory {
+		if run.IdempotencyKey == key {
+			return true
+		}
 	}
 	return work.RunDisposition != nil && work.RunDisposition.IdempotencyKey == key ||
 		work.Reconciliation != nil && work.Reconciliation.IdempotencyKey == key ||
@@ -397,6 +450,26 @@ func acceptedReviews(work authorityv1.WorkItem, headSHA string) bool {
 	}
 	for index, review := range work.Reviews {
 		if review.ReviewerProfileID != work.VerificationOrder[index] || review.Verdict != authorityv1.ReviewAccepted || review.HeadSHA != headSHA {
+			return false
+		}
+	}
+	return true
+}
+
+func runDispositionAllowed(work authorityv1.WorkItem, mutation LifecycleMutation) bool {
+	if work.Handoff == nil || work.Handoff.HeadSHA != mutation.HeadSHA || work.Reconciliation != nil || work.Terminal != nil ||
+		work.RunDisposition != nil && work.RunDisposition.Status == authorityv1.RunCompleted {
+		return false
+	}
+	if mutation.RunStatus == authorityv1.RunCompleted {
+		return acceptedReviews(work, mutation.HeadSHA)
+	}
+	if work.LifecycleState != authorityv1.LifecycleInProgress && work.LifecycleState != authorityv1.LifecycleInReview {
+		return false
+	}
+	for index, review := range work.Reviews {
+		if index >= len(work.VerificationOrder)-1 || review.ReviewerProfileID != work.VerificationOrder[index] || review.HeadSHA != mutation.HeadSHA ||
+			(index < len(work.Reviews)-1 && review.Verdict != authorityv1.ReviewAccepted) {
 			return false
 		}
 	}
@@ -437,6 +510,23 @@ func (s *Service) appendLifecycleUnknown(ctx context.Context, principal authorit
 	return err
 }
 
+func (s *Service) appendLifecycleReconciliationReceipt(ctx context.Context, principal authorityv1.Principal, traceRef string, mutation LifecycleMutation, labels []authorityv1.Label, work authorityv1.WorkItem) (string, error) {
+	event := s.event(principal, "work."+string(mutation.Operation)+".reconciliation", mutation.BeadID, traceRef, outcomeVerified, ruleLifecycleAllowed, labels)
+	event.EventID = deterministicEventID(mutation.IdempotencyKey, string(mutation.Operation)+":reconciliation")
+	event.AttemptID = mutation.AttemptID
+	if event.AttemptID == "" {
+		event.AttemptID = work.ClaimAttemptID
+	}
+	event.IdempotencyKey = mutation.IdempotencyKey
+	event.CanonicalVersion = &work.Version
+	event.BeforeHash, event.AfterHash = deterministicJSONDigest(work), deterministicJSONDigest(work)
+	receipt, err := s.events.Append(ctx, event)
+	if err != nil || !validEventReceipt(event, receipt) {
+		return "", newDenial(authorityv1.ErrorAuthorityDown, ruleAuthorityUnavailable, work.LifecycleState, requiredLifecycleReconcile, "work.reconcile", traceRef)
+	}
+	return fmt.Sprintf("lifecycle-reconciliation-%s-%s", mutation.Operation, event.EventID[4:]), nil
+}
+
 func lifecycleReceiptRef(mutation LifecycleMutation) string {
 	return fmt.Sprintf("lifecycle-receipt-%s-%s", mutation.Operation, deterministicEventID(mutation.IdempotencyKey, "receipt")[4:])
 }
@@ -453,7 +543,49 @@ func noMergeFields(mutation LifecycleMutation) bool {
 }
 
 func noAttemptFields(mutation LifecycleMutation) bool {
-	return mutation.AttemptID == "" && mutation.CanonicalClaimAttemptID == ""
+	return mutation.AttemptID == "" && mutation.CanonicalClaimAttemptID == "" && mutation.HandoffFenceDigest == ""
+}
+
+func normalizedFailureContext(value *authorityv1.FailureContext) *authorityv1.FailureContext {
+	if value == nil {
+		return nil
+	}
+	clone := *value
+	clone.BlockedBy = sortedStrings(value.BlockedBy)
+	return &clone
+}
+
+func validFailureContext(value *authorityv1.FailureContext, requireBlockedBy, requireFingerprint bool) bool {
+	if value == nil || !validID(value.Reason) || !validID(value.NextAction) || value.Attempt == 0 || value.Attempt > 2 ||
+		len(value.BlockedBy) > 16 || hasDuplicateStrings(value.BlockedBy) || requireBlockedBy && len(value.BlockedBy) == 0 ||
+		requireFingerprint && !validID(value.FailureFingerprint) || !requireFingerprint && value.FailureFingerprint != "" && !validID(value.FailureFingerprint) {
+		return false
+	}
+	for _, blocker := range value.BlockedBy {
+		if !validID(blocker) {
+			return false
+		}
+	}
+	return true
+}
+
+func validFailureForReview(verdict authorityv1.ReviewVerdict, failure *authorityv1.FailureContext) bool {
+	if verdict == authorityv1.ReviewBlocked {
+		return validFailureContext(failure, true, true)
+	}
+	return failure == nil
+}
+
+func validFailureForRun(status authorityv1.RunDispositionStatus, failure *authorityv1.FailureContext) bool {
+	if status == authorityv1.RunCompleted {
+		return failure == nil
+	}
+	return validFailureContext(failure, status == authorityv1.RunBlocked, status != authorityv1.RunInReview && status != authorityv1.RunNoWork)
+}
+
+func equalFailureContext(left, right *authorityv1.FailureContext) bool {
+	return left == nil && right == nil || left != nil && right != nil && left.Reason == right.Reason && left.FailureFingerprint == right.FailureFingerprint &&
+		left.Attempt == right.Attempt && left.NextAction == right.NextAction && equalStrings(left.BlockedBy, right.BlockedBy)
 }
 
 func knownReviewVerdict(verdict authorityv1.ReviewVerdict) bool {

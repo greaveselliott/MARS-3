@@ -118,14 +118,23 @@ operation without echoing credentials or payloads.
 - An ordered reviewer may record only its own verdict against the exact
   immutable commit and only while no implementation lease is active.
   `changes-requested` archives that review cycle and returns the same Bead to
-  `in-progress`; a fresh implementation lease receives a newer epoch.
+  `in-progress`; a fresh implementation lease receives a newer epoch. A
+  `blocked` verdict also reopens the same Bead, persists public-safe reason,
+  `blocked_by`, normalized fingerprint, attempt, and next action, and never
+  consumes the only recovery route.
+- A noncompleted run disposition is append-only recovery evidence, not terminal
+  completion. `blocked`, `failed`, `preempted`, `cancelled`, `no-work`, and
+  `changes-requested` persist their failure context and return the same Bead to
+  `in-progress`; `in-review` explicitly retains review state and may later be
+  superseded by `completed` after the accepted review chain. Rehandoff archives
+  the earlier cycle and preserves its run history.
 - `done` requires the accepted review chain, merged immutable Git evidence,
   `completed` run disposition, and a successful reconciliation receipt. Only
   the Delivery Orchestrator can request that terminal transition. Closure uses
   one native transaction and retains the terminal evidence references plus the
   original canonical claim binding.
-- A blocked attempt remains in its truthful lifecycle with `blocker`,
-  `blocked_by`, normalized failure fingerprint, and exact next action. It is not
+- A blocked attempt remains truthful with `blocker`, `blocked_by`, normalized
+  failure fingerprint, bounded attempt count, and exact next action. It is not
   silently closed or duplicated.
 - `superseded` requires an authorized reason and successor; it never masquerades
   as delivered value.

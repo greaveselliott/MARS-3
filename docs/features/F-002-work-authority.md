@@ -70,19 +70,24 @@
    validation, a Temporal token, or cached projection state is insufficient.
    S-002 later applies this contract to real external-effect brokers.
 6. A handoff binds the current execution attempt separately from the immutable
-   canonical claim attempt, releases the exact owning implementation lease,
-   and moves the canonical Bead to `in-review` by one expected-version native
-   transaction. An unknown post-release outcome is re-read from Beads and is
-   retried only with the same idempotency key; the released lease cannot
-   authorize another write. QA and then Security record only their own verdict
-   against the same immutable commit, and every review operation rejects an
-   active implementation lease for that Bead.
-7. `changes-requested` reopens M3-W001 rather than creating a duplicate. The
-   rejected cycle remains append-only history and a subsequent attempt receives
-   a newer epoch. Only the Delivery Orchestrator records the completed run and
-   merge reconciliation, then requests `done` after accepted reviews. The
-   terminal record retains its public-safe evidence references and the
-   canonical claim binding remains inspectable after closure.
+   canonical claim attempt, persists a digest of the complete normalized fence,
+   releases the exact owning implementation lease, and moves the canonical
+   Bead to `in-review` by one expected-version native transaction. An unknown
+   post-release outcome is re-read from Beads and may report replay success
+   only after the original receipt is verified or a deterministic
+   reconciliation receipt is appended; the released lease cannot authorize
+   another write. QA and then Security record only their own verdict against
+   the same immutable commit, and every review operation rejects an active
+   implementation lease for that Bead.
+7. `changes-requested` or `blocked` review reopens M3-W001 rather than creating
+   a duplicate. Every noncompleted run is recorded with public-safe failure
+   context; an explicit `in-review` run retains review state while other
+   noncompleted outcomes reopen the same Bead. Rehandoff archives the earlier
+   cycle and its run history, and a subsequent attempt receives a newer epoch.
+   Only the Delivery Orchestrator records the completed run and merge
+   reconciliation, then requests `done` after accepted reviews. The terminal
+   record retains exactly one complete canonical claim binding, detailed
+   public-safe evidence, and append-only prior cycles after closure.
 8. Projection consumers replay journal events exactly once in sequence. On an
    irrecoverable gap, truncation, unknown checkpoint, or version conflict, they
    mark the view stale and non-authorizing, discard it, then ask the gateway for
@@ -256,7 +261,10 @@ and opaque trace references.
   disposition, reconciliation, and a prerequisite-complete `done` transition.
 - Handoff, verdict, run, reconciliation, and terminal idempotency keys are
   unique across the current and archived review cycles. An exact historical
-  replay returns its verified record; a different request using that key fails.
+  replay returns its verified record only after the matching durable receipt
+  exists or a deterministic reconciliation receipt is appended. A different
+  request using that key fails. Every handoff record retains the immutable
+  canonical-claim attempt and a digest of the complete normalized fence.
 - A skill, profile maximum, provider session, Temporal task, or cached event
   does not grant permission.
 
@@ -286,6 +294,9 @@ and digest; digests prove integrity, never freshness by themselves.
 backlog --claim+lease--> in-progress --handoff--> in-review
 backlog --signed W-001 atomic bootstrap claim (no capability)--> in-progress
 in-review --changes-requested--> in-progress
+in-review --blocked review+failure context--> in-progress
+in-review --blocked|failed|preempted|cancelled|no-work|changes-requested run+failure context--> in-progress
+in-review --in-review run--> in-review --accepted reviews+completed run--> in-review
 in-review --accepted chain+merge+completed run+reconcile--> done
 backlog|in-progress|in-review --authorized supersession--> superseded
 
@@ -328,9 +339,12 @@ uncertainty blocks retry until separately authorized reconciliation.
 Every later mutation uses the normal live-lease transition above. P-001 and all
 subsequent work receive no equivalent exception.
 
-A blocked run remains in its truthful lifecycle with `blocker`, `blocked_by`,
-failure fingerprint, attempt count, and `next_action`. Missing evidence or an
-unknown receipt cannot take any transition to `done`.
+A blocked review and every noncompleted run retain public-safe `reason`,
+`blocked_by` where applicable, normalized failure fingerprint, bounded attempt
+count, and `next_action`. Except for an explicit `in-review` run, they reopen
+the same Bead to `in-progress`; a later handoff archives the earlier review and
+run history. Missing evidence or an unknown receipt cannot take any transition
+to `done`.
 
 ### Failure behavior
 

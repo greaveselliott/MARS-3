@@ -418,7 +418,7 @@ func TestNativeMutatorIntegration(t *testing.T) {
 	}
 	post = applyLifecycle(post, gateway.LifecycleMutation{
 		Operation: gateway.LifecycleHandoff, PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-native-001",
-		CanonicalClaimAttemptID: mutation.AttemptID, HeadSHA: head, EvidenceRefs: []string{"evidence-handoff"},
+		CanonicalClaimAttemptID: mutation.AttemptID, HandoffFenceDigest: strings.Repeat("e", 64), HeadSHA: head, EvidenceRefs: []string{"evidence-handoff"},
 		NextProfileID: "qa", IdempotencyKey: "handoff-native",
 	})
 	post = applyLifecycle(post, gateway.LifecycleMutation{

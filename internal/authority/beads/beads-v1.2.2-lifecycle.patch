@@ -1,5 +1,5 @@
 diff --git a/cmd/bd/batch.go b/cmd/bd/batch.go
-index f1a5409a7..8a18885bc 100644
+index f1a5409a7..88ef18f87 100644
 --- a/cmd/bd/batch.go
 +++ b/cmd/bd/batch.go
 @@ -63,0 +64 @@ Grammar (one command per line):
@@ -14,7 +14,7 @@ index f1a5409a7..8a18885bc 100644
 @@ -360,0 +365,2 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
 +	case "authority-transition":
 +		return runAuthorityTransitionBatchOp(ctx, tx, op, actorName)
-@@ -906,0 +913,518 @@ func runAuthorityClaimBatchOp(ctx context.Context, tx storage.Transaction, op ba
+@@ -906,0 +913,676 @@ func runAuthorityClaimBatchOp(ctx context.Context, tx storage.Transaction, op ba
 +var authorityTransitionKeys = map[string]bool{
 +	"expected_status":              true,
 +	"expected_assignee":            true,
@@ -31,20 +31,30 @@ index f1a5409a7..8a18885bc 100644
 +}
 +
 +type authorityLifecycleTransition struct {
-+	Operation               string   `json:"operation"`
-+	PrincipalProfileID      string   `json:"principalProfileId"`
-+	AttemptID               string   `json:"attemptId,omitempty"`
-+	CanonicalClaimAttemptID string   `json:"canonicalClaimAttemptId,omitempty"`
-+	HeadSHA                 string   `json:"headSHA"`
-+	EvidenceRefs            []string `json:"evidenceRefs"`
-+	NextProfileID           string   `json:"nextProfileId,omitempty"`
-+	Verdict                 string   `json:"verdict,omitempty"`
-+	RunStatus               string   `json:"runStatus,omitempty"`
-+	MergedSHA               string   `json:"mergedSHA,omitempty"`
-+	MergedTree              string   `json:"mergedTree,omitempty"`
-+	PullRequestID           string   `json:"pullRequestId,omitempty"`
-+	ProtectedMainRunID      string   `json:"protectedMainRunId,omitempty"`
-+	IdempotencyKey          string   `json:"idempotencyKey"`
++	Operation               string                   `json:"operation"`
++	PrincipalProfileID      string                   `json:"principalProfileId"`
++	AttemptID               string                   `json:"attemptId,omitempty"`
++	CanonicalClaimAttemptID string                   `json:"canonicalClaimAttemptId,omitempty"`
++	HandoffFenceDigest      string                   `json:"handoffFenceDigest,omitempty"`
++	HeadSHA                 string                   `json:"headSHA"`
++	EvidenceRefs            []string                 `json:"evidenceRefs"`
++	NextProfileID           string                   `json:"nextProfileId,omitempty"`
++	Verdict                 string                   `json:"verdict,omitempty"`
++	RunStatus               string                   `json:"runStatus,omitempty"`
++	Failure                 *authorityFailureContext `json:"failure,omitempty"`
++	MergedSHA               string                   `json:"mergedSHA,omitempty"`
++	MergedTree              string                   `json:"mergedTree,omitempty"`
++	PullRequestID           string                   `json:"pullRequestId,omitempty"`
++	ProtectedMainRunID      string                   `json:"protectedMainRunId,omitempty"`
++	IdempotencyKey          string                   `json:"idempotencyKey"`
++}
++
++type authorityFailureContext struct {
++	Reason             string   `json:"reason"`
++	BlockedBy          []string `json:"blocked_by,omitempty"`
++	FailureFingerprint string   `json:"failure_fingerprint,omitempty"`
++	Attempt            uint32   `json:"attempt"`
++	NextAction         string   `json:"next_action"`
 +}
 +
 +type lifecycleAuthorityTransaction interface {
@@ -198,23 +208,56 @@ index f1a5409a7..8a18885bc 100644
 +		seen[reference] = true
 +	}
 +	noMerge := value.MergedSHA == "" && value.MergedTree == "" && value.PullRequestID == "" && value.ProtectedMainRunID == ""
++	noAttempt := value.AttemptID == "" && value.CanonicalClaimAttemptID == "" && value.HandoffFenceDigest == ""
 +	switch value.Operation {
 +	case "handoff":
-+		return authorityToken(value.AttemptID) && authorityToken(value.CanonicalClaimAttemptID) && authorityToken(value.NextProfileID) && value.Verdict == "" && value.RunStatus == "" && noMerge
++		return authorityToken(value.AttemptID) && authorityToken(value.CanonicalClaimAttemptID) && authorityDigest(value.HandoffFenceDigest) &&
++			authorityToken(value.NextProfileID) && value.Verdict == "" && value.RunStatus == "" && value.Failure == nil && noMerge
 +	case "review-verdict":
-+		return value.AttemptID == "" && value.CanonicalClaimAttemptID == "" && value.NextProfileID == "" &&
-+			(value.Verdict == "accepted" || value.Verdict == "changes-requested" || value.Verdict == "blocked") && value.RunStatus == "" && noMerge
++		return noAttempt && value.NextProfileID == "" && authorityReviewFailure(value.Verdict, value.Failure) && value.RunStatus == "" && noMerge
 +	case "run-disposition":
-+		return value.AttemptID == "" && value.CanonicalClaimAttemptID == "" && value.NextProfileID == "" && value.Verdict == "" &&
-+			authorityRunStatus(value.RunStatus) && noMerge
++		return noAttempt && value.NextProfileID == "" && value.Verdict == "" && authorityRunFailure(value.RunStatus, value.Failure) && noMerge
 +	case "reconciliation":
-+		return value.AttemptID == "" && value.CanonicalClaimAttemptID == "" && value.NextProfileID == "" && value.Verdict == "" && value.RunStatus == "" &&
++		return noAttempt && value.NextProfileID == "" && value.Verdict == "" && value.RunStatus == "" && value.Failure == nil &&
 +			authorityCommit(value.MergedSHA) && authorityCommit(value.MergedTree) && authorityToken(value.PullRequestID) && authorityToken(value.ProtectedMainRunID)
 +	case "terminal-transition":
-+		return value.AttemptID == "" && value.CanonicalClaimAttemptID == "" && value.NextProfileID == "" && value.Verdict == "" && value.RunStatus == "" && noMerge
++		return noAttempt && value.NextProfileID == "" && value.Verdict == "" && value.RunStatus == "" && value.Failure == nil && noMerge
 +	default:
 +		return false
 +	}
++}
++
++func authorityReviewFailure(verdict string, failure *authorityFailureContext) bool {
++	if verdict == "blocked" {
++		return authorityFailureValid(failure, true, true)
++	}
++	return (verdict == "accepted" || verdict == "changes-requested") && failure == nil
++}
++
++func authorityRunFailure(status string, failure *authorityFailureContext) bool {
++	if !authorityRunStatus(status) {
++		return false
++	}
++	if status == "completed" {
++		return failure == nil
++	}
++	return authorityFailureValid(failure, status == "blocked", status != "in-review" && status != "no-work")
++}
++
++func authorityFailureValid(value *authorityFailureContext, requireBlockedBy, requireFingerprint bool) bool {
++	if value == nil || !authorityToken(value.Reason) || !authorityToken(value.NextAction) || value.Attempt == 0 || value.Attempt > 2 ||
++		len(value.BlockedBy) > 16 || requireBlockedBy && len(value.BlockedBy) == 0 ||
++		requireFingerprint && !authorityToken(value.FailureFingerprint) || !requireFingerprint && value.FailureFingerprint != "" && !authorityToken(value.FailureFingerprint) {
++		return false
++	}
++	seen := map[string]bool{}
++	for _, blocker := range value.BlockedBy {
++		if !authorityToken(blocker) || seen[blocker] {
++			return false
++		}
++		seen[blocker] = true
++	}
++	return true
 +}
 +
 +func authorityTransitionPostMetadata(pre []byte, transition authorityLifecycleTransition) ([]byte, string, string, string, error) {
@@ -243,31 +286,48 @@ index f1a5409a7..8a18885bc 100644
 +	if !ok || len(verification) < 3 || authorityString(values["coordinator"]) != verification[len(verification)-1] {
 +		return nil, "", "", "", fmt.Errorf("invalid verification order")
 +	}
++	claim := authorityClaimBinding(values)
++	if claim == nil || !authorityToken(authorityString(claim["attemptId"])) || !authorityToken(authorityString(claim["idempotencyKey"])) ||
++		!authorityCommit(authorityString(claim["baseCommit"])) {
++		return nil, "", "", "", fmt.Errorf("invalid claim lineage")
++	}
 +	postStatus, removeLabel, addLabel := "in_progress", "", ""
 +	switch transition.Operation {
 +	case "handoff":
-+		claim := authorityClaimBinding(values)
 +		if authorityString(values["lifecycleState"]) != "in-progress" || transition.PrincipalProfileID == "" || transition.NextProfileID != verification[0] ||
-+			claim == nil || authorityString(claim["attemptId"]) != transition.CanonicalClaimAttemptID {
++			authorityString(claim["attemptId"]) != transition.CanonicalClaimAttemptID || !authorityDigest(transition.HandoffFenceDigest) {
 +			return nil, "", "", "", fmt.Errorf("invalid handoff preimage")
 +		}
 +		if existing, exists := values["handoff"]; exists {
-+			reviews, reviewsOK := authorityArray(values["reviewRecords"])
-+			if _, handoffOK := authorityObject(existing); !handoffOK || !reviewsOK || len(reviews) == 0 || authorityStringValue(reviews[len(reviews)-1], "verdict") != "changes-requested" {
++			reviews, reviewsOK := authorityOptionalArray(values["reviewRecords"])
++			run, runOK := authorityObject(values["runDispositionRecord"])
++			lastReviewNonAccepted := len(reviews) > 0 && authorityStringValue(reviews[len(reviews)-1], "verdict") != "accepted"
++			lastRunNonCompleted := runOK && authorityString(run["status"]) != "completed"
++			if _, handoffOK := authorityObject(existing); !handoffOK || !reviewsOK || !lastReviewNonAccepted && !lastRunNonCompleted {
 +				return nil, "", "", "", fmt.Errorf("invalid rework history")
 +			}
 +			history, historyOK := authorityOptionalArray(values["reviewHistory"])
 +			if !historyOK {
 +				return nil, "", "", "", fmt.Errorf("invalid review history")
 +			}
-+			values["reviewHistory"] = append(history, map[string]interface{}{"handoff": existing, "reviews": reviews})
++			cycle := map[string]interface{}{"handoff": existing, "reviews": reviews}
++			if runHistory, runHistoryOK := authorityOptionalArray(values["runHistory"]); !runHistoryOK {
++				return nil, "", "", "", fmt.Errorf("invalid run history")
++			} else if len(runHistory) > 0 {
++				cycle["runHistory"] = runHistory
++			}
++			if runOK {
++				cycle["runDisposition"] = run
++			}
++			values["reviewHistory"] = append(history, cycle)
 +		}
 +		values["lifecycleState"] = "in-review"
 +		values["handoff"] = map[string]interface{}{
-+			"attemptId": transition.AttemptID, "headSHA": transition.HeadSHA, "evidenceRefs": transition.EvidenceRefs,
++			"attemptId": transition.AttemptID, "canonicalClaimAttemptId": transition.CanonicalClaimAttemptID, "fenceDigest": transition.HandoffFenceDigest,
++			"headSHA": transition.HeadSHA, "evidenceRefs": transition.EvidenceRefs,
 +			"nextProfileId": transition.NextProfileID, "idempotencyKey": transition.IdempotencyKey,
 +		}
-+		for _, key := range []string{"reviewRecords", "reviewAccepted", "runDisposition", "runDispositionRecord", "reconciled", "reconciliationRecord", "terminalRecord"} {
++		for _, key := range []string{"reviewRecords", "reviewAccepted", "runHistory", "runDisposition", "runDispositionRecord", "reconciled", "reconciliationRecord", "terminalRecord", "blocker", "blockedBy"} {
 +			delete(values, key)
 +		}
 +		removeLabel, addLabel = "in-progress", "in-review"
@@ -278,29 +338,59 @@ index f1a5409a7..8a18885bc 100644
 +			len(reviews) >= len(verification)-1 || verification[len(reviews)] != transition.PrincipalProfileID {
 +			return nil, "", "", "", fmt.Errorf("invalid review preimage")
 +		}
-+		reviews = append(reviews, map[string]interface{}{
++		reviewRecord := map[string]interface{}{
 +			"reviewerProfileId": transition.PrincipalProfileID, "verdict": transition.Verdict, "headSHA": transition.HeadSHA,
 +			"evidenceRefs": transition.EvidenceRefs, "idempotencyKey": transition.IdempotencyKey,
-+		})
++		}
++		if transition.Failure != nil {
++			reviewRecord["failure"] = transition.Failure
++		}
++		reviews = append(reviews, reviewRecord)
 +		values["reviewRecords"] = reviews
 +		delete(values, "reviewAccepted")
-+		if transition.Verdict == "changes-requested" {
++		delete(values, "blocker")
++		delete(values, "blockedBy")
++		if transition.Verdict == "changes-requested" || transition.Verdict == "blocked" {
 +			values["lifecycleState"] = "in-progress"
++			if transition.Verdict == "blocked" {
++				values["blocker"] = transition.Failure.Reason
++				values["blockedBy"] = transition.Failure.BlockedBy
++			}
 +			removeLabel, addLabel = "in-review", "in-progress"
 +		} else if transition.Verdict == "accepted" && len(reviews) == len(verification)-1 {
 +			values["reviewAccepted"] = true
 +		}
 +	case "run-disposition":
-+		if !authorityAcceptedReviewChain(values, verification, transition.HeadSHA) || transition.PrincipalProfileID != verification[len(verification)-1] {
++		if !authorityRunAllowed(values, verification, transition) {
 +			return nil, "", "", "", fmt.Errorf("invalid run preimage")
 +		}
-+		if _, exists := values["runDispositionRecord"]; exists {
-+			return nil, "", "", "", fmt.Errorf("run already recorded")
++		if existing, exists := values["runDispositionRecord"]; exists {
++			runHistory, runHistoryOK := authorityOptionalArray(values["runHistory"])
++			if !runHistoryOK {
++				return nil, "", "", "", fmt.Errorf("invalid run history")
++			}
++			values["runHistory"] = append(runHistory, existing)
 +		}
 +		values["runDisposition"] = transition.RunStatus
-+		values["runDispositionRecord"] = map[string]interface{}{
++		runRecord := map[string]interface{}{
 +			"principalProfileId": transition.PrincipalProfileID, "status": transition.RunStatus, "headSHA": transition.HeadSHA,
 +			"evidenceRefs": transition.EvidenceRefs, "idempotencyKey": transition.IdempotencyKey,
++		}
++		if transition.Failure != nil {
++			runRecord["failure"] = transition.Failure
++		}
++		values["runDispositionRecord"] = runRecord
++		delete(values, "blocker")
++		delete(values, "blockedBy")
++		if transition.RunStatus == "blocked" {
++			values["blocker"] = transition.Failure.Reason
++			values["blockedBy"] = transition.Failure.BlockedBy
++		}
++		if transition.RunStatus != "completed" && transition.RunStatus != "in-review" {
++			if authorityString(values["lifecycleState"]) == "in-review" {
++				removeLabel, addLabel = "in-review", "in-progress"
++			}
++			values["lifecycleState"] = "in-progress"
 +		}
 +	case "reconciliation":
 +		run, runOK := authorityObject(values["runDispositionRecord"])
@@ -363,12 +453,59 @@ index f1a5409a7..8a18885bc 100644
 +	return true
 +}
 +
-+func authorityClaimBinding(values map[string]interface{}) map[string]interface{} {
-+	if value, ok := authorityObject(values["workClaim"]); ok {
-+		return value
++func authorityRunAllowed(values map[string]interface{}, verification []string, transition authorityLifecycleTransition) bool {
++	if transition.PrincipalProfileID != verification[len(verification)-1] {
++		return false
 +	}
-+	value, _ := authorityObject(values["bootstrapClaim"])
-+	return value
++	handoff, ok := authorityObject(values["handoff"])
++	if !ok || authorityString(handoff["headSHA"]) != transition.HeadSHA {
++		return false
++	}
++	if _, ok := authorityObject(values["reconciliationRecord"]); ok {
++		return false
++	}
++	if _, ok := authorityObject(values["terminalRecord"]); ok {
++		return false
++	}
++	if existing, ok := authorityObject(values["runDispositionRecord"]); ok && authorityString(existing["status"]) == "completed" {
++		return false
++	}
++	if transition.RunStatus == "completed" {
++		return authorityAcceptedReviewChain(values, verification, transition.HeadSHA)
++	}
++	lifecycle := authorityString(values["lifecycleState"])
++	if lifecycle != "in-progress" && lifecycle != "in-review" {
++		return false
++	}
++	reviews, ok := authorityOptionalArray(values["reviewRecords"])
++	if !ok || len(reviews) > len(verification)-1 {
++		return false
++	}
++	for index, raw := range reviews {
++		review, ok := authorityObject(raw)
++		if !ok || authorityString(review["reviewerProfileId"]) != verification[index] || authorityString(review["headSHA"]) != transition.HeadSHA ||
++			(index < len(reviews)-1 && authorityString(review["verdict"]) != "accepted") {
++			return false
++		}
++	}
++	return true
++}
++
++func authorityClaimBinding(values map[string]interface{}) map[string]interface{} {
++	workValue, workPresent := values["workClaim"]
++	bootstrapValue, bootstrapPresent := values["bootstrapClaim"]
++	work, workValid := authorityObject(workValue)
++	bootstrap, bootstrapValid := authorityObject(bootstrapValue)
++	if workPresent != workValid || bootstrapPresent != bootstrapValid || workPresent == bootstrapPresent {
++		return nil
++	}
++	if workPresent {
++		return work
++	}
++	if bootstrapPresent {
++		return bootstrap
++	}
++	return nil
 +}
 +
 +func authorityLifecycleKeyUsed(values map[string]interface{}, key string) bool {
@@ -380,6 +517,13 @@ index f1a5409a7..8a18885bc 100644
 +	if reviews, ok := authorityOptionalArray(values["reviewRecords"]); ok {
 +		for _, raw := range reviews {
 +			if authorityStringValue(raw, "idempotencyKey") == key {
++				return true
++			}
++		}
++	}
++	if runs, ok := authorityOptionalArray(values["runHistory"]); ok {
++		for _, run := range runs {
++			if authorityStringValue(run, "idempotencyKey") == key {
 +				return true
 +			}
 +		}
@@ -399,6 +543,16 @@ index f1a5409a7..8a18885bc 100644
 +						return true
 +					}
 +				}
++			}
++			if runs, runsOK := authorityOptionalArray(cycle["runHistory"]); runsOK {
++				for _, run := range runs {
++					if authorityStringValue(run, "idempotencyKey") == key {
++						return true
++					}
++				}
++			}
++			if run, runOK := authorityObject(cycle["runDisposition"]); runOK && authorityString(run["idempotencyKey"]) == key {
++				return true
 +			}
 +		}
 +	}
@@ -472,6 +626,10 @@ index f1a5409a7..8a18885bc 100644
 +	return true
 +}
 +
++func authorityDigest(value string) bool {
++	return len(value) == 64 && authorityCommit(value)
++}
++
 +func authorityRunStatus(value string) bool {
 +	switch value {
 +	case "completed", "blocked", "in-review", "changes-requested", "no-work", "preempted", "cancelled", "failed":
@@ -534,10 +692,10 @@ index f1a5409a7..8a18885bc 100644
 +}
 +
 diff --git a/cmd/bd/batch_embedded_test.go b/cmd/bd/batch_embedded_test.go
-index 34f2e8fa8..415e4e339 100644
+index 34f2e8fa8..add8e3015 100644
 --- a/cmd/bd/batch_embedded_test.go
 +++ b/cmd/bd/batch_embedded_test.go
-@@ -556,0 +557,283 @@ func TestBatchAuthorityClaimContentionHasOneWinner(t *testing.T) {
+@@ -556,0 +557,376 @@ func TestBatchAuthorityClaimContentionHasOneWinner(t *testing.T) {
 +func TestBatchAuthorityLifecycleIsOneBoundedTransitionChain(t *testing.T) {
 +	previousActor := actor
 +	t.Cleanup(func() { setActor(previousActor) })
@@ -550,7 +708,7 @@ index 34f2e8fa8..415e4e339 100644
 +
 +	setActor("work-authority-engineer")
 +	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
-+		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1",
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", HandoffFenceDigest: strings.Repeat("1", 64),
 +		CanonicalClaimAttemptID: "canonical-attempt", HeadSHA: firstHead, EvidenceRefs: []string{"evidence-handoff"},
 +		NextProfileID: "qa", IdempotencyKey: "handoff-1",
 +	})
@@ -610,7 +768,7 @@ index 34f2e8fa8..415e4e339 100644
 +	firstHead, secondHead := strings.Repeat("a", 40), strings.Repeat("b", 40)
 +	setActor("work-authority-engineer")
 +	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
-+		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt",
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt", HandoffFenceDigest: strings.Repeat("2", 64),
 +		HeadSHA: firstHead, EvidenceRefs: []string{"evidence-first"}, NextProfileID: "qa", IdempotencyKey: "handoff-first",
 +	})
 +	setActor("qa")
@@ -620,7 +778,7 @@ index 34f2e8fa8..415e4e339 100644
 +	})
 +	setActor("work-authority-engineer")
 +	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
-+		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-2", CanonicalClaimAttemptID: "canonical-attempt",
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-2", CanonicalClaimAttemptID: "canonical-attempt", HandoffFenceDigest: strings.Repeat("3", 64),
 +		HeadSHA: secondHead, EvidenceRefs: []string{"evidence-second"}, NextProfileID: "qa", IdempotencyKey: "handoff-second",
 +	})
 +	got, err := store.GetIssue(ctx, issue.ID)
@@ -647,7 +805,7 @@ index 34f2e8fa8..415e4e339 100644
 +	ctx := context.Background()
 +	issue := seedAuthorityLifecycleFixture(t, store, ctx)
 +	transition := authorityLifecycleTransition{
-+		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt",
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt", HandoffFenceDigest: strings.Repeat("4", 64),
 +		HeadSHA: strings.Repeat("a", 40), EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff-1",
 +	}
 +	script := authorityTransitionScriptForTest(t, store, ctx, issue.ID, transition) + "dep add DOES-NOT-EXIST ALSO-MISSING\n"
@@ -688,7 +846,7 @@ index 34f2e8fa8..415e4e339 100644
 +	ctx := context.Background()
 +	issue := seedAuthorityLifecycleFixture(t, store, ctx)
 +	script := authorityTransitionScriptForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
-+		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt",
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt", HandoffFenceDigest: strings.Repeat("5", 64),
 +		HeadSHA: strings.Repeat("a", 40), EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff-1",
 +	})
 +	hooksDir := filepath.Join(root, ".beads", "hooks")
@@ -721,7 +879,7 @@ index 34f2e8fa8..415e4e339 100644
 +	ctx := context.Background()
 +	issue := seedAuthorityLifecycleFixture(t, store, ctx)
 +	script := authorityTransitionScriptForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
-+		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt",
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt", HandoffFenceDigest: strings.Repeat("6", 64),
 +		HeadSHA: strings.Repeat("a", 40), EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff-1",
 +	})
 +	wrapped := storage.NewHookFiringStore(store, nil)
@@ -729,6 +887,99 @@ index 34f2e8fa8..415e4e339 100644
 +		t.Fatal("server-backed transaction received lifecycle authority")
 +	}
 +	assertAuthorityLifecycleState(t, store, issue.ID, types.StatusInProgress, "in-progress", 2)
++}
++
++func TestAuthorityLifecycleNonterminalOutcomesRemainRecoverable(t *testing.T) {
++	base := authorityLifecycleMetadataForTest()
++	head := strings.Repeat("a", 40)
++	handoff := authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt", CanonicalClaimAttemptID: "canonical-attempt",
++		HandoffFenceDigest: strings.Repeat("7", 64), HeadSHA: head, EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff",
++	}
++	inReview := applyAuthorityMetadataForTest(t, base, handoff)
++	for _, status := range []string{"blocked", "in-review", "changes-requested", "no-work", "preempted", "cancelled", "failed"} {
++		t.Run(status, func(t *testing.T) {
++			failure := &authorityFailureContext{Reason: "run-" + status, Attempt: 2, NextAction: "resume-same-ticket"}
++			if status == "blocked" {
++				failure.BlockedBy = []string{"M3-P999"}
++			}
++			if status != "in-review" && status != "no-work" {
++				failure.FailureFingerprint = "fingerprint-" + status
++			}
++			post := applyAuthorityMetadataForTest(t, inReview, authorityLifecycleTransition{
++				Operation: "run-disposition", PrincipalProfileID: "delivery-orchestrator", HeadSHA: head, RunStatus: status,
++				Failure: failure, EvidenceRefs: []string{"evidence-run"}, IdempotencyKey: "run-" + status,
++			})
++			want := "in-progress"
++			if status == "in-review" {
++				want = "in-review"
++			}
++			if metadataStringForTest(post, "lifecycleState") != want {
++				t.Fatalf("lifecycle=%s, want %s", metadataStringForTest(post, "lifecycleState"), want)
++			}
++		})
++	}
++
++	blocked := applyAuthorityMetadataForTest(t, inReview, authorityLifecycleTransition{
++		Operation: "review-verdict", PrincipalProfileID: "qa", HeadSHA: head, Verdict: "blocked",
++		Failure:      &authorityFailureContext{Reason: "dependency-unavailable", BlockedBy: []string{"M3-P999"}, FailureFingerprint: "review-dependency-unavailable", Attempt: 2, NextAction: "resolve-dependency"},
++		EvidenceRefs: []string{"evidence-blocked"}, IdempotencyKey: "review-blocked",
++	})
++	if metadataStringForTest(blocked, "lifecycleState") != "in-progress" {
++		t.Fatal("blocked review did not reopen the same ticket")
++	}
++	applyAuthorityMetadataForTest(t, blocked, authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-2", CanonicalClaimAttemptID: "canonical-attempt",
++		HandoffFenceDigest: strings.Repeat("8", 64), HeadSHA: strings.Repeat("b", 40), EvidenceRefs: []string{"evidence-rework"}, NextProfileID: "qa", IdempotencyKey: "handoff-rework",
++	})
++}
++
++func TestAuthorityLifecycleTerminalRejectsMissingOrDualClaimLineage(t *testing.T) {
++	raw := authorityLifecycleMetadataForTest()
++	head := strings.Repeat("a", 40)
++	steps := []authorityLifecycleTransition{
++		{Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution", CanonicalClaimAttemptID: "canonical-attempt", HandoffFenceDigest: strings.Repeat("9", 64), HeadSHA: head, EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff"},
++		{Operation: "review-verdict", PrincipalProfileID: "qa", HeadSHA: head, Verdict: "accepted", EvidenceRefs: []string{"evidence-qa"}, IdempotencyKey: "qa"},
++		{Operation: "review-verdict", PrincipalProfileID: "security-reviewer", HeadSHA: head, Verdict: "accepted", EvidenceRefs: []string{"evidence-security"}, IdempotencyKey: "security"},
++		{Operation: "run-disposition", PrincipalProfileID: "delivery-orchestrator", HeadSHA: head, RunStatus: "completed", EvidenceRefs: []string{"evidence-run"}, IdempotencyKey: "run"},
++		{Operation: "reconciliation", PrincipalProfileID: "delivery-orchestrator", HeadSHA: head, MergedSHA: strings.Repeat("b", 40), MergedTree: strings.Repeat("c", 40), PullRequestID: "pr-010", ProtectedMainRunID: "run-010", EvidenceRefs: []string{"evidence-reconcile"}, IdempotencyKey: "reconcile"},
++	}
++	for _, step := range steps {
++		raw = applyAuthorityMetadataForTest(t, raw, step)
++	}
++	terminal := authorityLifecycleTransition{Operation: "terminal-transition", PrincipalProfileID: "delivery-orchestrator", HeadSHA: head, EvidenceRefs: []string{"evidence-terminal"}, IdempotencyKey: "terminal"}
++	for name, mutate := range map[string]func(map[string]interface{}){
++		"missing": func(values map[string]interface{}) { delete(values, "workClaim") },
++		"dual": func(values map[string]interface{}) {
++			values["bootstrapClaim"] = map[string]interface{}{"attemptId": "canonical-attempt", "idempotencyKey": "bootstrap-key", "baseCommit": strings.Repeat("d", 40), "grantId": "bootstrap-grant"}
++		},
++		"malformed shadow": func(values map[string]interface{}) { values["bootstrapClaim"] = "invalid-shadow-binding" },
++	} {
++		t.Run(name, func(t *testing.T) {
++			var values map[string]interface{}
++			if json.Unmarshal(raw, &values) != nil {
++				t.Fatal("decode fixture")
++			}
++			mutate(values)
++			corrupt, _ := json.Marshal(values)
++			if _, _, _, _, err := authorityTransitionPostMetadata(corrupt, terminal); err == nil {
++				t.Fatal("terminal transition accepted invalid claim lineage")
++			}
++		})
++	}
++}
++
++func authorityLifecycleMetadataForTest() json.RawMessage {
++	return json.RawMessage(`{"schemaVersion":1,"displayId":"W-002","lifecycleState":"in-progress","goalIds":["G-001"],"productDecisionIds":["PD-002"],"featureId":"F-002","scenarioIds":["F-002-S2"],"exclusivePaths":["internal/authority/**"],"verificationOrder":["qa","security-reviewer","delivery-orchestrator"],"workVersion":{"authorityGeneration":"fixture-generation","dependencyGraphRevision":1,"issueIncarnation":"fixture-incarnation","issueMutationSequence":2},"workClaim":{"attemptId":"canonical-attempt","baseCommit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","idempotencyKey":"claim-key"},"risk":"high","workType":"feature","coordinator":"delivery-orchestrator","failureOwnership":"foundation","publicDisclosure":true}`)
++}
++
++func applyAuthorityMetadataForTest(t *testing.T, raw json.RawMessage, transition authorityLifecycleTransition) json.RawMessage {
++	t.Helper()
++	post, _, _, _, err := authorityTransitionPostMetadata(raw, transition)
++	if err != nil {
++		t.Fatalf("%s: %v", transition.Operation, err)
++	}
++	return post
 +}
 +
 +func seedAuthorityLifecycleFixture(t *testing.T, store storage.DoltStorage, ctx context.Context) *types.Issue {

@@ -23,6 +23,16 @@ import (
 
 type openLifecycleLocks struct{}
 
+func cloneRunDisposition(value *authorityv1.RunDispositionRecord) *authorityv1.RunDispositionRecord {
+	if value == nil {
+		return nil
+	}
+	clone := *value
+	clone.EvidenceRefs = append([]string(nil), value.EvidenceRefs...)
+	clone.Failure = normalizedFailureContext(value.Failure)
+	return &clone
+}
+
 func (openLifecycleLocks) Enter(context.Context, string, string) (func(), error) {
 	return func() {}, nil
 }
@@ -46,26 +56,41 @@ func (store *memoryClaimStore) CompareAndSwapLifecycle(_ context.Context, mutati
 	switch mutation.Operation {
 	case LifecycleHandoff:
 		if item.Handoff != nil {
-			item.ReviewHistory = append(item.ReviewHistory, authorityv1.ReviewCycle{Handoff: *item.Handoff, Reviews: append([]authorityv1.ReviewRecord(nil), item.Reviews...)})
+			item.ReviewHistory = append(item.ReviewHistory, authorityv1.ReviewCycle{Handoff: *item.Handoff, Reviews: append([]authorityv1.ReviewRecord(nil), item.Reviews...),
+				RunHistory: append([]authorityv1.RunDispositionRecord(nil), item.RunHistory...), RunDisposition: cloneRunDisposition(item.RunDisposition)})
 		}
 		item.LifecycleState = authorityv1.LifecycleInReview
 		item.Handoff = &authorityv1.HandoffRecord{
-			AttemptID: mutation.AttemptID, HeadSHA: mutation.HeadSHA, EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...),
+			AttemptID: mutation.AttemptID, CanonicalClaimAttemptID: mutation.CanonicalClaimAttemptID, FenceDigest: mutation.HandoffFenceDigest,
+			HeadSHA: mutation.HeadSHA, EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...),
 			NextProfileID: mutation.NextProfileID, IdempotencyKey: mutation.IdempotencyKey,
 		}
-		item.Reviews, item.RunDisposition, item.Reconciliation, item.Terminal = nil, nil, nil, nil
+		item.Reviews, item.RunHistory, item.RunDisposition, item.Reconciliation, item.Terminal, item.Blockers = nil, nil, nil, nil, nil, nil
 	case LifecycleReview:
 		item.Reviews = append(item.Reviews, authorityv1.ReviewRecord{
 			ReviewerProfileID: mutation.PrincipalProfileID, Verdict: mutation.Verdict, HeadSHA: mutation.HeadSHA,
-			EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...), IdempotencyKey: mutation.IdempotencyKey,
+			EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...), IdempotencyKey: mutation.IdempotencyKey, Failure: normalizedFailureContext(mutation.Failure),
 		})
-		if mutation.Verdict == authorityv1.ReviewChangesRequested {
+		if mutation.Verdict == authorityv1.ReviewChangesRequested || mutation.Verdict == authorityv1.ReviewBlocked {
 			item.LifecycleState = authorityv1.LifecycleInProgress
+			if mutation.Verdict == authorityv1.ReviewBlocked {
+				item.Blockers = append(append([]string(nil), mutation.Failure.BlockedBy...), mutation.Failure.Reason)
+			}
 		}
 	case LifecycleRun:
+		if item.RunDisposition != nil {
+			item.RunHistory = append(item.RunHistory, *cloneRunDisposition(item.RunDisposition))
+		}
 		item.RunDisposition = &authorityv1.RunDispositionRecord{
 			PrincipalProfileID: mutation.PrincipalProfileID, Status: mutation.RunStatus, HeadSHA: mutation.HeadSHA,
-			EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...), IdempotencyKey: mutation.IdempotencyKey,
+			EvidenceRefs: append([]string(nil), mutation.EvidenceRefs...), IdempotencyKey: mutation.IdempotencyKey, Failure: normalizedFailureContext(mutation.Failure),
+		}
+		item.Blockers = nil
+		if mutation.RunStatus == authorityv1.RunBlocked {
+			item.Blockers = append(append([]string(nil), mutation.Failure.BlockedBy...), mutation.Failure.Reason)
+		}
+		if mutation.RunStatus != authorityv1.RunCompleted && mutation.RunStatus != authorityv1.RunInReview {
+			item.LifecycleState = authorityv1.LifecycleInProgress
 		}
 	case LifecycleReconcile:
 		item.Reconciliation = &authorityv1.ReconciliationRecord{
@@ -109,7 +134,7 @@ func TestLifecycleCompletesOnlyAfterOrderedIndependentEvidence(t *testing.T) {
 	if stored, err := sagas.GetLease(context.Background(), lease.TenantID, lease.ProjectID, lease.LeaseID); err != nil || stored.Active || stored.State != authorityv1.LeaseReleased {
 		t.Fatalf("handoff lease=%#v err=%v", stored, err)
 	}
-	if replay, err := service.Handoff(context.Background(), engineer, handoffRequest); err != nil || !replay.Replayed || replay.ReceiptRef != handoff.ReceiptRef {
+	if replay, err := service.Handoff(context.Background(), engineer, handoffRequest); err != nil || !replay.Replayed || !strings.HasPrefix(replay.ReceiptRef, "lifecycle-reconciliation-") {
 		t.Fatalf("handoff replay=%#v err=%v", replay, err)
 	}
 	orchestrator := lifecyclePrincipal("delivery-orchestrator", authorityv1.CapabilityRunDisposition, authorityv1.CapabilityWorkReconcile, authorityv1.CapabilityWorkClose)
@@ -200,6 +225,13 @@ func TestChangesRequestedReopensSameBeadWithNewerLeaseEpoch(t *testing.T) {
 	}); err != nil || !replay.Replayed {
 		t.Fatalf("historical handoff replay=%#v err=%v", replay, err)
 	}
+	historicalSplice := authorityv1.HandoffRequest{
+		BeadID: first.BeadID, ExpectedVersion: first.Version, ExpectedIntegrity: first.Integrity, Fence: fenceFromLease(firstLease), HeadSHA: firstHead,
+		EvidenceRefs: []string{"evidence-first"}, NextProfileID: "qa", IdempotencyKey: "handoff-first", TraceRef: "trace-handoff-first",
+	}
+	historicalSplice.Fence.CanonicalClaimAttemptID = "spliced-historical-claim"
+	_, err = service.Handoff(context.Background(), engineer, historicalSplice)
+	assertDenial(t, err, authorityv1.ErrorPolicyDenied, ruleLifecycleIdempotency, "use the original normalized lifecycle request or a new idempotency key", "work.read")
 	conflict := authorityv1.HandoffRequest{
 		BeadID: secondHandoff.Work.BeadID, ExpectedVersion: secondHandoff.Work.Version, ExpectedIntegrity: secondHandoff.Work.Integrity,
 		Fence: fenceFromLease(rework.Lease), HeadSHA: strings.Repeat("b", 40), EvidenceRefs: []string{"evidence-conflict"},
@@ -281,6 +313,147 @@ func TestHandoffAppliedUnknownEffectUsesCanonicalReadback(t *testing.T) {
 	if err != nil || result.Work.LifecycleState != authorityv1.LifecycleInReview || result.Work.Handoff == nil {
 		t.Fatalf("handoff readback=%#v err=%v", result, err)
 	}
+}
+
+func TestHandoffReplayRejectsSplicedCanonicalClaimAndFence(t *testing.T) {
+	clock := time.Date(2026, 8, 27, 12, 0, 0, 0, time.UTC)
+	service, store, _, _, engineer, lease := lifecycleFixture(t, &clock)
+	service.barrier, service.workLocks = openLifecycleLocks{}, openLifecycleLocks{}
+	engineer.Capabilities = append(engineer.Capabilities, authorityv1.CapabilityWorkHandoff, authorityv1.CapabilityLeaseRelease)
+	current := lifecycleWork(t, store)
+	request := authorityv1.HandoffRequest{
+		BeadID: current.BeadID, ExpectedVersion: current.Version, ExpectedIntegrity: current.Integrity, Fence: fenceFromLease(lease),
+		HeadSHA: strings.Repeat("c", 40), EvidenceRefs: []string{"evidence-fence"}, NextProfileID: "qa",
+		IdempotencyKey: "handoff-fence", TraceRef: "trace-handoff-fence",
+	}
+	if _, err := service.Handoff(context.Background(), engineer, request); err != nil {
+		t.Fatal(err)
+	}
+	for name, mutate := range map[string]func(*authorityv1.FencingTuple){
+		"canonical claim": func(fence *authorityv1.FencingTuple) { fence.CanonicalClaimAttemptID = "spliced-claim" },
+		"lease":           func(fence *authorityv1.FencingTuple) { fence.LeaseID = "spliced-lease" },
+		"generation":      func(fence *authorityv1.FencingTuple) { fence.FenceGeneration = "spliced-generation" },
+		"epoch":           func(fence *authorityv1.FencingTuple) { fence.LeaseEpoch++ },
+		"base":            func(fence *authorityv1.FencingTuple) { fence.BaseSHA = strings.Repeat("d", 40) },
+	} {
+		t.Run(name, func(t *testing.T) {
+			candidate := request
+			mutate(&candidate.Fence)
+			_, err := service.Handoff(context.Background(), engineer, candidate)
+			assertDenial(t, err, authorityv1.ErrorPolicyDenied, ruleLifecycleIdempotency, "use the original normalized lifecycle request or a new idempotency key", "work.read")
+		})
+	}
+}
+
+func TestLifecycleReplayRepairsMissingReceiptBeforeSuccess(t *testing.T) {
+	clock := time.Date(2026, 8, 27, 12, 0, 0, 0, time.UTC)
+	service, store, _, events, engineer, lease := lifecycleFixture(t, &clock)
+	service.barrier, service.workLocks = openLifecycleLocks{}, openLifecycleLocks{}
+	engineer.Capabilities = append(engineer.Capabilities, authorityv1.CapabilityWorkHandoff, authorityv1.CapabilityLeaseRelease)
+	current := lifecycleWork(t, store)
+	request := authorityv1.HandoffRequest{
+		BeadID: current.BeadID, ExpectedVersion: current.Version, ExpectedIntegrity: current.Integrity, Fence: fenceFromLease(lease),
+		HeadSHA: strings.Repeat("c", 40), EvidenceRefs: []string{"evidence-receipt"}, NextProfileID: "qa",
+		IdempotencyKey: "handoff-receipt", TraceRef: "trace-handoff-receipt",
+	}
+	events.failOperation = "work.handoff.receipt"
+	if _, err := service.Handoff(context.Background(), engineer, request); err == nil {
+		t.Fatal("missing lifecycle receipt was reported as success")
+	}
+	replayed, err := service.Handoff(context.Background(), engineer, request)
+	if err != nil || !replayed.Replayed || !strings.HasPrefix(replayed.ReceiptRef, "lifecycle-reconciliation-") {
+		t.Fatalf("repaired replay=%#v err=%v", replayed, err)
+	}
+	found := false
+	for _, event := range events.events {
+		found = found || event.Operation == "work.handoff.reconciliation" && event.Outcome == outcomeVerified
+	}
+	if !found {
+		t.Fatal("replay succeeded without a durable reconciliation receipt")
+	}
+}
+
+func TestNonterminalLifecycleOutcomesRemainRecoverable(t *testing.T) {
+	statuses := []authorityv1.RunDispositionStatus{
+		authorityv1.RunBlocked, authorityv1.RunInReview, authorityv1.RunChangesRequested, authorityv1.RunNoWork,
+		authorityv1.RunPreempted, authorityv1.RunCancelled, authorityv1.RunFailed,
+	}
+	for _, status := range statuses {
+		t.Run(string(status), func(t *testing.T) {
+			clock := time.Date(2026, 8, 27, 12, 0, 0, 0, time.UTC)
+			service, store, _, _, engineer, lease := lifecycleFixture(t, &clock)
+			service.barrier, service.workLocks = openLifecycleLocks{}, openLifecycleLocks{}
+			engineer.Capabilities = append(engineer.Capabilities, authorityv1.CapabilityWorkHandoff, authorityv1.CapabilityLeaseRelease)
+			head := strings.Repeat("c", 40)
+			current := lifecycleWork(t, store)
+			if _, err := service.Handoff(context.Background(), engineer, authorityv1.HandoffRequest{
+				BeadID: current.BeadID, ExpectedVersion: current.Version, ExpectedIntegrity: current.Integrity, Fence: fenceFromLease(lease), HeadSHA: head,
+				EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff-" + string(status), TraceRef: "trace-handoff-" + string(status),
+			}); err != nil {
+				t.Fatal(err)
+			}
+			current = lifecycleWork(t, store)
+			failure := failureForStatus(status)
+			result, err := service.RecordRunDisposition(context.Background(), lifecyclePrincipal("delivery-orchestrator", authorityv1.CapabilityRunDisposition), authorityv1.RunDispositionRequest{
+				BeadID: current.BeadID, ExpectedVersion: current.Version, ExpectedIntegrity: current.Integrity, HeadSHA: head, Status: status,
+				EvidenceRefs: []string{"evidence-run"}, IdempotencyKey: "run-" + string(status), TraceRef: "trace-run-" + string(status), Failure: failure,
+			})
+			if err != nil || result.Work.RunDisposition == nil || result.Work.RunDisposition.Status != status {
+				t.Fatalf("result=%#v err=%v", result, err)
+			}
+			if status == authorityv1.RunInReview {
+				if result.Work.LifecycleState != authorityv1.LifecycleInReview {
+					t.Fatalf("in-review lifecycle=%s", result.Work.LifecycleState)
+				}
+				qa := recordReview(t, service, lifecyclePrincipal("qa", authorityv1.CapabilityReviewRecord), result.Work, head, authorityv1.ReviewAccepted, "qa-after-run-in-review")
+				security := recordReview(t, service, lifecyclePrincipal("security-reviewer", authorityv1.CapabilityReviewRecord), qa.Work, head, authorityv1.ReviewAccepted, "security-after-run-in-review")
+				completed, completeErr := service.RecordRunDisposition(context.Background(), lifecyclePrincipal("delivery-orchestrator", authorityv1.CapabilityRunDisposition), authorityv1.RunDispositionRequest{
+					BeadID: security.Work.BeadID, ExpectedVersion: security.Work.Version, ExpectedIntegrity: security.Work.Integrity, HeadSHA: head,
+					Status: authorityv1.RunCompleted, EvidenceRefs: []string{"evidence-completed"}, IdempotencyKey: "run-completed-after-in-review", TraceRef: "trace-completed-after-in-review",
+				})
+				if completeErr != nil || completed.Work.RunDisposition == nil || completed.Work.RunDisposition.Status != authorityv1.RunCompleted || len(completed.Work.RunHistory) != 1 {
+					t.Fatalf("completed after in-review=%#v err=%v", completed, completeErr)
+				}
+				return
+			}
+			if result.Work.LifecycleState != authorityv1.LifecycleInProgress {
+				t.Fatalf("nonterminal lifecycle=%s", result.Work.LifecycleState)
+			}
+		})
+	}
+
+	t.Run("blocked review", func(t *testing.T) {
+		clock := time.Date(2026, 8, 27, 12, 0, 0, 0, time.UTC)
+		service, store, _, _, engineer, lease := lifecycleFixture(t, &clock)
+		service.barrier, service.workLocks = openLifecycleLocks{}, openLifecycleLocks{}
+		engineer.Capabilities = append(engineer.Capabilities, authorityv1.CapabilityWorkHandoff, authorityv1.CapabilityLeaseRelease)
+		head := strings.Repeat("d", 40)
+		current := lifecycleWork(t, store)
+		if _, err := service.Handoff(context.Background(), engineer, authorityv1.HandoffRequest{
+			BeadID: current.BeadID, ExpectedVersion: current.Version, ExpectedIntegrity: current.Integrity, Fence: fenceFromLease(lease), HeadSHA: head,
+			EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff-blocked-review", TraceRef: "trace-handoff-blocked-review",
+		}); err != nil {
+			t.Fatal(err)
+		}
+		current = lifecycleWork(t, store)
+		request := reviewRequest(current, head, authorityv1.ReviewBlocked, "qa-blocked")
+		request.Failure = &authorityv1.FailureContext{Reason: "dependency-unavailable", BlockedBy: []string{"M3-P999"}, FailureFingerprint: "review-dependency-unavailable", Attempt: 2, NextAction: "resolve-dependency"}
+		result, err := service.RecordReviewVerdict(context.Background(), lifecyclePrincipal("qa", authorityv1.CapabilityReviewRecord), request)
+		if err != nil || result.Work.LifecycleState != authorityv1.LifecycleInProgress || len(result.Work.Blockers) == 0 {
+			t.Fatalf("blocked review=%#v err=%v", result, err)
+		}
+	})
+}
+
+func failureForStatus(status authorityv1.RunDispositionStatus) *authorityv1.FailureContext {
+	failure := &authorityv1.FailureContext{Reason: "run-" + string(status), Attempt: 2, NextAction: "resume-same-ticket"}
+	if status == authorityv1.RunBlocked {
+		failure.BlockedBy = []string{"M3-P999"}
+	}
+	if status != authorityv1.RunInReview && status != authorityv1.RunNoWork {
+		failure.FailureFingerprint = "fingerprint-" + string(status)
+	}
+	return failure
 }
 
 func lifecycleWork(t *testing.T, store *memoryClaimStore) authorityv1.WorkItem {

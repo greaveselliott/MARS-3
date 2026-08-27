@@ -3,8 +3,8 @@
 **Classification:** PUBLIC
 **Work authority:** M3-W001
 **Failure ownership:** foundation
-**Correction grant:** `W-001-lifecycle-completion-v5`
-**Current disposition:** core gateway accepted and merged; completion audit changes-requested the missing governed lifecycle routes; W-001 remains in-progress
+**Correction grant:** `W-001-lifecycle-correction-v6`
+**Current disposition:** core gateway accepted and merged; independent review changes-requested the v5 lifecycle candidate; W-001 remains in-progress
 **Historical disposition:** postclaim reconciliation accepted, merged, and completed
 
 ## Superseded Security disposition
@@ -481,55 +481,92 @@ typed lifecycle `in-progress`, WorkVersion mutation/dependency revisions
 outcome without retrying it; no canonical work mutation accompanied the
 comment append.
 
-## Lifecycle-completion implementation candidate
+## Lifecycle-completion v5 review disposition
 
-The bounded v5 candidate now supplies the five lifecycle surfaces named by the
-completion audit: handoff, ordered review verdict, run disposition, merge
-reconciliation, and terminal transition. The public API and HTTP transport use
-typed requests. The gateway enforces profile capability, expected
-WorkVersion/integrity, immutable head, exact review order, idempotency across
-current and archived cycles, and the absence of an implementation lease during
-independent review and disposition. Handoff validates and releases the exact
-owning fence before one canonical CAS. It records both the current execution
-attempt and immutable canonical claim attempt; retry after a lost or rejected
-CAS cannot revive the released lease.
+Independent QA and Security reviewed exact public PR 10 v5 head
+`523ead6f899c413cb0a388c60a30b33aed88b8b6`, tree
+`aaff531b1b0fee9dfa907a5a52c0afd98abf050c`, signed tag object
+`15dbd1be9d1d098eb2f5da3dbafe824064dbff1f`, and successful run/job
+`33077554760/98535652734`. Both verdicts were `changes-requested`; the same
+Bead remains `in-progress` and the tag, commit, CI record, and verdicts remain
+immutable evidence.
 
-The project-owned Beads adapter recomputes each allowed postimage and invokes
-one new `authority-transition` operation in the pinned Beads patch. The native
-operation revalidates issue, metadata, label, dependency, actor, backend, and
-direct embedded-M3 identity inside the transaction. It rejects server-backed
-and hook-wrapped stores before authority reads or writes. A
-`changes-requested` verdict archives the rejected review cycle and reopens the
-same Bead. `done` requires accepted QA and Security records, a completed run,
-merge reconciliation, and terminal evidence; the canonical claim attempt
-remains projected after close.
+The exact foundation findings are:
+
+- `lifecycle.terminal_claim_binding_fail_open`: terminal projection accepted
+  missing or contradictory claim lineage and stripped detailed evidence;
+- `lifecycle.handoff_replay_fence_splice`: replay did not retain the canonical
+  claim attempt or complete authority fence;
+- `lifecycle.missing_receipt_replay_success`: retry after native CAS plus a
+  failed journal append could report success without repairing durable trace;
+- `lifecycle.nonterminal_convergence_deadlock`: blocked review and declared
+  noncompleted run outcomes could consume their only recovery route;
+- `lifecycle.qualification_not_reproducible`: the attested patched-binary hash
+  lacked a complete reproducible build contract.
+
+## Lifecycle-correction v6 candidate
+
+The prospective signed `W-001-lifecycle-correction-v6` grant permits only the
+five corrections above, their public contracts and tests, reproducible
+qualification, and a fresh v6 review publication. It grants no canonical Beads
+mutation or live lease and cannot merge before fresh QA and Security
+acceptance.
+
+The candidate now requires exactly one complete WorkClaim or BootstrapClaim on
+every active or terminal versioned work record and rejects stripped terminal
+evidence. Current and archived handoffs retain the canonical-claim attempt and
+a SHA-256 digest over the complete normalized fence. A replay returns success
+only after appending a deterministic reconciliation receipt when the original
+receipt is absent. Blocked review and every noncompleted run retain public-safe
+reason, blocker, normalized fingerprint, bounded attempt, and next action;
+reopen and rehandoff archive their full earlier review/run cycle rather than
+creating duplicate work. Completed closure still requires the accepted QA and
+Security chain, merged evidence, completed run, and reconciliation.
 
 Candidate material hashes:
 
 - lifecycle patch SHA-256:
-  `d8ce898daf237448dc32b0b7c1e40887617811245a82210b1059d6a5e3520568`;
-- locally built patched Beads binary SHA-256:
-  `5ba0667fd5ae5f132da4c4c80bc7091aa12110811923e9c693c375ed40fd3a61`.
+  `2dd3e2be93e3e0a571f384d077cb9739c144c5f22a00005d9b712a03da575411`;
+- twice-reproduced patched Beads binary SHA-256:
+  `6d273b90d0a6626f1903dd8b66a95a2c4650c7bad0aae124029369c15fc49432`;
+- Go tool `go1.26.2 darwin/arm64` executable SHA-256:
+  `005640c7ff93028cb704283b0f737f2db3faf8b51b2561170c769b83905da646`;
+- Apple clang `17.0.0` executable SHA-256:
+  `a961f78075d8e7621ef4f5d764c64ef8a41bf66c0a98ab5cb6ca39b85ce31c93`;
+- ICU package: `icu4c@78` version `78.3`.
 
-Candidate verification completed before the immutable checkpoint:
+The reproducible build starts from pinned Beads commit
+`6c124203e771433a3550c348771a5b5e27fd3c21`, applies the three immutable
+bootstrap patches, the gateway patch, then the lifecycle patch in repository
+order, and uses this environment contract with distinct empty home, temporary,
+and build-cache directories for each build:
 
-- patched Beads lifecycle tests: four direct embedded cases passed; the
-  explicit server-backed case was present but skipped because the local Docker
-  service was unavailable;
-- project native-mutator integration executed the actual patched binary through
-  claim, handoff, QA, Security, completed run, reconciliation, and terminal
-  close: passed;
-- gateway, Beads, HTTP, and PostgreSQL package tests: passed;
-- the same authority packages under the Go race detector: passed;
-- unknown-effect regressions proved both safe retry after lease release and
-  successful canonical readback after an applied transition with a lost
-  receipt.
+```text
+env -i PATH=<go-root>/bin:/usr/bin:/bin HOME=<empty-home> TMPDIR=<empty-tmp> \
+  GOCACHE=<empty-build-cache> GOMODCACHE=<go.sum-populated-module-cache> \
+  GOTOOLCHAIN=local CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 \
+  CC=/usr/bin/clang CXX=/usr/bin/clang++ \
+  CGO_CPPFLAGS=-I<icu4c@78-78.3-prefix>/include \
+  CGO_LDFLAGS=-L<icu4c@78-78.3-prefix>/lib LANG=C LC_ALL=C TZ=UTC \
+  <go-root>/bin/go build -trimpath -buildvcs=false -ldflags=-buildid= \
+  -o <output> ./cmd/bd
+```
 
-The PostgreSQL active-lease integration now checks exact lookup, cross-tenant
-denial, release, and expiry, but it must execute without a skip in an
-independent environment with the synthetic PostgreSQL endpoints. The native
-server-backed lifecycle case must likewise execute without a skip. Scenario
-states remain `failing` until these non-skipped results, the full public commit
-gate, and independent QA and Security verdicts bind one signed immutable tree.
-No canonical Beads lifecycle, lease, or production effect was performed by
-this candidate verification.
+Two clean builds with distinct home, temporary, and build-cache directories
+were byte-identical at the bound hash. The exact composed patched source then
+ran every `AuthorityLifecycle` native test without skips against the
+digest-pinned Dolt server image. Direct transition, changes-requested history,
+transaction rollback/contention, hook denial, server-transaction denial,
+blocked review, all seven noncompleted run outcomes, and missing/dual/malformed
+shadow claim rejection passed. Project `TestNativeMutatorIntegration` executed
+the reproduced binary without a skip and passed.
+
+The credential-free PostgreSQL suite ran against an ephemeral PostgreSQL 17.11
+container bound only to loopback at image digest
+`sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0`.
+`make test-authority-postgres` executed
+`TestPostgresLeaseLifecycleAndRestart` without a skip and passed; the temporary
+container was then stopped and auto-removed. Scenario states remain `failing`
+until the full public gate and independent QA and Security verdicts bind one
+signed immutable v6 tree. No canonical Beads lifecycle, live lease, or
+production effect was performed by this candidate verification.

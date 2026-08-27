@@ -269,6 +269,7 @@ type issueMetadata struct {
 	Handoff                     *metadataHandoff           `json:"handoff,omitempty"`
 	ReviewRecords               []metadataReview           `json:"reviewRecords,omitempty"`
 	ReviewHistory               []metadataReviewCycle      `json:"reviewHistory,omitempty"`
+	RunHistory                  []metadataRunDisposition   `json:"runHistory,omitempty"`
 	RunDispositionRecord        *metadataRunDisposition    `json:"runDispositionRecord,omitempty"`
 	ReconciliationRecord        *metadataReconciliation    `json:"reconciliationRecord,omitempty"`
 	TerminalRecord              *metadataTerminal          `json:"terminalRecord,omitempty"`
@@ -281,24 +282,29 @@ type issueMetadata struct {
 }
 
 type metadataHandoff struct {
-	AttemptID      string   `json:"attemptId"`
-	HeadSHA        string   `json:"headSHA"`
-	EvidenceRefs   []string `json:"evidenceRefs"`
-	NextProfileID  string   `json:"nextProfileId"`
-	IdempotencyKey string   `json:"idempotencyKey"`
+	AttemptID               string   `json:"attemptId"`
+	CanonicalClaimAttemptID string   `json:"canonicalClaimAttemptId"`
+	FenceDigest             string   `json:"fenceDigest"`
+	HeadSHA                 string   `json:"headSHA"`
+	EvidenceRefs            []string `json:"evidenceRefs"`
+	NextProfileID           string   `json:"nextProfileId"`
+	IdempotencyKey          string   `json:"idempotencyKey"`
 }
 
 type metadataReview struct {
-	ReviewerProfileID string                    `json:"reviewerProfileId"`
-	Verdict           authorityv1.ReviewVerdict `json:"verdict"`
-	HeadSHA           string                    `json:"headSHA"`
-	EvidenceRefs      []string                  `json:"evidenceRefs"`
-	IdempotencyKey    string                    `json:"idempotencyKey"`
+	ReviewerProfileID string                      `json:"reviewerProfileId"`
+	Verdict           authorityv1.ReviewVerdict   `json:"verdict"`
+	HeadSHA           string                      `json:"headSHA"`
+	EvidenceRefs      []string                    `json:"evidenceRefs"`
+	IdempotencyKey    string                      `json:"idempotencyKey"`
+	Failure           *authorityv1.FailureContext `json:"failure,omitempty"`
 }
 
 type metadataReviewCycle struct {
-	Handoff metadataHandoff  `json:"handoff"`
-	Reviews []metadataReview `json:"reviews"`
+	Handoff        metadataHandoff          `json:"handoff"`
+	Reviews        []metadataReview         `json:"reviews"`
+	RunHistory     []metadataRunDisposition `json:"runHistory,omitempty"`
+	RunDisposition *metadataRunDisposition  `json:"runDisposition,omitempty"`
 }
 
 type metadataRunDisposition struct {
@@ -307,6 +313,7 @@ type metadataRunDisposition struct {
 	HeadSHA            string                           `json:"headSHA"`
 	EvidenceRefs       []string                         `json:"evidenceRefs"`
 	IdempotencyKey     string                           `json:"idempotencyKey"`
+	Failure            *authorityv1.FailureContext      `json:"failure,omitempty"`
 }
 
 type metadataReconciliation struct {
@@ -455,17 +462,22 @@ func projectIssue(tenantID, projectID, id, status, assignee string, metadata iss
 		return authorityv1.WorkItem{}, ErrProjectionInvalid
 	}
 	claimAttemptID := ""
+	if metadata.WorkClaim != nil && metadata.BootstrapClaim != nil {
+		return authorityv1.WorkItem{}, ErrProjectionInvalid
+	}
 	binding := metadata.WorkClaim
 	if binding == nil {
 		binding = metadata.BootstrapClaim
 	}
-	if binding != nil {
-		claimAttemptID = binding.AttemptID
-	}
-	if metadata.LifecycleState == authorityv1.LifecycleInProgress || metadata.LifecycleState == authorityv1.LifecycleInReview {
-		if binding == nil || binding.AttemptID == "" || binding.IdempotencyKey == "" || binding.BaseCommit == "" || assignee == "" {
+	if metadata.LifecycleState == authorityv1.LifecycleBacklog {
+		if binding != nil {
 			return authorityv1.WorkItem{}, ErrProjectionInvalid
 		}
+	} else if !validClaimBinding(binding) || assignee == "" {
+		return authorityv1.WorkItem{}, ErrProjectionInvalid
+	}
+	if binding != nil {
+		claimAttemptID = binding.AttemptID
 	}
 	blockers := append([]string(nil), metadata.BlockedBy...)
 	if metadata.Blocker != "" {
@@ -499,7 +511,8 @@ func projectIssue(tenantID, projectID, id, status, assignee string, metadata iss
 	}
 	if metadata.Handoff != nil {
 		item.Handoff = &authorityv1.HandoffRecord{
-			AttemptID: metadata.Handoff.AttemptID, HeadSHA: metadata.Handoff.HeadSHA,
+			AttemptID: metadata.Handoff.AttemptID, CanonicalClaimAttemptID: metadata.Handoff.CanonicalClaimAttemptID,
+			FenceDigest: metadata.Handoff.FenceDigest, HeadSHA: metadata.Handoff.HeadSHA,
 			EvidenceRefs: append([]string(nil), metadata.Handoff.EvidenceRefs...), NextProfileID: metadata.Handoff.NextProfileID,
 			IdempotencyKey: metadata.Handoff.IdempotencyKey,
 		}
@@ -508,14 +521,15 @@ func projectIssue(tenantID, projectID, id, status, assignee string, metadata iss
 	for _, review := range metadata.ReviewRecords {
 		item.Reviews = append(item.Reviews, authorityv1.ReviewRecord{
 			ReviewerProfileID: review.ReviewerProfileID, Verdict: review.Verdict, HeadSHA: review.HeadSHA,
-			EvidenceRefs: append([]string(nil), review.EvidenceRefs...), IdempotencyKey: review.IdempotencyKey,
+			EvidenceRefs: append([]string(nil), review.EvidenceRefs...), IdempotencyKey: review.IdempotencyKey, Failure: cloneFailureContext(review.Failure),
 		})
 	}
 	item.ReviewHistory = make([]authorityv1.ReviewCycle, 0, len(metadata.ReviewHistory))
 	for _, cycle := range metadata.ReviewHistory {
 		projected := authorityv1.ReviewCycle{
 			Handoff: authorityv1.HandoffRecord{
-				AttemptID: cycle.Handoff.AttemptID, HeadSHA: cycle.Handoff.HeadSHA,
+				AttemptID: cycle.Handoff.AttemptID, CanonicalClaimAttemptID: cycle.Handoff.CanonicalClaimAttemptID,
+				FenceDigest: cycle.Handoff.FenceDigest, HeadSHA: cycle.Handoff.HeadSHA,
 				EvidenceRefs: append([]string(nil), cycle.Handoff.EvidenceRefs...), NextProfileID: cycle.Handoff.NextProfileID,
 				IdempotencyKey: cycle.Handoff.IdempotencyKey,
 			},
@@ -524,17 +538,16 @@ func projectIssue(tenantID, projectID, id, status, assignee string, metadata iss
 		for _, review := range cycle.Reviews {
 			projected.Reviews = append(projected.Reviews, authorityv1.ReviewRecord{
 				ReviewerProfileID: review.ReviewerProfileID, Verdict: review.Verdict, HeadSHA: review.HeadSHA,
-				EvidenceRefs: append([]string(nil), review.EvidenceRefs...), IdempotencyKey: review.IdempotencyKey,
+				EvidenceRefs: append([]string(nil), review.EvidenceRefs...), IdempotencyKey: review.IdempotencyKey, Failure: cloneFailureContext(review.Failure),
 			})
 		}
+		projected.RunHistory = projectRunHistory(cycle.RunHistory)
+		projected.RunDisposition = projectRunDisposition(cycle.RunDisposition)
 		item.ReviewHistory = append(item.ReviewHistory, projected)
 	}
+	item.RunHistory = projectRunHistory(metadata.RunHistory)
 	if metadata.RunDispositionRecord != nil {
-		item.RunDisposition = &authorityv1.RunDispositionRecord{
-			PrincipalProfileID: metadata.RunDispositionRecord.PrincipalProfileID, Status: metadata.RunDispositionRecord.Status,
-			HeadSHA: metadata.RunDispositionRecord.HeadSHA, EvidenceRefs: append([]string(nil), metadata.RunDispositionRecord.EvidenceRefs...),
-			IdempotencyKey: metadata.RunDispositionRecord.IdempotencyKey,
-		}
+		item.RunDisposition = projectRunDisposition(metadata.RunDispositionRecord)
 	}
 	if metadata.ReconciliationRecord != nil {
 		item.Reconciliation = &authorityv1.ReconciliationRecord{
@@ -558,11 +571,12 @@ func projectIssue(tenantID, projectID, id, status, assignee string, metadata iss
 			Handoff                                                     *authorityv1.HandoffRecord
 			Reviews                                                     []authorityv1.ReviewRecord
 			ReviewHistory                                               []authorityv1.ReviewCycle
+			RunHistory                                                  []authorityv1.RunDispositionRecord
 			RunDisposition                                              *authorityv1.RunDispositionRecord
 			Reconciliation                                              *authorityv1.ReconciliationRecord
 			Terminal                                                    *authorityv1.TerminalRecord
 		}{id, metadata.DisplayID, assignee, metadata.FeatureID, goalIDs, decisions, scenarios, verification,
-			item.Handoff, item.Reviews, item.ReviewHistory, item.RunDisposition, item.Reconciliation, item.Terminal}),
+			item.Handoff, item.Reviews, item.ReviewHistory, item.RunHistory, item.RunDisposition, item.Reconciliation, item.Terminal}),
 		DependencyOutcomes: digestValue(projectedDependencies), Blockers: digestValue(blockers), ExclusivePaths: digestValue(paths),
 	}
 	return item, nil
@@ -752,12 +766,59 @@ func compatibleLifecycle(native string, lifecycle authorityv1.LifecycleState) bo
 	}
 }
 
-func validLifecycleRecords(metadata issueMetadata) bool {
-	hasDetailed := metadata.Handoff != nil || len(metadata.ReviewRecords) > 0 || len(metadata.ReviewHistory) > 0 || metadata.RunDispositionRecord != nil || metadata.ReconciliationRecord != nil || metadata.TerminalRecord != nil
-	if !hasDetailed {
-		return true
+func validClaimBinding(binding *claimBinding) bool {
+	return binding != nil && safeToken(binding.AttemptID) && safeToken(binding.IdempotencyKey) && commitID(binding.BaseCommit) &&
+		(binding.GrantID == "" || safeToken(binding.GrantID))
+}
+
+func cloneFailureContext(value *authorityv1.FailureContext) *authorityv1.FailureContext {
+	if value == nil {
+		return nil
 	}
-	if metadata.Handoff == nil || !safeToken(metadata.Handoff.AttemptID) || !commitID(metadata.Handoff.HeadSHA) ||
+	clone := *value
+	clone.BlockedBy = append([]string(nil), value.BlockedBy...)
+	return &clone
+}
+
+func projectRunDisposition(value *metadataRunDisposition) *authorityv1.RunDispositionRecord {
+	if value == nil {
+		return nil
+	}
+	return &authorityv1.RunDispositionRecord{
+		PrincipalProfileID: value.PrincipalProfileID, Status: value.Status, HeadSHA: value.HeadSHA,
+		EvidenceRefs: append([]string(nil), value.EvidenceRefs...), IdempotencyKey: value.IdempotencyKey,
+		Failure: cloneFailureContext(value.Failure),
+	}
+}
+
+func projectRunHistory(values []metadataRunDisposition) []authorityv1.RunDispositionRecord {
+	result := make([]authorityv1.RunDispositionRecord, 0, len(values))
+	for index := range values {
+		result = append(result, *projectRunDisposition(&values[index]))
+	}
+	return result
+}
+
+func validLifecycleRecords(metadata issueMetadata) bool {
+	if metadata.WorkClaim != nil && metadata.BootstrapClaim != nil {
+		return false
+	}
+	binding := metadata.WorkClaim
+	if binding == nil {
+		binding = metadata.BootstrapClaim
+	}
+	if metadata.LifecycleState == authorityv1.LifecycleBacklog {
+		if binding != nil {
+			return false
+		}
+	} else if !validClaimBinding(binding) {
+		return false
+	}
+	hasDetailed := metadata.Handoff != nil || len(metadata.ReviewRecords) > 0 || len(metadata.ReviewHistory) > 0 || len(metadata.RunHistory) > 0 || metadata.RunDispositionRecord != nil || metadata.ReconciliationRecord != nil || metadata.TerminalRecord != nil
+	if !hasDetailed {
+		return metadata.LifecycleState != authorityv1.LifecycleDone
+	}
+	if metadata.Handoff == nil || !validMetadataHandoff(*metadata.Handoff) ||
 		!safeToken(metadata.Handoff.NextProfileID) || !safeToken(metadata.Handoff.IdempotencyKey) || !validEvidenceRefs(metadata.Handoff.EvidenceRefs) {
 		return false
 	}
@@ -782,11 +843,19 @@ func validLifecycleRecords(metadata issueMetadata) bool {
 				return false
 			}
 		}
+		for _, run := range cycle.RunHistory {
+			if !addLifecycleKey(idempotencyKeys, run.IdempotencyKey) {
+				return false
+			}
+		}
+		if cycle.RunDisposition != nil && !addLifecycleKey(idempotencyKeys, cycle.RunDisposition.IdempotencyKey) {
+			return false
+		}
 	}
-	changesRequested := false
+	nonAcceptedReview := false
 	for index, review := range metadata.ReviewRecords {
 		if review.ReviewerProfileID != metadata.VerificationOrder[index] || review.HeadSHA != metadata.Handoff.HeadSHA ||
-			!safeToken(review.IdempotencyKey) || !validEvidenceRefs(review.EvidenceRefs) || !knownReviewVerdict(review.Verdict) {
+			!safeToken(review.IdempotencyKey) || !validEvidenceRefs(review.EvidenceRefs) || !validMetadataReviewFailure(review) {
 			return false
 		}
 		if !addLifecycleKey(idempotencyKeys, review.IdempotencyKey) {
@@ -795,20 +864,39 @@ func validLifecycleRecords(metadata issueMetadata) bool {
 		if index < len(metadata.ReviewRecords)-1 && review.Verdict != authorityv1.ReviewAccepted {
 			return false
 		}
-		changesRequested = changesRequested || review.Verdict == authorityv1.ReviewChangesRequested
+		nonAcceptedReview = nonAcceptedReview || review.Verdict != authorityv1.ReviewAccepted
 	}
-	if changesRequested && (metadata.LifecycleState != authorityv1.LifecycleInProgress || metadata.ReviewRecords[len(metadata.ReviewRecords)-1].Verdict != authorityv1.ReviewChangesRequested) {
+	if nonAcceptedReview && (metadata.LifecycleState != authorityv1.LifecycleInProgress || metadata.ReviewRecords[len(metadata.ReviewRecords)-1].Verdict == authorityv1.ReviewAccepted) {
 		return false
+	}
+	for index := range metadata.RunHistory {
+		if !validMetadataRun(&metadata.RunHistory[index], metadata.Handoff.HeadSHA, metadata.Coordinator) ||
+			metadata.RunHistory[index].Status == authorityv1.RunCompleted || !addLifecycleKey(idempotencyKeys, metadata.RunHistory[index].IdempotencyKey) {
+			return false
+		}
 	}
 	if metadata.RunDispositionRecord != nil {
 		run := metadata.RunDispositionRecord
-		if !safeToken(run.PrincipalProfileID) || run.HeadSHA != metadata.Handoff.HeadSHA || !safeToken(run.IdempotencyKey) ||
-			!validEvidenceRefs(run.EvidenceRefs) || !knownRunDisposition(run.Status) {
+		if !validMetadataRun(run, metadata.Handoff.HeadSHA, metadata.Coordinator) {
 			return false
 		}
 		if !addLifecycleKey(idempotencyKeys, run.IdempotencyKey) {
 			return false
 		}
+		if run.Status != authorityv1.RunCompleted && run.Status != authorityv1.RunInReview && metadata.LifecycleState != authorityv1.LifecycleInProgress {
+			return false
+		}
+		if run.Status == authorityv1.RunInReview && metadata.LifecycleState != authorityv1.LifecycleInReview {
+			return false
+		}
+	}
+	blockedFailure := currentBlockedFailure(metadata)
+	if blockedFailure == nil {
+		if metadata.Blocker != "" || len(metadata.BlockedBy) != 0 {
+			return false
+		}
+	} else if metadata.Blocker != blockedFailure.Reason || !equalMetadataStrings(metadata.BlockedBy, blockedFailure.BlockedBy) {
+		return false
 	}
 	if metadata.ReconciliationRecord != nil {
 		reconciliation := metadata.ReconciliationRecord
@@ -846,15 +934,87 @@ func validLifecycleRecords(metadata issueMetadata) bool {
 }
 
 func validArchivedReviewCycle(cycle metadataReviewCycle, verificationOrder []string, reviewerCount int) bool {
-	if !safeToken(cycle.Handoff.AttemptID) || !commitID(cycle.Handoff.HeadSHA) || !safeToken(cycle.Handoff.NextProfileID) ||
-		!safeToken(cycle.Handoff.IdempotencyKey) || !validEvidenceRefs(cycle.Handoff.EvidenceRefs) || cycle.Handoff.NextProfileID != verificationOrder[0] ||
-		len(cycle.Reviews) == 0 || len(cycle.Reviews) > reviewerCount || cycle.Reviews[len(cycle.Reviews)-1].Verdict != authorityv1.ReviewChangesRequested {
+	if !validMetadataHandoff(cycle.Handoff) || cycle.Handoff.NextProfileID != verificationOrder[0] || len(cycle.Reviews) > reviewerCount {
 		return false
 	}
 	for index, review := range cycle.Reviews {
 		if review.ReviewerProfileID != verificationOrder[index] || review.HeadSHA != cycle.Handoff.HeadSHA || !safeToken(review.IdempotencyKey) ||
-			!validEvidenceRefs(review.EvidenceRefs) || !knownReviewVerdict(review.Verdict) ||
+			!validEvidenceRefs(review.EvidenceRefs) || !validMetadataReviewFailure(review) ||
 			(index < len(cycle.Reviews)-1 && review.Verdict != authorityv1.ReviewAccepted) {
+			return false
+		}
+	}
+	for index := range cycle.RunHistory {
+		if !validMetadataRun(&cycle.RunHistory[index], cycle.Handoff.HeadSHA, verificationOrder[len(verificationOrder)-1]) || cycle.RunHistory[index].Status == authorityv1.RunCompleted {
+			return false
+		}
+	}
+	if cycle.RunDisposition != nil && (!validMetadataRun(cycle.RunDisposition, cycle.Handoff.HeadSHA, verificationOrder[len(verificationOrder)-1]) || cycle.RunDisposition.Status == authorityv1.RunCompleted) {
+		return false
+	}
+	lastReviewNonAccepted := len(cycle.Reviews) > 0 && cycle.Reviews[len(cycle.Reviews)-1].Verdict != authorityv1.ReviewAccepted
+	return lastReviewNonAccepted || cycle.RunDisposition != nil && cycle.RunDisposition.Status != authorityv1.RunCompleted
+}
+
+func validMetadataHandoff(handoff metadataHandoff) bool {
+	return safeToken(handoff.AttemptID) && safeToken(handoff.CanonicalClaimAttemptID) && isLowerHex(handoff.FenceDigest, 64) &&
+		commitID(handoff.HeadSHA) && safeToken(handoff.NextProfileID) && safeToken(handoff.IdempotencyKey) && validEvidenceRefs(handoff.EvidenceRefs)
+}
+
+func validMetadataReviewFailure(review metadataReview) bool {
+	if !knownReviewVerdict(review.Verdict) {
+		return false
+	}
+	if review.Verdict == authorityv1.ReviewBlocked {
+		return validMetadataFailure(review.Failure, true, true)
+	}
+	return review.Failure == nil
+}
+
+func validMetadataRun(run *metadataRunDisposition, headSHA, coordinator string) bool {
+	if run == nil || run.PrincipalProfileID != coordinator || run.HeadSHA != headSHA || !safeToken(run.IdempotencyKey) ||
+		!validEvidenceRefs(run.EvidenceRefs) || !knownRunDisposition(run.Status) {
+		return false
+	}
+	if run.Status == authorityv1.RunCompleted {
+		return run.Failure == nil
+	}
+	return validMetadataFailure(run.Failure, run.Status == authorityv1.RunBlocked, run.Status != authorityv1.RunInReview && run.Status != authorityv1.RunNoWork)
+}
+
+func validMetadataFailure(value *authorityv1.FailureContext, requireBlockedBy, requireFingerprint bool) bool {
+	if value == nil || !safeToken(value.Reason) || !safeToken(value.NextAction) || value.Attempt == 0 || value.Attempt > 2 ||
+		len(value.BlockedBy) > 16 || hasDuplicateStrings(value.BlockedBy) || requireBlockedBy && len(value.BlockedBy) == 0 ||
+		requireFingerprint && !safeToken(value.FailureFingerprint) || !requireFingerprint && value.FailureFingerprint != "" && !safeToken(value.FailureFingerprint) {
+		return false
+	}
+	for _, blocker := range value.BlockedBy {
+		if !safeToken(blocker) {
+			return false
+		}
+	}
+	return true
+}
+
+func currentBlockedFailure(metadata issueMetadata) *authorityv1.FailureContext {
+	if metadata.RunDispositionRecord != nil && metadata.RunDispositionRecord.Status == authorityv1.RunBlocked {
+		return metadata.RunDispositionRecord.Failure
+	}
+	if len(metadata.ReviewRecords) > 0 {
+		last := metadata.ReviewRecords[len(metadata.ReviewRecords)-1]
+		if last.Verdict == authorityv1.ReviewBlocked {
+			return last.Failure
+		}
+	}
+	return nil
+}
+
+func equalMetadataStrings(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for index := range left {
+		if left[index] != right[index] {
 			return false
 		}
 	}

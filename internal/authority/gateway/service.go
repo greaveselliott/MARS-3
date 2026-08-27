@@ -472,6 +472,9 @@ func normalizeWorkItem(item authorityv1.WorkItem) authorityv1.WorkItem {
 	if len(item.ReviewHistory) == 0 {
 		item.ReviewHistory = nil
 	}
+	if len(item.RunHistory) == 0 {
+		item.RunHistory = nil
+	}
 	return item
 }
 
