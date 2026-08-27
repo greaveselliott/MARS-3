@@ -480,3 +480,56 @@ typed lifecycle `in-progress`, WorkVersion mutation/dependency revisions
 `1/1`, and no lease field. This resolves the initially unknown comment-command
 outcome without retrying it; no canonical work mutation accompanied the
 comment append.
+
+## Lifecycle-completion implementation candidate
+
+The bounded v5 candidate now supplies the five lifecycle surfaces named by the
+completion audit: handoff, ordered review verdict, run disposition, merge
+reconciliation, and terminal transition. The public API and HTTP transport use
+typed requests. The gateway enforces profile capability, expected
+WorkVersion/integrity, immutable head, exact review order, idempotency across
+current and archived cycles, and the absence of an implementation lease during
+independent review and disposition. Handoff validates and releases the exact
+owning fence before one canonical CAS. It records both the current execution
+attempt and immutable canonical claim attempt; retry after a lost or rejected
+CAS cannot revive the released lease.
+
+The project-owned Beads adapter recomputes each allowed postimage and invokes
+one new `authority-transition` operation in the pinned Beads patch. The native
+operation revalidates issue, metadata, label, dependency, actor, backend, and
+direct embedded-M3 identity inside the transaction. It rejects server-backed
+and hook-wrapped stores before authority reads or writes. A
+`changes-requested` verdict archives the rejected review cycle and reopens the
+same Bead. `done` requires accepted QA and Security records, a completed run,
+merge reconciliation, and terminal evidence; the canonical claim attempt
+remains projected after close.
+
+Candidate material hashes:
+
+- lifecycle patch SHA-256:
+  `d8ce898daf237448dc32b0b7c1e40887617811245a82210b1059d6a5e3520568`;
+- locally built patched Beads binary SHA-256:
+  `5ba0667fd5ae5f132da4c4c80bc7091aa12110811923e9c693c375ed40fd3a61`.
+
+Candidate verification completed before the immutable checkpoint:
+
+- patched Beads lifecycle tests: four direct embedded cases passed; the
+  explicit server-backed case was present but skipped because the local Docker
+  service was unavailable;
+- project native-mutator integration executed the actual patched binary through
+  claim, handoff, QA, Security, completed run, reconciliation, and terminal
+  close: passed;
+- gateway, Beads, HTTP, and PostgreSQL package tests: passed;
+- the same authority packages under the Go race detector: passed;
+- unknown-effect regressions proved both safe retry after lease release and
+  successful canonical readback after an applied transition with a lost
+  receipt.
+
+The PostgreSQL active-lease integration now checks exact lookup, cross-tenant
+denial, release, and expiry, but it must execute without a skip in an
+independent environment with the synthetic PostgreSQL endpoints. The native
+server-backed lifecycle case must likewise execute without a skip. Scenario
+states remain `failing` until these non-skipped results, the full public commit
+gate, and independent QA and Security verdicts bind one signed immutable tree.
+No canonical Beads lifecycle, lease, or production effect was performed by
+this candidate verification.

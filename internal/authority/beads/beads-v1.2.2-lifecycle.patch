@@ -1,0 +1,823 @@
+diff --git a/cmd/bd/batch.go b/cmd/bd/batch.go
+index f1a5409a7..8a18885bc 100644
+--- a/cmd/bd/batch.go
++++ b/cmd/bd/batch.go
+@@ -63,0 +64 @@ Grammar (one command per line):
++  authority-transition <id> <key>=<value> ...
+@@ -272,0 +274,3 @@ func parseBatchScript(r io.Reader) ([]batchOp, error) {
++		case "authority-transition":
++			op.cmd = "authority-transition"
++			op.args = tokens[1:]
+@@ -287 +291 @@ func parseBatchScript(r io.Reader) ([]batchOp, error) {
+-			return nil, fmt.Errorf("line %d: unsupported batch command %q (supported: close, update, create, dep add, dep remove, bootstrap-claim, authority-claim)", lineNo, tokens[0])
++			return nil, fmt.Errorf("line %d: unsupported batch command %q (supported: close, update, create, dep add, dep remove, bootstrap-claim, authority-claim, authority-transition)", lineNo, tokens[0])
+@@ -360,0 +365,2 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
++	case "authority-transition":
++		return runAuthorityTransitionBatchOp(ctx, tx, op, actorName)
+@@ -906,0 +913,518 @@ func runAuthorityClaimBatchOp(ctx context.Context, tx storage.Transaction, op ba
++var authorityTransitionKeys = map[string]bool{
++	"expected_status":              true,
++	"expected_assignee":            true,
++	"expected_created_at":          true,
++	"expected_updated_at":          true,
++	"expected_metadata_sha256":     true,
++	"expected_labels_sha256":       true,
++	"expected_dependencies_sha256": true,
++	"transition_base64":            true,
++	"post_status":                  true,
++	"remove_label":                 true,
++	"add_label":                    true,
++	"post_metadata_base64":         true,
++}
++
++type authorityLifecycleTransition struct {
++	Operation               string   `json:"operation"`
++	PrincipalProfileID      string   `json:"principalProfileId"`
++	AttemptID               string   `json:"attemptId,omitempty"`
++	CanonicalClaimAttemptID string   `json:"canonicalClaimAttemptId,omitempty"`
++	HeadSHA                 string   `json:"headSHA"`
++	EvidenceRefs            []string `json:"evidenceRefs"`
++	NextProfileID           string   `json:"nextProfileId,omitempty"`
++	Verdict                 string   `json:"verdict,omitempty"`
++	RunStatus               string   `json:"runStatus,omitempty"`
++	MergedSHA               string   `json:"mergedSHA,omitempty"`
++	MergedTree              string   `json:"mergedTree,omitempty"`
++	PullRequestID           string   `json:"pullRequestId,omitempty"`
++	ProtectedMainRunID      string   `json:"protectedMainRunId,omitempty"`
++	IdempotencyKey          string   `json:"idempotencyKey"`
++}
++
++type lifecycleAuthorityTransaction interface {
++	BootstrapAuthority(context.Context) (string, bool, error)
++}
++
++func runAuthorityTransitionBatchOp(ctx context.Context, tx storage.Transaction, op batchOp, actor string) (batchOpResult, error) {
++	result := batchOpResult{Line: op.line, Op: op.cmd}
++	if err := verifyAuthorityDirectWorkspace(); err != nil {
++		return result, err
++	}
++	if len(op.args) != 1+len(authorityTransitionKeys) {
++		return result, fmt.Errorf("authority-transition requires <id> and exactly twelve key=value arguments")
++	}
++	id := op.args[0]
++	values := make(map[string]string, len(op.args)-1)
++	for _, token := range op.args[1:] {
++		parts := strings.SplitN(token, "=", 2)
++		if len(parts) != 2 || parts[0] == "" || !authorityTransitionKeys[parts[0]] {
++			return result, fmt.Errorf("authority-transition: invalid argument %q", token)
++		}
++		if _, exists := values[parts[0]]; exists {
++			return result, fmt.Errorf("authority-transition: duplicate argument %q", parts[0])
++		}
++		values[parts[0]] = parts[1]
++	}
++	if len(values) != len(authorityTransitionKeys) {
++		return result, fmt.Errorf("authority-transition: every required argument must occur exactly once")
++	}
++	authorityTx, ok := tx.(lifecycleAuthorityTransaction)
++	if !ok {
++		return result, fmt.Errorf("authority-transition: storage transaction lacks direct embedded lifecycle authority")
++	}
++	database, embedded, err := authorityTx.BootstrapAuthority(ctx)
++	if err != nil || !embedded || database != "M3" {
++		return result, fmt.Errorf("authority-transition: transaction is not the direct embedded M3 authority")
++	}
++	issue, err := tx.GetIssue(ctx, id)
++	if err != nil {
++		return result, fmt.Errorf("authority-transition: read issue: %w", err)
++	}
++	if string(issue.Status) != values["expected_status"] || issue.Assignee != values["expected_assignee"] ||
++		issue.CreatedAt.UTC().Format(time.RFC3339) != values["expected_created_at"] ||
++		issue.UpdatedAt.UTC().Format(time.RFC3339) != values["expected_updated_at"] {
++		return result, fmt.Errorf("authority-transition: issue precondition mismatch")
++	}
++	metadataDigest, err := canonicalJSONDigest(issue.Metadata)
++	if err != nil || metadataDigest != values["expected_metadata_sha256"] {
++		return result, fmt.Errorf("authority-transition: metadata precondition mismatch")
++	}
++	labels, err := tx.GetLabels(ctx, id)
++	if err != nil {
++		return result, fmt.Errorf("authority-transition: read labels: %w", err)
++	}
++	sort.Strings(labels)
++	labelsJSON, _ := json.Marshal(labels)
++	if digestBytes(labelsJSON) != values["expected_labels_sha256"] {
++		return result, fmt.Errorf("authority-transition: label precondition mismatch")
++	}
++	dependencies, err := tx.GetDependencyRecords(ctx, id)
++	if err != nil {
++		return result, fmt.Errorf("authority-transition: read dependencies: %w", err)
++	}
++	conditions := make([]authorityDependencyCondition, 0, len(dependencies))
++	for _, dependency := range dependencies {
++		dependencyIssue, readErr := tx.GetIssue(ctx, dependency.DependsOnID)
++		if readErr != nil {
++			return result, fmt.Errorf("authority-transition: read dependency: %w", readErr)
++		}
++		dependencyMetadataDigest, digestErr := canonicalJSONDigest(dependencyIssue.Metadata)
++		if digestErr != nil {
++			return result, fmt.Errorf("authority-transition: dependency metadata is invalid")
++		}
++		conditions = append(conditions, authorityDependencyCondition{
++			ID: dependency.DependsOnID, DependencyType: string(dependency.Type),
++			Status: string(dependencyIssue.Status), MetadataSHA256: dependencyMetadataDigest,
++		})
++	}
++	sort.Slice(conditions, func(i, j int) bool {
++		if conditions[i].ID == conditions[j].ID {
++			return conditions[i].DependencyType < conditions[j].DependencyType
++		}
++		return conditions[i].ID < conditions[j].ID
++	})
++	dependenciesJSON, _ := json.Marshal(conditions)
++	if digestBytes(dependenciesJSON) != values["expected_dependencies_sha256"] {
++		return result, fmt.Errorf("authority-transition: dependency precondition mismatch")
++	}
++	transitionRaw, err := base64.RawStdEncoding.DecodeString(values["transition_base64"])
++	if err != nil || rejectDuplicateAuthorityJSONKeys(transitionRaw) != nil {
++		return result, fmt.Errorf("authority-transition: transition is not strict unpadded base64 JSON")
++	}
++	var transition authorityLifecycleTransition
++	decoder := json.NewDecoder(bytes.NewReader(transitionRaw))
++	decoder.DisallowUnknownFields()
++	if decoder.Decode(&transition) != nil {
++		return result, fmt.Errorf("authority-transition: transition schema is invalid")
++	}
++	if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) || !validAuthorityLifecycleTransition(transition) || transition.PrincipalProfileID != actor {
++		return result, fmt.Errorf("authority-transition: transition authority is invalid")
++	}
++	postMetadata, err := base64.RawStdEncoding.DecodeString(values["post_metadata_base64"])
++	if err != nil || rejectDuplicateAuthorityJSONKeys(postMetadata) != nil {
++		return result, fmt.Errorf("authority-transition: post metadata is not strict unpadded base64 JSON")
++	}
++	expectedMetadata, postStatus, removeLabel, addLabel, err := authorityTransitionPostMetadata(issue.Metadata, transition)
++	if err != nil || values["post_status"] != postStatus || values["remove_label"] != removeLabel || values["add_label"] != addLabel {
++		return result, fmt.Errorf("authority-transition: transition does not match the bounded lifecycle operation")
++	}
++	expectedDigest, expectedErr := canonicalJSONDigest(expectedMetadata)
++	providedDigest, providedErr := canonicalJSONDigest(postMetadata)
++	if expectedErr != nil || providedErr != nil || expectedDigest != providedDigest {
++		return result, fmt.Errorf("authority-transition: post metadata does not match the bounded transition")
++	}
++	if postStatus == "closed" {
++		if err := tx.CloseIssue(ctx, id, "MARS-3 lifecycle completed", actor, ""); err != nil {
++			return result, fmt.Errorf("authority-transition: close issue: %w", err)
++		}
++	} else if string(issue.Status) != postStatus {
++		if err := tx.UpdateIssue(ctx, id, map[string]interface{}{"status": postStatus}, actor); err != nil {
++			return result, fmt.Errorf("authority-transition: issue update: %w", err)
++		}
++	}
++	if err := tx.UpdateIssue(ctx, id, map[string]interface{}{"metadata": json.RawMessage(postMetadata)}, actor); err != nil {
++		return result, fmt.Errorf("authority-transition: metadata update: %w", err)
++	}
++	if removeLabel != "" {
++		if err := tx.RemoveLabel(ctx, id, removeLabel, actor); err != nil {
++			return result, fmt.Errorf("authority-transition: remove lifecycle label: %w", err)
++		}
++	}
++	if addLabel != "" {
++		if err := tx.AddLabel(ctx, id, addLabel, actor); err != nil {
++			return result, fmt.Errorf("authority-transition: add lifecycle label: %w", err)
++		}
++	}
++	result.Target = id
++	return result, nil
++}
++
++func validAuthorityLifecycleTransition(value authorityLifecycleTransition) bool {
++	if !authorityToken(value.PrincipalProfileID) || !authorityCommit(value.HeadSHA) || !authorityToken(value.IdempotencyKey) ||
++		len(value.EvidenceRefs) == 0 || len(value.EvidenceRefs) > 16 {
++		return false
++	}
++	seen := map[string]bool{}
++	for _, reference := range value.EvidenceRefs {
++		if !authorityToken(reference) || seen[reference] {
++			return false
++		}
++		seen[reference] = true
++	}
++	noMerge := value.MergedSHA == "" && value.MergedTree == "" && value.PullRequestID == "" && value.ProtectedMainRunID == ""
++	switch value.Operation {
++	case "handoff":
++		return authorityToken(value.AttemptID) && authorityToken(value.CanonicalClaimAttemptID) && authorityToken(value.NextProfileID) && value.Verdict == "" && value.RunStatus == "" && noMerge
++	case "review-verdict":
++		return value.AttemptID == "" && value.CanonicalClaimAttemptID == "" && value.NextProfileID == "" &&
++			(value.Verdict == "accepted" || value.Verdict == "changes-requested" || value.Verdict == "blocked") && value.RunStatus == "" && noMerge
++	case "run-disposition":
++		return value.AttemptID == "" && value.CanonicalClaimAttemptID == "" && value.NextProfileID == "" && value.Verdict == "" &&
++			authorityRunStatus(value.RunStatus) && noMerge
++	case "reconciliation":
++		return value.AttemptID == "" && value.CanonicalClaimAttemptID == "" && value.NextProfileID == "" && value.Verdict == "" && value.RunStatus == "" &&
++			authorityCommit(value.MergedSHA) && authorityCommit(value.MergedTree) && authorityToken(value.PullRequestID) && authorityToken(value.ProtectedMainRunID)
++	case "terminal-transition":
++		return value.AttemptID == "" && value.CanonicalClaimAttemptID == "" && value.NextProfileID == "" && value.Verdict == "" && value.RunStatus == "" && noMerge
++	default:
++		return false
++	}
++}
++
++func authorityTransitionPostMetadata(pre []byte, transition authorityLifecycleTransition) ([]byte, string, string, string, error) {
++	if rejectDuplicateAuthorityJSONKeys(pre) != nil {
++		return nil, "", "", "", fmt.Errorf("invalid metadata")
++	}
++	decoder := json.NewDecoder(bytes.NewReader(pre))
++	decoder.UseNumber()
++	var values map[string]interface{}
++	if decoder.Decode(&values) != nil || authorityLifecycleKeyUsed(values, transition.IdempotencyKey) {
++		return nil, "", "", "", fmt.Errorf("invalid lifecycle metadata")
++	}
++	version, ok := authorityObject(values["workVersion"])
++	if !ok || authorityString(version["authorityGeneration"]) == "" || authorityString(version["issueIncarnation"]) == "" {
++		return nil, "", "", "", fmt.Errorf("invalid WorkVersion")
++	}
++	sequenceNumber, ok := version["issueMutationSequence"].(json.Number)
++	if !ok {
++		return nil, "", "", "", fmt.Errorf("invalid mutation sequence")
++	}
++	sequence, err := strconv.ParseUint(sequenceNumber.String(), 10, 64)
++	if err != nil || sequence == 0 || sequence == ^uint64(0) {
++		return nil, "", "", "", fmt.Errorf("invalid mutation sequence")
++	}
++	verification, ok := authorityStrings(values["verificationOrder"])
++	if !ok || len(verification) < 3 || authorityString(values["coordinator"]) != verification[len(verification)-1] {
++		return nil, "", "", "", fmt.Errorf("invalid verification order")
++	}
++	postStatus, removeLabel, addLabel := "in_progress", "", ""
++	switch transition.Operation {
++	case "handoff":
++		claim := authorityClaimBinding(values)
++		if authorityString(values["lifecycleState"]) != "in-progress" || transition.PrincipalProfileID == "" || transition.NextProfileID != verification[0] ||
++			claim == nil || authorityString(claim["attemptId"]) != transition.CanonicalClaimAttemptID {
++			return nil, "", "", "", fmt.Errorf("invalid handoff preimage")
++		}
++		if existing, exists := values["handoff"]; exists {
++			reviews, reviewsOK := authorityArray(values["reviewRecords"])
++			if _, handoffOK := authorityObject(existing); !handoffOK || !reviewsOK || len(reviews) == 0 || authorityStringValue(reviews[len(reviews)-1], "verdict") != "changes-requested" {
++				return nil, "", "", "", fmt.Errorf("invalid rework history")
++			}
++			history, historyOK := authorityOptionalArray(values["reviewHistory"])
++			if !historyOK {
++				return nil, "", "", "", fmt.Errorf("invalid review history")
++			}
++			values["reviewHistory"] = append(history, map[string]interface{}{"handoff": existing, "reviews": reviews})
++		}
++		values["lifecycleState"] = "in-review"
++		values["handoff"] = map[string]interface{}{
++			"attemptId": transition.AttemptID, "headSHA": transition.HeadSHA, "evidenceRefs": transition.EvidenceRefs,
++			"nextProfileId": transition.NextProfileID, "idempotencyKey": transition.IdempotencyKey,
++		}
++		for _, key := range []string{"reviewRecords", "reviewAccepted", "runDisposition", "runDispositionRecord", "reconciled", "reconciliationRecord", "terminalRecord"} {
++			delete(values, key)
++		}
++		removeLabel, addLabel = "in-progress", "in-review"
++	case "review-verdict":
++		handoff, handoffOK := authorityObject(values["handoff"])
++		reviews, reviewsOK := authorityOptionalArray(values["reviewRecords"])
++		if authorityString(values["lifecycleState"]) != "in-review" || !handoffOK || !reviewsOK || authorityString(handoff["headSHA"]) != transition.HeadSHA ||
++			len(reviews) >= len(verification)-1 || verification[len(reviews)] != transition.PrincipalProfileID {
++			return nil, "", "", "", fmt.Errorf("invalid review preimage")
++		}
++		reviews = append(reviews, map[string]interface{}{
++			"reviewerProfileId": transition.PrincipalProfileID, "verdict": transition.Verdict, "headSHA": transition.HeadSHA,
++			"evidenceRefs": transition.EvidenceRefs, "idempotencyKey": transition.IdempotencyKey,
++		})
++		values["reviewRecords"] = reviews
++		delete(values, "reviewAccepted")
++		if transition.Verdict == "changes-requested" {
++			values["lifecycleState"] = "in-progress"
++			removeLabel, addLabel = "in-review", "in-progress"
++		} else if transition.Verdict == "accepted" && len(reviews) == len(verification)-1 {
++			values["reviewAccepted"] = true
++		}
++	case "run-disposition":
++		if !authorityAcceptedReviewChain(values, verification, transition.HeadSHA) || transition.PrincipalProfileID != verification[len(verification)-1] {
++			return nil, "", "", "", fmt.Errorf("invalid run preimage")
++		}
++		if _, exists := values["runDispositionRecord"]; exists {
++			return nil, "", "", "", fmt.Errorf("run already recorded")
++		}
++		values["runDisposition"] = transition.RunStatus
++		values["runDispositionRecord"] = map[string]interface{}{
++			"principalProfileId": transition.PrincipalProfileID, "status": transition.RunStatus, "headSHA": transition.HeadSHA,
++			"evidenceRefs": transition.EvidenceRefs, "idempotencyKey": transition.IdempotencyKey,
++		}
++	case "reconciliation":
++		run, runOK := authorityObject(values["runDispositionRecord"])
++		if !authorityAcceptedReviewChain(values, verification, transition.HeadSHA) || !runOK || authorityString(run["status"]) != "completed" ||
++			transition.PrincipalProfileID != verification[len(verification)-1] {
++			return nil, "", "", "", fmt.Errorf("invalid reconciliation preimage")
++		}
++		if _, exists := values["reconciliationRecord"]; exists {
++			return nil, "", "", "", fmt.Errorf("reconciliation already recorded")
++		}
++		values["reconciled"] = true
++		values["reconciliationRecord"] = map[string]interface{}{
++			"principalProfileId": transition.PrincipalProfileID, "headSHA": transition.HeadSHA, "mergedSHA": transition.MergedSHA,
++			"mergedTree": transition.MergedTree, "pullRequestId": transition.PullRequestID, "protectedMainRunId": transition.ProtectedMainRunID,
++			"evidenceRefs": transition.EvidenceRefs, "idempotencyKey": transition.IdempotencyKey,
++		}
++	case "terminal-transition":
++		run, runOK := authorityObject(values["runDispositionRecord"])
++		_, reconciliationOK := authorityObject(values["reconciliationRecord"])
++		if !authorityAcceptedReviewChain(values, verification, transition.HeadSHA) || !runOK || authorityString(run["status"]) != "completed" ||
++			!reconciliationOK || transition.PrincipalProfileID != verification[len(verification)-1] {
++			return nil, "", "", "", fmt.Errorf("invalid terminal preimage")
++		}
++		if _, exists := values["terminalRecord"]; exists {
++			return nil, "", "", "", fmt.Errorf("terminal already recorded")
++		}
++		values["lifecycleState"] = "done"
++		values["reviewAccepted"] = true
++		values["terminalRecord"] = map[string]interface{}{
++			"principalProfileId": transition.PrincipalProfileID, "headSHA": transition.HeadSHA,
++			"evidenceRefs": transition.EvidenceRefs, "idempotencyKey": transition.IdempotencyKey,
++		}
++		postStatus, removeLabel, addLabel = "closed", "in-review", "done"
++	default:
++		return nil, "", "", "", fmt.Errorf("unsupported lifecycle operation")
++	}
++	version["issueMutationSequence"] = json.Number(strconv.FormatUint(sequence+1, 10))
++	post, err := json.Marshal(values)
++	return post, postStatus, removeLabel, addLabel, err
++}
++
++func authorityAcceptedReviewChain(values map[string]interface{}, verification []string, headSHA string) bool {
++	if authorityString(values["lifecycleState"]) != "in-review" {
++		return false
++	}
++	handoff, ok := authorityObject(values["handoff"])
++	if !ok || authorityString(handoff["headSHA"]) != headSHA {
++		return false
++	}
++	reviews, ok := authorityArray(values["reviewRecords"])
++	if !ok || len(reviews) != len(verification)-1 {
++		return false
++	}
++	for index, raw := range reviews {
++		review, ok := authorityObject(raw)
++		if !ok || authorityString(review["reviewerProfileId"]) != verification[index] || authorityString(review["verdict"]) != "accepted" || authorityString(review["headSHA"]) != headSHA {
++			return false
++		}
++	}
++	return true
++}
++
++func authorityClaimBinding(values map[string]interface{}) map[string]interface{} {
++	if value, ok := authorityObject(values["workClaim"]); ok {
++		return value
++	}
++	value, _ := authorityObject(values["bootstrapClaim"])
++	return value
++}
++
++func authorityLifecycleKeyUsed(values map[string]interface{}, key string) bool {
++	for _, field := range []string{"handoff", "runDispositionRecord", "reconciliationRecord", "terminalRecord"} {
++		if record, ok := authorityObject(values[field]); ok && authorityString(record["idempotencyKey"]) == key {
++			return true
++		}
++	}
++	if reviews, ok := authorityOptionalArray(values["reviewRecords"]); ok {
++		for _, raw := range reviews {
++			if authorityStringValue(raw, "idempotencyKey") == key {
++				return true
++			}
++		}
++	}
++	if history, ok := authorityOptionalArray(values["reviewHistory"]); ok {
++		for _, raw := range history {
++			cycle, cycleOK := authorityObject(raw)
++			if !cycleOK {
++				return true
++			}
++			if handoff, handoffOK := authorityObject(cycle["handoff"]); handoffOK && authorityString(handoff["idempotencyKey"]) == key {
++				return true
++			}
++			if reviews, reviewsOK := authorityArray(cycle["reviews"]); reviewsOK {
++				for _, review := range reviews {
++					if authorityStringValue(review, "idempotencyKey") == key {
++						return true
++					}
++				}
++			}
++		}
++	}
++	return false
++}
++
++func authorityObject(value interface{}) (map[string]interface{}, bool) {
++	result, ok := value.(map[string]interface{})
++	return result, ok
++}
++
++func authorityArray(value interface{}) ([]interface{}, bool) {
++	result, ok := value.([]interface{})
++	return result, ok
++}
++
++func authorityOptionalArray(value interface{}) ([]interface{}, bool) {
++	if value == nil {
++		return []interface{}{}, true
++	}
++	return authorityArray(value)
++}
++
++func authorityStrings(value interface{}) ([]string, bool) {
++	raw, ok := authorityArray(value)
++	if !ok {
++		return nil, false
++	}
++	result := make([]string, len(raw))
++	for index, value := range raw {
++		result[index], ok = value.(string)
++		if !ok || !authorityToken(result[index]) {
++			return nil, false
++		}
++	}
++	return result, true
++}
++
++func authorityString(value interface{}) string {
++	result, _ := value.(string)
++	return result
++}
++
++func authorityStringValue(value interface{}, key string) string {
++	record, _ := authorityObject(value)
++	return authorityString(record[key])
++}
++
++func authorityToken(value string) bool {
++	if len(value) == 0 || len(value) > 128 {
++		return false
++	}
++	for index := range value {
++		character := value[index]
++		if !(character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z' || character >= '0' && character <= '9' || strings.ContainsRune("._:-", rune(character))) {
++			return false
++		}
++	}
++	return true
++}
++
++func authorityCommit(value string) bool {
++	if len(value) != 40 && len(value) != 64 {
++		return false
++	}
++	for index := range value {
++		if !(value[index] >= '0' && value[index] <= '9' || value[index] >= 'a' && value[index] <= 'f') {
++			return false
++		}
++	}
++	return true
++}
++
++func authorityRunStatus(value string) bool {
++	switch value {
++	case "completed", "blocked", "in-review", "changes-requested", "no-work", "preempted", "cancelled", "failed":
++		return true
++	default:
++		return false
++	}
++}
++
++func rejectDuplicateAuthorityJSONKeys(raw []byte) error {
++	decoder := json.NewDecoder(bytes.NewReader(raw))
++	var visit func() error
++	visit = func() error {
++		token, err := decoder.Token()
++		if err != nil {
++			return err
++		}
++		delimiter, composite := token.(json.Delim)
++		if !composite {
++			return nil
++		}
++		switch delimiter {
++		case '{':
++			seen := map[string]bool{}
++			for decoder.More() {
++				keyToken, err := decoder.Token()
++				if err != nil {
++					return err
++				}
++				key, ok := keyToken.(string)
++				if !ok || seen[key] {
++					return fmt.Errorf("duplicate JSON key")
++				}
++				seen[key] = true
++				if err := visit(); err != nil {
++					return err
++				}
++			}
++			_, err := decoder.Token()
++			return err
++		case '[':
++			for decoder.More() {
++				if err := visit(); err != nil {
++					return err
++				}
++			}
++			_, err := decoder.Token()
++			return err
++		default:
++			return fmt.Errorf("invalid JSON delimiter")
++		}
++	}
++	if err := visit(); err != nil {
++		return err
++	}
++	if _, err := decoder.Token(); !errors.Is(err, io.EOF) {
++		return fmt.Errorf("trailing JSON")
++	}
++	return nil
++}
++
+diff --git a/cmd/bd/batch_embedded_test.go b/cmd/bd/batch_embedded_test.go
+index 34f2e8fa8..415e4e339 100644
+--- a/cmd/bd/batch_embedded_test.go
++++ b/cmd/bd/batch_embedded_test.go
+@@ -556,0 +557,283 @@ func TestBatchAuthorityClaimContentionHasOneWinner(t *testing.T) {
++func TestBatchAuthorityLifecycleIsOneBoundedTransitionChain(t *testing.T) {
++	previousActor := actor
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	store := newEmbeddedBootstrapTestStore(t, root)
++	authorizeAuthorityClaimWorkspace(t, root)
++	ctx := context.Background()
++	issue := seedAuthorityLifecycleFixture(t, store, ctx)
++	firstHead := strings.Repeat("a", 40)
++
++	setActor("work-authority-engineer")
++	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1",
++		CanonicalClaimAttemptID: "canonical-attempt", HeadSHA: firstHead, EvidenceRefs: []string{"evidence-handoff"},
++		NextProfileID: "qa", IdempotencyKey: "handoff-1",
++	})
++	setActor("qa")
++	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
++		Operation: "review-verdict", PrincipalProfileID: "qa", HeadSHA: firstHead, Verdict: "accepted",
++		EvidenceRefs: []string{"evidence-qa"}, IdempotencyKey: "review-qa",
++	})
++	setActor("security-reviewer")
++	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
++		Operation: "review-verdict", PrincipalProfileID: "security-reviewer", HeadSHA: firstHead, Verdict: "accepted",
++		EvidenceRefs: []string{"evidence-security"}, IdempotencyKey: "review-security",
++	})
++	setActor("delivery-orchestrator")
++	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
++		Operation: "run-disposition", PrincipalProfileID: "delivery-orchestrator", HeadSHA: firstHead, RunStatus: "completed",
++		EvidenceRefs: []string{"evidence-run"}, IdempotencyKey: "run-completed",
++	})
++	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
++		Operation: "reconciliation", PrincipalProfileID: "delivery-orchestrator", HeadSHA: firstHead,
++		MergedSHA: strings.Repeat("b", 40), MergedTree: strings.Repeat("c", 40), PullRequestID: "pr-009", ProtectedMainRunID: "run-009",
++		EvidenceRefs: []string{"evidence-merge"}, IdempotencyKey: "reconciled",
++	})
++	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
++		Operation: "terminal-transition", PrincipalProfileID: "delivery-orchestrator", HeadSHA: firstHead,
++		EvidenceRefs: []string{"evidence-terminal"}, IdempotencyKey: "terminal-done",
++	})
++
++	got, err := store.GetIssue(ctx, issue.ID)
++	if err != nil {
++		t.Fatal(err)
++	}
++	var metadata map[string]interface{}
++	if json.Unmarshal(got.Metadata, &metadata) != nil || got.Status != types.StatusClosed || metadataStringForTest(got.Metadata, "lifecycleState") != "done" ||
++		metadata["workVersion"].(map[string]interface{})["issueMutationSequence"] != float64(8) ||
++		metadata["terminalRecord"].(map[string]interface{})["evidenceRefs"].([]interface{})[0] != "evidence-terminal" {
++		t.Fatalf("terminal postimage=%s/%s", got.Status, got.Metadata)
++	}
++	labels, err := store.GetLabels(ctx, issue.ID)
++	if err != nil {
++		t.Fatal(err)
++	}
++	sort.Strings(labels)
++	if strings.Join(labels, ",") != "done" {
++		t.Fatalf("terminal labels=%v", labels)
++	}
++}
++
++func TestBatchAuthorityLifecycleChangesRequestedPreservesHistory(t *testing.T) {
++	previousActor := actor
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	store := newEmbeddedBootstrapTestStore(t, root)
++	authorizeAuthorityClaimWorkspace(t, root)
++	ctx := context.Background()
++	issue := seedAuthorityLifecycleFixture(t, store, ctx)
++	firstHead, secondHead := strings.Repeat("a", 40), strings.Repeat("b", 40)
++	setActor("work-authority-engineer")
++	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt",
++		HeadSHA: firstHead, EvidenceRefs: []string{"evidence-first"}, NextProfileID: "qa", IdempotencyKey: "handoff-first",
++	})
++	setActor("qa")
++	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
++		Operation: "review-verdict", PrincipalProfileID: "qa", HeadSHA: firstHead, Verdict: "changes-requested",
++		EvidenceRefs: []string{"evidence-changes"}, IdempotencyKey: "review-changes",
++	})
++	setActor("work-authority-engineer")
++	applyAuthorityTransitionForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-2", CanonicalClaimAttemptID: "canonical-attempt",
++		HeadSHA: secondHead, EvidenceRefs: []string{"evidence-second"}, NextProfileID: "qa", IdempotencyKey: "handoff-second",
++	})
++	got, err := store.GetIssue(ctx, issue.ID)
++	if err != nil {
++		t.Fatal(err)
++	}
++	var metadata map[string]interface{}
++	if json.Unmarshal(got.Metadata, &metadata) != nil {
++		t.Fatal("invalid metadata")
++	}
++	history, ok := metadata["reviewHistory"].([]interface{})
++	if !ok || len(history) != 1 || metadataStringForTest(got.Metadata, "lifecycleState") != "in-review" {
++		t.Fatalf("rework history=%s", got.Metadata)
++	}
++}
++
++func TestBatchAuthorityLifecycleRollbackAndContentionFailClosed(t *testing.T) {
++	previousActor := actor
++	setActor("work-authority-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	store := newEmbeddedBootstrapTestStore(t, root)
++	authorizeAuthorityClaimWorkspace(t, root)
++	ctx := context.Background()
++	issue := seedAuthorityLifecycleFixture(t, store, ctx)
++	transition := authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt",
++		HeadSHA: strings.Repeat("a", 40), EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff-1",
++	}
++	script := authorityTransitionScriptForTest(t, store, ctx, issue.ID, transition) + "dep add DOES-NOT-EXIST ALSO-MISSING\n"
++	if err := runBatchScriptInTx(t, ctx, store, script); err == nil {
++		t.Fatal("post-transition failure did not roll back")
++	}
++	assertAuthorityLifecycleState(t, store, issue.ID, types.StatusInProgress, "in-progress", 2)
++
++	script = authorityTransitionScriptForTest(t, store, ctx, issue.ID, transition)
++	start := make(chan struct{})
++	results := make(chan error, 2)
++	for range 2 {
++		go func() {
++			<-start
++			results <- runBatchScriptInTx(t, ctx, store, script)
++		}()
++	}
++	close(start)
++	winners := 0
++	for range 2 {
++		if err := <-results; err == nil {
++			winners++
++		}
++	}
++	if winners != 1 {
++		t.Fatalf("lifecycle contention winners=%d, want one", winners)
++	}
++	assertAuthorityLifecycleState(t, store, issue.ID, types.StatusInProgress, "in-review", 3)
++}
++
++func TestBatchAuthorityLifecycleHookWrapperHasNoAuthority(t *testing.T) {
++	previousActor := actor
++	setActor("work-authority-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	store := newEmbeddedBootstrapTestStore(t, root)
++	authorizeAuthorityClaimWorkspace(t, root)
++	ctx := context.Background()
++	issue := seedAuthorityLifecycleFixture(t, store, ctx)
++	script := authorityTransitionScriptForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt",
++		HeadSHA: strings.Repeat("a", 40), EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff-1",
++	})
++	hooksDir := filepath.Join(root, ".beads", "hooks")
++	if err := os.MkdirAll(hooksDir, 0o700); err != nil {
++		t.Fatal(err)
++	}
++	sentinel := filepath.Join(root, "lifecycle-hook-fired")
++	t.Setenv("MARS3_HOOK_SENTINEL", sentinel)
++	if err := os.WriteFile(filepath.Join(hooksDir, "on_update"), []byte("#!/bin/sh\n/usr/bin/touch \"$MARS3_HOOK_SENTINEL\"\n"), 0o700); err != nil {
++		t.Fatal(err)
++	}
++	wrapped := storage.NewHookFiringStore(store, hooks.NewRunner(hooksDir))
++	if err := runBatchScriptInTx(t, ctx, wrapped, script); err == nil {
++		t.Fatal("hook-wrapped transaction received lifecycle authority")
++	}
++	assertAuthorityLifecycleState(t, store, issue.ID, types.StatusInProgress, "in-progress", 2)
++	time.Sleep(100 * time.Millisecond)
++	if _, err := os.Lstat(sentinel); !os.IsNotExist(err) {
++		t.Fatalf("rejected lifecycle transition executed hook: %v", err)
++	}
++}
++
++func TestBatchAuthorityLifecycleServerTransactionFailsBeforeRead(t *testing.T) {
++	previousActor := actor
++	setActor("work-authority-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	store := newTestStoreWithPrefix(t, filepath.Join(root, ".beads", "beads.db"), "tbc")
++	authorizeAuthorityClaimWorkspace(t, root)
++	ctx := context.Background()
++	issue := seedAuthorityLifecycleFixture(t, store, ctx)
++	script := authorityTransitionScriptForTest(t, store, ctx, issue.ID, authorityLifecycleTransition{
++		Operation: "handoff", PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-attempt-1", CanonicalClaimAttemptID: "canonical-attempt",
++		HeadSHA: strings.Repeat("a", 40), EvidenceRefs: []string{"evidence-handoff"}, NextProfileID: "qa", IdempotencyKey: "handoff-1",
++	})
++	wrapped := storage.NewHookFiringStore(store, nil)
++	if err := runBatchScriptInTx(t, ctx, wrapped, script); err == nil {
++		t.Fatal("server-backed transaction received lifecycle authority")
++	}
++	assertAuthorityLifecycleState(t, store, issue.ID, types.StatusInProgress, "in-progress", 2)
++}
++
++func seedAuthorityLifecycleFixture(t *testing.T, store storage.DoltStorage, ctx context.Context) *types.Issue {
++	t.Helper()
++	issue := seedBootstrapClaimFixture(t, store, ctx)
++	metadata := json.RawMessage(`{"schemaVersion":1,"displayId":"W-002","lifecycleState":"in-progress","goalIds":["G-001"],"productDecisionIds":["PD-002"],"featureId":"F-002","scenarioIds":["F-002-S2"],"exclusivePaths":["internal/authority/**"],"verificationOrder":["qa","security-reviewer","delivery-orchestrator"],"workVersion":{"authorityGeneration":"fixture-generation","dependencyGraphRevision":1,"issueIncarnation":"fixture-incarnation","issueMutationSequence":2},"workClaim":{"attemptId":"canonical-attempt","baseCommit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","idempotencyKey":"claim-key"},"risk":"high","workType":"feature","coordinator":"delivery-orchestrator","failureOwnership":"foundation","publicDisclosure":true}`)
++	if err := store.UpdateIssue(ctx, issue.ID, map[string]interface{}{"status": "in_progress", "assignee": "work-authority-engineer", "metadata": metadata}, "test"); err != nil {
++		t.Fatalf("seed lifecycle issue: %v", err)
++	}
++	if err := store.RemoveLabel(ctx, issue.ID, "backlog", "test"); err != nil {
++		t.Fatal(err)
++	}
++	if err := store.AddLabel(ctx, issue.ID, "in-progress", "test"); err != nil {
++		t.Fatal(err)
++	}
++	issue, err := store.GetIssue(ctx, issue.ID)
++	if err != nil {
++		t.Fatal(err)
++	}
++	return issue
++}
++
++func authorityTransitionScriptForTest(t *testing.T, store storage.DoltStorage, ctx context.Context, id string, transition authorityLifecycleTransition) string {
++	t.Helper()
++	issue, err := store.GetIssue(ctx, id)
++	if err != nil {
++		t.Fatal(err)
++	}
++	metadataDigest, err := canonicalJSONDigest(issue.Metadata)
++	if err != nil {
++		t.Fatal(err)
++	}
++	labels, err := store.GetLabels(ctx, id)
++	if err != nil {
++		t.Fatal(err)
++	}
++	sort.Strings(labels)
++	labelsJSON, _ := json.Marshal(labels)
++	dependencies, err := store.GetDependencyRecords(ctx, id)
++	if err != nil {
++		t.Fatal(err)
++	}
++	conditions := make([]authorityDependencyCondition, 0, len(dependencies))
++	for _, dependency := range dependencies {
++		dependencyIssue, err := store.GetIssue(ctx, dependency.DependsOnID)
++		if err != nil {
++			t.Fatal(err)
++		}
++		dependencyDigest, err := canonicalJSONDigest(dependencyIssue.Metadata)
++		if err != nil {
++			t.Fatal(err)
++		}
++		conditions = append(conditions, authorityDependencyCondition{ID: dependency.DependsOnID, DependencyType: string(dependency.Type), Status: string(dependencyIssue.Status), MetadataSHA256: dependencyDigest})
++	}
++	sort.Slice(conditions, func(i, j int) bool {
++		if conditions[i].ID == conditions[j].ID {
++			return conditions[i].DependencyType < conditions[j].DependencyType
++		}
++		return conditions[i].ID < conditions[j].ID
++	})
++	dependenciesJSON, _ := json.Marshal(conditions)
++	transitionJSON, _ := json.Marshal(transition)
++	post, postStatus, removeLabel, addLabel, err := authorityTransitionPostMetadata(issue.Metadata, transition)
++	if err != nil {
++		t.Fatal(err)
++	}
++	return fmt.Sprintf("authority-transition %s expected_status=%s expected_assignee=%s expected_created_at=%s expected_updated_at=%s expected_metadata_sha256=%s expected_labels_sha256=%s expected_dependencies_sha256=%s transition_base64=%s post_status=%s remove_label=%s add_label=%s post_metadata_base64=%s\n",
++		id, issue.Status, issue.Assignee, issue.CreatedAt.UTC().Format(time.RFC3339), issue.UpdatedAt.UTC().Format(time.RFC3339), metadataDigest,
++		digestBytes(labelsJSON), digestBytes(dependenciesJSON), base64.RawStdEncoding.EncodeToString(transitionJSON), postStatus, removeLabel, addLabel,
++		base64.RawStdEncoding.EncodeToString(post))
++}
++
++func applyAuthorityTransitionForTest(t *testing.T, store storage.DoltStorage, ctx context.Context, id string, transition authorityLifecycleTransition) {
++	t.Helper()
++	if err := runBatchScriptInTx(t, ctx, store, authorityTransitionScriptForTest(t, store, ctx, id, transition)); err != nil {
++		t.Fatalf("%s: %v", transition.Operation, err)
++	}
++}
++
++func assertAuthorityLifecycleState(t *testing.T, store storage.DoltStorage, id string, status types.Status, lifecycle string, sequence float64) {
++	t.Helper()
++	issue, err := store.GetIssue(t.Context(), id)
++	if err != nil {
++		t.Fatal(err)
++	}
++	var metadata map[string]interface{}
++	if json.Unmarshal(issue.Metadata, &metadata) != nil || issue.Status != status || metadataStringForTest(issue.Metadata, "lifecycleState") != lifecycle ||
++		metadata["workVersion"].(map[string]interface{})["issueMutationSequence"] != sequence {
++		t.Fatalf("authority lifecycle state=%s/%s", issue.Status, issue.Metadata)
++	}
++}
++

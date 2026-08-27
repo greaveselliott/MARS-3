@@ -405,6 +405,46 @@ func TestNativeMutatorIntegration(t *testing.T) {
 	if _, err := store.CompareAndSwapClaim(context.Background(), mutation); !errors.Is(err, gateway.ErrStaleWorkVersion) {
 		t.Fatalf("replayed stale claim error=%v", err)
 	}
+	head := strings.Repeat("b", 40)
+	applyLifecycle := func(current authorityv1.WorkItem, transition gateway.LifecycleMutation) authorityv1.WorkItem {
+		t.Helper()
+		transition.TenantID, transition.ProjectID, transition.BeadID = "tenant-fixture", "project-fixture", current.BeadID
+		transition.ExpectedVersion, transition.ExpectedIntegrity = current.Version, current.Integrity
+		next, err := store.CompareAndSwapLifecycle(context.Background(), transition)
+		if err != nil {
+			t.Fatalf("native %s: %v", transition.Operation, err)
+		}
+		return next
+	}
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleHandoff, PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-native-001",
+		CanonicalClaimAttemptID: mutation.AttemptID, HeadSHA: head, EvidenceRefs: []string{"evidence-handoff"},
+		NextProfileID: "qa", IdempotencyKey: "handoff-native",
+	})
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleReview, PrincipalProfileID: "qa", HeadSHA: head, Verdict: authorityv1.ReviewAccepted,
+		EvidenceRefs: []string{"evidence-qa"}, IdempotencyKey: "review-qa-native",
+	})
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleReview, PrincipalProfileID: "security-reviewer", HeadSHA: head, Verdict: authorityv1.ReviewAccepted,
+		EvidenceRefs: []string{"evidence-security"}, IdempotencyKey: "review-security-native",
+	})
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleRun, PrincipalProfileID: "delivery-orchestrator", HeadSHA: head, RunStatus: authorityv1.RunCompleted,
+		EvidenceRefs: []string{"evidence-run"}, IdempotencyKey: "run-native",
+	})
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleReconcile, PrincipalProfileID: "delivery-orchestrator", HeadSHA: head,
+		MergedSHA: strings.Repeat("c", 40), MergedTree: strings.Repeat("d", 40), PullRequestID: "pr-native", ProtectedMainRunID: "run-native",
+		EvidenceRefs: []string{"evidence-merge"}, IdempotencyKey: "reconcile-native",
+	})
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleTerminal, PrincipalProfileID: "delivery-orchestrator", HeadSHA: head,
+		EvidenceRefs: []string{"evidence-terminal"}, IdempotencyKey: "terminal-native",
+	})
+	if post.LifecycleState != authorityv1.LifecycleDone || post.NativeStatus != "closed" || post.ClaimAttemptID != mutation.AttemptID || post.Terminal == nil || post.Version.IssueMutationSequence != 8 {
+		t.Fatalf("native lifecycle terminal=%#v", post)
+	}
 }
 
 func boundedFixtureError(output []byte) string {

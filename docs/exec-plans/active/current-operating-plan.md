@@ -152,11 +152,12 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: implement the S1 gateway-only walking skeleton,
-  then add atomic claim, durable fencing leases, pre-effect validation, direct
-  access denial, and ordered projection recovery in scenario order. The
-  gateway must issue and verify the first W-001 development lease before any
-  later effect may rely on it.
+- Required next transition: bind the lifecycle-completion implementation to a
+  signed immutable checkpoint, execute the non-skipped native Beads and
+  PostgreSQL conformance suites, then route that exact tree through QA and
+  Security. No canonical handoff or later lifecycle mutation may execute until
+  the reviewed tree is merged and a separate reconciliation authority binds
+  the protected-main result.
 
 The W-001 bootstrap grant is deliberately not a live lease: it is
 human-directed, binds one base commit and attempt, permits only canonical W-001
@@ -165,6 +166,24 @@ self-host conformance. The first PostgreSQL epoch is W-001 acceptance evidence,
 not a prerequisite for building the epoch service. The authoritative Bead
 holds exclusive paths and mutable lifecycle; this plan does not copy lease
 values or represent a proposed owner as a current grant.
+
+## Lifecycle-completion candidate
+
+The current bounded candidate adds typed handoff, ordered review verdict, run
+disposition, merge reconciliation, and terminal routes. Each canonical change
+uses one expected-version native Beads transaction. Handoff releases the exact
+owning development lease first, separates the current execution attempt from
+the immutable canonical claim attempt, and recovers unknown outcomes through
+canonical readback and idempotent retry. Review and disposition routes reject
+any active implementation lease. `changes-requested` preserves the rejected
+cycle and reopens the same Bead; terminal closure requires QA and Security
+acceptance, a completed run, merge evidence, and reconciliation, and retains
+evidence references plus claim lineage after close.
+
+This is candidate implementation evidence only. F-002 scenarios remain
+`failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation
+is authorized until a signed checkpoint receives independent QA and Security
+acceptance and protected-main reconciliation.
 
 ## Success evidence
 
