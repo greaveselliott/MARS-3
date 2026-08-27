@@ -19,4 +19,8 @@ the pinned Beads source. That patch is distributed under the upstream MIT
 License reproduced in THIRD_PARTY_NOTICES; no Beads database or binary is
 distributed.
 
+The W-001 lease authority links pgx v5.10.0 and its pinned transitive Go
+modules under MIT and BSD 3-Clause licenses. Exact versions, copyright notices,
+and license terms are recorded in THIRD_PARTY_NOTICES.
+
 See THIRD_PARTY_NOTICES and the generated provenance manifest for details.

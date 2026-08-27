@@ -1,10 +1,13 @@
-.PHONY: build test vet verify
+.PHONY: build test test-authority-postgres vet verify
 
 build:
 	go build ./cmd/mars3
 
 test:
 	go test ./...
+
+test-authority-postgres:
+	go test ./internal/authority/postgres -run '^TestPostgresLeaseLifecycleAndRestart$$' -count=1 -v
 
 vet:
 	go vet ./...

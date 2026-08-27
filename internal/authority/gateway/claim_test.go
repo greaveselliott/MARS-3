@@ -90,7 +90,7 @@ func newMemorySagaStore(now time.Time) *memorySagaStore {
 	return &memorySagaStore{sagas: make(map[string]ClaimSaga), now: now}
 }
 
-func (store *memorySagaStore) Lookup(_ context.Context, key string) (ClaimSaga, bool, error) {
+func (store *memorySagaStore) Lookup(_ context.Context, _, _, key string) (ClaimSaga, bool, error) {
 	store.mu.Lock()
 	defer store.mu.Unlock()
 	saga, found := store.sagas[key]
@@ -106,12 +106,12 @@ func (store *memorySagaStore) Begin(_ context.Context, intent ClaimIntent) (Clai
 		}
 		return cloneSaga(saga), nil
 	}
-	saga := ClaimSaga{RequestDigest: intent.RequestDigest, Phase: claimPhaseIntent}
+	saga := ClaimSaga{RequestDigest: intent.RequestDigest, Phase: claimPhaseIntent, Intent: intent}
 	store.sagas[intent.IdempotencyKey] = saga
 	return saga, nil
 }
 
-func (store *memorySagaStore) MarkCanonicalClaimed(_ context.Context, key, digest string, work authorityv1.WorkItem) (ClaimSaga, error) {
+func (store *memorySagaStore) MarkCanonicalClaimed(_ context.Context, _, _, key, digest string, work authorityv1.WorkItem) (ClaimSaga, error) {
 	store.mu.Lock()
 	defer store.mu.Unlock()
 	saga, found := store.sagas[key]
@@ -147,7 +147,7 @@ func (store *memorySagaStore) IssueLease(_ context.Context, key, digest string, 
 		IdempotencyKey: request.IdempotencyKey, LeaseEpoch: store.epoch, ClaimVersion: request.ClaimVersion,
 		BaseSHA: request.BaseSHA, Capability: request.Capability,
 		ExclusivePaths: append([]string(nil), request.ExclusivePaths...), Labels: append([]authorityv1.Label(nil), request.Labels...), IssuedAt: store.now,
-		ExpiresAt: request.MaximumExpiry, Active: true,
+		ExpiresAt: request.MaximumExpiry, State: authorityv1.LeaseActive, Active: true,
 	}
 	saga.ReceiptRef = "receipt-" + digest[:16]
 	store.sagas[key] = saga
@@ -387,6 +387,8 @@ func cloneWork(item authorityv1.WorkItem) authorityv1.WorkItem {
 }
 
 func cloneSaga(saga ClaimSaga) ClaimSaga {
+	saga.Intent.ExclusivePaths = append([]string(nil), saga.Intent.ExclusivePaths...)
+	saga.Intent.Labels = append([]authorityv1.Label(nil), saga.Intent.Labels...)
 	saga.Work = cloneWork(saga.Work)
 	saga.Lease.ExclusivePaths = append([]string(nil), saga.Lease.ExclusivePaths...)
 	saga.Lease.Labels = append([]authorityv1.Label(nil), saga.Lease.Labels...)

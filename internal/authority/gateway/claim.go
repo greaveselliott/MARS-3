@@ -88,6 +88,12 @@ type ClaimStore interface {
 
 type ClaimPhase string
 
+const (
+	ClaimPhaseIntent    ClaimPhase = claimPhaseIntent
+	ClaimPhaseCanonical ClaimPhase = claimPhaseCanonical
+	ClaimPhaseComplete  ClaimPhase = claimPhaseComplete
+)
+
 // ClaimIntent is the normalized cross-store saga preimage. RequestDigest is a
 // deterministic hash over every authority-bearing input.
 type ClaimIntent struct {
@@ -124,6 +130,7 @@ type LeaseRequest struct {
 type ClaimSaga struct {
 	RequestDigest string
 	Phase         ClaimPhase
+	Intent        ClaimIntent
 	Work          authorityv1.WorkItem
 	Lease         authorityv1.CapabilityLease
 	ReceiptRef    string
@@ -132,9 +139,9 @@ type ClaimSaga struct {
 // ClaimSagaStore owns idempotency, pending-saga state, and live lease issuance.
 // Begin must atomically reject reuse of a key for a different RequestDigest.
 type ClaimSagaStore interface {
-	Lookup(context.Context, string) (ClaimSaga, bool, error)
+	Lookup(context.Context, string, string, string) (ClaimSaga, bool, error)
 	Begin(context.Context, ClaimIntent) (ClaimSaga, error)
-	MarkCanonicalClaimed(context.Context, string, string, authorityv1.WorkItem) (ClaimSaga, error)
+	MarkCanonicalClaimed(context.Context, string, string, string, string, authorityv1.WorkItem) (ClaimSaga, error)
 	IssueLease(context.Context, string, string, LeaseRequest) (ClaimSaga, error)
 }
 
@@ -175,13 +182,16 @@ func (s *Service) Claim(ctx context.Context, principal authorityv1.Principal, re
 	if err != nil {
 		return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, request.BeadID, traceRef, nil, denialForClaimRule(ruleClaimInvalid, "", traceRef))
 	}
-	existing, found, err := s.sagas.Lookup(ctx, request.IdempotencyKey)
+	existing, found, err := s.sagas.Lookup(ctx, principal.TenantID, principal.ProjectID, request.IdempotencyKey)
 	if err != nil {
 		return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, request.BeadID, traceRef, nil, newDenial(authorityv1.ErrorAuthorityDown, ruleAuthorityUnavailable, "", requiredReconciliation, allowedSagaRead, traceRef))
 	}
 	if found {
 		if existing.RequestDigest != requestDigest {
 			return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, request.BeadID, traceRef, nil, denialForClaimRule(ruleClaimIdempotency, "", traceRef))
+		}
+		if !validSagaIntentCore(existing.Intent, principal, request, requestDigest) {
+			return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, request.BeadID, traceRef, nil, denialForClaimRule(ruleClaimSagaInvalid, existing.Work.LifecycleState, traceRef))
 		}
 		if existing.Phase == claimPhaseCanonical || existing.Phase == claimPhaseComplete {
 			if !validStoredClaim(existing.Work, principal, request) {
@@ -195,6 +205,9 @@ func (s *Service) Claim(ctx context.Context, principal authorityv1.Principal, re
 			labels, labelDenial := admittedLabels(principal.Labels, current.Labels, request.ProposedLabels, current.LifecycleState, traceRef)
 			if labelDenial != nil {
 				return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, request.BeadID, traceRef, labels, labelDenial)
+			}
+			if !equalLabels(existing.Intent.Labels, labels) {
+				return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, request.BeadID, traceRef, labels, denialForClaimRule(ruleClaimSagaInvalid, current.LifecycleState, traceRef))
 			}
 			if existing.Phase == claimPhaseComplete {
 				return s.replayCompletedClaim(ctx, principal, request, labels, existing)
@@ -250,7 +263,7 @@ func (s *Service) Claim(ctx context.Context, principal authorityv1.Principal, re
 		}
 		return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, item.BeadID, traceRef, labels, newDenial(authorityv1.ErrorAuthorityDown, ruleAuthorityUnavailable, item.LifecycleState, requiredReconciliation, allowedSagaRead, traceRef))
 	}
-	if saga.RequestDigest != requestDigest {
+	if saga.RequestDigest != requestDigest || !validSagaIntentCore(saga.Intent, principal, request, requestDigest) || !equalLabels(saga.Intent.Labels, labels) {
 		return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, item.BeadID, traceRef, labels, denialForClaimRule(ruleClaimSagaInvalid, item.LifecycleState, traceRef))
 	}
 	if saga.Phase != claimPhaseIntent && saga.Phase != claimPhaseCanonical {
@@ -295,7 +308,7 @@ func (s *Service) Claim(ctx context.Context, principal authorityv1.Principal, re
 		if !validClaimPostimage(post, item, principal, request) {
 			return authorityv1.ClaimResponse{}, s.unknownAfterEffect(ctx, principal, request, labels, newDenial(authorityv1.ErrorUnknownEffect, ruleClaimPostimage, post.LifecycleState, requiredReconciliation, allowedSagaRead, traceRef))
 		}
-		saga, err = s.sagas.MarkCanonicalClaimed(ctx, request.IdempotencyKey, requestDigest, post)
+		saga, err = s.sagas.MarkCanonicalClaimed(ctx, principal.TenantID, principal.ProjectID, request.IdempotencyKey, requestDigest, post)
 		if err != nil || saga.RequestDigest != requestDigest || saga.Phase != claimPhaseCanonical {
 			return authorityv1.ClaimResponse{}, s.unknownAfterEffect(ctx, principal, request, labels, newDenial(authorityv1.ErrorUnknownEffect, ruleClaimUnknown, post.LifecycleState, requiredReconciliation, allowedSagaRead, traceRef))
 		}
@@ -407,7 +420,7 @@ func equalWorkItems(left, right authorityv1.WorkItem) bool {
 }
 
 func validClaimLease(lease authorityv1.CapabilityLease, request LeaseRequest, now time.Time) bool {
-	return validID(lease.LeaseID) && lease.TenantID == request.TenantID && lease.ProjectID == request.ProjectID && lease.BeadID == request.BeadID && lease.AttemptID == request.AttemptID && lease.IdempotencyKey == request.IdempotencyKey && validID(lease.FenceGeneration) && lease.LeaseEpoch > 0 && lease.ClaimVersion == request.ClaimVersion && lease.BaseSHA == request.BaseSHA && lease.Capability == request.Capability && equalStrings(lease.ExclusivePaths, request.ExclusivePaths) && equalLabels(lease.Labels, request.Labels) && lease.Active && !lease.IssuedAt.After(now) && lease.ExpiresAt.After(now) && !lease.ExpiresAt.After(request.MaximumExpiry)
+	return validID(lease.LeaseID) && lease.TenantID == request.TenantID && lease.ProjectID == request.ProjectID && lease.BeadID == request.BeadID && lease.AttemptID == request.AttemptID && lease.IdempotencyKey == request.IdempotencyKey && validID(lease.FenceGeneration) && lease.LeaseEpoch > 0 && lease.ClaimVersion == request.ClaimVersion && lease.BaseSHA == request.BaseSHA && lease.Capability == request.Capability && equalStrings(lease.ExclusivePaths, request.ExclusivePaths) && equalLabels(lease.Labels, request.Labels) && lease.State == authorityv1.LeaseActive && lease.Active && !lease.IssuedAt.After(now) && lease.ExpiresAt.After(now) && !lease.ExpiresAt.After(request.MaximumExpiry)
 }
 
 func equalWorkVersion(left, right authorityv1.WorkVersion) bool { return left == right }
@@ -434,6 +447,10 @@ func equalDependencies(left, right []authorityv1.Dependency) bool {
 		}
 	}
 	return true
+}
+
+func validSagaIntentCore(intent ClaimIntent, principal authorityv1.Principal, request authorityv1.ClaimRequest, requestDigest string) bool {
+	return intent.RequestDigest == requestDigest && intent.TenantID == principal.TenantID && intent.ProjectID == principal.ProjectID && intent.BeadID == request.BeadID && intent.AttemptID == request.AttemptID && intent.IdempotencyKey == request.IdempotencyKey && intent.BaseSHA == request.BaseSHA && intent.Capability == request.Capability && equalStrings(intent.ExclusivePaths, request.ExclusivePaths)
 }
 
 func claimRequestDigest(principal authorityv1.Principal, request authorityv1.ClaimRequest) (string, error) {

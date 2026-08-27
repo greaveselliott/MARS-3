@@ -40,6 +40,15 @@ const (
 	CapabilityTicketDelivery Capability = "ticket.delivery"
 )
 
+type LeaseState string
+
+const (
+	LeaseActive   LeaseState = "active"
+	LeaseReleased LeaseState = "released"
+	LeaseRevoked  LeaseState = "revoked"
+	LeaseExpired  LeaseState = "expired"
+)
+
 type Label string
 
 const (
@@ -167,6 +176,7 @@ type CapabilityLease struct {
 	Labels          []Label     `json:"labels"`
 	IssuedAt        time.Time   `json:"issued_at"`
 	ExpiresAt       time.Time   `json:"expires_at"`
+	State           LeaseState  `json:"state"`
 	Active          bool        `json:"active"`
 }
 
@@ -175,6 +185,45 @@ type ClaimResponse struct {
 	Lease      CapabilityLease `json:"lease"`
 	Replayed   bool            `json:"replayed"`
 	ReceiptRef string          `json:"receipt_ref"`
+}
+
+// FencingTuple is revalidated immediately before every material write. It is
+// deliberately verbose so no cached token can stand in for current authority.
+type FencingTuple struct {
+	TenantID        string      `json:"tenant_id"`
+	ProjectID       string      `json:"project_id"`
+	BeadID          string      `json:"bead_id"`
+	AttemptID       string      `json:"attempt_id"`
+	IdempotencyKey  string      `json:"idempotency_key"`
+	LeaseID         string      `json:"lease_id"`
+	FenceGeneration string      `json:"fence_generation"`
+	LeaseEpoch      uint64      `json:"lease_epoch"`
+	ClaimVersion    WorkVersion `json:"claim_version"`
+	BaseSHA         string      `json:"base_sha"`
+	Capability      Capability  `json:"capability"`
+	ExclusivePaths  []string    `json:"exclusive_paths"`
+	Labels          []Label     `json:"labels"`
+}
+
+type RenewLeaseRequest struct {
+	Fence     FencingTuple `json:"fence"`
+	NewExpiry time.Time    `json:"new_expiry"`
+	TraceRef  string       `json:"trace_ref"`
+}
+
+type ReleaseLeaseRequest struct {
+	Fence    FencingTuple `json:"fence"`
+	TraceRef string       `json:"trace_ref"`
+}
+
+type RevokeLeaseRequest struct {
+	TenantID        string `json:"tenant_id"`
+	ProjectID       string `json:"project_id"`
+	LeaseID         string `json:"lease_id"`
+	FenceGeneration string `json:"fence_generation"`
+	LeaseEpoch      uint64 `json:"lease_epoch"`
+	Reason          string `json:"reason"`
+	TraceRef        string `json:"trace_ref"`
 }
 
 type ErrorCode string
