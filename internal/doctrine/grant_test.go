@@ -673,6 +673,400 @@ func writeW001PostclaimChronoFixFixture(t *testing.T, grant, signature, publicKe
 	return root
 }
 
+func TestW001DeliveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001DeliveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 delivery grant was rejected: %v", findings)
+	}
+}
+
+func TestLoadW001DeliveryGrantReturnsBoundedRuntimeProjection(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	grant, err := loadW001DeliveryGrant(repo, time.Date(2026, 8, 27, 1, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if grant.ID != "W-001-delivery-v2" || grant.Repository != planningGrantRepository || grant.Bead != "M3-W001" ||
+		grant.Principal != "work-authority-engineer" || grant.AttemptID != "w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73" ||
+		grant.IdempotencyKey != "w001-key" || grant.BaseCommit != w001DeliveryBase ||
+		grant.ExpectedNativeStatus != "in_progress" || grant.ExpectedLifecycleState != "in-progress" || grant.ExpectedAssignee != grant.Principal ||
+		grant.CanonicalClaimAttemptID != "w001-bootstrap-3135f1d1-b0d4-4956-9fc9-1852310bfd77" ||
+		grant.WorkVersionGeneration != "6e79ff81-a007-42a5-a178-7ce58dbb718b" ||
+		grant.WorkVersionIncarnation != "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41" ||
+		grant.IssueMutationSequence != 1 || grant.DependencyGraphRevision != 1 || grant.CanonicalWorkMutationAllowed || !grant.DevelopmentLeaseAllowed {
+		t.Fatalf("unexpected runtime projection: %+v", grant)
+	}
+	if _, err := loadW001DeliveryGrant(repo, grant.ExpiresAt); err == nil {
+		t.Fatal("expired delivery grant was accepted")
+	}
+}
+
+func TestW001DeliveryGrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(w001DeliveryGrantPath)
+	signature := read(w001DeliveryGrantSignature)
+	publicKey := read(wave1PlanningGrantKey)
+
+	t.Run("implementation authority tamper", func(t *testing.T) {
+		tampered := bytes.Replace(grant, []byte("implementationAllowed: true"), []byte("implementationAllowed: false"), 1)
+		root := t.TempDir()
+		writePlanningGrantTestFile(t, root, w001DeliveryGrantPath, tampered)
+		writePlanningGrantTestFile(t, root, w001DeliveryGrantSignature, signature)
+		writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+		var findings []Finding
+		checkW001DeliveryGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_delivery_value") || !findingCodePresent(findings, "public.w001_delivery_signature") {
+			t.Fatalf("tampered delivery authority was accepted: %v", findings)
+		}
+	})
+
+	t.Run("path scope tamper", func(t *testing.T) {
+		tampered := bytes.Replace(grant, []byte("    - internal/authority/**"), []byte("    - internal/runtime/**"), 1)
+		root := t.TempDir()
+		writePlanningGrantTestFile(t, root, w001DeliveryGrantPath, tampered)
+		writePlanningGrantTestFile(t, root, w001DeliveryGrantSignature, signature)
+		writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+		var findings []Finding
+		checkW001DeliveryGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_delivery_sequence") || !findingCodePresent(findings, "public.w001_delivery_signature") {
+			t.Fatalf("tampered delivery path scope was accepted: %v", findings)
+		}
+	})
+}
+
+func TestW001DeliveryCIFixAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001DeliveryCIFix(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 delivery CI correction was rejected: %v", findings)
+	}
+}
+
+func TestW001DeliveryCIFixFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(w001DeliveryCIFixPath)
+	signature := read(w001DeliveryCIFixSignature)
+	tampered := bytes.Replace(grant, []byte("requiredTagger: release-manager"), []byte("requiredTagger: work-authority-engineer"), 1)
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001DeliveryReviewTag+":refs/tags/"+w001DeliveryReviewTag)
+	for path, data := range map[string][]byte{
+		w001DeliveryCIFixPath:               tampered,
+		w001DeliveryCIFixSignature:          signature,
+		w001DeliveryGrantPath:               read(w001DeliveryGrantPath),
+		w001DeliveryGrantSignature:          read(w001DeliveryGrantSignature),
+		wave1PlanningGrantKey:               read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md": read("docs/evidence/W-001-validation.md"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001DeliveryCIFix(root, &findings)
+	if !findingCodePresent(findings, "public.w001_delivery_ci_value") || !findingCodePresent(findings, "public.w001_delivery_ci_signature") {
+		t.Fatalf("tampered delivery CI correction was accepted: %v", findings)
+	}
+}
+
+func TestW001DeliveryScannerFixAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001DeliveryScannerFix(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 scanner correction was rejected: %v", findings)
+	}
+}
+
+func TestW001DeliveryScannerFixGrantTamperFails(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	tampered := bytes.Replace(read(w001DeliveryScannerFixPath), []byte("historyFindings: 10"), []byte("historyFindings: 11"), 1)
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001DeliveryV1PreservedHead)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001DeliveryCIFixReviewTag+":refs/tags/"+w001DeliveryCIFixReviewTag)
+	for path, data := range map[string][]byte{
+		w001DeliveryScannerFixPath:          tampered,
+		w001DeliveryScannerFixSignature:     read(w001DeliveryScannerFixSignature),
+		w001DeliveryCIFixPath:               read(w001DeliveryCIFixPath),
+		w001DeliveryCIFixSignature:          read(w001DeliveryCIFixSignature),
+		w001DeliveryScannerIgnorePath:       read(w001DeliveryScannerIgnorePath),
+		wave1PlanningGrantKey:               read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md": read("docs/evidence/W-001-validation.md"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001DeliveryScannerFix(root, &findings)
+	if !findingCodePresent(findings, "public.w001_delivery_scanner_value") || !findingCodePresent(findings, "public.w001_delivery_scanner_signature") {
+		t.Fatalf("tampered scanner correction was accepted: %v", findings)
+	}
+}
+
+func TestW001DeliveryScannerIgnoreFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	exact := strings.Join(w001DeliveryScannerFingerprints, "\n") + "\n"
+	for _, testCase := range []struct {
+		name string
+		body string
+	}{
+		{name: "changed", body: strings.Replace(exact, "0faf9071", "1faf9071", 1)},
+		{name: "extra", body: exact + "*:generic-api-key:*\n"},
+		{name: "missing", body: strings.TrimPrefix(exact, w001DeliveryScannerFingerprints[0]+"\n")},
+		{name: "duplicate", body: exact + w001DeliveryScannerFingerprints[0] + "\n"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			root := t.TempDir()
+			runPlanningGrantTestGit(t, root, "init", "--quiet")
+			runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001DeliveryV1PreservedHead)
+			writePlanningGrantTestFile(t, root, w001DeliveryScannerIgnorePath, []byte(testCase.body))
+			var findings []Finding
+			checkW001DeliveryScannerIgnore(root, &findings)
+			if !findingCodePresent(findings, "public.w001_delivery_scanner_ignore") {
+				t.Fatalf("unsafe scanner exception was accepted: %v", findings)
+			}
+		})
+	}
+}
+
+func TestW001DeliveryScannerFingerprintSourcesFailClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001DeliveryV1PreservedHead)
+
+	tests := []struct {
+		name string
+		list []string
+		code string
+	}{
+		{name: "duplicate", list: append(append([]string{}, w001DeliveryScannerFingerprints...), w001DeliveryScannerFingerprints[0]), code: "public.w001_delivery_scanner_duplicate"},
+		{name: "wildcard", list: []string{"*:internal/authority/beads/store_test.go:generic-api-key:96"}, code: "public.w001_delivery_scanner_fingerprint"},
+		{name: "wrong rule", list: []string{"0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:github-pat:96"}, code: "public.w001_delivery_scanner_fingerprint"},
+		{name: "missing line", list: []string{"0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:99999"}, code: "public.w001_delivery_scanner_source"},
+		{name: "outside history", list: []string{w001DeliveryScannerFixBase + ":docs/evidence/W-001-validation.md:generic-api-key:1"}, code: "public.w001_delivery_scanner_history"},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			var findings []Finding
+			checkW001DeliveryScannerFingerprintSources(root, testCase.list, &findings)
+			if !findingCodePresent(findings, testCase.code) {
+				t.Fatalf("unsafe scanner source tuple was accepted: %v", findings)
+			}
+		})
+	}
+}
+
+func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	object, err := planningGrantGitOutput(repo, "cat-file", "tag", w001DeliveryV2TagObject)
+	if err != nil {
+		t.Fatal(err)
+	}
+	publicKey, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(wave1PlanningGrantKey)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	target, err := verifyPinnedPlanningGrantTagForIdentity(object, publicKey, w001DeliveryReviewTag, w001DeliveryReviewTagMessage, "engineer@example.com")
+	if err != nil || target != w001DeliveryCIFixBase {
+		t.Fatalf("authorized historical Engineer tag was rejected: target=%q err=%v", target, err)
+	}
+	if _, err := verifyPinnedPlanningGrantTag(object, publicKey, w001DeliveryReviewTag, w001DeliveryReviewTagMessage); err == nil {
+		t.Fatal("historical Engineer tag was accepted as a Release Manager review tag")
+	}
+}
+
+func TestW001DeliveryPullRequestCheckoutBindsEventHead(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	root := filepath.Join(t.TempDir(), "repo")
+	if output, err := exec.Command("git", "clone", "--quiet", "--no-local", repo, root).CombinedOutput(); err != nil {
+		t.Fatalf("clone delivery fixture: %v: %s", err, output)
+	}
+	feature := planningGrantTestGitOutput(t, root, "rev-parse", "HEAD^{commit}")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", repo, w001DeliveryBase)
+	tree := planningGrantTestGitOutput(t, root, "rev-parse", feature+"^{tree}")
+	merge := planningGrantTestGitOutput(t, root,
+		"-c", "user.name=Synthetic Merge Bot",
+		"-c", "user.email=merge-bot@example.com",
+		"-c", "commit.gpgsign=false",
+		"commit-tree", tree,
+		"-p", w001DeliveryBase,
+		"-p", feature,
+		"-m", "synthetic W-001 delivery merge",
+	)
+	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--force", "--detach", merge)
+	event := map[string]any{
+		"number":     9,
+		"repository": map[string]any{"full_name": planningGrantRepository},
+		"pull_request": map[string]any{
+			"base":             map[string]any{"ref": "main", "sha": w001DeliveryBase},
+			"head":             map[string]any{"ref": w001DeliveryBranch, "sha": feature},
+			"merge_commit_sha": merge,
+		},
+	}
+	eventPath := writePlanningGrantGitHubEvent(t, event)
+	setPlanningGrantCommonGitHubFacts(t, root, merge, eventPath)
+	t.Setenv("GITHUB_EVENT_NAME", "pull_request")
+	t.Setenv("GITHUB_REF", "refs/pull/9/merge")
+	t.Setenv("GITHUB_HEAD_REF", w001DeliveryBranch)
+	t.Setenv("GITHUB_BASE_REF", "main")
+	t.Setenv("GITHUB_REF_PROTECTED", "false")
+	t.Setenv("GITHUB_WORKFLOW_REF", planningGrantRepository+"/"+planningGrantWorkflowPath+"@refs/pull/9/merge")
+	var findings []Finding
+	actual, requireTag, mainTree := w001DeliveryGitHubCheckout(root, merge, "", &findings)
+	if len(findings) != 0 || actual != feature || !requireTag || mainTree {
+		t.Fatalf("canonical PR checkout was not bound to its feature head: head=%q tag=%t main=%t findings=%v", actual, requireTag, mainTree, findings)
+	}
+
+	t.Run("event head mismatch fails", func(t *testing.T) {
+		event["pull_request"].(map[string]any)["head"] = map[string]any{"ref": w001DeliveryBranch, "sha": w001DeliveryBase}
+		badEventPath := writePlanningGrantGitHubEvent(t, event)
+		t.Setenv("GITHUB_EVENT_PATH", badEventPath)
+		var rejected []Finding
+		if actual, _, _ := w001DeliveryGitHubCheckout(root, merge, "", &rejected); actual != "" || !findingCodePresent(rejected, "public.w001_delivery_pr_topology") {
+			t.Fatalf("event-head mismatch was accepted: head=%q findings=%v", actual, rejected)
+		}
+	})
+
+	t.Run("wrong parent order fails", func(t *testing.T) {
+		wrong := planningGrantTestGitOutput(t, root,
+			"-c", "user.name=Synthetic Merge Bot",
+			"-c", "user.email=merge-bot@example.com",
+			"-c", "commit.gpgsign=false",
+			"commit-tree", tree,
+			"-p", feature,
+			"-p", w001DeliveryBase,
+			"-m", "wrong-order W-001 merge",
+		)
+		runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--force", "--detach", wrong)
+		event["pull_request"].(map[string]any)["head"] = map[string]any{"ref": w001DeliveryBranch, "sha": feature}
+		event["pull_request"].(map[string]any)["merge_commit_sha"] = wrong
+		wrongEventPath := writePlanningGrantGitHubEvent(t, event)
+		t.Setenv("GITHUB_SHA", wrong)
+		t.Setenv("GITHUB_EVENT_PATH", wrongEventPath)
+		var rejected []Finding
+		if actual, _, _ := w001DeliveryGitHubCheckout(root, wrong, "", &rejected); actual != "" || !findingCodePresent(rejected, "public.w001_delivery_pr_topology") {
+			t.Fatalf("wrong-parent synthetic merge was accepted: head=%q findings=%v", actual, rejected)
+		}
+	})
+
+	t.Run("wrong tree fails", func(t *testing.T) {
+		baseTree := planningGrantTestGitOutput(t, root, "rev-parse", w001DeliveryBase+"^{tree}")
+		wrong := planningGrantTestGitOutput(t, root,
+			"-c", "user.name=Synthetic Merge Bot",
+			"-c", "user.email=merge-bot@example.com",
+			"-c", "commit.gpgsign=false",
+			"commit-tree", baseTree,
+			"-p", w001DeliveryBase,
+			"-p", feature,
+			"-m", "wrong-tree W-001 merge",
+		)
+		runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--force", "--detach", wrong)
+		event["pull_request"].(map[string]any)["head"] = map[string]any{"ref": w001DeliveryBranch, "sha": feature}
+		event["pull_request"].(map[string]any)["merge_commit_sha"] = wrong
+		wrongEventPath := writePlanningGrantGitHubEvent(t, event)
+		t.Setenv("GITHUB_SHA", wrong)
+		t.Setenv("GITHUB_EVENT_PATH", wrongEventPath)
+		var rejected []Finding
+		if actual, _, _ := w001DeliveryGitHubCheckout(root, wrong, "", &rejected); actual != "" || !findingCodePresent(rejected, "public.w001_delivery_pr_tree") {
+			t.Fatalf("wrong-tree synthetic merge was accepted: head=%q findings=%v", actual, rejected)
+		}
+	})
+}
+
+func TestW001DeliveryPathScope(t *testing.T) {
+	for _, path := range []string{
+		w001DeliveryGrantPath,
+		"internal/authority/gateway/service.go",
+		"cmd/mars3-authority/main.go",
+		"api/authority/v1/types.go",
+		"database/authority/001_leases.sql",
+		"deploy/authority/network-policy.yaml",
+		"go.mod",
+	} {
+		if !w001DeliveryPathsAllowed([]string{path}) {
+			t.Fatalf("signed W-001 delivery path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{"internal/runtime/escape.go", "internal/authority", "docs/features/F-002-work-authority.md", ".github/workflows/foundation-quality.yml"} {
+		if w001DeliveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope delivery path was accepted: %s", path)
+		}
+	}
+	for _, path := range []string{w001DeliveryCIFixPath, w001DeliveryCIFixSignature, "docs/evidence/W-001-validation.md", "internal/doctrine/grant.go", "internal/doctrine/grant_test.go"} {
+		if !w001DeliveryCIFixPathsAllowed([]string{path}) {
+			t.Fatalf("signed CI-correction path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{"internal/authority/gateway/service.go", ".github/workflows/foundation-quality.yml", "go.mod"} {
+		if w001DeliveryCIFixPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope CI-correction path was accepted: %s", path)
+		}
+	}
+	for _, path := range []string{w001DeliveryScannerIgnorePath, w001DeliveryScannerFixPath, w001DeliveryScannerFixSignature, "docs/evidence/W-001-validation.md", "internal/doctrine/grant.go", "internal/doctrine/grant_test.go", "internal/doctrine/public.go", "internal/doctrine/doctrine_test.go"} {
+		if !w001DeliveryScannerFixPathsAllowed([]string{path}) {
+			t.Fatalf("signed scanner-correction path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{".github/workflows/foundation-quality.yml", "internal/authority/gateway/service.go", "go.mod"} {
+		if w001DeliveryScannerFixPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope scanner-correction path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001DeliveryGitDiffIsFenced(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001DeliveryGrantGitDiff(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("current signed W-001 delivery checkout was rejected: %v", findings)
+	}
+}
+
 func clonePlanningGrantMaterials(materials map[string][]byte) map[string][]byte {
 	cloned := make(map[string][]byte, len(materials))
 	for path, data := range materials {

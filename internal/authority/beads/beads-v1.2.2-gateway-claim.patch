@@ -1,0 +1,375 @@
+diff --git a/cmd/bd/batch.go b/cmd/bd/batch.go
+index 7cb66a80c..f1a5409a7 100644
+--- a/cmd/bd/batch.go
++++ b/cmd/bd/batch.go
+@@ -4,0 +5 @@ import (
++	"bytes"
+@@ -61,0 +63 @@ Grammar (one command per line):
++  authority-claim <id> <key>=<value> ...
+@@ -267,0 +270,3 @@ func parseBatchScript(r io.Reader) ([]batchOp, error) {
++		case "authority-claim":
++			op.cmd = "authority-claim"
++			op.args = tokens[1:]
+@@ -282 +287 @@ func parseBatchScript(r io.Reader) ([]batchOp, error) {
+-			return nil, fmt.Errorf("line %d: unsupported batch command %q (supported: close, update, create, dep add, dep remove, bootstrap-claim)", lineNo, tokens[0])
++			return nil, fmt.Errorf("line %d: unsupported batch command %q (supported: close, update, create, dep add, dep remove, bootstrap-claim, authority-claim)", lineNo, tokens[0])
+@@ -353,0 +359,2 @@ func runBatchOp(ctx context.Context, tx storage.Transaction, op batchOp) (batchO
++	case "authority-claim":
++		return runAuthorityClaimBatchOp(ctx, tx, op, actorName)
+@@ -475,0 +483,14 @@ var bootstrapClaimKeys = map[string]bool{
++var authorityClaimKeys = map[string]bool{
++	"expected_status":              true,
++	"expected_assignee":            true,
++	"expected_created_at":          true,
++	"expected_updated_at":          true,
++	"expected_metadata_sha256":     true,
++	"expected_labels_sha256":       true,
++	"expected_dependencies_sha256": true,
++	"attempt_id":                   true,
++	"idempotency_key":              true,
++	"base_commit":                  true,
++	"post_metadata_base64":         true,
++}
++
+@@ -482,0 +504,7 @@ const (
++const (
++	authorityDirectBeadsDirEnv  = "MARS3_AUTHORITY_DIRECT_BEADS_DIR"
++	authorityDirectProjectEnv   = "MARS3_AUTHORITY_PROJECT_ID"
++	authorityDirectDatabaseEnv  = "MARS3_AUTHORITY_DATABASE"
++	authorityWorkspaceDigestEnv = "MARS3_AUTHORITY_WORKSPACE_SHA256"
++)
++
+@@ -525,0 +554,35 @@ func verifyBootstrapDirectWorkspace() error {
++func verifyAuthorityDirectWorkspace() error {
++	root, err := os.Getwd()
++	if err != nil {
++		return fmt.Errorf("authority-claim: resolve direct workspace: %w", err)
++	}
++	resolvedRoot, err := filepath.EvalSymlinks(root)
++	if err != nil {
++		return fmt.Errorf("authority-claim: resolve direct workspace: %w", err)
++	}
++	directBeadsDir := filepath.Join(resolvedRoot, ".beads")
++	expectedBeadsDir, err := filepath.EvalSymlinks(os.Getenv(authorityDirectBeadsDirEnv))
++	if err != nil || !filepath.IsAbs(expectedBeadsDir) || filepath.Clean(expectedBeadsDir) != filepath.Clean(directBeadsDir) {
++		return fmt.Errorf("authority-claim: direct Beads directory is not authority-bound")
++	}
++	if err := rejectBootstrapRedirect(directBeadsDir); err != nil {
++		return fmt.Errorf("authority-claim: direct redirect boundary: %w", err)
++	}
++	if err := rejectBootstrapSelectors(directBeadsDir); err != nil {
++		return fmt.Errorf("authority-claim: direct selector boundary: %w", err)
++	}
++	metadata, entries, err := bootstrapWorkspaceIdentity(resolvedRoot)
++	if err != nil {
++		return fmt.Errorf("authority-claim: direct workspace identity: %w", err)
++	}
++	if metadata.ProjectID != os.Getenv(authorityDirectProjectEnv) || metadata.Database != "dolt" || metadata.Backend != "dolt" ||
++		metadata.DoltMode != "embedded" || metadata.DoltDatabase != os.Getenv(authorityDirectDatabaseEnv) || metadata.DoltDatabase != "M3" {
++		return fmt.Errorf("authority-claim: direct embedded authority identity is invalid")
++	}
++	digest, err := bootstrapWorkspaceDigest(resolvedRoot, metadata, entries)
++	if err != nil || digest != os.Getenv(authorityWorkspaceDigestEnv) {
++		return fmt.Errorf("authority-claim: direct workspace instance digest is invalid")
++	}
++	return nil
++}
++
+@@ -730,0 +794,153 @@ func runBootstrapClaimBatchOp(ctx context.Context, tx storage.Transaction, op ba
++type authorityDependencyCondition struct {
++	ID             string `json:"id"`
++	DependencyType string `json:"dependency_type"`
++	Status         string `json:"status"`
++	MetadataSHA256 string `json:"metadata_sha256"`
++}
++
++func runAuthorityClaimBatchOp(ctx context.Context, tx storage.Transaction, op batchOp, actor string) (batchOpResult, error) {
++	result := batchOpResult{Line: op.line, Op: op.cmd}
++	if err := verifyAuthorityDirectWorkspace(); err != nil {
++		return result, err
++	}
++	if len(op.args) != 12 {
++		return result, fmt.Errorf("authority-claim requires <id> and exactly eleven key=value arguments")
++	}
++	id := op.args[0]
++	values := make(map[string]string, len(op.args)-1)
++	for _, token := range op.args[1:] {
++		parts := strings.SplitN(token, "=", 2)
++		if len(parts) != 2 || parts[0] == "" || !authorityClaimKeys[parts[0]] {
++			return result, fmt.Errorf("authority-claim: invalid argument %q", token)
++		}
++		if _, exists := values[parts[0]]; exists {
++			return result, fmt.Errorf("authority-claim: duplicate argument %q", parts[0])
++		}
++		values[parts[0]] = parts[1]
++	}
++	if len(values) != len(authorityClaimKeys) {
++		return result, fmt.Errorf("authority-claim: every required argument must occur exactly once")
++	}
++	claimTx, ok := tx.(atomicClaimTransaction)
++	if !ok {
++		return result, fmt.Errorf("authority-claim: storage transaction lacks native CAS claim support")
++	}
++	database, embedded, err := claimTx.BootstrapAuthority(ctx)
++	if err != nil || !embedded || database != "M3" {
++		return result, fmt.Errorf("authority-claim: transaction is not the direct embedded M3 authority")
++	}
++	issue, err := tx.GetIssue(ctx, id)
++	if err != nil {
++		return result, fmt.Errorf("authority-claim: read issue: %w", err)
++	}
++	if string(issue.Status) != values["expected_status"] || issue.Assignee != values["expected_assignee"] ||
++		issue.CreatedAt.UTC().Format(time.RFC3339) != values["expected_created_at"] ||
++		issue.UpdatedAt.UTC().Format(time.RFC3339) != values["expected_updated_at"] {
++		return result, fmt.Errorf("authority-claim: issue precondition mismatch")
++	}
++	metadataDigest, err := canonicalJSONDigest(issue.Metadata)
++	if err != nil || metadataDigest != values["expected_metadata_sha256"] {
++		return result, fmt.Errorf("authority-claim: metadata precondition mismatch")
++	}
++	labels, err := tx.GetLabels(ctx, id)
++	if err != nil {
++		return result, fmt.Errorf("authority-claim: read labels: %w", err)
++	}
++	sort.Strings(labels)
++	labelsJSON, _ := json.Marshal(labels)
++	if digestBytes(labelsJSON) != values["expected_labels_sha256"] {
++		return result, fmt.Errorf("authority-claim: label precondition mismatch")
++	}
++	dependencies, err := tx.GetDependencyRecords(ctx, id)
++	if err != nil {
++		return result, fmt.Errorf("authority-claim: read dependencies: %w", err)
++	}
++	conditions := make([]authorityDependencyCondition, 0, len(dependencies))
++	for _, dependency := range dependencies {
++		dependencyIssue, readErr := tx.GetIssue(ctx, dependency.DependsOnID)
++		if readErr != nil {
++			return result, fmt.Errorf("authority-claim: read dependency: %w", readErr)
++		}
++		dependencyMetadataDigest, digestErr := canonicalJSONDigest(dependencyIssue.Metadata)
++		if digestErr != nil {
++			return result, fmt.Errorf("authority-claim: dependency metadata is invalid")
++		}
++		conditions = append(conditions, authorityDependencyCondition{
++			ID: dependency.DependsOnID, DependencyType: string(dependency.Type),
++			Status: string(dependencyIssue.Status), MetadataSHA256: dependencyMetadataDigest,
++		})
++	}
++	sort.Slice(conditions, func(i, j int) bool {
++		if conditions[i].ID == conditions[j].ID {
++			return conditions[i].DependencyType < conditions[j].DependencyType
++		}
++		return conditions[i].ID < conditions[j].ID
++	})
++	dependenciesJSON, _ := json.Marshal(conditions)
++	if digestBytes(dependenciesJSON) != values["expected_dependencies_sha256"] {
++		return result, fmt.Errorf("authority-claim: dependency precondition mismatch")
++	}
++	postMetadata, err := base64.RawStdEncoding.DecodeString(values["post_metadata_base64"])
++	if err != nil || !json.Valid(postMetadata) {
++		return result, fmt.Errorf("authority-claim: post metadata is not valid unpadded base64 JSON")
++	}
++	expectedPostMetadata, err := authorityClaimPostMetadata(issue.Metadata, values["attempt_id"], values["idempotency_key"], values["base_commit"])
++	if err != nil || digestBytes(expectedPostMetadata) != digestBytes(postMetadata) {
++		return result, fmt.Errorf("authority-claim: post metadata does not match the bounded transition")
++	}
++	if err := claimTx.ClaimIssue(ctx, id, actor); err != nil {
++		return result, fmt.Errorf("authority-claim: native CAS claim: %w", err)
++	}
++	if err := tx.UpdateIssue(ctx, id, map[string]interface{}{"metadata": json.RawMessage(postMetadata)}, actor); err != nil {
++		return result, fmt.Errorf("authority-claim: metadata update: %w", err)
++	}
++	if err := tx.RemoveLabel(ctx, id, "backlog", actor); err != nil {
++		return result, fmt.Errorf("authority-claim: remove lifecycle label: %w", err)
++	}
++	if err := tx.AddLabel(ctx, id, "in-progress", actor); err != nil {
++		return result, fmt.Errorf("authority-claim: add lifecycle label: %w", err)
++	}
++	result.Target = id
++	return result, nil
++}
++
++func authorityClaimPostMetadata(pre []byte, attemptID, idempotencyKey, baseCommit string) ([]byte, error) {
++	decoder := json.NewDecoder(bytes.NewReader(pre))
++	decoder.UseNumber()
++	var values map[string]interface{}
++	if err := decoder.Decode(&values); err != nil {
++		return nil, err
++	}
++	_, hasWorkClaim := values["workClaim"]
++	_, hasBootstrapClaim := values["bootstrapClaim"]
++	if values["lifecycleState"] != "backlog" || hasWorkClaim || hasBootstrapClaim || attemptID == "" || idempotencyKey == "" || baseCommit == "" {
++		return nil, fmt.Errorf("authority-claim: invalid lifecycle or claim preimage")
++	}
++	version, ok := values["workVersion"].(map[string]interface{})
++	if !ok || version["authorityGeneration"] == "" || version["issueIncarnation"] == "" {
++		return nil, fmt.Errorf("authority-claim: invalid WorkVersion preimage")
++	}
++	sequenceNumber, ok := version["issueMutationSequence"].(json.Number)
++	if !ok {
++		return nil, fmt.Errorf("authority-claim: invalid mutation sequence")
++	}
++	sequence, err := strconv.ParseUint(sequenceNumber.String(), 10, 64)
++	if err != nil || sequence == 0 || sequence == ^uint64(0) {
++		return nil, fmt.Errorf("authority-claim: invalid mutation sequence")
++	}
++	graphNumber, ok := version["dependencyGraphRevision"].(json.Number)
++	if !ok {
++		return nil, fmt.Errorf("authority-claim: invalid dependency graph revision")
++	}
++	graphRevision, err := strconv.ParseUint(graphNumber.String(), 10, 64)
++	if err != nil || graphRevision == 0 {
++		return nil, fmt.Errorf("authority-claim: invalid dependency graph revision")
++	}
++	version["issueMutationSequence"] = json.Number(strconv.FormatUint(sequence+1, 10))
++	values["lifecycleState"] = "in-progress"
++	values["workClaim"] = map[string]interface{}{
++		"attemptId": attemptID, "idempotencyKey": idempotencyKey, "baseCommit": baseCommit,
++	}
++	return json.Marshal(values)
++}
++
+diff --git a/cmd/bd/batch_embedded_test.go b/cmd/bd/batch_embedded_test.go
+index 78f0e66c4..769eb8f36 100644
+--- a/cmd/bd/batch_embedded_test.go
++++ b/cmd/bd/batch_embedded_test.go
+@@ -94,0 +95,72 @@ func bootstrapClaimScript(t *testing.T, st storage.DoltStorage, ctx context.Cont
++func authorizeAuthorityClaimWorkspace(t *testing.T, root string) {
++	t.Helper()
++	authorizeBootstrapClaimWorkspace(t, root)
++	t.Setenv(authorityDirectBeadsDirEnv, os.Getenv(bootstrapDirectBeadsDirEnv))
++	t.Setenv(authorityDirectProjectEnv, os.Getenv(bootstrapDirectProjectEnv))
++	t.Setenv(authorityDirectDatabaseEnv, os.Getenv(bootstrapDirectDatabaseEnv))
++	t.Setenv(authorityWorkspaceDigestEnv, os.Getenv(bootstrapWorkspaceDigestEnv))
++}
++
++func authorityClaimScript(t *testing.T, st storage.DoltStorage, ctx context.Context, id, attemptID string) string {
++	t.Helper()
++	issue, err := st.GetIssue(ctx, id)
++	if err != nil {
++		t.Fatalf("GetIssue %s: %v", id, err)
++	}
++	metadataDigest, err := canonicalJSONDigest(issue.Metadata)
++	if err != nil {
++		t.Fatalf("canonical metadata: %v", err)
++	}
++	labels, err := st.GetLabels(ctx, id)
++	if err != nil {
++		t.Fatalf("GetLabels %s: %v", id, err)
++	}
++	sort.Strings(labels)
++	labelsJSON, _ := json.Marshal(labels)
++	dependencies, err := st.GetDependencyRecords(ctx, id)
++	if err != nil {
++		t.Fatalf("GetDependencyRecords %s: %v", id, err)
++	}
++	conditions := make([]authorityDependencyCondition, 0, len(dependencies))
++	for _, dependency := range dependencies {
++		dependencyIssue, readErr := st.GetIssue(ctx, dependency.DependsOnID)
++		if readErr != nil {
++			t.Fatal(readErr)
++		}
++		dependencyMetadataDigest, digestErr := canonicalJSONDigest(dependencyIssue.Metadata)
++		if digestErr != nil {
++			t.Fatal(digestErr)
++		}
++		conditions = append(conditions, authorityDependencyCondition{
++			ID: dependency.DependsOnID, DependencyType: string(dependency.Type),
++			Status: string(dependencyIssue.Status), MetadataSHA256: dependencyMetadataDigest,
++		})
++	}
++	sort.Slice(conditions, func(i, j int) bool { return conditions[i].ID < conditions[j].ID })
++	dependenciesJSON, _ := json.Marshal(conditions)
++	const idempotencyKey = "test-key"
++	const baseCommit = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
++	postMetadata, err := authorityClaimPostMetadata(issue.Metadata, attemptID, idempotencyKey, baseCommit)
++	if err != nil {
++		t.Fatal(err)
++	}
++	return fmt.Sprintf("authority-claim %s expected_status=%s expected_assignee=%s expected_created_at=%s expected_updated_at=%s expected_metadata_sha256=%s expected_labels_sha256=%s expected_dependencies_sha256=%s attempt_id=%s idempotency_key=%s base_commit=%s post_metadata_base64=%s\n",
++		id, issue.Status, issue.Assignee, issue.CreatedAt.UTC().Format(time.RFC3339), issue.UpdatedAt.UTC().Format(time.RFC3339),
++		metadataDigest, digestBytes(labelsJSON), digestBytes(dependenciesJSON), attemptID, idempotencyKey, baseCommit,
++		base64.RawStdEncoding.EncodeToString(postMetadata))
++}
++
++func seedAuthorityClaimFixture(t *testing.T, st storage.DoltStorage, ctx context.Context) *types.Issue {
++	t.Helper()
++	issue := seedBootstrapClaimFixture(t, st, ctx)
++	metadata := json.RawMessage(`{"lifecycleState":"backlog","workVersion":{"authorityGeneration":"fixture-generation","dependencyGraphRevision":1,"issueIncarnation":"fixture-incarnation","issueMutationSequence":1}}`)
++	if err := st.UpdateIssue(ctx, issue.ID, map[string]interface{}{"metadata": metadata}, "test"); err != nil {
++		t.Fatalf("UpdateIssue authority metadata: %v", err)
++	}
++	issue, err := st.GetIssue(ctx, issue.ID)
++	if err != nil {
++		t.Fatal(err)
++	}
++	return issue
++}
++
+@@ -418,0 +491,66 @@ func TestBatchBootstrapClaimHookWrappedTransactionFailsBeforeRead(t *testing.T)
++func TestBatchAuthorityClaimIsOneBoundedAtomicTransition(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	store := newEmbeddedBootstrapTestStore(t, root)
++	authorizeAuthorityClaimWorkspace(t, root)
++	ctx := context.Background()
++	issue := seedAuthorityClaimFixture(t, store, ctx)
++	const attemptID = "fixture-attempt-001"
++	if err := runBatchScriptInTx(t, ctx, store, authorityClaimScript(t, store, ctx, issue.ID, attemptID)); err != nil {
++		t.Fatalf("authority claim: %v", err)
++	}
++	got, err := store.GetIssue(ctx, issue.ID)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if got.Status != types.StatusInProgress || got.Assignee != "bootstrap-engineer" || metadataStringForTest(got.Metadata, "lifecycleState") != "in-progress" {
++		t.Fatalf("authority claim postimage=%s/%s/%s", got.Status, got.Assignee, metadataStringForTest(got.Metadata, "lifecycleState"))
++	}
++	var metadata map[string]interface{}
++	if json.Unmarshal(got.Metadata, &metadata) != nil || metadata["workClaim"].(map[string]interface{})["attemptId"] != attemptID || metadata["workVersion"].(map[string]interface{})["issueMutationSequence"] != float64(2) {
++		t.Fatalf("authority claim metadata=%s", got.Metadata)
++	}
++	labels, err := store.GetLabels(ctx, issue.ID)
++	if err != nil {
++		t.Fatal(err)
++	}
++	sort.Strings(labels)
++	if strings.Join(labels, ",") != "in-progress" {
++		t.Fatalf("authority claim labels=%v", labels)
++	}
++}
++
++func TestBatchAuthorityClaimContentionHasOneWinner(t *testing.T) {
++	t.Setenv("BEADS_ACTOR", "bootstrap-engineer")
++	previousActor := actor
++	setActor("bootstrap-engineer")
++	t.Cleanup(func() { setActor(previousActor) })
++	root := t.TempDir()
++	store := newEmbeddedBootstrapTestStore(t, root)
++	authorizeAuthorityClaimWorkspace(t, root)
++	ctx := context.Background()
++	issue := seedAuthorityClaimFixture(t, store, ctx)
++	script := authorityClaimScript(t, store, ctx, issue.ID, "fixture-attempt-001")
++	start := make(chan struct{})
++	results := make(chan error, 2)
++	for range 2 {
++		go func() {
++			<-start
++			results <- runBatchScriptInTx(t, ctx, store, script)
++		}()
++	}
++	close(start)
++	winners := 0
++	for range 2 {
++		if err := <-results; err == nil {
++			winners++
++		}
++	}
++	if winners != 1 {
++		t.Fatalf("concurrent authority claims produced %d winners, want one", winners)
++	}
++}
++

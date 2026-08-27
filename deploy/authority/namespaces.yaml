@@ -1,0 +1,27 @@
+# FactoryDocSync:
+# docs:
+# - docs/features/F-002-work-authority.md
+# - docs/design-docs/ADR-001-git-beads-authority.md
+# - docs/design-docs/ADR-003-rule-of-two.md
+# - docs/code-documentation-map.md
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mars3-authority
+  labels:
+    mars3.io/compartment: authority
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mars3-agent-sandboxes
+  labels:
+    mars3.io/compartment: untrusted-agent
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: authority-gateway
+  namespace: mars3-authority
+automountServiceAccountToken: false

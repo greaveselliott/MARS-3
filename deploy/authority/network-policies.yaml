@@ -1,0 +1,78 @@
+# FactoryDocSync:
+# docs:
+# - docs/features/F-002-work-authority.md
+# - docs/design-docs/ADR-001-git-beads-authority.md
+# - docs/design-docs/ADR-003-rule-of-two.md
+# - docs/code-documentation-map.md
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-agent-sandbox-traffic
+  namespace: mars3-agent-sandboxes
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-authority-traffic
+  namespace: mars3-authority
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-control-plane-to-gateway
+  namespace: mars3-authority
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mars3-authority-gateway
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: mars3-control-plane
+          podSelector:
+            matchLabels:
+              mars3.io/authority-client: trusted
+      ports:
+        - protocol: TCP
+          port: 8443
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-authority-stores
+  namespace: mars3-authority
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mars3-authority-gateway
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mars3-authority-postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mars3-authority-beads
+      ports:
+        - protocol: TCP
+          port: 7443

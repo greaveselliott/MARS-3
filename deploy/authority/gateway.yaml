@@ -1,0 +1,82 @@
+# FactoryDocSync:
+# docs:
+# - docs/features/F-002-work-authority.md
+# - docs/design-docs/ADR-001-git-beads-authority.md
+# - docs/design-docs/ADR-003-rule-of-two.md
+# - docs/code-documentation-map.md
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mars3-authority-gateway
+  namespace: mars3-authority
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mars3-authority-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mars3-authority-gateway
+    spec:
+      serviceAccountName: authority-gateway
+      automountServiceAccountToken: false
+      hostNetwork: false
+      hostPID: false
+      hostIPC: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: gateway
+          # Synthetic W-001 admission fixture. P-001 must replace this reserved
+          # image reference with a signed qualified artifact before deployment.
+          image: example.invalid/mars3-authority@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          args:
+            - serve
+            - --config=/run/mars3/config/config.json
+          ports:
+            - name: https
+              containerPort: 8443
+          env:
+            - name: MARS3_AUTHORITY_CONFIG
+              value: /run/mars3/config/config.json
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: runtime-config
+              mountPath: /run/mars3/config
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+      volumes:
+        - name: runtime-config
+          projected:
+            sources:
+              - configMap:
+                  name: mars3-authority-runtime-public
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mars3-authority-gateway
+  namespace: mars3-authority
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: mars3-authority-gateway
+  ports:
+    - name: https
+      port: 8443
+      targetPort: https

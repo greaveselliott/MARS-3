@@ -159,7 +159,7 @@ func checkGovernedPublicScope(path string, findings *[]Finding) {
 		}
 	}
 	for _, allowed := range []string{
-		".gitattributes", ".gitignore", "AGENTS.md", "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "LICENSE", "Makefile", "NOTICE", "README.md", "SECURITY.md", "THIRD_PARTY_NOTICES", "go.mod", "go.sum",
+		".gitattributes", ".gitignore", ".gitleaksignore", "AGENTS.md", "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "LICENSE", "Makefile", "NOTICE", "README.md", "SECURITY.md", "THIRD_PARTY_NOTICES", "go.mod", "go.sum",
 	} {
 		if path == allowed {
 			return

@@ -1,0 +1,83 @@
+schemaVersion: 1
+kind: MARS3W001DeliveryCICorrection
+
+grant:
+  id: W-001-delivery-ci-correction-v3
+  classification: PUBLIC
+  issuedAt: 2026-08-27T08:25:00Z
+  expiresAt: 2026-08-28T08:25:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: ac20b235724b2219e5db230a7a44b507e46d5547
+  baseTree: 4812b71b88500101688be7c80f41461a79619646
+  workingBranch: codex/w-001-delivery-v2
+  priorGrant: W-001-delivery-v2
+  priorGrantSHA256: 3f4d6ee6075e40ec49eefd24a9a20d734619833be61a58547d97f402258b055a
+  priorGrantSignatureSHA256: 3b7951067a50975875fdeb194c51680c66869868a27e94bcb53a031d4c438f45
+  priorReviewTag: mars3/w001-delivery-v2
+  priorReviewTagObject: 9eb770c85a1df06dd90e993c9447176c9bbbffd0
+  priorReviewTagTarget: ac20b235724b2219e5db230a7a44b507e46d5547
+  priorReviewTagTree: 4812b71b88500101688be7c80f41461a79619646
+  successorReviewTag: mars3/w001-delivery-v3
+  successorReviewTagMessage: MARS-3 W-001 delivery tree attestation v3
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: work-authority-engineer
+  failureOwnership: foundation
+  purpose: preserve the authorized v2 tag and correct the release-identity admission contract
+  allowedEffects:
+    - preserve-the-v2-tag-head-tree-and-two-failed-check-attempts
+    - distinguish-tag-identity-failure-from-tag-target-failure
+    - validate-the-v2-engineer-tag-as-authorized-historical-evidence
+    - create-signed-correction-commits-and-one-signed-v3-release-manager-review-tag
+    - push-the-existing-review-branch-and-v3-tag-without-another-v2-run-retry
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-delivery-ci-correction-v3.yaml
+    - .harness/grants/W-001-delivery-ci-correction-v3.yaml.sig
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v2-tag-object-target-tree-message-signature-and-tagger-remain-immutable
+    - v2-failed-check-attempts-remain-durable-foundation-evidence
+    - v3-tag-targets-the-final-correction-head-and-uses-the-release-manager-identity
+    - pull-request-checkout-binds-the-v3-tag-to-the-event-head-not-the-synthetic-merge
+    - protected-main-tree-equals-the-signed-v3-feature-tree
+    - every-correction-commit-stays-inside-the-signed-path-set
+  prohibitedEffects:
+    - move-delete-or-reuse-the-v2-review-tag
+    - retry-run-33053544349-again
+    - mutate-any-Bead-Dolt-row-dependency-label-comment-or-history
+    - issue-assert-renew-release-or-revoke-a-live-lease
+    - change-gateway-runtime-platform-or-product-behavior
+    - mutate-workflow-ruleset-repository-settings-or-secret-scanner-policy
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+
+finding:
+  code: public.w001_delivery_tag_identity
+  normalizedFingerprint: delivery-review-tag/release-identity-mismatch
+  observedTagger: work-authority-engineer
+  requiredTagger: release-manager
+  run: 33053544349
+  firstAttemptJob: 98454619462
+  retryAttemptJob: 98454903898
+  retryBudget: exhausted
+  priorTagAuthorizedByV2: true
+  priorTagAcceptedAsFinalReview: false
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-delivery-ci-correction-v3
+  detachedSignature: W-001-delivery-ci-correction-v3.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
