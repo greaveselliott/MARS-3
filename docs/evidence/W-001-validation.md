@@ -570,3 +570,33 @@ container was then stopped and auto-removed. Scenario states remain `failing`
 until the full public gate and independent QA and Security verdicts bind one
 signed immutable v6 tree. No canonical Beads lifecycle, live lease, or
 production effect was performed by this candidate verification.
+
+## Lifecycle-correction v6 review disposition
+
+Independent QA and Security reviewed public PR 10 exact head
+`e0f27046ec28ab924eac910d40e244cb26b30323`, tree
+`bbc1aa76b3965f0740e54f984ad713978a3be9f8`, signed tag object
+`d8637c7443ab04e05892ecf5489f0b45fa41e43d`, and successful run/job
+`33083662143/98557343299`. Both verdicts were `changes-requested`; the same
+Bead remains `in-progress`, no live lease exists, and the immutable v6 commit,
+tag, run, and dispositions remain evidence.
+
+The exact additive findings are:
+
+- `lifecycle.claim_lineage_not_joined`: current and archived handoff attempts
+  were not joined to the sole retained claim, incomplete type-specific claims
+  and contradictory legacy lifecycle shadows could still project;
+- `lifecycle.failure_fingerprint_retry_not_monotonic`: some noncompleted runs
+  could omit their fingerprint and equivalent failures could recur without a
+  monotonic second-attempt blocked escalation;
+- `lifecycle.qualification_not_independently_reproducible`: independent cold
+  builds from the published source and recipe produced internally stable but
+  different binary hashes, so the build boundary was underspecified.
+
+## Lifecycle-correction v7 candidate
+
+The prospective signed `W-001-lifecycle-correction-v7` grant permits only the
+three corrections above, their public contracts and tests, hermetic independent
+build qualification, and one fresh v7 review publication. It grants no canonical
+Beads mutation or live lease and cannot merge before fresh QA and Security
+acceptance. Historical v6 materials remain immutable.

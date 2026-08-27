@@ -1,0 +1,128 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCorrectionGrant
+
+grant:
+  id: W-001-lifecycle-correction-v7
+  classification: PUBLIC
+  issuedAt: 2026-08-27T15:07:00Z
+  expiresAt: 2026-08-30T15:07:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: e0f27046ec28ab924eac910d40e244cb26b30323
+  baseTree: bbc1aa76b3965f0740e54f984ad713978a3be9f8
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-correction-v6
+  priorGrantSHA256: 0d5b8aa829d8eecd4755f6063512facdcd17c0312e45ec4ca2ff1295f73a462e
+  priorGrantSignatureSHA256: cae00cafd4007330beb5bac423300cee4b7dfc349d7e5385c57f62092a9a5a8d
+  priorReviewTag: mars3/w001-lifecycle-completion-v6
+  priorReviewTagObject: d8637c7443ab04e05892ecf5489f0b45fa41e43d
+  priorReviewTagTarget: e0f27046ec28ab924eac910d40e244cb26b30323
+  priorReviewTagTree: bbc1aa76b3965f0740e54f984ad713978a3be9f8
+  pullRequest: 10
+  priorRun: 33083662143
+  priorJob: 98557343299
+  priorQADisposition: changes-requested
+  priorSecurityDisposition: changes-requested
+  successorReviewTag: mars3/w001-lifecycle-completion-v7
+  successorReviewTagMessage: MARS-3 W-001 lifecycle correction tree attestation v7
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: work-authority-engineer
+  failureOwnership: foundation
+  purpose: close the exact v6 claim-lineage convergence and reproducible-build findings without canonical mutation
+  attemptId: w001-lifecycle-correction-v7
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: true
+  allowedEffects:
+    - preserve-the-v6-commits-tag-run-and-changes-requested-dispositions
+    - join-every-current-and-archived-handoff-to-the-sole-complete-canonical-claim
+    - reject-null-malformed-incomplete-or-type-confused-claim-shadows-and-contradictory-legacy-lifecycle-scalars
+    - require-a-normalized-fingerprint-for-every-noncompleted-run
+    - enforce-one-retry-per-fingerprint-and-durable-blocked-escalation-without-a-third-automatic-attempt
+    - preserve-a-hermetic-independent-reproducible-patched-Beads-build-recipe-source-digest-and-binary-hash
+    - execute-non-skipped-native-Beads-and-PostgreSQL-qualification
+    - update-the-active-plan-feature-spec-evidence-and-manifest-with-the-truthful-v7-correction
+    - create-signed-semantic-commits-and-one-signed-v7-release-manager-review-tag
+    - push-the-existing-review-branch-and-tag-and-update-pull-request-10
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-correction-v7.yaml
+    - .harness/grants/W-001-lifecycle-correction-v7.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/features/F-002-work-authority.md
+    - docs/product-specs/work-authority.md
+    - docs/evidence/W-001-validation.md
+    - api/authority/v1/types.go
+    - internal/authority/beads/**
+    - internal/authority/gateway/**
+    - internal/authority/httpapi/**
+    - internal/authority/postgres/**
+    - database/authority/**
+    - cmd/mars3-authority/**
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - every-current-and-archived-handoff-canonical-attempt-equals-the-sole-retained-claim-attempt
+    - work-and-bootstrap-claims-have-distinct-complete-type-specific-contracts-and-raw-presence-is-fail-closed
+    - legacy-lifecycle-scalars-are-absent-or-exactly-derived-from-detailed-records
+    - every-noncompleted-run-retains-a-public-safe-normalized-fingerprint
+    - first-failure-and-one-retry-use-monotonic-attempts-and-equivalent-recurrence-becomes-blocked
+    - a-third-equivalent-automatic-attempt-is-denied-across-current-and-archived-cycles
+    - independent-cold-builds-from-different-source-and-cache-paths-reproduce-the-bound-binary
+    - native-and-PostgreSQL-qualification-execute-without-skips
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged-until-fresh-review-and-merge
+  prohibitedEffects:
+    - mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths
+    - mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - move-delete-or-reuse-the-v6-review-tag
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - lifecycle.claim_lineage_not_joined
+    - lifecycle.failure_fingerprint_retry_not_monotonic
+    - lifecycle.qualification_not_independently_reproducible
+  normalizedFingerprint: pr10-v6/lifecycle-lineage-retry-build-correction
+  reviewedHead: e0f27046ec28ab924eac910d40e244cb26b30323
+  reviewedTree: bbc1aa76b3965f0740e54f984ad713978a3be9f8
+  result: changes-requested-same-ticket-remains-in-progress
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  assignee: work-authority-engineer
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  nativeBeadsNoSkipRequired: true
+  postgresNoSkipRequired: true
+  independentColdBuildsRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-correction-v7
+  detachedSignature: W-001-lifecycle-correction-v7.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

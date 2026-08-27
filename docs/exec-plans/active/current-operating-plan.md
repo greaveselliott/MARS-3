@@ -156,9 +156,9 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the v6 lifecycle correction to a signed
+- Required next transition: bind the v7 lifecycle correction to a signed
   immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
-  conformance suites, then route that exact tree through QA and Security. No
+  conformance suites plus independent cold-build reproduction, then route that exact tree through QA and Security. No
   canonical handoff or later lifecycle mutation may execute until the reviewed
   tree is merged and a separate reconciliation authority binds the
   protected-main result.
@@ -185,6 +185,14 @@ attempt, and next action, then reopen the same Bead or remain explicitly
 `in-review` through an append-only recovery route. Completed closure still
 requires QA and Security acceptance, merged evidence, completed run, and
 reconciliation.
+
+Independent QA and Security changes-requested the signed v6 checkpoint. They
+confirmed the earlier full-fence replay, missing-receipt, recovery-route, native,
+and PostgreSQL corrections, but found that claim attempts were not joined across
+all handoff history, failure fingerprints were not monotonic across equivalent
+retries, and the published binary hash did not reproduce from independent cold
+builds. The signed `W-001-lifecycle-correction-v7` grant preserves v6 and permits
+only those additive corrections and their qualification.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation

@@ -1079,6 +1079,80 @@ func TestW001LifecycleCorrectionPathScope(t *testing.T) {
 	}
 }
 
+func TestW001LifecycleCorrectionV7GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCorrectionV7Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v7 lifecycle correction was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCorrectionV7GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCorrectionV7Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCorrectionReviewTag+":refs/tags/"+w001LifecycleCorrectionReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCorrectionV7Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCorrectionV7Path:       tampered,
+		w001LifecycleCorrectionV7Signature:  read(w001LifecycleCorrectionV7Signature),
+		w001LifecycleCorrectionPath:         read(w001LifecycleCorrectionPath),
+		w001LifecycleCorrectionSignature:    read(w001LifecycleCorrectionSignature),
+		wave1PlanningGrantKey:               read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md": read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                 read(canonicalActivePlan),
+		".harness/manifest.yaml":            read(".harness/manifest.yaml"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCorrectionV7Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_correction_v7_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_correction_v7_signature") {
+		t.Fatalf("tampered v7 lifecycle correction authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCorrectionV7PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCorrectionV7Path,
+		"docs/evidence/W-001-validation.md",
+		"api/authority/v1/types.go",
+		"internal/authority/beads/reproducible_build_test.go",
+		"internal/authority/gateway/lifecycle.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCorrectionV7PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v7 lifecycle correction path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCorrectionPath,
+		".github/workflows/foundation-quality.yml",
+		"internal/platform/runtime.go",
+		"go.mod",
+	} {
+		if w001LifecycleCorrectionV7PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v7 lifecycle correction path was accepted: %s", path)
+		}
+	}
+}
+
 func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	object, err := planningGrantGitOutput(repo, "cat-file", "tag", w001DeliveryV2TagObject)
