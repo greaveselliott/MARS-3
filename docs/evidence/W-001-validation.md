@@ -469,3 +469,14 @@ the missing lifecycle implementation, public synthetic tests and leases, this
 truthful plan/evidence correction, and one exact status comment. It does not
 authorize a canonical lifecycle transition, another Bead, a production lease,
 repository-control changes, secrets, private data, or destructive work.
+
+Canonical read-back confirms that the authorized public-safe finding was
+appended exactly once as M3-W001 comment
+`01a04328-9ad4-749f-8e46-ce5e15b68f94` at `2026-08-27T12:18:50Z`. Its exact
+text reproduces SHA-256
+`d7ddb1c0d4ecb00b93fcbec4d56b740da581a725e91e6381601d2d295203c38d`.
+The same read-back showed comment count `81`, native status `in_progress`,
+typed lifecycle `in-progress`, WorkVersion mutation/dependency revisions
+`1/1`, and no lease field. This resolves the initially unknown comment-command
+outcome without retrying it; no canonical work mutation accompanied the
+comment append.
