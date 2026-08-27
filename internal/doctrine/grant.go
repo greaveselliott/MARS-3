@@ -21,6 +21,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -255,6 +256,30 @@ type W001BootstrapExecutionAuthorization struct {
 	ExpiresAt               string `json:"expiresAt"`
 	payloadSHA256           string
 	signatureSHA256         string
+}
+
+// W001DeliveryGrant is the validated runtime projection of the signed W-001
+// delivery authority. It deliberately excludes signing material and exposes
+// only the fields required to reconcile the already-canonical claim with one
+// bounded development lease.
+type W001DeliveryGrant struct {
+	ID                           string
+	Repository                   string
+	Bead                         string
+	Principal                    string
+	AttemptID                    string
+	IdempotencyKey               string
+	BaseCommit                   string
+	ExpiresAt                    time.Time
+	ExpectedNativeStatus         string
+	ExpectedLifecycleState       string
+	ExpectedAssignee             string
+	WorkVersionGeneration        string
+	WorkVersionIncarnation       string
+	IssueMutationSequence        uint64
+	DependencyGraphRevision      uint64
+	CanonicalWorkMutationAllowed bool
+	DevelopmentLeaseAllowed      bool
 }
 
 type grantScalarExpectation struct {
@@ -3369,6 +3394,59 @@ func LoadW001BootstrapGrant(repo string) (W001BootstrapGrant, error) {
 		grant.PatchedBinarySHA256 = w001PostclaimHookBinarySHA
 	}
 	return grant, nil
+}
+
+// LoadW001DeliveryGrant verifies the complete signed delivery contract before
+// returning its minimal runtime projection. Runtime callers must still compare
+// the returned preimage with a fresh canonical Beads read immediately before
+// issuing a development lease.
+func LoadW001DeliveryGrant(repo string) (W001DeliveryGrant, error) {
+	return loadW001DeliveryGrant(repo, time.Now().UTC())
+}
+
+func loadW001DeliveryGrant(repo string, now time.Time) (W001DeliveryGrant, error) {
+	root, err := repositoryRoot(repo)
+	if err != nil {
+		return W001DeliveryGrant{}, err
+	}
+	var findings []Finding
+	checkW001DeliveryGrant(root, &findings)
+	if len(findings) != 0 {
+		sortFindings(findings)
+		return W001DeliveryGrant{}, fmt.Errorf("W-001 delivery grant validation failed: %s: %s", findings[0].Code, findings[0].Message)
+	}
+	data, err := readRepoFile(root, w001DeliveryGrantPath)
+	if err != nil {
+		return W001DeliveryGrant{}, err
+	}
+	document := parseStrictGrant(data, w001DeliveryGrantScalars, w001DeliveryGrantSequences,
+		[]string{"grant", "canonicalPreimage", "publication", "reconciliation", "verification", "integrity"})
+	expiresAt, err := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if err != nil || !now.Before(expiresAt) {
+		return W001DeliveryGrant{}, errors.New("W-001 delivery grant has expired")
+	}
+	mutationSequence, err := strconv.ParseUint(scalarValue(document, "canonicalPreimage.issueMutationSequence"), 10, 64)
+	if err != nil {
+		return W001DeliveryGrant{}, errors.New("W-001 delivery mutation sequence is invalid")
+	}
+	graphRevision, err := strconv.ParseUint(scalarValue(document, "canonicalPreimage.dependencyGraphRevision"), 10, 64)
+	if err != nil {
+		return W001DeliveryGrant{}, errors.New("W-001 delivery dependency revision is invalid")
+	}
+	return W001DeliveryGrant{
+		ID: scalarValue(document, "grant.id"), Repository: scalarValue(document, "grant.repository"),
+		Bead: scalarValue(document, "grant.bead"), Principal: scalarValue(document, "grant.principal"),
+		AttemptID: scalarValue(document, "grant.attemptId"), IdempotencyKey: scalarValue(document, "grant.idempotencyKey"),
+		BaseCommit: scalarValue(document, "grant.baseCommit"), ExpiresAt: expiresAt,
+		ExpectedNativeStatus:   scalarValue(document, "canonicalPreimage.nativeStatus"),
+		ExpectedLifecycleState: scalarValue(document, "canonicalPreimage.lifecycleState"),
+		ExpectedAssignee:       scalarValue(document, "canonicalPreimage.assignee"),
+		WorkVersionGeneration:  scalarValue(document, "canonicalPreimage.workVersionGeneration"),
+		WorkVersionIncarnation: scalarValue(document, "canonicalPreimage.workVersionIncarnation"),
+		IssueMutationSequence:  mutationSequence, DependencyGraphRevision: graphRevision,
+		CanonicalWorkMutationAllowed: scalarValue(document, "grant.canonicalWorkMutationAllowed") == "true",
+		DevelopmentLeaseAllowed:      scalarValue(document, "grant.developmentLeaseAllowed") == "true",
+	}, nil
 }
 
 // LoadW001BootstrapExecutionAuthorization verifies the separately signed,

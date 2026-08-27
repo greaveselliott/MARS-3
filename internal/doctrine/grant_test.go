@@ -682,6 +682,26 @@ func TestW001DeliveryGrantAcceptsPinnedSignedContract(t *testing.T) {
 	}
 }
 
+func TestLoadW001DeliveryGrantReturnsBoundedRuntimeProjection(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	grant, err := loadW001DeliveryGrant(repo, time.Date(2026, 8, 27, 1, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if grant.ID != "W-001-delivery" || grant.Repository != planningGrantRepository || grant.Bead != "M3-W001" ||
+		grant.Principal != "work-authority-engineer" || grant.AttemptID != "w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73" ||
+		grant.IdempotencyKey != "w001-delivery-295ebd16-1d32-479e-a620-97a51e62a4c0" || grant.BaseCommit != w001DeliveryBase ||
+		grant.ExpectedNativeStatus != "in_progress" || grant.ExpectedLifecycleState != "in-progress" || grant.ExpectedAssignee != grant.Principal ||
+		grant.WorkVersionGeneration != "6e79ff81-a007-42a5-a178-7ce58dbb718b" ||
+		grant.WorkVersionIncarnation != "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41" ||
+		grant.IssueMutationSequence != 1 || grant.DependencyGraphRevision != 1 || grant.CanonicalWorkMutationAllowed || !grant.DevelopmentLeaseAllowed {
+		t.Fatalf("unexpected runtime projection: %+v", grant)
+	}
+	if _, err := loadW001DeliveryGrant(repo, grant.ExpiresAt); err == nil {
+		t.Fatal("expired delivery grant was accepted")
+	}
+}
+
 func TestW001DeliveryGrantFailsClosed(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	read := func(path string) []byte {
