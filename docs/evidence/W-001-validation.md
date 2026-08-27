@@ -353,3 +353,36 @@ skip to look like positive evidence. Its missing-endpoint negative check exits
 nonzero, and the same target passes with both isolated loopback endpoints.
 Separately, the complete API and authority package suite passes under Go's
 race detector on the v2 candidate.
+
+## Signed delivery-v2 publication checkpoint
+
+The scanner-clean delivery series is rooted at accepted `main`
+`59f1fe24952b68bd3bbb6994bfee46c350b7c9cd` and contains these signed semantic
+checkpoints before this evidence-only update:
+
+- `fce3985e6ccca600bd3c808bdafa89587bc95638` establishes delivery authority;
+- `0edcee81cd303ba886062bad5bd8b5846487844a` adds the typed gateway and canonical CAS;
+- `2821e81afa6972106828489b68dcc1c7e7a90a09` adds PostgreSQL fencing and rebaseline;
+- `26f7cb3048add2af1c65e84df9164382d1e96246` adds transport and sandbox isolation.
+
+The immutable implementation checkpoint tree is
+`6e156306584d736f26df33f9f2a6c4d7ce4b5637`. Each commit verifies with the
+pinned human-bootstrap-authority ED25519 key. The signed delivery grant and
+detached signature have SHA-256 values
+`3f4d6ee6075e40ec49eefd24a9a20d734619833be61a58547d97f402258b055a` and
+`3b7951067a50975875fdeb194c51680c66869868a27e94bcb53a031d4c438f45`.
+
+A clean standalone clone containing accepted `main`, the preserved public
+transition tags, and the signed delivery series passed doctrine, plan,
+DocSync, public-check, all Go tests, vet, strict Git checks, and the complete
+authority race suite. Digest-pinned worktree and full-history secret scans
+reported zero findings. The independent reviewers must bind their verdicts to
+the final evidence commit and verify that its parent is the implementation
+checkpoint above; this paragraph does not self-attest its own commit identity.
+
+A first local, unpublished version of this evidence checkpoint placed a commit
+digest immediately after an authority-like field label, which the pinned
+generic-key heuristic rejected. It contained no credential and was never
+pushed, tagged, or submitted for review. The local candidate was replaced
+before publication, without changing any implementation commit or weakening
+the scanner configuration.
