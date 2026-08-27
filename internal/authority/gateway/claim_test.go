@@ -27,10 +27,16 @@ type memoryClaimStore struct {
 	invalidPostimage bool
 	getBarrier       chan struct{}
 	getCount         int
+	getErr           error
 }
 
 func (store *memoryClaimStore) Get(_ context.Context, tenantID, projectID, beadID string) (authorityv1.WorkItem, error) {
 	store.mu.Lock()
+	if store.getErr != nil {
+		err := store.getErr
+		store.mu.Unlock()
+		return authorityv1.WorkItem{}, err
+	}
 	if store.item.TenantID != tenantID || store.item.ProjectID != projectID || store.item.BeadID != beadID {
 		store.mu.Unlock()
 		return authorityv1.WorkItem{}, ErrWorkNotFound

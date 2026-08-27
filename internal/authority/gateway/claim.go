@@ -162,6 +162,9 @@ func NewWithClaims(store ClaimStore, sagas ClaimSagaStore, events EventSink, now
 	if leases, ok := sagas.(LeaseValidator); ok {
 		service.leases = leases
 	}
+	if leaseOps, ok := sagas.(LeaseStore); ok {
+		service.leaseOps = leaseOps
+	}
 	if barrier, ok := sagas.(ProjectBarrier); ok {
 		service.barrier = barrier
 	}

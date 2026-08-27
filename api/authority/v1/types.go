@@ -233,6 +233,15 @@ type RevokeLeaseRequest struct {
 	TraceRef        string `json:"trace_ref"`
 }
 
+// LeaseMutationResponse binds a lifecycle result to its durable journal
+// receipt. Replayed is true only for an already-applied identical terminal or
+// renewal state.
+type LeaseMutationResponse struct {
+	Lease      CapabilityLease `json:"lease"`
+	Replayed   bool            `json:"replayed"`
+	ReceiptRef string          `json:"receipt_ref"`
+}
+
 // EffectValidationRequest is presented by a trusted tool broker immediately
 // before one bounded material effect. ProposedLabels can add taint only.
 type EffectValidationRequest struct {

@@ -123,6 +123,7 @@ type Service struct {
 	claims    ClaimStore
 	sagas     ClaimSagaStore
 	leases    LeaseValidator
+	leaseOps  LeaseStore
 	barrier   ProjectBarrier
 	workLocks WorkMutationLocker
 	events    EventSink
