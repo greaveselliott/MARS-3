@@ -107,6 +107,8 @@ type EventSink interface {
 // exposes their handles to callers.
 type Service struct {
 	store  WorkStore
+	claims ClaimStore
+	sagas  ClaimSagaStore
 	events EventSink
 	now    func() time.Time
 }
@@ -227,6 +229,14 @@ func admitRequest(principal authorityv1.Principal, traceRef string, proposed []a
 	if len(principal.Labels) == 0 {
 		return traceRef, newDenial(authorityv1.ErrorPolicyDenied, ruleLabelInvalid, "", requiredSafeCompartment, allowedHumanMediate, traceRef)
 	}
+	if len(principal.Capabilities) > maxProjectionValues || hasDuplicateCapabilities(principal.Capabilities) {
+		return traceRef, newDenial(authorityv1.ErrorUnauthorized, ruleUnauthenticated, "", requiredAuthenticate, allowedAuthenticate, traceRef)
+	}
+	for _, capability := range principal.Capabilities {
+		if !knownCapability(capability) {
+			return traceRef, newDenial(authorityv1.ErrorUnauthorized, ruleUnauthenticated, "", requiredAuthenticate, allowedAuthenticate, traceRef)
+		}
+	}
 	if _, denial := admittedLabels(principal.Labels, nil, proposed, "", traceRef); denial != nil {
 		return traceRef, denial
 	}
@@ -234,6 +244,9 @@ func admitRequest(principal authorityv1.Principal, traceRef string, proposed []a
 }
 
 func admittedLabels(principal, resource, proposed []authorityv1.Label, state authorityv1.LifecycleState, traceRef string) ([]authorityv1.Label, *authorityv1.Denial) {
+	if len(principal) > maxProjectionValues || len(resource) > maxProjectionValues || len(proposed) > maxProjectionValues || hasDuplicateLabels(principal) || hasDuplicateLabels(resource) || hasDuplicateLabels(proposed) {
+		return nil, newDenial(authorityv1.ErrorPolicyDenied, ruleLabelInvalid, state, requiredSafeCompartment, allowedHumanMediate, traceRef)
+	}
 	combined := make(map[authorityv1.Label]bool)
 	for _, label := range append(append([]authorityv1.Label{}, principal...), resource...) {
 		if !knownLabel(label) {
@@ -301,7 +314,7 @@ func projectionRule(item authorityv1.WorkItem) string {
 	if !validIntegrity(item.Integrity) {
 		return ruleIntegrityInvalid
 	}
-	if len(item.Labels) == 0 || len(item.Labels) > maxProjectionValues {
+	if len(item.Labels) == 0 || len(item.Labels) > maxProjectionValues || hasDuplicateLabels(item.Labels) {
 		return ruleLabelInvalid
 	}
 	return ""
@@ -384,7 +397,7 @@ func (s *Service) deny(ctx context.Context, principal authorityv1.Principal, ope
 }
 
 func validEventReceipt(event, receipt authorityv1.Event) bool {
-	return receipt.Sequence > 0 && receipt.SchemaVersion == event.SchemaVersion && receipt.TraceRef == event.TraceRef && receipt.TenantID == event.TenantID && receipt.ProjectID == event.ProjectID && receipt.BeadID == event.BeadID && receipt.PrincipalID == event.PrincipalID && receipt.Operation == event.Operation && receipt.Outcome == event.Outcome && receipt.Rule == event.Rule && equalLabels(receipt.Labels, event.Labels) && receipt.OccurredAt.Equal(event.OccurredAt)
+	return receipt.Sequence > 0 && receipt.SchemaVersion == event.SchemaVersion && receipt.EventID == event.EventID && receipt.TraceRef == event.TraceRef && receipt.TenantID == event.TenantID && receipt.ProjectID == event.ProjectID && receipt.BeadID == event.BeadID && receipt.AttemptID == event.AttemptID && receipt.IdempotencyKey == event.IdempotencyKey && receipt.PrincipalID == event.PrincipalID && receipt.Operation == event.Operation && receipt.Outcome == event.Outcome && receipt.Rule == event.Rule && equalLabels(receipt.Labels, event.Labels) && !receipt.OccurredAt.IsZero() && !receipt.OccurredAt.After(event.OccurredAt)
 }
 
 func (s *Service) event(principal authorityv1.Principal, operation, beadID, traceRef, outcome, rule string, labels []authorityv1.Label) authorityv1.Event {
@@ -403,6 +416,7 @@ func (s *Service) event(principal authorityv1.Principal, operation, beadID, trac
 	}
 	return authorityv1.Event{
 		SchemaVersion: 1,
+		EventID:       deterministicEventID(traceRef, operation+"\x00"+beadID),
 		TraceRef:      traceRef,
 		TenantID:      tenantID,
 		ProjectID:     projectID,
@@ -485,11 +499,42 @@ func knownLabel(label authorityv1.Label) bool {
 	}
 }
 
+func knownCapability(capability authorityv1.Capability) bool {
+	switch capability {
+	case authorityv1.CapabilityWorkRead, authorityv1.CapabilityWorkClaim, authorityv1.CapabilityWorkStatus, authorityv1.CapabilityWorkHandoff, authorityv1.CapabilityReviewRecord, authorityv1.CapabilityRunDisposition, authorityv1.CapabilityLeaseIssue, authorityv1.CapabilityLeaseRenew, authorityv1.CapabilityLeaseRelease, authorityv1.CapabilityLeaseRevoke, authorityv1.CapabilityEffectValidate, authorityv1.CapabilityTicketDelivery:
+		return true
+	default:
+		return false
+	}
+}
+
 func hasCapability(principal authorityv1.Principal, capability authorityv1.Capability) bool {
 	for _, candidate := range principal.Capabilities {
 		if candidate == capability {
 			return true
 		}
+	}
+	return false
+}
+
+func hasDuplicateCapabilities(values []authorityv1.Capability) bool {
+	seen := make(map[authorityv1.Capability]bool, len(values))
+	for _, value := range values {
+		if seen[value] {
+			return true
+		}
+		seen[value] = true
+	}
+	return false
+}
+
+func hasDuplicateLabels(values []authorityv1.Label) bool {
+	seen := make(map[authorityv1.Label]bool, len(values))
+	for _, value := range values {
+		if seen[value] {
+			return true
+		}
+		seen[value] = true
 	}
 	return false
 }

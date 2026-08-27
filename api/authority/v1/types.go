@@ -37,6 +37,7 @@ const (
 	CapabilityLeaseRelease   Capability = "lease.release"
 	CapabilityLeaseRevoke    Capability = "lease.revoke"
 	CapabilityEffectValidate Capability = "effect.validate"
+	CapabilityTicketDelivery Capability = "ticket.delivery"
 )
 
 type Label string
@@ -97,6 +98,7 @@ type WorkItem struct {
 	NativeStatus       string           `json:"native_status"`
 	LifecycleState     LifecycleState   `json:"lifecycle_state"`
 	Assignee           string           `json:"assignee"`
+	ClaimAttemptID     string           `json:"claim_attempt_id,omitempty"`
 	GoalIDs            []string         `json:"goal_ids"`
 	ProductDecisionIDs []string         `json:"product_decision_ids"`
 	FeatureID          string           `json:"feature_id"`
@@ -132,6 +134,49 @@ type GetWorkRequest struct {
 	ProposedLabels []Label `json:"proposed_labels,omitempty"`
 }
 
+// ClaimRequest binds a proposed claim to a fresh canonical observation and
+// the immutable implementation boundary that every later effect must present.
+type ClaimRequest struct {
+	BeadID            string           `json:"bead_id"`
+	ExpectedVersion   WorkVersion      `json:"expected_version"`
+	ExpectedIntegrity IntegrityDigests `json:"expected_integrity"`
+	AttemptID         string           `json:"attempt_id"`
+	BaseSHA           string           `json:"base_sha"`
+	ExclusivePaths    []string         `json:"exclusive_paths"`
+	Capability        Capability       `json:"capability"`
+	IdempotencyKey    string           `json:"idempotency_key"`
+	TraceRef          string           `json:"trace_ref"`
+	ProposedLabels    []Label          `json:"proposed_labels,omitempty"`
+}
+
+// CapabilityLease is issued only after the canonical compare-and-swap claim
+// is verified. Its full tuple fences every later write.
+type CapabilityLease struct {
+	LeaseID         string      `json:"lease_id"`
+	TenantID        string      `json:"tenant_id"`
+	ProjectID       string      `json:"project_id"`
+	BeadID          string      `json:"bead_id"`
+	AttemptID       string      `json:"attempt_id"`
+	IdempotencyKey  string      `json:"idempotency_key"`
+	FenceGeneration string      `json:"fence_generation"`
+	LeaseEpoch      uint64      `json:"lease_epoch"`
+	ClaimVersion    WorkVersion `json:"claim_version"`
+	BaseSHA         string      `json:"base_sha"`
+	Capability      Capability  `json:"capability"`
+	ExclusivePaths  []string    `json:"exclusive_paths"`
+	Labels          []Label     `json:"labels"`
+	IssuedAt        time.Time   `json:"issued_at"`
+	ExpiresAt       time.Time   `json:"expires_at"`
+	Active          bool        `json:"active"`
+}
+
+type ClaimResponse struct {
+	Work       WorkItem        `json:"work"`
+	Lease      CapabilityLease `json:"lease"`
+	Replayed   bool            `json:"replayed"`
+	ReceiptRef string          `json:"receipt_ref"`
+}
+
 type ErrorCode string
 
 const (
@@ -160,16 +205,19 @@ type Denial struct {
 func (d *Denial) Error() string { return string(d.Code) + ": " + d.Rule }
 
 type Event struct {
-	SchemaVersion uint32    `json:"schema_version"`
-	Sequence      uint64    `json:"sequence"`
-	TraceRef      string    `json:"trace_ref"`
-	TenantID      string    `json:"tenant_id"`
-	ProjectID     string    `json:"project_id"`
-	BeadID        string    `json:"bead_id,omitempty"`
-	PrincipalID   string    `json:"principal_id"`
-	Operation     string    `json:"operation"`
-	Outcome       string    `json:"outcome"`
-	Rule          string    `json:"rule,omitempty"`
-	Labels        []Label   `json:"labels"`
-	OccurredAt    time.Time `json:"occurred_at"`
+	SchemaVersion  uint32    `json:"schema_version"`
+	EventID        string    `json:"event_id"`
+	Sequence       uint64    `json:"sequence"`
+	TraceRef       string    `json:"trace_ref"`
+	TenantID       string    `json:"tenant_id"`
+	ProjectID      string    `json:"project_id"`
+	BeadID         string    `json:"bead_id,omitempty"`
+	AttemptID      string    `json:"attempt_id,omitempty"`
+	IdempotencyKey string    `json:"idempotency_key,omitempty"`
+	PrincipalID    string    `json:"principal_id"`
+	Operation      string    `json:"operation"`
+	Outcome        string    `json:"outcome"`
+	Rule           string    `json:"rule,omitempty"`
+	Labels         []Label   `json:"labels"`
+	OccurredAt     time.Time `json:"occurred_at"`
 }
