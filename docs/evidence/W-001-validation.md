@@ -411,3 +411,33 @@ identity/diagnostic correction and one successor Release Manager tag. It does
 not authorize a Beads mutation, lease, runtime behavior change, policy change,
 or production effect. Fresh QA and Security review must bind the final v3 head,
 tree, tag, and successful public run before merge.
+
+## Delivery-v3 repository-history scanner finding
+
+Signed v3 head `383ea617ad2bcbe06522a30014a1b19127b5239f`, tree
+`e91776b8de9e9d1e1e193ae9588363c4d87a62e6`, and Release Manager tag object
+`700d85715981fb6e9def191b414c815c8f543dd0` corrected the tag admission defect.
+Public run `33066374068`, job `98497338894`, then passed doctrine, plan, DocSync,
+public-check, Go tests, vet, whitespace, and the synthetic secret canary. Its
+worktree scan reported zero findings. The complete-history scan fetched 69
+reachable commits and reported ten `generic-api-key` findings in the preserved
+delivery-v1 branch, so the run correctly failed.
+
+The normalized failure fingerprint is
+`delivery-history-scanner/preserved-v1-synthetic-generic-key`.
+
+All ten findings are public synthetic idempotency, generation, or grant values
+already documented by the scanner-clean v2 replacement. Their full immutable
+fingerprints are the exact contents of `.gitleaksignore` and the signed
+`W-001-delivery-scanner-correction-v4` grant. A disposable 69-commit clone with
+that exact file passed the complete-history scan. Adding a new committed
+synthetic credential canary still produced one `github-pat` finding and a
+nonzero result. No wildcard, regex, rule, path, commit-range, workflow, image,
+or scanner-version exception is permitted.
+
+The v4 correction must mechanically pin the complete ten-line file and resolve
+every commit, path, rule, line, and preserved-branch ancestry before review.
+Changed, extra, missing, duplicate, or unresolvable entries must fail closed.
+The v2 and v3 tags and failed runs remain immutable; neither failed head may be
+rerun. No Beads, lease, runtime, production, repository-setting, trust-root, or
+destructive effect is authorized.

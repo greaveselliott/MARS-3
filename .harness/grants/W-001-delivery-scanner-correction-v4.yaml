@@ -1,0 +1,105 @@
+schemaVersion: 1
+kind: MARS3W001DeliveryScannerCorrection
+
+grant:
+  id: W-001-delivery-scanner-correction-v4
+  classification: PUBLIC
+  issuedAt: 2026-08-27T11:30:30Z
+  expiresAt: 2026-08-28T11:30:30Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 383ea617ad2bcbe06522a30014a1b19127b5239f
+  baseTree: e91776b8de9e9d1e1e193ae9588363c4d87a62e6
+  workingBranch: codex/w-001-delivery-v2
+  priorGrant: W-001-delivery-ci-correction-v3
+  priorGrantSHA256: 0448e00fbc585d95dcd740e1f8dd164882d343fbe1d73bec1cda65fd59586b85
+  priorGrantSignatureSHA256: 3ceeb9fed4151141c1f2f79ac2a0116698721fead88b7c4503e8b6192bd3c097
+  priorReviewTag: mars3/w001-delivery-v3
+  priorReviewTagObject: 700d85715981fb6e9def191b414c815c8f543dd0
+  priorReviewTagTarget: 383ea617ad2bcbe06522a30014a1b19127b5239f
+  priorReviewTagTree: e91776b8de9e9d1e1e193ae9588363c4d87a62e6
+  successorReviewTag: mars3/w001-delivery-v4
+  successorReviewTagMessage: MARS-3 W-001 delivery tree attestation v4
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: work-authority-engineer
+  failureOwnership: foundation
+  purpose: preserve public delivery-v1 history while suppressing only ten immutable synthetic scanner fingerprints
+  allowedEffects:
+    - preserve-the-v2-and-v3-tags-heads-trees-and-failed-checks
+    - add-one-exact-ten-line-gitleaks-fingerprint-file
+    - validate-each-fingerprint-commit-path-rule-line-and-preserved-branch-ancestry
+    - prove-new-secret-canaries-remain-detectable
+    - create-signed-correction-commits-and-one-signed-v4-release-manager-review-tag
+    - push-the-existing-review-branch-and-v4-tag-without-rerunning-failed-heads
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .gitleaksignore
+    - .harness/grants/W-001-delivery-scanner-correction-v4.yaml
+    - .harness/grants/W-001-delivery-scanner-correction-v4.yaml.sig
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+    - internal/doctrine/public.go
+    - internal/doctrine/doctrine_test.go
+  requiredProperties:
+    - exactly-ten-full-fingerprints-and-no-pattern-wildcard-or-rule-level-exception
+    - every-fingerprint-resolves-to-the-signed-preserved-delivery-v1-history
+    - changed-extra-missing-duplicate-or-unresolvable-fingerprint-fails-closed
+    - worktree-and-new-commit-findings-remain-unsuppressed
+    - scanner-image-workflow-rules-and-canary-remain-unchanged
+    - v4-tag-targets-the-final-correction-head-and-uses-the-release-manager-identity
+    - protected-main-tree-equals-the-signed-v4-feature-tree
+  prohibitedEffects:
+    - add-a-wildcard-regex-rule-path-or-commit-range-exception
+    - change-disable-or-replace-the-scanner-image-workflow-canary-or-history-scan
+    - suppress-any-future-commit-worktree-or-non-generic-api-key-finding
+    - move-delete-or-reuse-the-v2-or-v3-review-tags
+    - rerun-the-v2-or-v3-failed-heads
+    - delete-rewrite-or-force-push-the-preserved-delivery-v1-branch
+    - mutate-any-Bead-Dolt-row-dependency-label-comment-or-history
+    - issue-assert-renew-release-or-revoke-a-live-lease
+    - change-gateway-runtime-platform-or-product-behavior
+    - mutate-workflow-ruleset-repository-settings-or-trust-roots
+    - production-or-destructive-effect
+    - autonomous-mutation
+    - trust-escalation
+
+finding:
+  code: public.w001_delivery_history_scanner
+  normalizedFingerprint: delivery-history-scanner/preserved-v1-synthetic-generic-key
+  run: 33066374068
+  job: 98497338894
+  result: history-scan-failure
+  worktreeFindings: 0
+  historyFindings: 10
+  historyCommits: 69
+  rule: generic-api-key
+  scannerImageDigest: sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba
+  ignorePath: .gitleaksignore
+  allowedFingerprints:
+    - 0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:96
+    - 0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:109
+    - 0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:129
+    - 0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:226
+    - 2fecae29a52f0d765c8f586e9b7be3ed5ea7eeb0:.harness/grants/W-001-delivery.yaml:generic-api-key:23
+    - 85848a524d40e3041199c21b89e82f2cf8910b39:internal/authority/beads/beads-v1.2.2-gateway-claim.patch:generic-api-key:283
+    - 85848a524d40e3041199c21b89e82f2cf8910b39:internal/authority/beads/store_test.go:generic-api-key:196
+    - 85848a524d40e3041199c21b89e82f2cf8910b39:internal/authority/beads/store_test.go:generic-api-key:365
+    - 9e39ae0e7653f300635ad36f0728d5698e4eb954:internal/authority/gateway/effect_test.go:generic-api-key:217
+    - e055ddab2e1f47b1eed68593893510894a3cce7f:internal/authority/gateway/effect_test.go:generic-api-key:204
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  newCanaryRequired: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-delivery-scanner-correction-v4
+  detachedSignature: W-001-delivery-scanner-correction-v4.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
