@@ -13,9 +13,12 @@ This is the only active execution plan. It is a Git-owned ordering and evidence
 contract, not a second ticket database. The reviewed helper is accepted on
 `main`, and the signed W-001 bootstrap flow has compare-and-swap claimed the
 canonical Bead as `in-progress`. This `delivery` projection records that
-durable fact; it grants no capability lease and authorizes no implementation.
-A separately signed delivery grant remains required before any gateway source
-change, and the first live lease remains W-001 acceptance evidence.
+durable fact. The accepted postclaim tree has been squash-merged with exact
+tree equality, protected-main CI passed, and the Orchestrator recorded the
+bounded reconciliation receipt in M3-W001. The separately signed
+`W-001-delivery-v2` grant now authorizes the Work Authority Engineer's bounded
+implementation; no live lease exists yet, and the first verified development
+lease remains W-001 acceptance evidence.
 
 ## Durable lineage
 
@@ -71,8 +74,10 @@ read a ready Bead, compare-and-swap claim it, issue a scoped lease epoch,
 heartbeat it, reject stale or mismatched writes, append a bounded event, and
 rebuild the read projection without giving Temporal or PostgreSQL ownership of
 the work graph. The current phase schedules delivery against the verified
-claim. Implementation starts only under a separately signed delivery grant;
-no lease exists yet.
+claim. The signed delivery grant is active for its exact attempt, base,
+principal, and paths; no lease exists yet. Its v2 publication route preserves
+the original delivery branch as public foundation-failure evidence and
+republishes from accepted `main` without a scanner exception or history rewrite.
 
 ## Scenario priority
 
@@ -86,10 +91,9 @@ no lease exists yet.
 The scenarios are ordered to establish read truth before mutation, then prove
 that losing authority blocks the W-001 synthetic effect boundary and defines
 the contract later real brokers must enforce. M3-W001 already
-declares this exact group and required evidence, but implementation of the
-group is not authorized until the later bounded delivery grant. The canonical
-claim is verified, but the claim itself grants neither a lease nor source-code
-authority.
+declares this exact group and required evidence. The canonical claim itself
+grants neither a lease nor source-code authority; the separately signed
+delivery grant supplies the current bounded source authority.
 
 ## Delivery waves
 
@@ -134,10 +138,20 @@ The Orchestrator may schedule it only through a later truthful plan transition.
   `67hmen0cmq0he08n7ujlqpcsmmi94fhb`, WorkVersion mutation sequence `1`,
   dependency-graph revision `1`, and exact signed postimage digests.
 - Live lease: absent by design; the bootstrap claim grants none.
-- Required next transition: independently accept and merge this postclaim Git
-  reconciliation, then issue a separate signed delivery grant for the bounded
-  W-001 implementation paths. The gateway must self-host and issue the first
-  verified lease before later effects may rely on it.
+- Postclaim reconciliation: QA and Security accepted v6 tree
+  `7febda7ec2fec47b7d6bf11fdd5b24e605b9e2b2`; PR #8 squash-merged as
+  `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`; protected-main run
+  `33025602656` passed; canonical comment
+  `01a0408e-ca08-71f0-b1ac-0dec0039706a` records the consistent Git/Beads
+  read-back.
+- Delivery authority: signed grant `W-001-delivery-v2`, attempt
+  `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
+  `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
+- Required next transition: implement the S1 gateway-only walking skeleton,
+  then add atomic claim, durable fencing leases, pre-effect validation, direct
+  access denial, and ordered projection recovery in scenario order. The
+  gateway must issue and verify the first W-001 development lease before any
+  later effect may rely on it.
 
 The W-001 bootstrap grant is deliberately not a live lease: it is
 human-directed, binds one base commit and attempt, permits only canonical W-001
@@ -186,8 +200,8 @@ equivalent recurrence records a durable `blocked` disposition and escalates.
 Only the Delivery Orchestrator changes dependency order or the selected Bead.
 During contract publication, the signed one-time grant permits only its listed
 paths and effect intents/receipts without an implementation claim. During
-W-001 implementation, the separate signed bootstrap grant replaces the
-not-yet-built lease only for its exact human-directed scope. Once self-hosted
-fencing exists, every mutation must pass the current authoritative state,
+W-001 implementation, the signed delivery grant supplies bounded source
+authority while the lease service does not yet exist. Once self-hosted fencing
+exists, every mutation must pass the current authoritative state,
 exact required transition, allowed corrective action, and live epoch checks;
 the bootstrap grant is then unusable.
