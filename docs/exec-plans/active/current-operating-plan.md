@@ -156,7 +156,7 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the v7 lifecycle correction to a signed
+- Required next transition: bind the v8 lifecycle correction to a signed
   immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
   conformance suites plus independent cold-build reproduction, then route that exact tree through QA and Security. No
   canonical handoff or later lifecycle mutation may execute until the reviewed
@@ -173,7 +173,7 @@ values or represent a proposed owner as a current grant.
 
 ## Lifecycle-correction candidate
 
-The v7 bounded candidate retains the typed handoff, ordered review, run,
+The v8 bounded candidate retains the typed handoff, ordered review, run,
 reconciliation, and terminal routes while closing the independent v5 findings.
 Terminal versioned work must retain exactly one complete WorkClaim or
 BootstrapClaim plus detailed lifecycle evidence. Every current or archived
@@ -196,6 +196,15 @@ all handoff history, failure fingerprints were not monotonic across equivalent
 retries, and the published binary hash did not reproduce from independent cold
 builds. The signed `W-001-lifecycle-correction-v7` grant preserves v6 and permits
 only those additive corrections and their qualification.
+
+Independent QA and Security also changes-requested the immutable v7 checkpoint
+at head `36d8c981ebde65e694416caf16fc02d50aac2a67`, tree
+`be55454779c2c0dd08adc08666c2b7ee3826448f`. They confirmed the v6 corrections
+and reproducible builder, but found that case-folded JSON claim aliases could
+overwrite canonical fields, active legacy-only metadata could claim terminal
+state, and dependency readiness ignored contradictory detailed lifecycle
+records. The signed `W-001-lifecycle-correction-v8` grant permits only those
+three fail-closed corrections, native parity, qualification, and fresh review.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation

@@ -218,6 +218,14 @@ const (
 	w001LifecycleCorrectionV7TagMessage = "MARS-3 W-001 lifecycle correction tree attestation v7"
 	w001LifecycleCorrectionV7PatchPath  = "internal/authority/beads/beads-v1.2.2-lifecycle.patch"
 	w001LifecycleCorrectionV7PatchSHA   = "2db1615df7bc1c5b4bd0d2d17cecb22a43b2bf4be72a1ebcf750820170b5ff66"
+	w001LifecycleCorrectionV8Path       = ".harness/grants/W-001-lifecycle-correction-v8.yaml"
+	w001LifecycleCorrectionV8Signature  = ".harness/grants/W-001-lifecycle-correction-v8.yaml.sig"
+	w001LifecycleCorrectionV8Namespace  = "mars3-w001-lifecycle-correction-v8"
+	w001LifecycleCorrectionV8Base       = "36d8c981ebde65e694416caf16fc02d50aac2a67"
+	w001LifecycleCorrectionV8BaseTree   = "be55454779c2c0dd08adc08666c2b7ee3826448f"
+	w001LifecycleV7TagObject            = "217585d45ec414f55e5d326419a4f79b96a48915"
+	w001LifecycleCorrectionV8ReviewTag  = "mars3/w001-lifecycle-completion-v8"
+	w001LifecycleCorrectionV8TagMessage = "MARS-3 W-001 lifecycle correction tree attestation v8"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -2574,6 +2582,117 @@ var w001LifecycleCorrectionV7Sequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001LifecycleCorrectionV8Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCorrectionGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-correction-v8"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T16:29:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T16:29:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCorrectionV8Base},
+	{path: "grant.baseTree", value: w001LifecycleCorrectionV8BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-correction-v7"},
+	{path: "grant.priorGrantSHA256", value: "ee5866add69534ff82dafba945d17959949584f91746551c67be3af70a9fbff2"},
+	{path: "grant.priorGrantSignatureSHA256", value: "33070c3d15d4e9b121c3812538a47510a8bd3b996ebb845c94ebb648e3148009"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCorrectionV7ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV7TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCorrectionV8Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCorrectionV8BaseTree},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.priorRun", value: "33091727157"},
+	{path: "grant.priorJob", value: "98586729802"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCorrectionV8ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCorrectionV8TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "work-authority-engineer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "close the exact v7 canonical-key legacy-scalar and dependency-readiness findings without canonical mutation"},
+	{path: "grant.attemptId", value: "w001-lifecycle-correction-v8"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "true"},
+	{path: "findings.normalizedFingerprint", value: "pr10-v7/canonical-key-legacy-dependency-correction"},
+	{path: "findings.reviewedHead", value: w001LifecycleCorrectionV8Base},
+	{path: "findings.reviewedTree", value: w001LifecycleCorrectionV8BaseTree},
+	{path: "findings.result", value: "changes-requested-same-ticket-remains-in-progress"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.assignee", value: "work-authority-engineer"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.nativeBeadsNoSkipRequired", value: "true"},
+	{path: "verification.postgresNoSkipRequired", value: "true"},
+	{path: "verification.independentColdBuildsRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCorrectionV8Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-correction-v8.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCorrectionV8Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v7-commits-tag-run-and-changes-requested-dispositions",
+		"reject-case-folded-or-other-noncanonical-authority-metadata-keys-before-typed-decoding",
+		"require-legacy-lifecycle-scalars-to-be-empty-when-detailed-evidence-is-absent",
+		"derive-dependency-readiness-from-consistent-detailed-evidence-or-reject-the-projection",
+		"mirror-the-corrections-in-the-pinned-native-Beads-transaction-path",
+		"execute-non-skipped-native-Beads-and-PostgreSQL-qualification",
+		"preserve-an-independent-reproducible-patched-Beads-source-digest-and-binary-hash",
+		"update-the-active-plan-feature-spec-evidence-and-manifest-with-the-truthful-v8-correction",
+		"create-signed-semantic-commits-and-one-signed-v8-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-update-pull-request-10",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCorrectionV8Path, w001LifecycleCorrectionV8Signature, ".harness/manifest.yaml",
+		canonicalActivePlan, "docs/features/F-002-work-authority.md", "docs/product-specs/work-authority.md",
+		"docs/evidence/W-001-validation.md", "internal/authority/beads/**",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"authority-metadata-object-keys-are-unique-and-canonical-under-case-folding-before-typed-decoding",
+		"active-records-without-detailed-evidence-cannot-claim-accepted-completed-reconciled-or-blocked-state",
+		"detailed-dependency-lifecycle-records-and-legacy-scalars-cannot-contradict-each-other",
+		"dependency-readiness-is-derived-from-valid-detailed-evidence-when-it-exists",
+		"project-adapter-and-native-transaction-enforce-the-same-fail-closed-contract",
+		"native-and-PostgreSQL-qualification-execute-without-skips",
+		"independent-cold-builds-reproduce-the-bound-patched-Beads-binary",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged-until-fresh-review-and-merge",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths",
+		"mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"move-delete-or-reuse-the-v7-review-tag",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes": {
+		"lifecycle.claim_key_alias_not_canonical",
+		"lifecycle.legacy_active_scalar_contradiction",
+		"lifecycle.dependency_detailed_state_ignored",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -4170,6 +4289,12 @@ func checkW001LifecycleCorrectionGrant(root string, findings *[]Finding) {
 }
 
 func checkW001LifecycleCorrectionV7Grant(root string, findings *[]Finding) {
+	v8Active := false
+	if _, v8Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionV8Path))); v8Err == nil {
+		v8Active = true
+	} else if !os.IsNotExist(v8Err) {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_state", "v8 lifecycle correction state cannot be established")
+	}
 	data, err := readRepoFile(root, w001LifecycleCorrectionV7Path)
 	if err != nil {
 		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_missing", "signed v7 lifecycle correction grant is required")
@@ -4240,15 +4365,18 @@ func checkW001LifecycleCorrectionV7Grant(root string, findings *[]Finding) {
 	checkW001LifecycleV6Tag(root, findings)
 	checkW001LifecycleCorrectionV7Evidence(root, findings)
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
-	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-correction-v7`")) ||
+	if planErr != nil || (!v8Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-correction-v7`"))) ||
 		!bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_correction_v7_plan", "active plan must select the truthful v7 lifecycle correction")
 	}
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
-	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-correction-v7")) ||
-		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-correction-v7")) ||
+	if manifestErr != nil || (!v8Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-correction-v7")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-correction-v7")))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_correction_v7_manifest", "manifest must project the v7 lifecycle correction and absent live lease")
+	}
+	if v8Active {
+		checkW001LifecycleCorrectionV8Grant(root, findings)
 	}
 }
 
@@ -4274,6 +4402,101 @@ func checkW001LifecycleCorrectionV7Evidence(root string, findings *[]Finding) {
 	patch, patchErr := readRepoFile(root, w001LifecycleCorrectionV7PatchPath)
 	if patchErr != nil || fileSHA256(patch) != w001LifecycleCorrectionV7PatchSHA {
 		addFinding(findings, w001LifecycleCorrectionV7PatchPath, "public.w001_lifecycle_correction_v7_patch", "v7 lifecycle patch must match its exact reviewed SHA-256")
+	}
+}
+
+func checkW001LifecycleCorrectionV8Grant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001LifecycleCorrectionV8Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_missing", "signed v8 lifecycle correction grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCorrectionV8Scalars, w001LifecycleCorrectionV8Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCorrectionV8Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_value", "%s does not match the signed v8 lifecycle-correction contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCorrectionV8Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_sequence", "%s must equal the exact ordered v8 lifecycle-correction contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_expiry", "v8 lifecycle correction grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCorrectionV8Signature)
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCorrectionV8Signature, "public.w001_lifecycle_correction_v8_signature_missing", "detached v8 lifecycle correction signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_correction_v8_key", "v8 lifecycle correction must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001LifecycleCorrectionV8Namespace); err != nil {
+			addFinding(findings, w001LifecycleCorrectionV8Signature, "public.w001_lifecycle_correction_v8_signature", "%v", err)
+		}
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCorrectionV7Path, scalarValue(document, "grant.priorGrantSHA256")},
+		{w001LifecycleCorrectionV7Signature, scalarValue(document, "grant.priorGrantSignatureSHA256")},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_correction_v8_prior_grant", "prior v7 lifecycle material must match its exact signed SHA-256")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCorrectionV8Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCorrectionV8Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCorrectionV8Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCorrectionV8BaseTree {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_base", "v8 lifecycle correction must descend from the exact reviewed v7 head and tree")
+	}
+	checkW001LifecycleV7Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"lifecycle.claim_key_alias_not_canonical",
+		"lifecycle.legacy_active_scalar_contradiction",
+		"lifecycle.dependency_detailed_state_ignored",
+		w001LifecycleCorrectionV8Base,
+		w001LifecycleCorrectionV8BaseTree,
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_correction_v8_evidence", "v8 lifecycle evidence must preserve the exact v7 findings")
+			break
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-correction-v8`")) ||
+		!bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_correction_v8_plan", "active plan must select the truthful v8 lifecycle correction")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-correction-v8")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-correction-v8")) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_correction_v8_manifest", "manifest must project the v8 lifecycle correction and absent live lease")
 	}
 }
 
@@ -5236,6 +5459,7 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 	}
 	correctionActive := false
 	v7Active := false
+	v8Active := false
 	if _, correctionErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionPath))); correctionErr == nil {
 		correctionActive = true
 		if !checkW001LifecycleV5Tag(root, findings) {
@@ -5252,6 +5476,15 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		}
 	} else if !os.IsNotExist(v7Err) {
 		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_state", "v7 lifecycle correction Git state cannot be established")
+		return
+	}
+	if _, v8Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionV8Path))); v8Err == nil {
+		v8Active = true
+		if !checkW001LifecycleV7Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v8Err) {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_state", "v8 lifecycle correction Git state cannot be established")
 		return
 	}
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
@@ -5294,6 +5527,9 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		if v7Active {
 			reviewTag, reviewMessage = w001LifecycleCorrectionV7ReviewTag, w001LifecycleCorrectionV7TagMessage
 		}
+		if v8Active {
+			reviewTag, reviewMessage = w001LifecycleCorrectionV8ReviewTag, w001LifecycleCorrectionV8TagMessage
+		}
 		target, ok := checkW001DeliveryReviewTag(root, expected, reviewTag, reviewMessage, findings)
 		if !ok {
 			return
@@ -5316,6 +5552,7 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 	if featureHead != w001LifecycleBase {
 		v5End := featureHead
 		v6End := featureHead
+		v7End := featureHead
 		if correctionActive {
 			v5End = w001LifecycleCorrectionBase
 			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCorrectionBase, featureHead); err != nil {
@@ -5330,13 +5567,23 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 				return
 			}
 		}
+		if v8Active {
+			v7End = w001LifecycleCorrectionV8Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCorrectionV8Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_ancestry", "v8 lifecycle correction must descend from the exact immutable v7 head")
+				return
+			}
+		}
 		if !checkW001LifecycleCommitRange(root, w001LifecycleBase, v5End, "2026-08-27T12:05:00Z", "v5", findings) {
 			return
 		}
 		if correctionActive && !checkW001LifecycleCommitRange(root, w001LifecycleCorrectionBase, v6End, "2026-08-27T13:50:00Z", "v6", findings) {
 			return
 		}
-		if v7Active && !checkW001LifecycleCommitRange(root, w001LifecycleCorrectionV7Base, featureHead, "2026-08-27T15:07:00Z", "v7", findings) {
+		if v7Active && !checkW001LifecycleCommitRange(root, w001LifecycleCorrectionV7Base, v7End, "2026-08-27T15:07:00Z", "v7", findings) {
+			return
+		}
+		if v8Active && !checkW001LifecycleCommitRange(root, w001LifecycleCorrectionV8Base, featureHead, "2026-08-27T16:29:00Z", "v8", findings) {
 			return
 		}
 	}
@@ -5357,6 +5604,9 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 	}
 	if v7Active {
 		allowed = w001LifecycleCorrectionV7PathsAllowed(paths)
+	}
+	if v8Active {
+		allowed = w001LifecycleCorrectionV8PathsAllowed(paths)
 	}
 	if err != nil || !allowed {
 		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_scope", "current changes include a path outside the signed lifecycle-completion scope")
@@ -5395,6 +5645,8 @@ func checkW001LifecycleCommitRange(root, base, head, issued, phase string, findi
 			allowed = w001LifecycleCorrectionPathsAllowed(normalized)
 		} else if phase == "v7" {
 			allowed = w001LifecycleCorrectionV7PathsAllowed(normalized)
+		} else if phase == "v8" {
+			allowed = w001LifecycleCorrectionV8PathsAllowed(normalized)
 		}
 		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
 		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
@@ -5488,6 +5740,23 @@ func w001LifecycleCorrectionV7PathsAllowed(paths []string) bool {
 		if !allowed {
 			return false
 		}
+	}
+	return true
+}
+
+func w001LifecycleCorrectionV8PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCorrectionV8Path: true, w001LifecycleCorrectionV8Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/features/F-002-work-authority.md": true, "docs/product-specs/work-authority.md": true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if exact[path] || strings.HasPrefix(path, "internal/authority/beads/") && len(path) > len("internal/authority/beads/") {
+			continue
+		}
+		return false
 	}
 	return true
 }
@@ -5858,6 +6127,32 @@ func checkW001LifecycleV6Tag(root string, findings *[]Finding) bool {
 	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
 	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCorrectionV7BaseTree {
 		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_prior_tag", "v6 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV7Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCorrectionV7ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV7TagObject {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_prior_tag", "v7 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV7TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_prior_tag", "v7 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCorrectionV7ReviewTag, w001LifecycleCorrectionV7TagMessage)
+	if err != nil || target != w001LifecycleCorrectionV8Base {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_prior_tag", "v7 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCorrectionV8BaseTree {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_prior_tag", "v7 lifecycle tag tree must remain exact")
 		return false
 	}
 	return true

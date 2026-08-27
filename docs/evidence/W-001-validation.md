@@ -677,3 +677,33 @@ container was stopped and auto-removed. This verification did not mutate the
 canonical Beads workspace or create a canonical live lease. M3-W001 remains
 `in-progress` at WorkVersion mutation/dependency revisions `1/1`, and M3-P001
 remains `backlog` pending the immutable v7 review chain.
+
+## Lifecycle-correction v7 review disposition
+
+Independent QA and Security reviewed public PR 10 exact head
+`36d8c981ebde65e694416caf16fc02d50aac2a67`, tree
+`be55454779c2c0dd08adc08666c2b7ee3826448f`, signed tag object
+`217585d45ec414f55e5d326419a4f79b96a48915`, and successful bounded rerun/job
+`33091727157/98586729802`. Both verdicts were `changes-requested`; the immutable
+v7 commit, tag, run, and dispositions remain evidence, M3-W001 remains
+`in-progress`, and no canonical live lease exists.
+
+The exact additive findings are:
+
+- `lifecycle.claim_key_alias_not_canonical`: case-folded aliases such as
+  `workclaim` could bypass exact raw-key checks and overwrite the canonical
+  typed WorkClaim during Go JSON decoding;
+- `lifecycle.legacy_active_scalar_contradiction`: active metadata without
+  detailed lifecycle evidence could retain terminal legacy accepted,
+  completed, or reconciled values;
+- `lifecycle.dependency_detailed_state_ignored`: dependency readiness trusted
+  legacy completion scalars while ignoring a contradictory detailed failed
+  run.
+
+The prospective signed `W-001-lifecycle-correction-v8` grant is based on exact
+v7 head `36d8c981ebde65e694416caf16fc02d50aac2a67` and tree
+`be55454779c2c0dd08adc08666c2b7ee3826448f`. It permits only canonical-key
+admission, legacy/detailed lifecycle consistency, dependency-readiness
+derivation, native parity, qualification, public evidence, and fresh immutable
+review. It grants no canonical Beads mutation, live lease, merge, production
+effect, or trust expansion.
