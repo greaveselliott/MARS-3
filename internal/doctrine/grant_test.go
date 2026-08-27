@@ -1324,6 +1324,80 @@ func TestW001LifecycleCorrectionV9PathScope(t *testing.T) {
 	}
 }
 
+func TestW001LifecycleStabilizationV10GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleStabilizationV10Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v10 lifecycle CI stabilization was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleStabilizationV10GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleStabilizationV10Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCorrectionV9ReviewTag+":refs/tags/"+w001LifecycleCorrectionV9ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleStabilizationV10Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleStabilizationV10Path:      tampered,
+		w001LifecycleStabilizationV10Signature: read(w001LifecycleStabilizationV10Signature),
+		w001LifecycleCorrectionV9Path:          read(w001LifecycleCorrectionV9Path),
+		w001LifecycleCorrectionV9Signature:     read(w001LifecycleCorrectionV9Signature),
+		wave1PlanningGrantKey:                  read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":    read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                    read(canonicalActivePlan),
+		".harness/manifest.yaml":               read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":      read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleStabilizationV10Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_stabilization_v10_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_stabilization_v10_signature") {
+		t.Fatalf("tampered v10 lifecycle CI stabilization authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleStabilizationV10PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleStabilizationV10Path,
+		w001LifecycleStabilizationV10Signature,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleStabilizationV10PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v10 lifecycle CI stabilization path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCorrectionV9Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleStabilizationV10PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v10 lifecycle CI stabilization path was accepted: %s", path)
+		}
+	}
+}
+
 func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	object, err := planningGrantGitOutput(repo, "cat-file", "tag", w001DeliveryV2TagObject)
@@ -3064,8 +3138,7 @@ func writePlanningGrantTestFile(t *testing.T, root, path string, data []byte) {
 
 func runPlanningGrantTestGit(t *testing.T, root string, arguments ...string) {
 	t.Helper()
-	command := exec.Command("git", append([]string{"-C", root}, arguments...)...)
-	command.Env = planningGrantGitEnvironment()
+	command := planningGrantTestGitCommand(root, arguments...)
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("git %v failed: %v: %s", arguments, err, output)
 	}
@@ -3073,11 +3146,38 @@ func runPlanningGrantTestGit(t *testing.T, root string, arguments ...string) {
 
 func planningGrantTestGitOutput(t *testing.T, root string, arguments ...string) string {
 	t.Helper()
-	command := exec.Command("git", append([]string{"-C", root}, arguments...)...)
-	command.Env = planningGrantGitEnvironment()
+	command := planningGrantTestGitCommand(root, arguments...)
 	output, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("git %v failed: %v: %s", arguments, err, output)
 	}
 	return strings.TrimSpace(string(output))
+}
+
+func planningGrantTestGitCommand(root string, arguments ...string) *exec.Cmd {
+	bounded := []string{
+		"-c", "maintenance.auto=false",
+		"-c", "gc.auto=0",
+		"-c", "gc.autoDetach=false",
+		"-c", "maintenance.autoDetach=false",
+		"-C", root,
+	}
+	command := exec.Command("git", append(bounded, arguments...)...)
+	command.Env = planningGrantGitEnvironment()
+	return command
+}
+
+func TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance(t *testing.T) {
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	for key, want := range map[string]string{
+		"maintenance.auto":       "false",
+		"gc.auto":                "0",
+		"gc.autoDetach":          "false",
+		"maintenance.autoDetach": "false",
+	} {
+		if got := planningGrantTestGitOutput(t, root, "config", "--get", key); got != want {
+			t.Fatalf("bounded disposable Git config %s=%q, want %q", key, got, want)
+		}
+	}
 }

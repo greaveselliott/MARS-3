@@ -844,3 +844,30 @@ projection showed W-001 still `in_progress` / `in-progress` with generation
 mutation sequence `1`, and dependency revision `1`; P-001 remained
 `open` / `backlog` without WorkVersion. W-001 remains pending fresh immutable
 v9 QA and Security review.
+
+## Lifecycle-correction v9 public-CI disposition and v10 stabilization
+
+The immutable v9 candidate is head
+`ad845ff81f1e64b9e4110162a77a65a844891731`, tree
+`e4a08e5a4b211003dc29609a0128856eec306061`, signed tag object
+`47933c4957b9af2e8d7a38f971d7a20c5de8122f`. Public run `33104553091`
+admitted doctrine, plan, DocSync, and immediate-public-disclosure checks on
+both attempts. Attempt-one job `98630789458` and attempt-two job
+`98631170195` each failed only during doctrine test cleanup after authority
+packages passed.
+
+The normalized fingerprint is `ci/doctrine-tempdir-git-pack-cleanup`: Git pack
+activity outlived a disposable `t.TempDir` repository, so Go cleanup observed
+a nonempty pack directory. The bounded retry was used once; the run therefore
+exhausted two identical retries and was not retried a third time. QA and
+Security were not asked to accept a CI-red checkpoint.
+
+The prospective signed `W-001-lifecycle-ci-stabilization-v10` grant preserves
+the complete v9 commit, tree, tag, runtime, native patches, product contracts,
+and qualification hashes. It changes only the test Git wrapper so every
+disposable command receives command-local `maintenance.auto=false`,
+`gc.auto=0`, `gc.autoDetach=false`, and `maintenance.autoDetach=false`, plus a
+regression that reads those exact effective values. No user, system, global,
+production, or repository-persistent Git configuration is changed.
+Accordingly, no authority runtime bytes changed in V10. It grants no Beads
+mutation, live lease, merge, production effect, or trust expansion.

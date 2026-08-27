@@ -156,8 +156,8 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the v9 lifecycle correction to a signed
-  immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
+- Required next transition: bind the v10 CI-stabilized lifecycle correction to
+  a signed immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
   conformance suites plus independent cold-build reproduction, then route that exact tree through QA and Security. No
   canonical handoff or later lifecycle mutation may execute until the reviewed
   tree is merged and a separate reconciliation authority binds the
@@ -171,7 +171,7 @@ not a prerequisite for building the epoch service. The authoritative Bead
 holds exclusive paths and mutable lifecycle; this plan does not copy lease
 values or represent a proposed owner as a current grant.
 
-## Lifecycle-correction candidate
+## Lifecycle-correction and CI-stabilization candidate
 
 The v9 bounded candidate retains the typed handoff, ordered review, run,
 reconciliation, and terminal routes while closing the independent v5 findings.
@@ -217,6 +217,16 @@ detailed lifecycle records and fall back to sparse legacy readiness. The
 signed `W-001-lifecycle-correction-v9` grant permits only recursive native
 canonical-key admission, strict sparse-legacy dependency compatibility, their
 qualification, public evidence, and fresh immutable review.
+
+V9 head `ad845ff81f1e64b9e4110162a77a65a844891731`, tree
+`e4a08e5a4b211003dc29609a0128856eec306061`, passed every local and
+no-skip qualification gate. Public run `33104553091` then exhausted its two
+allowed attempts on the same foundation-owned disposable Git-pack cleanup
+race, after authority packages had passed. The signed
+`W-001-lifecycle-ci-stabilization-v10` grant preserves the V9 runtime,
+contracts, qualification bytes, tag, and failed runs; it permits only applying
+bounded no-maintenance/no-auto-GC/no-detach configuration to every disposable
+test Git command, updating the validator and evidence, and fresh review.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation
