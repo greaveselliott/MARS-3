@@ -109,6 +109,7 @@ type Service struct {
 	store  WorkStore
 	claims ClaimStore
 	sagas  ClaimSagaStore
+	leases LeaseValidator
 	events EventSink
 	now    func() time.Time
 }

@@ -157,6 +157,9 @@ func NewWithClaims(store ClaimStore, sagas ClaimSagaStore, events EventSink, now
 	}
 	service.claims = store
 	service.sagas = sagas
+	if leases, ok := sagas.(LeaseValidator); ok {
+		service.leases = leases
+	}
 	return service, nil
 }
 

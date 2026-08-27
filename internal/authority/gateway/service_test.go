@@ -53,13 +53,14 @@ type fakeEvents struct {
 	mu             sync.Mutex
 	events         []authorityv1.Event
 	err            error
+	failAt         int
 	invalidReceipt bool
 }
 
 func (sink *fakeEvents) Append(_ context.Context, event authorityv1.Event) (authorityv1.Event, error) {
 	sink.mu.Lock()
 	defer sink.mu.Unlock()
-	if sink.err != nil {
+	if sink.err != nil || (sink.failAt > 0 && len(sink.events)+1 == sink.failAt) {
 		return authorityv1.Event{}, sink.err
 	}
 	if event.EventID != "" {

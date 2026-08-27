@@ -226,6 +226,25 @@ type RevokeLeaseRequest struct {
 	TraceRef        string `json:"trace_ref"`
 }
 
+// EffectValidationRequest is presented by a trusted tool broker immediately
+// before one bounded material effect. ProposedLabels can add taint only.
+type EffectValidationRequest struct {
+	Fence          FencingTuple `json:"fence"`
+	EffectID       string       `json:"effect_id"`
+	Path           string       `json:"path"`
+	TraceRef       string       `json:"trace_ref"`
+	ProposedLabels []Label      `json:"proposed_labels,omitempty"`
+}
+
+// EffectValidation is a point-in-time receipt, not a reusable capability.
+type EffectValidation struct {
+	Allowed    bool      `json:"allowed"`
+	EffectID   string    `json:"effect_id"`
+	LeaseID    string    `json:"lease_id"`
+	CheckedAt  time.Time `json:"checked_at"`
+	ReceiptRef string    `json:"receipt_ref"`
+}
+
 type ErrorCode string
 
 const (
