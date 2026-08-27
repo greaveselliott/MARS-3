@@ -24,10 +24,11 @@ state, release machinery, product routes, prompts, and interface are excluded.
   `2a187917a0b9e8ea3ab3db2d9e60649f0e2e4ea5`
 - Use: an external work-authority service during development.
 
-No Beads or Dolt database is committed. MARS-3 distributes one clearly marked
-source patch for the bounded W-001 atomic bootstrap claim; the patch modifies
-the pinned Beads source only in a temporary build directory. No upstream binary
-is redistributed. The Beads MIT license follows:
+No Beads or Dolt database is committed. MARS-3 distributes clearly marked,
+composable source patches for the bounded W-001 bootstrap claim and the native
+gateway compare-and-swap claim. The patches modify the pinned Beads source only
+in a temporary build directory. No upstream binary is redistributed. The Beads
+MIT license follows:
 
 MIT License
 

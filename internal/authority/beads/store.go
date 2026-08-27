@@ -20,7 +20,9 @@ import (
 	"errors"
 	"io"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	authorityv1 "github.com/greaveselliott/MARS-3/api/authority/v1"
 	"github.com/greaveselliott/MARS-3/internal/authority/gateway"
@@ -40,13 +42,22 @@ type Reader interface {
 // AtomicClaim binds every expected projection field. Implementations must
 // validate and mutate these values in one native embedded-Dolt transaction.
 type AtomicClaim struct {
-	BeadID            string
-	ExpectedVersion   authorityv1.WorkVersion
-	ExpectedIntegrity authorityv1.IntegrityDigests
-	ExpectedDigest    string
-	AttemptID         string
-	Assignee          string
-	IdempotencyKey    string
+	BeadID             string
+	ExpectedVersion    authorityv1.WorkVersion
+	ExpectedIntegrity  authorityv1.IntegrityDigests
+	ExpectedDigest     string
+	ExpectedStatus     string
+	ExpectedAssignee   string
+	ExpectedCreatedAt  string
+	ExpectedUpdatedAt  string
+	MetadataSHA256     string
+	LabelsSHA256       string
+	DependenciesSHA256 string
+	AttemptID          string
+	Assignee           string
+	IdempotencyKey     string
+	BaseCommit         string
+	PostMetadata       []byte
 }
 
 type AtomicMutator interface {
@@ -111,20 +122,30 @@ func (store *Store) List(ctx context.Context, tenantID, projectID string) ([]aut
 }
 
 func (store *Store) CompareAndSwapClaim(ctx context.Context, mutation gateway.ClaimMutation) (authorityv1.WorkItem, error) {
-	if mutation.TenantID != store.tenantID || mutation.ProjectID != store.projectID || mutation.BeadID == "" || mutation.AttemptID == "" || mutation.Assignee == "" || mutation.IdempotencyKey == "" {
+	if mutation.TenantID != store.tenantID || mutation.ProjectID != store.projectID || mutation.BeadID == "" || mutation.AttemptID == "" || mutation.Assignee == "" || mutation.IdempotencyKey == "" || mutation.BaseSHA == "" {
 		return authorityv1.WorkItem{}, ErrProjectionInvalid
 	}
-	pre, err := store.Get(ctx, mutation.TenantID, mutation.ProjectID, mutation.BeadID)
+	snapshot, err := store.readSnapshot(ctx, mutation.TenantID, mutation.ProjectID, mutation.BeadID)
 	if err != nil {
 		return authorityv1.WorkItem{}, err
 	}
+	pre := snapshot.Item
 	if pre.LifecycleState != authorityv1.LifecycleBacklog || pre.Version != mutation.ExpectedVersion || pre.Integrity != mutation.ExpectedIntegrity {
 		return authorityv1.WorkItem{}, gateway.ErrStaleWorkVersion
+	}
+	postMetadata, err := claimPostMetadata(snapshot.MetadataRaw, mutation.AttemptID, mutation.IdempotencyKey, mutation.BaseSHA)
+	if err != nil {
+		return authorityv1.WorkItem{}, ErrProjectionInvalid
 	}
 	raw, err := store.mutator.CompareAndSwapClaim(ctx, AtomicClaim{
 		BeadID: mutation.BeadID, ExpectedVersion: mutation.ExpectedVersion,
 		ExpectedIntegrity: mutation.ExpectedIntegrity, ExpectedDigest: projectionDigest(pre),
-		AttemptID: mutation.AttemptID, Assignee: mutation.Assignee, IdempotencyKey: mutation.IdempotencyKey,
+		ExpectedStatus: snapshot.NativeStatus, ExpectedAssignee: snapshot.NativeAssignee,
+		ExpectedCreatedAt: snapshot.CreatedAt, ExpectedUpdatedAt: snapshot.UpdatedAt,
+		MetadataSHA256: snapshot.MetadataSHA256, LabelsSHA256: snapshot.LabelsSHA256,
+		DependenciesSHA256: snapshot.DependenciesSHA256,
+		AttemptID:          mutation.AttemptID, Assignee: mutation.Assignee, IdempotencyKey: mutation.IdempotencyKey,
+		BaseCommit: mutation.BaseSHA, PostMetadata: postMetadata,
 	})
 	if errors.Is(err, ErrCASStale) {
 		return authorityv1.WorkItem{}, gateway.ErrStaleWorkVersion
@@ -136,7 +157,30 @@ func (store *Store) CompareAndSwapClaim(ctx context.Context, mutation gateway.Cl
 	if err != nil || post.BeadID != mutation.BeadID {
 		return authorityv1.WorkItem{}, ErrProjectionInvalid
 	}
+	if post.NativeStatus != "in_progress" || post.LifecycleState != authorityv1.LifecycleInProgress ||
+		post.Assignee != mutation.Assignee || post.ClaimAttemptID != mutation.AttemptID ||
+		post.Version.AuthorityGeneration != pre.Version.AuthorityGeneration ||
+		post.Version.IssueIncarnation != pre.Version.IssueIncarnation ||
+		post.Version.IssueMutationSequence != pre.Version.IssueMutationSequence+1 ||
+		post.Version.DependencyGraphRevision != pre.Version.DependencyGraphRevision {
+		return authorityv1.WorkItem{}, ErrProjectionInvalid
+	}
 	return post, nil
+}
+
+func (store *Store) readSnapshot(ctx context.Context, tenantID, projectID, beadID string) (issueSnapshot, error) {
+	if tenantID != store.tenantID || projectID != store.projectID || beadID == "" {
+		return issueSnapshot{}, gateway.ErrWorkNotFound
+	}
+	raw, err := store.reader.ReadIssue(ctx, beadID)
+	if err != nil {
+		return issueSnapshot{}, ErrProjectionInvalid
+	}
+	snapshot, err := decodeIssueSnapshot(raw, tenantID, projectID, store.resourceLabels)
+	if err != nil || snapshot.Item.BeadID != beadID {
+		return issueSnapshot{}, ErrProjectionInvalid
+	}
+	return snapshot, nil
 }
 
 type issueMetadata struct {
@@ -184,32 +228,90 @@ type dependencyProjection struct {
 	Status         string
 	DependencyType string
 	Metadata       issueMetadata
+	MetadataSHA256 string
+}
+
+type authorityDependencyCondition struct {
+	ID             string `json:"id"`
+	DependencyType string `json:"dependency_type"`
+	Status         string `json:"status"`
+	MetadataSHA256 string `json:"metadata_sha256"`
+}
+
+type issueSnapshot struct {
+	Item               authorityv1.WorkItem
+	NativeStatus       string
+	NativeAssignee     string
+	CreatedAt          string
+	UpdatedAt          string
+	MetadataRaw        []byte
+	MetadataSHA256     string
+	LabelsSHA256       string
+	DependenciesSHA256 string
 }
 
 func decodeIssueProjection(raw []byte, tenantID, projectID string, labels []authorityv1.Label) (authorityv1.WorkItem, error) {
+	snapshot, err := decodeIssueSnapshot(raw, tenantID, projectID, labels)
+	return snapshot.Item, err
+}
+
+func decodeIssueSnapshot(raw []byte, tenantID, projectID string, labels []authorityv1.Label) (issueSnapshot, error) {
 	objects, err := decodeIssueArray(raw)
 	if err != nil || len(objects) != 1 {
-		return authorityv1.WorkItem{}, ErrProjectionInvalid
+		return issueSnapshot{}, ErrProjectionInvalid
 	}
 	object := objects[0]
 	if !onlyObjectKeys(object, "acceptance_criteria", "assignee", "comment_count", "created_at", "created_by", "dependencies", "dependency_count", "dependent_count", "description", "id", "issue_type", "labels", "metadata", "owner", "priority", "started_at", "status", "title", "updated_at") {
-		return authorityv1.WorkItem{}, ErrProjectionInvalid
+		return issueSnapshot{}, ErrProjectionInvalid
 	}
-	var id, status, assignee string
+	var id, status, assignee, createdAt, updatedAt string
+	var nativeLabels []string
 	var metadata issueMetadata
 	var dependenciesRaw []json.RawMessage
-	if decodeField(object, "id", &id) != nil || decodeField(object, "status", &status) != nil || decodeField(object, "assignee", &assignee) != nil || decodeStrictField(object, "metadata", &metadata) != nil || decodeField(object, "dependencies", &dependenciesRaw) != nil {
-		return authorityv1.WorkItem{}, ErrProjectionInvalid
+	if decodeField(object, "id", &id) != nil || decodeField(object, "status", &status) != nil || decodeOptionalString(object, "assignee", &assignee) != nil ||
+		decodeField(object, "created_at", &createdAt) != nil || decodeField(object, "updated_at", &updatedAt) != nil ||
+		decodeField(object, "labels", &nativeLabels) != nil || decodeStrictField(object, "metadata", &metadata) != nil ||
+		decodeField(object, "dependencies", &dependenciesRaw) != nil {
+		return issueSnapshot{}, ErrProjectionInvalid
 	}
+	createdTime, createdErr := time.Parse(time.RFC3339Nano, createdAt)
+	updatedTime, updatedErr := time.Parse(time.RFC3339Nano, updatedAt)
+	if createdErr != nil || updatedErr != nil || hasDuplicateStrings(nativeLabels) {
+		return issueSnapshot{}, ErrProjectionInvalid
+	}
+	sort.Strings(nativeLabels)
 	dependencies := make([]dependencyProjection, 0, len(dependenciesRaw))
 	for _, dependencyRaw := range dependenciesRaw {
 		dependency, err := decodeDependency(dependencyRaw)
 		if err != nil {
-			return authorityv1.WorkItem{}, ErrProjectionInvalid
+			return issueSnapshot{}, ErrProjectionInvalid
 		}
 		dependencies = append(dependencies, dependency)
 	}
-	return projectIssue(tenantID, projectID, id, status, assignee, metadata, dependencies, labels)
+	item, err := projectIssue(tenantID, projectID, id, status, assignee, metadata, dependencies, labels)
+	if err != nil {
+		return issueSnapshot{}, err
+	}
+	conditions := make([]authorityDependencyCondition, 0, len(dependencies))
+	for _, dependency := range dependencies {
+		conditions = append(conditions, authorityDependencyCondition{
+			ID: dependency.ID, DependencyType: dependency.DependencyType,
+			Status: dependency.Status, MetadataSHA256: dependency.MetadataSHA256,
+		})
+	}
+	sort.Slice(conditions, func(i, j int) bool {
+		if conditions[i].ID == conditions[j].ID {
+			return conditions[i].DependencyType < conditions[j].DependencyType
+		}
+		return conditions[i].ID < conditions[j].ID
+	})
+	metadataRaw := append([]byte(nil), object["metadata"]...)
+	return issueSnapshot{
+		Item: item, NativeStatus: status, NativeAssignee: assignee,
+		CreatedAt: createdTime.UTC().Format(time.RFC3339), UpdatedAt: updatedTime.UTC().Format(time.RFC3339),
+		MetadataRaw: metadataRaw, MetadataSHA256: canonicalJSONDigest(metadataRaw),
+		LabelsSHA256: digestValue(nativeLabels), DependenciesSHA256: digestValue(conditions),
+	}, nil
 }
 
 func projectIssue(tenantID, projectID, id, status, assignee string, metadata issueMetadata, dependencies []dependencyProjection, labels []authorityv1.Label) (authorityv1.WorkItem, error) {
@@ -361,6 +463,10 @@ func decodeDependency(raw json.RawMessage) (dependencyProjection, error) {
 	if decodeField(object, "id", &result.ID) != nil || decodeField(object, "status", &result.Status) != nil || decodeField(object, "dependency_type", &result.DependencyType) != nil || decodeDependencyMetadata(object["metadata"], &result.Metadata) != nil {
 		return dependencyProjection{}, ErrProjectionInvalid
 	}
+	result.MetadataSHA256 = canonicalJSONDigest(object["metadata"])
+	if result.MetadataSHA256 == "" {
+		return dependencyProjection{}, ErrProjectionInvalid
+	}
 	return result, nil
 }
 
@@ -395,6 +501,18 @@ func decodeDependencyMetadata(raw json.RawMessage, target *issueMetadata) error 
 func decodeField(object map[string]json.RawMessage, key string, target any) error {
 	value, found := object[key]
 	if !found || json.Unmarshal(value, target) != nil {
+		return ErrProjectionInvalid
+	}
+	return nil
+}
+
+func decodeOptionalString(object map[string]json.RawMessage, key string, target *string) error {
+	value, found := object[key]
+	if !found || bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+		*target = ""
+		return nil
+	}
+	if json.Unmarshal(value, target) != nil {
 		return ErrProjectionInvalid
 	}
 	return nil
@@ -450,6 +568,70 @@ func compatibleLifecycle(native string, lifecycle authorityv1.LifecycleState) bo
 }
 
 func projectionDigest(item authorityv1.WorkItem) string { return digestValue(item) }
+
+func canonicalJSONDigest(data []byte) string {
+	if rejectDuplicateJSONKeys(data) != nil {
+		return ""
+	}
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber()
+	var value any
+	if decoder.Decode(&value) != nil {
+		return ""
+	}
+	if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+		return ""
+	}
+	canonical, err := json.Marshal(value)
+	if err != nil {
+		return ""
+	}
+	digest := sha256.Sum256(canonical)
+	return hex.EncodeToString(digest[:])
+}
+
+func claimPostMetadata(pre []byte, attemptID, idempotencyKey, baseCommit string) ([]byte, error) {
+	if rejectDuplicateJSONKeys(pre) != nil {
+		return nil, ErrProjectionInvalid
+	}
+	decoder := json.NewDecoder(bytes.NewReader(pre))
+	decoder.UseNumber()
+	var values map[string]any
+	if decoder.Decode(&values) != nil || values["lifecycleState"] != string(authorityv1.LifecycleBacklog) || attemptID == "" || idempotencyKey == "" || baseCommit == "" {
+		return nil, ErrProjectionInvalid
+	}
+	if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+		return nil, ErrProjectionInvalid
+	}
+	if _, exists := values["workClaim"]; exists {
+		return nil, ErrProjectionInvalid
+	}
+	if _, exists := values["bootstrapClaim"]; exists {
+		return nil, ErrProjectionInvalid
+	}
+	version, ok := values["workVersion"].(map[string]any)
+	if !ok {
+		return nil, ErrProjectionInvalid
+	}
+	sequenceNumber, ok := version["issueMutationSequence"].(json.Number)
+	if !ok {
+		return nil, ErrProjectionInvalid
+	}
+	sequence, err := strconv.ParseUint(sequenceNumber.String(), 10, 64)
+	if err != nil || sequence == 0 || sequence == ^uint64(0) {
+		return nil, ErrProjectionInvalid
+	}
+	version["issueMutationSequence"] = json.Number(strconv.FormatUint(sequence+1, 10))
+	values["lifecycleState"] = string(authorityv1.LifecycleInProgress)
+	values["workClaim"] = map[string]any{
+		"attemptId": attemptID, "idempotencyKey": idempotencyKey, "baseCommit": baseCommit,
+	}
+	result, err := json.Marshal(values)
+	if err != nil {
+		return nil, ErrProjectionInvalid
+	}
+	return result, nil
+}
 
 func digestValue(value any) string {
 	data, err := json.Marshal(value)

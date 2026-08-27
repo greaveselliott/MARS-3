@@ -78,6 +78,7 @@ type ClaimMutation struct {
 	AttemptID         string
 	Assignee          string
 	IdempotencyKey    string
+	BaseSHA           string
 }
 
 // ClaimStore owns the canonical work transition. It never issues capability.
@@ -321,7 +322,7 @@ func (s *Service) Claim(ctx context.Context, principal authorityv1.Principal, re
 		post, claimErr := s.claims.CompareAndSwapClaim(ctx, ClaimMutation{
 			TenantID: principal.TenantID, ProjectID: principal.ProjectID, BeadID: request.BeadID,
 			ExpectedVersion: request.ExpectedVersion, ExpectedIntegrity: request.ExpectedIntegrity,
-			AttemptID: request.AttemptID, Assignee: principal.ProfileID, IdempotencyKey: request.IdempotencyKey,
+			AttemptID: request.AttemptID, Assignee: principal.ProfileID, IdempotencyKey: request.IdempotencyKey, BaseSHA: request.BaseSHA,
 		})
 		if claimErr != nil {
 			if errors.Is(claimErr, ErrStaleWorkVersion) {

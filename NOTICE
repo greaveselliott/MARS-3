@@ -14,10 +14,10 @@ MIT License. Its embedded Dolt dependency is pinned through revision 1bf533220ab
 Beads databases are external operational state and are not redistributed in
 this repository.
 
-The W-001 bootstrap includes a clearly marked MARS-3 modification patch against
-the pinned Beads source. That patch is distributed under the upstream MIT
-License reproduced in THIRD_PARTY_NOTICES; no Beads database or binary is
-distributed.
+W-001 includes clearly marked, composable MARS-3 modification patches against
+the pinned Beads source for the bounded bootstrap and native gateway claim
+transitions. Those patches are distributed under the upstream MIT License
+reproduced in THIRD_PARTY_NOTICES; no Beads database or binary is distributed.
 
 The W-001 lease authority links pgx v5.10.0 and its pinned transitive Go
 modules under MIT and BSD 3-Clause licenses. Exact versions, copyright notices,
