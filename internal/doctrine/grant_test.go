@@ -673,6 +673,86 @@ func writeW001PostclaimChronoFixFixture(t *testing.T, grant, signature, publicKe
 	return root
 }
 
+func TestW001DeliveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001DeliveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 delivery grant was rejected: %v", findings)
+	}
+}
+
+func TestW001DeliveryGrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	grant := read(w001DeliveryGrantPath)
+	signature := read(w001DeliveryGrantSignature)
+	publicKey := read(wave1PlanningGrantKey)
+
+	t.Run("implementation authority tamper", func(t *testing.T) {
+		tampered := bytes.Replace(grant, []byte("implementationAllowed: true"), []byte("implementationAllowed: false"), 1)
+		root := t.TempDir()
+		writePlanningGrantTestFile(t, root, w001DeliveryGrantPath, tampered)
+		writePlanningGrantTestFile(t, root, w001DeliveryGrantSignature, signature)
+		writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+		var findings []Finding
+		checkW001DeliveryGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_delivery_value") || !findingCodePresent(findings, "public.w001_delivery_signature") {
+			t.Fatalf("tampered delivery authority was accepted: %v", findings)
+		}
+	})
+
+	t.Run("path scope tamper", func(t *testing.T) {
+		tampered := bytes.Replace(grant, []byte("    - internal/authority/**"), []byte("    - internal/runtime/**"), 1)
+		root := t.TempDir()
+		writePlanningGrantTestFile(t, root, w001DeliveryGrantPath, tampered)
+		writePlanningGrantTestFile(t, root, w001DeliveryGrantSignature, signature)
+		writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
+		var findings []Finding
+		checkW001DeliveryGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_delivery_sequence") || !findingCodePresent(findings, "public.w001_delivery_signature") {
+			t.Fatalf("tampered delivery path scope was accepted: %v", findings)
+		}
+	})
+}
+
+func TestW001DeliveryPathScope(t *testing.T) {
+	for _, path := range []string{
+		w001DeliveryGrantPath,
+		"internal/authority/gateway/service.go",
+		"cmd/mars3-authority/main.go",
+		"api/authority/v1/types.go",
+		"database/authority/001_leases.sql",
+		"deploy/authority/network-policy.yaml",
+		"go.mod",
+	} {
+		if !w001DeliveryPathsAllowed([]string{path}) {
+			t.Fatalf("signed W-001 delivery path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{"internal/runtime/escape.go", "internal/authority", "docs/features/F-002-work-authority.md", ".github/workflows/foundation-quality.yml"} {
+		if w001DeliveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope delivery path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001DeliveryGitDiffIsFenced(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001DeliveryGrantGitDiff(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("current signed W-001 delivery checkout was rejected: %v", findings)
+	}
+}
+
 func clonePlanningGrantMaterials(materials map[string][]byte) map[string][]byte {
 	cloned := make(map[string][]byte, len(materials))
 	for path, data := range materials {

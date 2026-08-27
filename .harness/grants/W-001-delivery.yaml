@@ -1,0 +1,134 @@
+schemaVersion: 1
+kind: MARS3W001DeliveryGrant
+
+grant:
+  id: W-001-delivery
+  classification: PUBLIC
+  issuedAt: 2026-08-27T00:09:46Z
+  expiresAt: 2026-08-30T00:09:46Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 59f1fe24952b68bd3bbb6994bfee46c350b7c9cd
+  baseTree: 7febda7ec2fec47b7d6bf11fdd5b24e605b9e2b2
+  workingBranch: codex/w-001-delivery
+  reviewTag: mars3/w001-delivery-v1
+  reviewTagMessage: MARS-3 W-001 delivery tree attestation v1
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: work-authority-engineer
+  failureOwnership: foundation
+  purpose: reconcile the accepted postclaim publication and implement the bounded W-001 gateway
+  bead: M3-W001
+  displayId: W-001
+  attemptId: w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73
+  idempotencyKey: w001-delivery-295ebd16-1d32-479e-a620-97a51e62a4c0
+  priorGrant: W-001-postclaim-chronology-correction-v6
+  priorGrantSHA256: d6789b026605a16526f8d97a9dd3c92b08c131ecaeb05564fa5b2f507ff0a445
+  priorGrantSignatureSHA256: 0ef51eec2a89f6d6cc298d5f725d97555ff816eeebefa72f585982df39afa982
+  priorReviewTag: mars3/w001-postclaim-reconciliation-v6
+  priorReviewTagObject: 2346a1388272569bb64817ea7e9b6463c4e84e5a
+  priorReviewTagTarget: c6749bceb7114b16d7941afc7609c158295ccd2b
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalWorkMutationAllowed: false
+  developmentLeaseAllowed: true
+  allowedEffects:
+    - verify-the-exact-reviewed-postclaim-squash-and-protected-main-run
+    - append-one-exact-public-safe-postclaim-reconciliation-comment-to-M3-W001
+    - update-the-active-plan-and-public-evidence-with-the-verified-merge-receipt
+    - edit-only-the-exact-authorized-Git-paths
+    - implement-and-test-the-W001-authority-gateway-in-public-synthetic-fixtures
+    - create-local-non-production-databases-containers-and-network-namespaces-for-tests
+    - issue-renew-release-revoke-and-validate-only-W001-development-test-leases
+    - create-signed-semantic-commits-and-one-signed-v1-review-tag
+    - push-one-review-branch-and-tag-and-open-one-ready-pull-request
+    - obtain-independent-QA-and-Security-review-before-merge
+    - squash-merge-promptly-with-reviewed-tree-equality-and-reconcile-the-result
+  authorizedPaths:
+    - .harness/grants/W-001-delivery.yaml
+    - .harness/grants/W-001-delivery.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+    - internal/authority/**
+    - cmd/mars3-authority/**
+    - api/authority/**
+    - database/authority/**
+    - deploy/authority/**
+    - go.mod
+    - go.sum
+    - Makefile
+    - NOTICE
+    - THIRD_PARTY_NOTICES
+  requiredProperties:
+    - Beads-Dolt-remains-the-sole-work-definition-and-lifecycle-authority
+    - PostgreSQL-remains-the-sole-live-lease-authority-and-never-becomes-ticket-authority
+    - canonical-W001-claim-and-WorkVersion-match-the-signed-preimage
+    - every-Git-write-stays-inside-the-canonical-Bead-paths-or-explicit-Orchestrator-shared-paths
+    - every-material-effect-revalidates-the-current-fencing-tuple-immediately-before-execution
+    - development-lease-generation-and-epochs-are-durable-monotonic-and-non-reusable
+    - direct-Beads-Dolt-and-lease-store-access-from-untrusted-clients-fails-closed
+    - trace-and-evidence-output-remains-bounded-public-safe-and-contains-no-raw-payloads
+    - no-canonical-lifecycle-review-or-terminal-disposition-is-created-by-the-Engineer
+    - independent-QA-and-Security-review-the-same-immutable-delivery-tree
+  prohibitedEffects:
+    - replay-the-one-shot-W001-bootstrap-claim
+    - mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths
+    - mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history
+    - issue-a-production-or-cross-ticket-lease
+    - expose-Beads-Dolt-PostgreSQL-or-provider-credentials-to-a-model-sandbox-or-public-client
+    - access-store-or-publish-secrets-private-data-provider-sessions-or-raw-payloads
+    - modify-repository-rulesets-branch-protection-secret-scanning-trust-roots-or-approval-policy
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+canonicalPreimage:
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  assignee: work-authority-engineer
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+publication:
+  pullRequest: 8
+  reviewedHead: c6749bceb7114b16d7941afc7609c158295ccd2b
+  reviewedTree: 7febda7ec2fec47b7d6bf11fdd5b24e605b9e2b2
+  mergedCommit: 59f1fe24952b68bd3bbb6994bfee46c350b7c9cd
+  mergedParent: adfd64feb565fb703a3568122cc032d4d1a450f5
+  mergedTree: 7febda7ec2fec47b7d6bf11fdd5b24e605b9e2b2
+  protectedMainRun: 33025602656
+  protectedMainJob: 98366054428
+  protectedMainResult: SUCCESS
+  qaDisposition: accepted
+  securityDisposition: accepted
+
+reconciliation:
+  commentAuthor: delivery-orchestrator
+  commentSHA256: 9c1becf8bc3e1efd7b59b41439cbb7b382f536271d5478f1750545c49fffae74
+  runDisposition: completed
+  nextOwner: work-authority-engineer
+  nextNeed: signed-W001-delivery-grant
+  liveLeaseAsserted: false
+  implementationEffectObserved: false
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-delivery
+  detachedSignature: W-001-delivery.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

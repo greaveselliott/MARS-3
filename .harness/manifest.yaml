@@ -13,6 +13,9 @@ authority:
   current_bead_state: in-progress
   current_bead_claimed: true
   plan_phase: delivery
+  active_delivery_grant: W-001-delivery
+  active_attempt: w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73
+  live_lease_state: absent
   durable_product_system: git
   markdown_ticket_authority: prohibited
   genesis_is_provenance_only: true

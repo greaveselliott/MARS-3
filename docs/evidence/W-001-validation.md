@@ -4,7 +4,7 @@
 **Work authority:** M3-W001
 **Failure ownership:** foundation
 **Correction grant:** `W-001-postclaim-chronology-correction-v6`
-**Current disposition:** changes-requested pending fresh immutable QA and Security review
+**Current disposition:** postclaim reconciliation accepted, merged, and completed; W-001 delivery is active under a separate signed grant
 
 ## Superseded Security disposition
 
@@ -181,7 +181,36 @@ This composition preserves the previously reviewed patch bytes and prevents
 the correction grant from silently rebinding unrelated historical changes.
 
 The exact generated patches, helper, tests, signed correction grants, retained
-v1 through v5 tags, public commit gates, and independent dispositions are
-bound by their immutable reviewed Git trees. Until both QA and Security accept
-the signed v6 tree, PR #8 must remain unmerged and no delivery lease or
-implementation right exists.
+v1 through v6 tags, public commit gates, and independent dispositions are
+bound by their immutable reviewed Git trees.
+
+## Postclaim merge and delivery handoff
+
+Independent QA and Security accepted v6 head
+`c6749bceb7114b16d7941afc7609c158295ccd2b`, tree
+`7febda7ec2fec47b7d6bf11fdd5b24e605b9e2b2`, and signed annotated tag
+object `2346a1388272569bb64817ea7e9b6463c4e84e5a`. PR #8 was squash-merged
+without bypass as main commit
+`59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`, whose sole parent is
+`adfd64feb565fb703a3568122cc032d4d1a450f5` and whose tree is exactly the
+reviewed v6 tree. Protected-main run `33025602656`, job `98366054428`,
+completed successfully.
+
+The Delivery Orchestrator appended the exact public-safe reconciliation
+comment to canonical M3-W001 as comment
+`01a0408e-ca08-71f0-b1ac-0dec0039706a` at
+`2026-08-27T00:11:35Z`. Its text SHA-256 is
+`9c1becf8bc3e1efd7b59b41439cbb7b382f536271d5478f1750545c49fffae74`.
+Read-back left W-001 `in_progress` / `in-progress`, WorkVersion mutation and
+dependency revisions `1` / `1`, P-001 backlog and unclaimed, and the live
+lease absent. This completed the postclaim reconciliation subjob without an
+implementation effect.
+
+The separately signed `W-001-delivery` grant is now the bounded implementation
+authority for the Work Authority Engineer. It permits only W-001's canonical
+exclusive paths plus the named Orchestrator-owned plan and validator paths,
+public synthetic development fixtures, and W-001 development/test leases. It
+does not authorize another canonical claim, a lifecycle transition, review or
+terminal disposition, production, destructive work, repository-control
+changes, secrets, private data, or any other Bead. No development lease exists
+at this handoff checkpoint.
