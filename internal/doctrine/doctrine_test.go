@@ -279,6 +279,14 @@ func TestGovernedPublicScopeRejectsUnrelatedAndEscapingPaths(t *testing.T) {
 	}
 }
 
+func TestGovernedPublicScopeAllowsPinnedScannerFingerprintFile(t *testing.T) {
+	var findings []Finding
+	checkGovernedPublicScope(".gitleaksignore", &findings)
+	if len(findings) != 0 {
+		t.Fatalf("governed exact-fingerprint file was rejected: %v", findings)
+	}
+}
+
 func TestClaimAttestationRequiresCompleteWorkLineage(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	claim, err := os.ReadFile(filepath.Join(repo, ".harness", "claims", "H-001.yaml"))

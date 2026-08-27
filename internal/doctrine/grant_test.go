@@ -791,6 +791,115 @@ func TestW001DeliveryCIFixFailsClosed(t *testing.T) {
 	}
 }
 
+func TestW001DeliveryScannerFixAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001DeliveryScannerFix(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 scanner correction was rejected: %v", findings)
+	}
+}
+
+func TestW001DeliveryScannerFixGrantTamperFails(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	tampered := bytes.Replace(read(w001DeliveryScannerFixPath), []byte("historyFindings: 10"), []byte("historyFindings: 11"), 1)
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001DeliveryV1PreservedHead)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001DeliveryCIFixReviewTag+":refs/tags/"+w001DeliveryCIFixReviewTag)
+	for path, data := range map[string][]byte{
+		w001DeliveryScannerFixPath:          tampered,
+		w001DeliveryScannerFixSignature:     read(w001DeliveryScannerFixSignature),
+		w001DeliveryCIFixPath:               read(w001DeliveryCIFixPath),
+		w001DeliveryCIFixSignature:          read(w001DeliveryCIFixSignature),
+		w001DeliveryScannerIgnorePath:       read(w001DeliveryScannerIgnorePath),
+		wave1PlanningGrantKey:               read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md": read("docs/evidence/W-001-validation.md"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001DeliveryScannerFix(root, &findings)
+	if !findingCodePresent(findings, "public.w001_delivery_scanner_value") || !findingCodePresent(findings, "public.w001_delivery_scanner_signature") {
+		t.Fatalf("tampered scanner correction was accepted: %v", findings)
+	}
+}
+
+func TestW001DeliveryScannerIgnoreFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	exact := strings.Join(w001DeliveryScannerFingerprints, "\n") + "\n"
+	for _, testCase := range []struct {
+		name string
+		body string
+	}{
+		{name: "changed", body: strings.Replace(exact, "0faf9071", "1faf9071", 1)},
+		{name: "extra", body: exact + "*:generic-api-key:*\n"},
+		{name: "missing", body: strings.TrimPrefix(exact, w001DeliveryScannerFingerprints[0]+"\n")},
+		{name: "duplicate", body: exact + w001DeliveryScannerFingerprints[0] + "\n"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			root := t.TempDir()
+			runPlanningGrantTestGit(t, root, "init", "--quiet")
+			runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001DeliveryV1PreservedHead)
+			writePlanningGrantTestFile(t, root, w001DeliveryScannerIgnorePath, []byte(testCase.body))
+			var findings []Finding
+			checkW001DeliveryScannerIgnore(root, &findings)
+			if !findingCodePresent(findings, "public.w001_delivery_scanner_ignore") {
+				t.Fatalf("unsafe scanner exception was accepted: %v", findings)
+			}
+		})
+	}
+}
+
+func TestW001DeliveryScannerFingerprintSourcesFailClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001DeliveryV1PreservedHead)
+
+	tests := []struct {
+		name string
+		list []string
+		code string
+	}{
+		{name: "duplicate", list: append(append([]string{}, w001DeliveryScannerFingerprints...), w001DeliveryScannerFingerprints[0]), code: "public.w001_delivery_scanner_duplicate"},
+		{name: "wildcard", list: []string{"*:internal/authority/beads/store_test.go:generic-api-key:96"}, code: "public.w001_delivery_scanner_fingerprint"},
+		{name: "wrong rule", list: []string{"0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:github-pat:96"}, code: "public.w001_delivery_scanner_fingerprint"},
+		{name: "missing line", list: []string{"0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:99999"}, code: "public.w001_delivery_scanner_source"},
+		{name: "outside history", list: []string{w001DeliveryScannerFixBase + ":docs/evidence/W-001-validation.md:generic-api-key:1"}, code: "public.w001_delivery_scanner_history"},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			var findings []Finding
+			checkW001DeliveryScannerFingerprintSources(root, testCase.list, &findings)
+			if !findingCodePresent(findings, testCase.code) {
+				t.Fatalf("unsafe scanner source tuple was accepted: %v", findings)
+			}
+		})
+	}
+}
+
 func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	object, err := planningGrantGitOutput(repo, "cat-file", "tag", w001DeliveryV2TagObject)
@@ -935,6 +1044,16 @@ func TestW001DeliveryPathScope(t *testing.T) {
 	for _, path := range []string{"internal/authority/gateway/service.go", ".github/workflows/foundation-quality.yml", "go.mod"} {
 		if w001DeliveryCIFixPathsAllowed([]string{path}) {
 			t.Fatalf("out-of-scope CI-correction path was accepted: %s", path)
+		}
+	}
+	for _, path := range []string{w001DeliveryScannerIgnorePath, w001DeliveryScannerFixPath, w001DeliveryScannerFixSignature, "docs/evidence/W-001-validation.md", "internal/doctrine/grant.go", "internal/doctrine/grant_test.go", "internal/doctrine/public.go", "internal/doctrine/doctrine_test.go"} {
+		if !w001DeliveryScannerFixPathsAllowed([]string{path}) {
+			t.Fatalf("signed scanner-correction path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{".github/workflows/foundation-quality.yml", "internal/authority/gateway/service.go", "go.mod"} {
+		if w001DeliveryScannerFixPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope scanner-correction path was accepted: %s", path)
 		}
 	}
 }

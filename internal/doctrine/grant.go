@@ -178,6 +178,16 @@ const (
 	w001DeliveryV2TagObject           = "9eb770c85a1df06dd90e993c9447176c9bbbffd0"
 	w001DeliveryCIFixReviewTag        = "mars3/w001-delivery-v3"
 	w001DeliveryCIFixReviewTagMessage = "MARS-3 W-001 delivery tree attestation v3"
+	w001DeliveryScannerFixPath        = ".harness/grants/W-001-delivery-scanner-correction-v4.yaml"
+	w001DeliveryScannerFixSignature   = ".harness/grants/W-001-delivery-scanner-correction-v4.yaml.sig"
+	w001DeliveryScannerFixNamespace   = "mars3-w001-delivery-scanner-correction-v4"
+	w001DeliveryScannerFixBase        = "383ea617ad2bcbe06522a30014a1b19127b5239f"
+	w001DeliveryScannerFixBaseTree    = "e91776b8de9e9d1e1e193ae9588363c4d87a62e6"
+	w001DeliveryV3TagObject           = "700d85715981fb6e9def191b414c815c8f543dd0"
+	w001DeliveryScannerFixReviewTag   = "mars3/w001-delivery-v4"
+	w001DeliveryScannerFixTagMessage  = "MARS-3 W-001 delivery tree attestation v4"
+	w001DeliveryV1PreservedHead       = "919f1189fb0703e42bcc11570a59527ad8e7a444"
+	w001DeliveryScannerIgnorePath     = ".gitleaksignore"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -2095,6 +2105,113 @@ var w001DeliveryCIFixSequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001DeliveryScannerFingerprints = []string{
+	"0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:96",
+	"0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:109",
+	"0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:129",
+	"0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:226",
+	"2fecae29a52f0d765c8f586e9b7be3ed5ea7eeb0:.harness/grants/W-001-delivery.yaml:generic-api-key:23",
+	"85848a524d40e3041199c21b89e82f2cf8910b39:internal/authority/beads/beads-v1.2.2-gateway-claim.patch:generic-api-key:283",
+	"85848a524d40e3041199c21b89e82f2cf8910b39:internal/authority/beads/store_test.go:generic-api-key:196",
+	"85848a524d40e3041199c21b89e82f2cf8910b39:internal/authority/beads/store_test.go:generic-api-key:365",
+	"9e39ae0e7653f300635ad36f0728d5698e4eb954:internal/authority/gateway/effect_test.go:generic-api-key:217",
+	"e055ddab2e1f47b1eed68593893510894a3cce7f:internal/authority/gateway/effect_test.go:generic-api-key:204",
+}
+
+var w001DeliveryScannerFixScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001DeliveryScannerCorrection"},
+	{path: "grant.id", value: "W-001-delivery-scanner-correction-v4"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T11:30:30Z"},
+	{path: "grant.expiresAt", value: "2026-08-28T11:30:30Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001DeliveryScannerFixBase},
+	{path: "grant.baseTree", value: w001DeliveryScannerFixBaseTree},
+	{path: "grant.workingBranch", value: w001DeliveryBranch},
+	{path: "grant.priorGrant", value: "W-001-delivery-ci-correction-v3"},
+	{path: "grant.priorGrantSHA256", value: "0448e00fbc585d95dcd740e1f8dd164882d343fbe1d73bec1cda65fd59586b85"},
+	{path: "grant.priorGrantSignatureSHA256", value: "3ceeb9fed4151141c1f2f79ac2a0116698721fead88b7c4503e8b6192bd3c097"},
+	{path: "grant.priorReviewTag", value: w001DeliveryCIFixReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001DeliveryV3TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001DeliveryScannerFixBase},
+	{path: "grant.priorReviewTagTree", value: w001DeliveryScannerFixBaseTree},
+	{path: "grant.successorReviewTag", value: w001DeliveryScannerFixReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001DeliveryScannerFixTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "work-authority-engineer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "preserve public delivery-v1 history while suppressing only ten immutable synthetic scanner fingerprints"},
+	{path: "finding.code", value: "public.w001_delivery_history_scanner"},
+	{path: "finding.normalizedFingerprint", value: "delivery-history-scanner/preserved-v1-synthetic-generic-key"},
+	{path: "finding.run", value: "33066374068"},
+	{path: "finding.job", value: "98497338894"},
+	{path: "finding.result", value: "history-scan-failure"},
+	{path: "finding.worktreeFindings", value: "0"},
+	{path: "finding.historyFindings", value: "10"},
+	{path: "finding.historyCommits", value: "69"},
+	{path: "finding.rule", value: "generic-api-key"},
+	{path: "finding.scannerImageDigest", value: "sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba"},
+	{path: "finding.ignorePath", value: w001DeliveryScannerIgnorePath},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.newCanaryRequired", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001DeliveryScannerFixNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-delivery-scanner-correction-v4.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001DeliveryScannerFixSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v2-and-v3-tags-heads-trees-and-failed-checks",
+		"add-one-exact-ten-line-gitleaks-fingerprint-file",
+		"validate-each-fingerprint-commit-path-rule-line-and-preserved-branch-ancestry",
+		"prove-new-secret-canaries-remain-detectable",
+		"create-signed-correction-commits-and-one-signed-v4-release-manager-review-tag",
+		"push-the-existing-review-branch-and-v4-tag-without-rerunning-failed-heads",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001DeliveryScannerIgnorePath,
+		w001DeliveryScannerFixPath,
+		w001DeliveryScannerFixSignature,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+		"internal/doctrine/public.go",
+		"internal/doctrine/doctrine_test.go",
+	},
+	"grant.requiredProperties": {
+		"exactly-ten-full-fingerprints-and-no-pattern-wildcard-or-rule-level-exception",
+		"every-fingerprint-resolves-to-the-signed-preserved-delivery-v1-history",
+		"changed-extra-missing-duplicate-or-unresolvable-fingerprint-fails-closed",
+		"worktree-and-new-commit-findings-remain-unsuppressed",
+		"scanner-image-workflow-rules-and-canary-remain-unchanged",
+		"v4-tag-targets-the-final-correction-head-and-uses-the-release-manager-identity",
+		"protected-main-tree-equals-the-signed-v4-feature-tree",
+	},
+	"grant.prohibitedEffects": {
+		"add-a-wildcard-regex-rule-path-or-commit-range-exception",
+		"change-disable-or-replace-the-scanner-image-workflow-canary-or-history-scan",
+		"suppress-any-future-commit-worktree-or-non-generic-api-key-finding",
+		"move-delete-or-reuse-the-v2-or-v3-review-tags",
+		"rerun-the-v2-or-v3-failed-heads",
+		"delete-rewrite-or-force-push-the-preserved-delivery-v1-branch",
+		"mutate-any-Bead-Dolt-row-dependency-label-comment-or-history",
+		"issue-assert-renew-release-or-revoke-a-live-lease",
+		"change-gateway-runtime-platform-or-product-behavior",
+		"mutate-workflow-ruleset-repository-settings-or-trust-roots",
+		"production-or-destructive-effect",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"finding.allowedFingerprints": w001DeliveryScannerFingerprints,
+	"verification.order":          {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -3320,6 +3437,11 @@ func checkW001DeliveryGrant(root string, findings *[]Finding) {
 	} else if !os.IsNotExist(correctionErr) {
 		addFinding(findings, w001DeliveryCIFixPath, "public.w001_delivery_ci_state", "delivery CI-correction state cannot be established")
 	}
+	if _, scannerErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001DeliveryScannerFixPath))); scannerErr == nil {
+		checkW001DeliveryScannerFix(root, findings)
+	} else if !os.IsNotExist(scannerErr) {
+		addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_state", "delivery scanner-correction state cannot be established")
+	}
 }
 
 func checkW001DeliveryCIFix(root string, findings *[]Finding) {
@@ -3393,6 +3515,126 @@ func checkW001DeliveryCIFix(root string, findings *[]Finding) {
 		!bytes.Contains(evidence, []byte("98454619462")) || !bytes.Contains(evidence, []byte("98454903898")) ||
 		!bytes.Contains(evidence, []byte("The retry budget is exhausted; the run will not be retried again.")) {
 		addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_delivery_ci_evidence", "delivery CI evidence must preserve the normalized failure and exhausted retry")
+	}
+}
+
+func checkW001DeliveryScannerFix(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001DeliveryScannerFixPath)
+	if err != nil {
+		addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_missing", "signed W-001 delivery scanner correction is required")
+		return
+	}
+	document := parseStrictGrant(data, w001DeliveryScannerFixScalars, w001DeliveryScannerFixSequences,
+		[]string{"grant", "finding", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_schema", "%s", message)
+	}
+	for _, expected := range w001DeliveryScannerFixScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_value", "%s does not match the signed scanner-correction contract", expected.path)
+		}
+	}
+	for path, expected := range w001DeliveryScannerFixSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_sequence", "%s must equal the exact ordered scanner-correction contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "finding", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_expiry", "scanner-correction grant must use one RFC3339 interval no longer than 72 hours")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001DeliveryScannerFixSignature)
+	if signatureErr != nil {
+		addFinding(findings, w001DeliveryScannerFixSignature, "public.w001_delivery_scanner_signature_missing", "detached scanner-correction signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_delivery_scanner_key", "scanner correction must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001DeliveryScannerFixNamespace); err != nil {
+			addFinding(findings, w001DeliveryScannerFixSignature, "public.w001_delivery_scanner_signature", "%v", err)
+		}
+	}
+
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001DeliveryCIFixPath, scalarValue(document, "grant.priorGrantSHA256")},
+		{w001DeliveryCIFixSignature, scalarValue(document, "grant.priorGrantSignatureSHA256")},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_delivery_scanner_prior_grant", "prior delivery correction must match its exact signed SHA-256")
+		}
+	}
+	checkW001DeliveryV3Tag(root, findings)
+	checkW001DeliveryScannerIgnore(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	if evidenceErr != nil || !bytes.Contains(evidence, []byte("delivery-history-scanner/preserved-v1-synthetic-generic-key")) ||
+		!bytes.Contains(evidence, []byte("33066374068")) || !bytes.Contains(evidence, []byte("98497338894")) ||
+		!bytes.Contains(evidence, []byte("Adding a new committed\nsynthetic credential canary still produced one `github-pat` finding")) {
+		addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_delivery_scanner_evidence", "scanner evidence must preserve the exact history failure and new-canary proof")
+	}
+}
+
+func checkW001DeliveryScannerIgnore(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001DeliveryScannerIgnorePath)
+	expected := strings.Join(w001DeliveryScannerFingerprints, "\n") + "\n"
+	if err != nil || string(data) != expected {
+		addFinding(findings, w001DeliveryScannerIgnorePath, "public.w001_delivery_scanner_ignore", "scanner ignore must equal the exact signed ten-fingerprint file")
+		return
+	}
+	checkW001DeliveryScannerFingerprintSources(root, w001DeliveryScannerFingerprints, findings)
+}
+
+func checkW001DeliveryScannerFingerprintSources(root string, fingerprints []string, findings *[]Finding) {
+	if _, err := planningGrantGitOutput(root, "rev-parse", "--verify", w001DeliveryV1PreservedHead+"^{commit}"); err != nil {
+		addFinding(findings, w001DeliveryScannerIgnorePath, "public.w001_delivery_scanner_history", "preserved delivery-v1 head must resolve locally")
+		return
+	}
+	seen := make(map[string]bool, len(fingerprints))
+	for _, fingerprint := range fingerprints {
+		if seen[fingerprint] {
+			addFinding(findings, w001DeliveryScannerIgnorePath, "public.w001_delivery_scanner_duplicate", "scanner fingerprint must occur exactly once")
+			continue
+		}
+		seen[fingerprint] = true
+		parts := strings.Split(fingerprint, ":")
+		if len(parts) != 4 || !sha1Pattern.MatchString(parts[0]) || !safeRelativePath(parts[1]) ||
+			parts[2] != "generic-api-key" {
+			addFinding(findings, w001DeliveryScannerIgnorePath, "public.w001_delivery_scanner_fingerprint", "scanner fingerprint is not one exact commit:path:rule:line tuple")
+			continue
+		}
+		line, lineErr := strconv.Atoi(parts[3])
+		if lineErr != nil || line < 1 {
+			addFinding(findings, w001DeliveryScannerIgnorePath, "public.w001_delivery_scanner_fingerprint", "scanner fingerprint line is invalid")
+			continue
+		}
+		if _, ancestryErr := planningGrantGitOutput(root, "merge-base", "--is-ancestor", parts[0], w001DeliveryV1PreservedHead); ancestryErr != nil {
+			addFinding(findings, w001DeliveryScannerIgnorePath, "public.w001_delivery_scanner_history", "scanner fingerprint commit must belong to the preserved delivery-v1 history")
+			continue
+		}
+		content, showErr := planningGrantGitOutput(root, "show", parts[0]+":"+parts[1])
+		lines := bytes.Split(content, []byte("\n"))
+		if showErr != nil || line > len(lines) || len(bytes.TrimSpace(lines[line-1])) == 0 {
+			addFinding(findings, w001DeliveryScannerIgnorePath, "public.w001_delivery_scanner_source", "scanner fingerprint must resolve to a nonempty immutable source line")
+		}
 	}
 }
 
@@ -4320,6 +4562,18 @@ func checkW001DeliveryGrantGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, w001DeliveryCIFixPath, "public.w001_delivery_ci_state", "delivery CI-correction Git state cannot be established")
 		return
 	}
+	scannerFixActive := false
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001DeliveryScannerFixPath))); err == nil {
+		scannerFixActive = true
+		before := len(*findings)
+		checkW001DeliveryScannerFix(root, findings)
+		if len(*findings) != before || !checkW001DeliveryV3Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_state", "delivery scanner-correction Git state cannot be established")
+		return
+	}
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
 	head := strings.TrimSpace(string(headOutput))
 	if err != nil || !sha1Pattern.MatchString(head) {
@@ -4357,6 +4611,9 @@ func checkW001DeliveryGrantGitDiff(root string, findings *[]Finding) {
 		reviewTag, reviewTagMessage := w001DeliveryReviewTag, w001DeliveryReviewTagMessage
 		if ciFixActive {
 			reviewTag, reviewTagMessage = w001DeliveryCIFixReviewTag, w001DeliveryCIFixReviewTagMessage
+		}
+		if scannerFixActive {
+			reviewTag, reviewTagMessage = w001DeliveryScannerFixReviewTag, w001DeliveryScannerFixTagMessage
 		}
 		target, ok := checkW001DeliveryReviewTag(root, expected, reviewTag, reviewTagMessage, findings)
 		if !ok {
@@ -4404,6 +4661,11 @@ func checkW001DeliveryGrantGitDiff(root string, findings *[]Finding) {
 					pathsAllowed = w001DeliveryCIFixPathsAllowed(normalized)
 				}
 			}
+			if scannerFixActive {
+				if _, ancestryErr := planningGrantGitOutput(root, "merge-base", "--is-ancestor", commit.id, w001DeliveryScannerFixBase); ancestryErr != nil {
+					pathsAllowed = w001DeliveryScannerFixPathsAllowed(normalized)
+				}
+			}
 			if err != nil || normalizeErr != nil || !pathsAllowed {
 				addFinding(findings, w001DeliveryGrantPath, "public.w001_delivery_scope", "a delivery commit includes a path outside its signed scope")
 				return
@@ -4433,6 +4695,9 @@ func checkW001DeliveryGrantGitDiff(root string, findings *[]Finding) {
 	if ciFixActive {
 		pathsAllowed = w001DeliveryCIFixPathsAllowed(paths)
 	}
+	if scannerFixActive {
+		pathsAllowed = w001DeliveryScannerFixPathsAllowed(paths)
+	}
 	if err != nil || !pathsAllowed {
 		addFinding(findings, w001DeliveryGrantPath, "public.w001_delivery_scope", "current changes include a path outside the signed delivery scope")
 	}
@@ -4442,7 +4707,9 @@ func w001DeliveryPathsAllowed(paths []string) bool {
 	exact := map[string]bool{
 		w001DeliveryGrantPath: true, w001DeliveryGrantSignature: true,
 		w001DeliveryCIFixPath: true, w001DeliveryCIFixSignature: true,
-		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		w001DeliveryScannerFixPath: true, w001DeliveryScannerFixSignature: true,
+		w001DeliveryScannerIgnorePath: true,
+		".harness/manifest.yaml":      true, canonicalActivePlan: true,
 		"docs/evidence/W-001-validation.md": true,
 		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
 		"go.mod": true, "go.sum": true, "Makefile": true,
@@ -4483,6 +4750,25 @@ func w001DeliveryCIFixPathsAllowed(paths []string) bool {
 	return true
 }
 
+func w001DeliveryScannerFixPathsAllowed(paths []string) bool {
+	allowed := map[string]bool{
+		w001DeliveryScannerIgnorePath:        true,
+		w001DeliveryScannerFixPath:           true,
+		w001DeliveryScannerFixSignature:      true,
+		"docs/evidence/W-001-validation.md":  true,
+		"internal/doctrine/grant.go":         true,
+		"internal/doctrine/grant_test.go":    true,
+		"internal/doctrine/public.go":        true,
+		"internal/doctrine/doctrine_test.go": true,
+	}
+	for _, path := range paths {
+		if !allowed[path] {
+			return false
+		}
+	}
+	return true
+}
+
 func checkW001DeliveryV2Tag(root string, findings *[]Finding) bool {
 	ref := "refs/tags/" + w001DeliveryReviewTag
 	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
@@ -4504,6 +4790,32 @@ func checkW001DeliveryV2Tag(root string, findings *[]Finding) bool {
 	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
 	if treeErr != nil || strings.TrimSpace(string(tree)) != w001DeliveryCIFixBaseTree {
 		addFinding(findings, w001DeliveryCIFixPath, "public.w001_delivery_ci_prior_tag", "v2 delivery tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001DeliveryV3Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001DeliveryCIFixReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001DeliveryV3TagObject {
+		addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_prior_tag", "v3 delivery tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001DeliveryV3TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_prior_tag", "v3 delivery tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001DeliveryCIFixReviewTag, w001DeliveryCIFixReviewTagMessage)
+	if err != nil || target != w001DeliveryScannerFixBase {
+		addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_prior_tag", "v3 delivery tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001DeliveryScannerFixBaseTree {
+		addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_prior_tag", "v3 delivery tag tree must remain exact")
 		return false
 	}
 	return true
