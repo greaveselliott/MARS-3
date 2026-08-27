@@ -117,6 +117,28 @@ func TestPostgresLeaseLifecycleAndRestart(t *testing.T) {
 	if err := store.ProvisionProject(ctx, tenantID, projectID); err != nil {
 		t.Fatalf("ProvisionProject: %v", err)
 	}
+	releaseFirstWork, err := store.EnterWork(ctx, tenantID, projectID, "M3-W002")
+	if err != nil {
+		t.Fatalf("EnterWork first: %v", err)
+	}
+	secondWorkLock := make(chan func(), 1)
+	secondWorkError := make(chan error, 1)
+	go func() {
+		release, err := store.EnterWork(ctx, tenantID, projectID, "M3-W002")
+		secondWorkLock <- release
+		secondWorkError <- err
+	}()
+	select {
+	case err := <-secondWorkError:
+		t.Fatalf("same-Bead mutation lock did not serialize: %v", err)
+	case <-time.After(100 * time.Millisecond):
+	}
+	releaseFirstWork()
+	releaseSecondWork := <-secondWorkLock
+	if err := <-secondWorkError; err != nil {
+		t.Fatalf("EnterWork second: %v", err)
+	}
+	releaseSecondWork()
 	journalEvent := authorityv1.Event{
 		SchemaVersion: 1, EventID: "evt-pg-001", TraceRef: "trace-journal-001",
 		TenantID: tenantID, ProjectID: projectID, BeadID: "M3-W002",

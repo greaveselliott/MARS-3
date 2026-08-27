@@ -110,16 +110,23 @@ type ProjectBarrier interface {
 	Enter(context.Context, string, string) (func(), error)
 }
 
+// WorkMutationLocker serializes canonical mutations for one Bead across all
+// gateway replicas. Direct datastore writers remain prohibited.
+type WorkMutationLocker interface {
+	EnterWork(context.Context, string, string, string) (func(), error)
+}
+
 // Service contains only trusted dependencies; it owns admission and never
 // exposes their handles to callers.
 type Service struct {
-	store   WorkStore
-	claims  ClaimStore
-	sagas   ClaimSagaStore
-	leases  LeaseValidator
-	barrier ProjectBarrier
-	events  EventSink
-	now     func() time.Time
+	store     WorkStore
+	claims    ClaimStore
+	sagas     ClaimSagaStore
+	leases    LeaseValidator
+	barrier   ProjectBarrier
+	workLocks WorkMutationLocker
+	events    EventSink
+	now       func() time.Time
 }
 
 func New(store WorkStore, events EventSink, now func() time.Time) (*Service, error) {

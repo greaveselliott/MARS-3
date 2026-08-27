@@ -163,6 +163,9 @@ func NewWithClaims(store ClaimStore, sagas ClaimSagaStore, events EventSink, now
 	if barrier, ok := sagas.(ProjectBarrier); ok {
 		service.barrier = barrier
 	}
+	if workLocks, ok := sagas.(WorkMutationLocker); ok {
+		service.workLocks = workLocks
+	}
 	return service, nil
 }
 
@@ -196,6 +199,14 @@ func (s *Service) Claim(ctx context.Context, principal authorityv1.Principal, re
 		}
 	}
 	defer release()
+	releaseWork := func() {}
+	if s.workLocks != nil {
+		releaseWork, err = s.workLocks.EnterWork(ctx, principal.TenantID, principal.ProjectID, request.BeadID)
+		if err != nil {
+			return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, request.BeadID, traceRef, nil, newDenial(authorityv1.ErrorAuthorityDown, ruleAuthorityUnavailable, "", requiredReconciliation, allowedSagaRead, traceRef))
+		}
+	}
+	defer releaseWork()
 	existing, found, err := s.sagas.Lookup(ctx, principal.TenantID, principal.ProjectID, request.IdempotencyKey)
 	if err != nil {
 		return authorityv1.ClaimResponse{}, s.deny(ctx, principal, operationClaimIntent, request.BeadID, traceRef, nil, newDenial(authorityv1.ErrorAuthorityDown, ruleAuthorityUnavailable, "", requiredReconciliation, allowedSagaRead, traceRef))

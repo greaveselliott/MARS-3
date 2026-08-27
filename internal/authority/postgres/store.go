@@ -413,6 +413,33 @@ func (store *Store) Enter(ctx context.Context, tenantID, projectID string) (func
 	}, nil
 }
 
+// EnterWork takes a distributed transaction-scoped lock for one canonical
+// Bead after entering the shared project barrier.
+func (store *Store) EnterWork(ctx context.Context, tenantID, projectID, beadID string) (func(), error) {
+	if beadID == "" || strings.Contains(beadID, "|") {
+		return nil, ErrProjectNotProvisioned
+	}
+	tx, err := store.beginScoped(ctx, tenantID, projectID, pgx.RepeatableRead)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := store.verifyProject(ctx, tx, tenantID, projectID, false); err != nil {
+		_ = tx.Rollback(context.Background())
+		return nil, err
+	}
+	if _, err := tx.Exec(ctx, `select pg_advisory_xact_lock(hashtextextended($1, 981733))`, tenantID+"|"+projectID+"|"+beadID); err != nil {
+		_ = tx.Rollback(context.Background())
+		return nil, err
+	}
+	var once bool
+	return func() {
+		if !once {
+			once = true
+			_ = tx.Rollback(context.Background())
+		}
+	}, nil
+}
+
 func loadSaga(ctx context.Context, tx pgx.Tx, tenantID, projectID, key string, lock bool) (gateway.ClaimSaga, error) {
 	query := `
 		select request_digest, phase, bead_id, attempt_id, idempotency_key, base_sha,
