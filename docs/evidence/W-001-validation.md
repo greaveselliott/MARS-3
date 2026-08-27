@@ -707,3 +707,55 @@ admission, legacy/detailed lifecycle consistency, dependency-readiness
 derivation, native parity, qualification, public evidence, and fresh immutable
 review. It grants no canonical Beads mutation, live lease, merge, production
 effect, or trust expansion.
+
+## Lifecycle-correction v8 candidate
+
+The v8 adapter rejects every noncanonical metadata key before typed decoding,
+including top-level and nested case-fold aliases. A record without detailed
+lifecycle evidence can no longer carry legacy accepted, completed, reconciled,
+or blocker state. Dependency projections decode the full canonical metadata;
+when detailed lifecycle records exist, they must pass the same lifecycle
+validator and agree with their legacy scalars before readiness can project.
+The pinned native transaction path rejects unknown top-level authority keys and
+the exact case-fold claim reproduction, while its existing detailed lifecycle
+preimage validation rejects the orphan legacy terminal state.
+
+V8 material bindings are:
+
+- lifecycle patch SHA-256:
+  `116c3b59744f1d6c3065ef8baf89d2bfac372bab66282b8cd9443e0843fc65c5`;
+- full six-file patched-source diff SHA-256 after all five patches:
+  `5fb4120f30c9d54d4dd847755a8070d305c1a7a14b783e7ce33157b432b02665`;
+- unchanged patched-source `go.mod` SHA-256:
+  `82794b69209f2d2e8ad23fccc94a84d07ac46fc99040964a89ff5566e42c8044`;
+- unchanged patched-source `go.sum` SHA-256:
+  `ad753874d566d22c81da097ed3d8d59f2f17ff6e69a437aca914ad178a488efb`;
+- exact Linux/arm64 builder manifest:
+  `sha256:b1a0cc29a7e13e0595e21087eeb930dc494976b18ba68279bf52c665f3170aa0`;
+- twice-reproduced Linux/arm64 patched binary SHA-256:
+  `a478f5090ca1b616e5aa8e5b74f4277814a8f0b1a88d990f9b7876761a3a7cc7`.
+
+The two builds used different host source trees and fresh v8 Go build caches at
+the fixed `/src` and `/cache` container paths. Because v8 did not change the
+bound `go.mod` or `go.sum`, each build mounted one of the two independently
+downloaded and verified v7 module caches read-only at `/cache/modcache`. The
+fresh module-download attempt was stopped after Docker networking stalled with
+no CPU or cache progress; the local Docker daemon was then fully restarted.
+Both retained module graphs passed `go mod verify` with networking disabled,
+and both builds used the same v7 normalized `go build` command and environment.
+The outputs were byte-identical.
+
+The exact patched source executed every selected native `AuthorityLifecycle`
+case with Docker available and no skip. This included embedded completion,
+rework, rollback, contention, hook denial, server-transaction denial, all
+noncompleted outcomes, canonical-claim history, fingerprint retry limits,
+case-fold claim alias rejection, and orphan legacy terminal-scalar rejection.
+The reproduced binary then passed `TestNativeMutatorIntegration` in the pinned
+network-disabled Linux builder without a skip.
+
+The PostgreSQL lifecycle/restart suite executed without a skip against an
+ephemeral loopback-only PostgreSQL 17.11 container at digest
+`sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0`.
+It passed and the container was stopped and auto-removed. No canonical Beads
+metadata or live lease was created; W-001 remains `in-progress` pending fresh
+immutable v8 QA and Security review.

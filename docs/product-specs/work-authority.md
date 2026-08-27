@@ -140,6 +140,12 @@ operation without echoing credentials or payloads.
   malformed, incomplete, dual, and type-confused claims are invalid; every
   current and archived handoff names that sole claim attempt; and legacy
   lifecycle scalars are absent or exactly derived from detailed records.
+  Canonical JSON key spellings are enforced recursively before typed decoding,
+  so case-folded aliases cannot overwrite validated fields. Active records
+  without detailed evidence must have empty legacy terminal/blocker state.
+  Dependency readiness derives from valid detailed review, run, and
+  reconciliation evidence whenever it exists and rejects conflicting legacy
+  completion scalars.
 - A blocked attempt remains truthful with `blocker`, `blocked_by`, normalized
   failure fingerprint, bounded attempt count, and exact next action. It is not
   silently closed or duplicated.

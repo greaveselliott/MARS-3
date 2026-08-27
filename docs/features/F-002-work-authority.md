@@ -94,7 +94,13 @@
    after closure. Null, malformed, incomplete, dual, or type-confused claim
    objects fail closed. Every current and archived handoff must name the sole
    retained claim attempt, and legacy lifecycle scalars are absent or exactly
-   derived from their detailed records.
+   derived from their detailed records. Authority metadata keys must also be
+   exact canonical spellings at every typed object boundary; duplicate,
+   case-folded, or otherwise unknown aliases fail before decoding. When an
+   active record has no detailed lifecycle evidence, accepted, completed,
+   reconciled, and blocker legacy fields must be empty. Dependency readiness
+   uses validated detailed lifecycle evidence when present and rejects any
+   contradiction with its legacy projection.
 8. Projection consumers replay journal events exactly once in sequence. On an
    irrecoverable gap, truncation, unknown checkpoint, or version conflict, they
    mark the view stale and non-authorizing, discard it, then ask the gateway for

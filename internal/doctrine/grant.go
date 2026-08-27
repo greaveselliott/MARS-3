@@ -226,6 +226,7 @@ const (
 	w001LifecycleV7TagObject            = "217585d45ec414f55e5d326419a4f79b96a48915"
 	w001LifecycleCorrectionV8ReviewTag  = "mars3/w001-lifecycle-completion-v8"
 	w001LifecycleCorrectionV8TagMessage = "MARS-3 W-001 lifecycle correction tree attestation v8"
+	w001LifecycleCorrectionV8PatchSHA   = "116c3b59744f1d6c3065ef8baf89d2bfac372bab66282b8cd9443e0843fc65c5"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -4400,6 +4401,9 @@ func checkW001LifecycleCorrectionV7Evidence(root string, findings *[]Finding) {
 		}
 	}
 	patch, patchErr := readRepoFile(root, w001LifecycleCorrectionV7PatchPath)
+	if _, v8Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionV8Path))); v8Err == nil {
+		patch, patchErr = planningGrantGitOutput(root, "show", w001LifecycleCorrectionV8Base+":"+w001LifecycleCorrectionV7PatchPath)
+	}
 	if patchErr != nil || fileSHA256(patch) != w001LifecycleCorrectionV7PatchSHA {
 		addFinding(findings, w001LifecycleCorrectionV7PatchPath, "public.w001_lifecycle_correction_v7_patch", "v7 lifecycle patch must match its exact reviewed SHA-256")
 	}
@@ -4481,11 +4485,20 @@ func checkW001LifecycleCorrectionV8Grant(root string, findings *[]Finding) {
 		"lifecycle.dependency_detailed_state_ignored",
 		w001LifecycleCorrectionV8Base,
 		w001LifecycleCorrectionV8BaseTree,
+		w001LifecycleCorrectionV8PatchSHA,
+		"5fb4120f30c9d54d4dd847755a8070d305c1a7a14b783e7ce33157b432b02665",
+		"a478f5090ca1b616e5aa8e5b74f4277814a8f0b1a88d990f9b7876761a3a7cc7",
+		"case-fold claim alias rejection",
+		"Dependency projections decode the full canonical metadata",
 	} {
 		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
 			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_correction_v8_evidence", "v8 lifecycle evidence must preserve the exact v7 findings")
 			break
 		}
+	}
+	patch, patchErr := readRepoFile(root, w001LifecycleCorrectionV7PatchPath)
+	if patchErr != nil || fileSHA256(patch) != w001LifecycleCorrectionV8PatchSHA {
+		addFinding(findings, w001LifecycleCorrectionV7PatchPath, "public.w001_lifecycle_correction_v8_patch", "v8 lifecycle patch must match its exact reviewed SHA-256")
 	}
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
 	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-correction-v8`")) ||
