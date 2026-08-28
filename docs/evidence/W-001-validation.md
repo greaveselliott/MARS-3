@@ -1362,3 +1362,28 @@ using synthetic test-only roles. The container was stopped and auto-removed;
 evidence pending signed commits and tag, normal-clone public and leak gates,
 exact-head CI, and fresh independent QA and Security review. It grants no
 merge, canonical lifecycle mutation, live lease, or production authority.
+
+The signed V17 implementation checkpoint is commit
+`a3b9351b0070d99b4c210814113b5377c13ed574`, tree
+`73754f9ca4bb173587eea0d45aee49b451acaa49`, with sole parent the exact V16
+head. Its diff contains exactly the seven V17-authorized paths and remains
+empty for `api/**`, `internal/authority/**`, `database/**`, `.github/**`,
+`go.mod`, and `go.sum`. The commit signature verifies as
+`engineer@example.com` with the pinned ED25519 fingerprint.
+
+A first normal-clone validator pass was rejected because `--single-branch`
+omitted historical annotated tags and branch-only scanner-history commits. The
+same local disposable clone fetched all tags and all source branch refs without
+changing its branch, head, tree, or worktree. Doctrine, plan, doc-sync, and
+public-check then passed on the exact implementation commit. The unmodified
+`go test ./... -count=1` passed every package; `internal/doctrine` completed in
+140.152 seconds. `go vet ./...`, whitespace, show-check, commit-signature
+verification, and clean-checkout gates passed.
+
+The digest-pinned, network-disabled Gitleaks image at
+`sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba`
+detected one synthetic canary and returned nonzero, then found no leak in the
+exact implementation worktree or all 95 fetched commits. This checkpoint is
+qualified implementation evidence pending the signed evidence commit and V17
+tag, exact-head public CI, and fresh independent QA and Security review. It is
+not merge, Beads, lease, reconciliation, or production authority.
