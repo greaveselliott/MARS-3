@@ -1463,3 +1463,25 @@ reported that sole failure after 133.825 seconds. No product, authority,
 database, workflow, dependency, Beads, lease, or production byte was changed.
 The identical public and full-suite gates therefore remain assigned to the
 fresh normal-clone checkpoint after the implementation commit is signed.
+
+The signed retirement implementation checkpoint is commit
+`67d4a1d2aff15f4d4bdfe7d69ca6704cedf20cb5`, tree
+`af3eafc6341599ce1478a3e874599596cb2e30bd`, with sole parent the signed grant
+commit. Its V17-base diff is exactly the nine authorized paths. The diff is
+empty for `api/**`, `internal/authority/**`, `database/**`, `.github/**`,
+`go.mod`, and `go.sum`; the V9 authority runtime, native patches, product
+contracts, workflow, and dependency bytes remain unchanged. Both retirement
+commits verify with the pinned ED25519 key.
+
+A fresh normal local clone with a real `.git` directory checked out the exact
+implementation commit and tree on
+`codex/w-001-lifecycle-completion`. Rebuilt doctrine, plan, doc-sync, and
+public-check validators all passed. `go vet ./...`, `git diff --check`, commit
+signature verification, and clean-checkout verification passed. The unmodified
+`go test ./... -count=1` passed every package; `internal/doctrine` completed in
+109.490 seconds. The public and complete-suite results close the source
+worktree's linked-`.git` limitation without changing the candidate. Local
+Gitleaks was unavailable; the unchanged exact workflow's canary, worktree, and
+history scanner steps remain required at exact-head CI. This is qualified
+implementation evidence pending the signed evidence checkpoint, retirement
+tag, exact-head public run, and independent QA followed by Security review.
