@@ -1387,3 +1387,79 @@ exact implementation worktree or all 95 fetched commits. This checkpoint is
 qualified implementation evidence pending the signed evidence commit and V17
 tag, exact-head public CI, and fresh independent QA and Security review. It is
 not merge, Beads, lease, reconciliation, or production authority.
+
+### V17 failed disposition and test-harness retirement authority
+
+The immutable V17 subject is head
+`0ed9482fea1bd22bf4198ff9d9223e004853212a`, tree
+`e1c3179abf82bef70f56ee330735072b9ed8b510`, signed annotated tag object
+`3767eab4895d567ece26ab42eef006926fb8dddd`. Exact-head public run
+`33213446709`, job `98991727867`, failed. Independent QA and Security both
+returned `changes-requested` against that exact subject.
+
+The public failure is
+`ci.public_gate_fetch_head_pseudoref_portability`: Ubuntu Git 2.55 refused the
+fixture's manual `update-ref FETCH_HEAD` because `FETCH_HEAD` is a pseudoref
+written by ordinary fetch. Security also recorded
+`ci.test_git_gitdir_rebinding_bypass`,
+`ci.test_process_guard_transitive_production_caller_bypass`,
+`ci.test_git_local_config_process_bypass`, and
+`ci.test_process_guard_top_level_funclit_bypass`. The shared one-shot state and
+outer source/destination descriptor identity were correctly improved, but the
+recurring same-class findings mean that passing focused tests cannot establish
+the attempted in-package security boundary.
+
+The signed `W-001-lifecycle-test-harness-retirement-v1` grant binds that exact
+V17 commit, tree, tag object, failed run, and both review dispositions. Its
+grant SHA-256 is
+`4d2cc1ba4f537715283631e2b2f57a6098b522bc0135e3dc8bff4254aa5e19b3`;
+its detached-signature SHA-256 is
+`4e093b74ce43191da23d9e34d68c77bbe3428f38fee5c75612580e708ec06486`.
+The detached signature verifies under namespace
+`mars3-w001-lifecycle-test-harness-retirement-v1` with pinned ED25519
+fingerprint `SHA256:i5VSHF257DhXJ5l/9oOUGHnT2mrqgXYSMryQHRsSBx8`. Signed grant
+commit `adf068e9a329c8748357343dcb5976e317c5ec12` contains only the two new
+grant paths and verifies with the same key.
+
+The authorized retirement removes the descriptor/Perl trampoline, copied
+one-shot executor, descriptor pack/index transfer, manual `FETCH_HEAD` update,
+and AST process self-admission. The replacement is a transparent deterministic
+Git fixture: literal `/usr/bin/git`, exact admitted argv, zero ambient Git
+configuration, canonical local-only fetch sources, disabled hooks, and
+disabled background maintenance. Ordinary `git fetch` creates `FETCH_HEAD`.
+The accepted immutable read-only/no-credential CI workflow is recorded as the
+candidate-code security boundary; the fixture runner is not described as a
+sandbox or authority mechanism.
+
+Before durable documentation sync, the exact focused Git fixture suite passed:
+`go test ./internal/doctrine -run 'TestPlanningGrantTestGit' -count=1` in
+1.682 seconds. The doctrine package compiled with the retirement validator and
+the combined focused Git/plan-grant selection passed in 1.660 seconds. Full
+qualification, signed candidate identity, retirement tag, exact-head CI, and
+fresh ordered QA then Security review remain pending. This evidence grants no
+merge, Beads/lease mutation, downstream-ticket start, or production effect.
+
+The first rebuilt doctrine validator identified three ordinary integration
+defects before candidate commit: a case-sensitive ADR marker, a removed-symbol
+check that matched its own string literals, and the exact signed grant commit's
+Git timestamp `2026-08-28T22:23:41Z` preceding the grant's rounded
+`2026-08-28T22:24:00Z` issuance time by 19 seconds. The one authorized
+ordinary correction removes the self-matching scan, uses the durable ADR
+heading's exact case, and admits only commit
+`adf068e9a329c8748357343dcb5976e317c5ec12` within a maximum 60-second
+issuance skew. Every other retirement commit must remain at or after issuance.
+This is a bounded timestamp/validator correction, not a change to the retired
+harness design or to any prior signed object.
+
+After that correction, rebuilt doctrine, plan, and doc-sync validators all
+passed, and `git diff --check` passed. The focused deterministic Git and
+planning-grant suite passed ten consecutive runs in 15.828 seconds; the same
+suite passed under the race detector in 2.362 seconds. `go vet ./...` passed.
+The unmodified `go test ./... -count=1` passed every authority package and
+reached the known linked-worktree-only failure in
+`TestRepositoryChecks/public`: public-check correctly rejects this worktree's
+`.git` link file as outside the governed source roots. `internal/doctrine`
+reported that sole failure after 133.825 seconds. No product, authority,
+database, workflow, dependency, Beads, lease, or production byte was changed.
+The identical public and full-suite gates therefore remain assigned to the
+fresh normal-clone checkpoint after the implementation commit is signed.

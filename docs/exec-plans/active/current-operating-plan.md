@@ -2,7 +2,7 @@
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
-**Updated:** 2026-08-26
+**Updated:** 2026-08-28
 **Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
@@ -156,13 +156,17 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the V17 shared one-shot, descriptor-stream
-  fetch, and closed production-process inventory correction to a signed
+- Required next transition: bind the signed
+  `W-001-lifecycle-test-harness-retirement-v1` whole-design retirement to one
   immutable checkpoint; verify that exact tree from a normal clone through the
   public and leak gates; then publish its signed tag, run exact-head CI, and
-  route it through independent QA and Security. The independent cold builds,
-  non-skipped native Beads suite, exact-artifact integration, and PostgreSQL
-  lifecycle suite have passed. No
+  route it through independent QA followed by Security. The retirement
+  replaces the descriptor/Perl/one-shot/fetch-stream/AST self-sandbox with a
+  transparent deterministic local Git fixture and treats the accepted
+  read-only, no-credential public workflow as the candidate-code security
+  boundary. The independent cold builds, non-skipped native Beads suite,
+  exact-artifact integration, and PostgreSQL lifecycle suite remain preserved.
+  No
   canonical handoff or later lifecycle mutation may execute until the reviewed
   tree is merged and a separate reconciliation authority binds the
   protected-main result.
@@ -337,6 +341,36 @@ closed production process-entry inventory from tests, retaining the prior
 regression corpus, and fresh qualification and review. W-001 therefore remains
 `in-progress`; no merge, canonical lifecycle mutation, live lease, or
 production effect is authorized by this correction.
+
+Independent QA and Security changes-requested the immutable V17 checkpoint at
+head `0ed9482fea1bd22bf4198ff9d9223e004853212a`, tree
+`e1c3179abf82bef70f56ee330735072b9ed8b510`, signed annotated tag object
+`3767eab4895d567ece26ab42eef006926fb8dddd`. Exact-head public run
+`33213446709`, job `98991727867`, failed on Ubuntu Git 2.55 because the fixture
+attempted `update-ref FETCH_HEAD`, which Git correctly rejected as a pseudoref
+(`ci.public_gate_fetch_head_pseudoref_portability`). Security also found that
+outer directory descriptors did not bind later mutable `.git` discovery
+(`ci.test_git_gitdir_rebinding_bypass`), direct-name source scanning did not
+close transitive production process calls
+(`ci.test_process_guard_transitive_production_caller_bypass`), writable local
+Git configuration could still start filters
+(`ci.test_git_local_config_process_bypass`), and top-level function literals
+escaped a function-declaration-only scan
+(`ci.test_process_guard_top_level_funclit_bypass`).
+
+Those findings recur in the same attempted candidate-source self-sandbox
+class, so no V18 incremental fence is scheduled. The signed
+`W-001-lifecycle-test-harness-retirement-v1` grant instead authorizes one
+whole-design retirement across exactly nine paths. The test Git runner remains
+deterministic fixture infrastructure: literal system Git, exact admitted argv,
+zero ambient environment, canonical local-only fetch sources, disabled hooks,
+and disabled automatic maintenance. Ordinary `git fetch` creates `FETCH_HEAD`.
+The descriptor trampoline, captured one-shot executor, pack/index stream, and
+AST process inventory are removed rather than represented as a security
+sandbox. Candidate-code security is owned by the immutable, read-only,
+no-credential public workflow and independent review. W-001 therefore remains
+`in-progress`; no merge, canonical lifecycle mutation, live lease, downstream
+ticket, or production effect is authorized by this retirement.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation

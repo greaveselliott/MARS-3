@@ -16,9 +16,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go/ast"
-	"go/parser"
-	"go/token"
 	"io"
 	"os"
 	"os/exec"
@@ -211,98 +208,106 @@ const (
 )
 
 const (
-	w001LifecycleCorrectionV7Path           = ".harness/grants/W-001-lifecycle-correction-v7.yaml"
-	w001LifecycleCorrectionV7Signature      = ".harness/grants/W-001-lifecycle-correction-v7.yaml.sig"
-	w001LifecycleCorrectionV7Namespace      = "mars3-w001-lifecycle-correction-v7"
-	w001LifecycleCorrectionV7Base           = "e0f27046ec28ab924eac910d40e244cb26b30323"
-	w001LifecycleCorrectionV7BaseTree       = "bbc1aa76b3965f0740e54f984ad713978a3be9f8"
-	w001LifecycleV6TagObject                = "d8637c7443ab04e05892ecf5489f0b45fa41e43d"
-	w001LifecycleCorrectionV7ReviewTag      = "mars3/w001-lifecycle-completion-v7"
-	w001LifecycleCorrectionV7TagMessage     = "MARS-3 W-001 lifecycle correction tree attestation v7"
-	w001LifecycleCorrectionV7PatchPath      = "internal/authority/beads/beads-v1.2.2-lifecycle.patch"
-	w001LifecycleCorrectionV7PatchSHA       = "2db1615df7bc1c5b4bd0d2d17cecb22a43b2bf4be72a1ebcf750820170b5ff66"
-	w001LifecycleCorrectionV8Path           = ".harness/grants/W-001-lifecycle-correction-v8.yaml"
-	w001LifecycleCorrectionV8Signature      = ".harness/grants/W-001-lifecycle-correction-v8.yaml.sig"
-	w001LifecycleCorrectionV8Namespace      = "mars3-w001-lifecycle-correction-v8"
-	w001LifecycleCorrectionV8Base           = "36d8c981ebde65e694416caf16fc02d50aac2a67"
-	w001LifecycleCorrectionV8BaseTree       = "be55454779c2c0dd08adc08666c2b7ee3826448f"
-	w001LifecycleV7TagObject                = "217585d45ec414f55e5d326419a4f79b96a48915"
-	w001LifecycleCorrectionV8ReviewTag      = "mars3/w001-lifecycle-completion-v8"
-	w001LifecycleCorrectionV8TagMessage     = "MARS-3 W-001 lifecycle correction tree attestation v8"
-	w001LifecycleCorrectionV8PatchSHA       = "116c3b59744f1d6c3065ef8baf89d2bfac372bab66282b8cd9443e0843fc65c5"
-	w001LifecycleCorrectionV9Path           = ".harness/grants/W-001-lifecycle-correction-v9.yaml"
-	w001LifecycleCorrectionV9Signature      = ".harness/grants/W-001-lifecycle-correction-v9.yaml.sig"
-	w001LifecycleCorrectionV9Namespace      = "mars3-w001-lifecycle-correction-v9"
-	w001LifecycleCorrectionV9Base           = "6d6b90ef495cd64286e755e90d199a3cb622cd54"
-	w001LifecycleCorrectionV9BaseTree       = "f596e2a148f055bcac90960419b2e22928bd471c"
-	w001LifecycleV8TagObject                = "fb99ef24abb1176e7bcec01bddffe305979d8464"
-	w001LifecycleCorrectionV9ReviewTag      = "mars3/w001-lifecycle-completion-v9"
-	w001LifecycleCorrectionV9TagMessage     = "MARS-3 W-001 lifecycle correction tree attestation v9"
-	w001LifecycleCorrectionV9PatchSHA       = "6cca8ab8bd5bd0d5f179612ece7e68e002caa69c455c80cdb00335d5e75a31c4"
-	w001LifecycleStabilizationV10Path       = ".harness/grants/W-001-lifecycle-ci-stabilization-v10.yaml"
-	w001LifecycleStabilizationV10Signature  = ".harness/grants/W-001-lifecycle-ci-stabilization-v10.yaml.sig"
-	w001LifecycleStabilizationV10Namespace  = "mars3-w001-lifecycle-ci-stabilization-v10"
-	w001LifecycleStabilizationV10Base       = "ad845ff81f1e64b9e4110162a77a65a844891731"
-	w001LifecycleStabilizationV10BaseTree   = "e4a08e5a4b211003dc29609a0128856eec306061"
-	w001LifecycleV9TagObject                = "47933c4957b9af2e8d7a38f971d7a20c5de8122f"
-	w001LifecycleStabilizationV10ReviewTag  = "mars3/w001-lifecycle-completion-v10"
-	w001LifecycleStabilizationV10TagMessage = "MARS-3 W-001 lifecycle CI stabilization tree attestation v10"
-	w001LifecycleCIFencingV11Path           = ".harness/grants/W-001-lifecycle-ci-fencing-v11.yaml"
-	w001LifecycleCIFencingV11Signature      = ".harness/grants/W-001-lifecycle-ci-fencing-v11.yaml.sig"
-	w001LifecycleCIFencingV11Namespace      = "mars3-w001-lifecycle-ci-fencing-v11"
-	w001LifecycleCIFencingV11Base           = "47b19b2c89d72fbf9eb5356ceefe33783d691aa4"
-	w001LifecycleCIFencingV11BaseTree       = "0ebe496c48871b040a7fcd7a286073f2c1d40153"
-	w001LifecycleV10TagObject               = "84672df5f046995bb7efd79cf8f9a333946aecfa"
-	w001LifecycleCIFencingV11ReviewTag      = "mars3/w001-lifecycle-completion-v11"
-	w001LifecycleCIFencingV11TagMessage     = "MARS-3 W-001 lifecycle CI Git fencing correction tree attestation v11"
-	w001LifecycleCIHardeningV12Path         = ".harness/grants/W-001-lifecycle-ci-hardening-v12.yaml"
-	w001LifecycleCIHardeningV12Signature    = ".harness/grants/W-001-lifecycle-ci-hardening-v12.yaml.sig"
-	w001LifecycleCIHardeningV12Namespace    = "mars3-w001-lifecycle-ci-hardening-v12"
-	w001LifecycleCIHardeningV12Base         = "54f4593b1730ff9ae04a2e5cce0589c6baedfee6"
-	w001LifecycleCIHardeningV12BaseTree     = "44ba564be30e0db0aa735d76539c3604a5d79e3f"
-	w001LifecycleV11TagObject               = "7313ee2e38dd1d4f4f5ca62237e0be89b0b4f13a"
-	w001LifecycleCIHardeningV12ReviewTag    = "mars3/w001-lifecycle-completion-v12"
-	w001LifecycleCIHardeningV12TagMessage   = "MARS-3 W-001 lifecycle CI hardening tree attestation v12"
-	w001LifecycleCIHardeningV13Path         = ".harness/grants/W-001-lifecycle-ci-hardening-v13.yaml"
-	w001LifecycleCIHardeningV13Signature    = ".harness/grants/W-001-lifecycle-ci-hardening-v13.yaml.sig"
-	w001LifecycleCIHardeningV13Namespace    = "mars3-w001-lifecycle-ci-hardening-v13"
-	w001LifecycleCIHardeningV13Base         = "3c8d55aa39e4e099d8a922f8e13a71efcbe2c78b"
-	w001LifecycleCIHardeningV13BaseTree     = "c4bb80ab477b7fcbe73a7a237479e44703393952"
-	w001LifecycleV12TagObject               = "d0176029978e0c49d795a02ad36f7f7992c3bdfa"
-	w001LifecycleCIHardeningV13ReviewTag    = "mars3/w001-lifecycle-completion-v13"
-	w001LifecycleCIHardeningV13TagMessage   = "MARS-3 W-001 lifecycle CI closed argv and process admission tree attestation v13"
-	w001LifecycleCIHardeningV14Path         = ".harness/grants/W-001-lifecycle-ci-hardening-v14.yaml"
-	w001LifecycleCIHardeningV14Signature    = ".harness/grants/W-001-lifecycle-ci-hardening-v14.yaml.sig"
-	w001LifecycleCIHardeningV14Namespace    = "mars3-w001-lifecycle-ci-hardening-v14"
-	w001LifecycleCIHardeningV14Base         = "ce934054aed66c074e99a032191a6a51c620b947"
-	w001LifecycleCIHardeningV14BaseTree     = "73cab7fb7b1bd2fc1102dc4b16e9617fd7c26680"
-	w001LifecycleV13TagObject               = "8d50fbb230503f4ad24cfc7301e4e4924be30ec0"
-	w001LifecycleCIHardeningV14ReviewTag    = "mars3/w001-lifecycle-completion-v14"
-	w001LifecycleCIHardeningV14TagMessage   = "MARS-3 W-001 lifecycle CI physical path and transitive process boundary tree attestation v14"
-	w001LifecycleCIHardeningV15Path         = ".harness/grants/W-001-lifecycle-ci-hardening-v15.yaml"
-	w001LifecycleCIHardeningV15Signature    = ".harness/grants/W-001-lifecycle-ci-hardening-v15.yaml.sig"
-	w001LifecycleCIHardeningV15Namespace    = "mars3-w001-lifecycle-ci-hardening-v15"
-	w001LifecycleCIHardeningV15Base         = "d631bec4ed786116c13e36995722d91d48d64109"
-	w001LifecycleCIHardeningV15BaseTree     = "b9467f12b2031c5159ef749938bbd4f475eb6153"
-	w001LifecycleV14TagObject               = "f97b9ebd0150ee4d75bf691c16c176b792d42461"
-	w001LifecycleCIHardeningV15ReviewTag    = "mars3/w001-lifecycle-completion-v15"
-	w001LifecycleCIHardeningV15TagMessage   = "MARS-3 W-001 lifecycle CI descriptor-bound Git and closed process import tree attestation v15"
-	w001LifecycleCIHardeningV16Path         = ".harness/grants/W-001-lifecycle-ci-hardening-v16.yaml"
-	w001LifecycleCIHardeningV16Signature    = ".harness/grants/W-001-lifecycle-ci-hardening-v16.yaml.sig"
-	w001LifecycleCIHardeningV16Namespace    = "mars3-w001-lifecycle-ci-hardening-v16"
-	w001LifecycleCIHardeningV16Base         = "a46f16deff2fc06c5d0d21377a3bb2c65e873fc9"
-	w001LifecycleCIHardeningV16BaseTree     = "c2e482717f182040708cbf2551ee266de2485a30"
-	w001LifecycleV15TagObject               = "71230aed1661a987dbd1b63b058180a6b33f7825"
-	w001LifecycleCIHardeningV16ReviewTag    = "mars3/w001-lifecycle-completion-v16"
-	w001LifecycleCIHardeningV16TagMessage   = "MARS-3 W-001 lifecycle CI closed descriptor launcher attestation v16"
-	w001LifecycleCIHardeningV17Path         = ".harness/grants/W-001-lifecycle-ci-hardening-v17.yaml"
-	w001LifecycleCIHardeningV17Signature    = ".harness/grants/W-001-lifecycle-ci-hardening-v17.yaml.sig"
-	w001LifecycleCIHardeningV17Namespace    = "mars3-w001-lifecycle-ci-hardening-v17"
-	w001LifecycleCIHardeningV17Base         = "25d2f14e20e74f1415caa4118a93c359f9370031"
-	w001LifecycleCIHardeningV17BaseTree     = "d9bf0e3f89807c12c5be5a58ea68fd04715aa740"
-	w001LifecycleV16TagObject               = "125a596c00a5a00f40fbda002f38cc06e3f0b5cb"
-	w001LifecycleCIHardeningV17ReviewTag    = "mars3/w001-lifecycle-completion-v17"
-	w001LifecycleCIHardeningV17TagMessage   = "MARS-3 W-001 lifecycle CI descriptor-stream and closed executor attestation v17"
+	w001LifecycleCorrectionV7Path                = ".harness/grants/W-001-lifecycle-correction-v7.yaml"
+	w001LifecycleCorrectionV7Signature           = ".harness/grants/W-001-lifecycle-correction-v7.yaml.sig"
+	w001LifecycleCorrectionV7Namespace           = "mars3-w001-lifecycle-correction-v7"
+	w001LifecycleCorrectionV7Base                = "e0f27046ec28ab924eac910d40e244cb26b30323"
+	w001LifecycleCorrectionV7BaseTree            = "bbc1aa76b3965f0740e54f984ad713978a3be9f8"
+	w001LifecycleV6TagObject                     = "d8637c7443ab04e05892ecf5489f0b45fa41e43d"
+	w001LifecycleCorrectionV7ReviewTag           = "mars3/w001-lifecycle-completion-v7"
+	w001LifecycleCorrectionV7TagMessage          = "MARS-3 W-001 lifecycle correction tree attestation v7"
+	w001LifecycleCorrectionV7PatchPath           = "internal/authority/beads/beads-v1.2.2-lifecycle.patch"
+	w001LifecycleCorrectionV7PatchSHA            = "2db1615df7bc1c5b4bd0d2d17cecb22a43b2bf4be72a1ebcf750820170b5ff66"
+	w001LifecycleCorrectionV8Path                = ".harness/grants/W-001-lifecycle-correction-v8.yaml"
+	w001LifecycleCorrectionV8Signature           = ".harness/grants/W-001-lifecycle-correction-v8.yaml.sig"
+	w001LifecycleCorrectionV8Namespace           = "mars3-w001-lifecycle-correction-v8"
+	w001LifecycleCorrectionV8Base                = "36d8c981ebde65e694416caf16fc02d50aac2a67"
+	w001LifecycleCorrectionV8BaseTree            = "be55454779c2c0dd08adc08666c2b7ee3826448f"
+	w001LifecycleV7TagObject                     = "217585d45ec414f55e5d326419a4f79b96a48915"
+	w001LifecycleCorrectionV8ReviewTag           = "mars3/w001-lifecycle-completion-v8"
+	w001LifecycleCorrectionV8TagMessage          = "MARS-3 W-001 lifecycle correction tree attestation v8"
+	w001LifecycleCorrectionV8PatchSHA            = "116c3b59744f1d6c3065ef8baf89d2bfac372bab66282b8cd9443e0843fc65c5"
+	w001LifecycleCorrectionV9Path                = ".harness/grants/W-001-lifecycle-correction-v9.yaml"
+	w001LifecycleCorrectionV9Signature           = ".harness/grants/W-001-lifecycle-correction-v9.yaml.sig"
+	w001LifecycleCorrectionV9Namespace           = "mars3-w001-lifecycle-correction-v9"
+	w001LifecycleCorrectionV9Base                = "6d6b90ef495cd64286e755e90d199a3cb622cd54"
+	w001LifecycleCorrectionV9BaseTree            = "f596e2a148f055bcac90960419b2e22928bd471c"
+	w001LifecycleV8TagObject                     = "fb99ef24abb1176e7bcec01bddffe305979d8464"
+	w001LifecycleCorrectionV9ReviewTag           = "mars3/w001-lifecycle-completion-v9"
+	w001LifecycleCorrectionV9TagMessage          = "MARS-3 W-001 lifecycle correction tree attestation v9"
+	w001LifecycleCorrectionV9PatchSHA            = "6cca8ab8bd5bd0d5f179612ece7e68e002caa69c455c80cdb00335d5e75a31c4"
+	w001LifecycleStabilizationV10Path            = ".harness/grants/W-001-lifecycle-ci-stabilization-v10.yaml"
+	w001LifecycleStabilizationV10Signature       = ".harness/grants/W-001-lifecycle-ci-stabilization-v10.yaml.sig"
+	w001LifecycleStabilizationV10Namespace       = "mars3-w001-lifecycle-ci-stabilization-v10"
+	w001LifecycleStabilizationV10Base            = "ad845ff81f1e64b9e4110162a77a65a844891731"
+	w001LifecycleStabilizationV10BaseTree        = "e4a08e5a4b211003dc29609a0128856eec306061"
+	w001LifecycleV9TagObject                     = "47933c4957b9af2e8d7a38f971d7a20c5de8122f"
+	w001LifecycleStabilizationV10ReviewTag       = "mars3/w001-lifecycle-completion-v10"
+	w001LifecycleStabilizationV10TagMessage      = "MARS-3 W-001 lifecycle CI stabilization tree attestation v10"
+	w001LifecycleCIFencingV11Path                = ".harness/grants/W-001-lifecycle-ci-fencing-v11.yaml"
+	w001LifecycleCIFencingV11Signature           = ".harness/grants/W-001-lifecycle-ci-fencing-v11.yaml.sig"
+	w001LifecycleCIFencingV11Namespace           = "mars3-w001-lifecycle-ci-fencing-v11"
+	w001LifecycleCIFencingV11Base                = "47b19b2c89d72fbf9eb5356ceefe33783d691aa4"
+	w001LifecycleCIFencingV11BaseTree            = "0ebe496c48871b040a7fcd7a286073f2c1d40153"
+	w001LifecycleV10TagObject                    = "84672df5f046995bb7efd79cf8f9a333946aecfa"
+	w001LifecycleCIFencingV11ReviewTag           = "mars3/w001-lifecycle-completion-v11"
+	w001LifecycleCIFencingV11TagMessage          = "MARS-3 W-001 lifecycle CI Git fencing correction tree attestation v11"
+	w001LifecycleCIHardeningV12Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v12.yaml"
+	w001LifecycleCIHardeningV12Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v12.yaml.sig"
+	w001LifecycleCIHardeningV12Namespace         = "mars3-w001-lifecycle-ci-hardening-v12"
+	w001LifecycleCIHardeningV12Base              = "54f4593b1730ff9ae04a2e5cce0589c6baedfee6"
+	w001LifecycleCIHardeningV12BaseTree          = "44ba564be30e0db0aa735d76539c3604a5d79e3f"
+	w001LifecycleV11TagObject                    = "7313ee2e38dd1d4f4f5ca62237e0be89b0b4f13a"
+	w001LifecycleCIHardeningV12ReviewTag         = "mars3/w001-lifecycle-completion-v12"
+	w001LifecycleCIHardeningV12TagMessage        = "MARS-3 W-001 lifecycle CI hardening tree attestation v12"
+	w001LifecycleCIHardeningV13Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v13.yaml"
+	w001LifecycleCIHardeningV13Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v13.yaml.sig"
+	w001LifecycleCIHardeningV13Namespace         = "mars3-w001-lifecycle-ci-hardening-v13"
+	w001LifecycleCIHardeningV13Base              = "3c8d55aa39e4e099d8a922f8e13a71efcbe2c78b"
+	w001LifecycleCIHardeningV13BaseTree          = "c4bb80ab477b7fcbe73a7a237479e44703393952"
+	w001LifecycleV12TagObject                    = "d0176029978e0c49d795a02ad36f7f7992c3bdfa"
+	w001LifecycleCIHardeningV13ReviewTag         = "mars3/w001-lifecycle-completion-v13"
+	w001LifecycleCIHardeningV13TagMessage        = "MARS-3 W-001 lifecycle CI closed argv and process admission tree attestation v13"
+	w001LifecycleCIHardeningV14Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v14.yaml"
+	w001LifecycleCIHardeningV14Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v14.yaml.sig"
+	w001LifecycleCIHardeningV14Namespace         = "mars3-w001-lifecycle-ci-hardening-v14"
+	w001LifecycleCIHardeningV14Base              = "ce934054aed66c074e99a032191a6a51c620b947"
+	w001LifecycleCIHardeningV14BaseTree          = "73cab7fb7b1bd2fc1102dc4b16e9617fd7c26680"
+	w001LifecycleV13TagObject                    = "8d50fbb230503f4ad24cfc7301e4e4924be30ec0"
+	w001LifecycleCIHardeningV14ReviewTag         = "mars3/w001-lifecycle-completion-v14"
+	w001LifecycleCIHardeningV14TagMessage        = "MARS-3 W-001 lifecycle CI physical path and transitive process boundary tree attestation v14"
+	w001LifecycleCIHardeningV15Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v15.yaml"
+	w001LifecycleCIHardeningV15Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v15.yaml.sig"
+	w001LifecycleCIHardeningV15Namespace         = "mars3-w001-lifecycle-ci-hardening-v15"
+	w001LifecycleCIHardeningV15Base              = "d631bec4ed786116c13e36995722d91d48d64109"
+	w001LifecycleCIHardeningV15BaseTree          = "b9467f12b2031c5159ef749938bbd4f475eb6153"
+	w001LifecycleV14TagObject                    = "f97b9ebd0150ee4d75bf691c16c176b792d42461"
+	w001LifecycleCIHardeningV15ReviewTag         = "mars3/w001-lifecycle-completion-v15"
+	w001LifecycleCIHardeningV15TagMessage        = "MARS-3 W-001 lifecycle CI descriptor-bound Git and closed process import tree attestation v15"
+	w001LifecycleCIHardeningV16Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v16.yaml"
+	w001LifecycleCIHardeningV16Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v16.yaml.sig"
+	w001LifecycleCIHardeningV16Namespace         = "mars3-w001-lifecycle-ci-hardening-v16"
+	w001LifecycleCIHardeningV16Base              = "a46f16deff2fc06c5d0d21377a3bb2c65e873fc9"
+	w001LifecycleCIHardeningV16BaseTree          = "c2e482717f182040708cbf2551ee266de2485a30"
+	w001LifecycleV15TagObject                    = "71230aed1661a987dbd1b63b058180a6b33f7825"
+	w001LifecycleCIHardeningV16ReviewTag         = "mars3/w001-lifecycle-completion-v16"
+	w001LifecycleCIHardeningV16TagMessage        = "MARS-3 W-001 lifecycle CI closed descriptor launcher attestation v16"
+	w001LifecycleCIHardeningV17Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v17.yaml"
+	w001LifecycleCIHardeningV17Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v17.yaml.sig"
+	w001LifecycleCIHardeningV17Namespace         = "mars3-w001-lifecycle-ci-hardening-v17"
+	w001LifecycleCIHardeningV17Base              = "25d2f14e20e74f1415caa4118a93c359f9370031"
+	w001LifecycleCIHardeningV17BaseTree          = "d9bf0e3f89807c12c5be5a58ea68fd04715aa740"
+	w001LifecycleV16TagObject                    = "125a596c00a5a00f40fbda002f38cc06e3f0b5cb"
+	w001LifecycleCIHardeningV17ReviewTag         = "mars3/w001-lifecycle-completion-v17"
+	w001LifecycleCIHardeningV17TagMessage        = "MARS-3 W-001 lifecycle CI descriptor-stream and closed executor attestation v17"
+	w001LifecycleTestHarnessRetirementPath       = ".harness/grants/W-001-lifecycle-test-harness-retirement-v1.yaml"
+	w001LifecycleTestHarnessRetirementSignature  = ".harness/grants/W-001-lifecycle-test-harness-retirement-v1.yaml.sig"
+	w001LifecycleTestHarnessRetirementNamespace  = "mars3-w001-lifecycle-test-harness-retirement-v1"
+	w001LifecycleTestHarnessRetirementBase       = "0ed9482fea1bd22bf4198ff9d9223e004853212a"
+	w001LifecycleTestHarnessRetirementBaseTree   = "e1c3179abf82bef70f56ee330735072b9ed8b510"
+	w001LifecycleV17TagObject                    = "3767eab4895d567ece26ab42eef006926fb8dddd"
+	w001LifecycleTestHarnessRetirementReviewTag  = "mars3/w001-lifecycle-test-harness-retirement-v1"
+	w001LifecycleTestHarnessRetirementTagMessage = "MARS-3 W-001 lifecycle test-harness retirement attestation v1"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -3707,6 +3712,125 @@ var w001LifecycleCIHardeningV17Sequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001LifecycleTestHarnessRetirementScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleTestHarnessRetirementGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-test-harness-retirement-v1"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-28T22:24:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-31T22:24:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleTestHarnessRetirementBase},
+	{path: "grant.baseTree", value: w001LifecycleTestHarnessRetirementBaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-ci-hardening-v17"},
+	{path: "grant.priorGrantSHA256", value: "8898b65846209758f892c1b965c2d69bb13a6c1a97714f953b3f8735d96a1f7d"},
+	{path: "grant.priorGrantSignatureSHA256", value: "f3c1fcc7ab46205f00d45029add526fa7b9df06b19aa7a65b7f08f12a7b87df6"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCIHardeningV17ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV17TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleTestHarnessRetirementBase},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleTestHarnessRetirementBaseTree},
+	{path: "grant.priorRun", value: "33213446709"},
+	{path: "grant.priorJob", value: "98991727867"},
+	{path: "grant.priorRunDisposition", value: "failed"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleTestHarnessRetirementReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleTestHarnessRetirementTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "retire the unprovable in-package Git test self-sandbox and restore a truthful deterministic fixture boundary"},
+	{path: "grant.attemptId", value: "w001-lifecycle-test-harness-retirement-v1"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "grant.ordinaryCorrectionLimit", value: "1"},
+	{path: "findings.portabilityFinding", value: "Git 2.55 refused update-ref FETCH_HEAD because FETCH_HEAD is a pseudoref written by fetch rather than a normal ref transaction"},
+	{path: "findings.gitdirFinding", value: "descriptor-binding only the outer directory could not bind Git's later mutable .git discovery"},
+	{path: "findings.processFinding", value: "same-package tests could reach ambient production process constructors transitively despite direct identifier admission"},
+	{path: "findings.configurationFinding", value: "repository-local Git configuration and attributes could still cause child processes outside the constructor inventory"},
+	{path: "findings.structuralFinding", value: "top-level function literals escaped the function-declaration-only executor-field scan"},
+	{path: "findings.architectureDecision", value: "retire the candidate-source self-sandbox and rely on the accepted isolated public workflow for candidate-code security"},
+	{path: "findings.nextAction", value: "prospective-whole-design-test-harness-retirement"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleTestHarnessRetirementNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-test-harness-retirement-v1.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleTestHarnessRetirementSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-runtime-qualification-and-v10-v17-immutable-history-runs-and-dispositions",
+		"retire-the-descriptor-perl-one-shot-fetch-stream-and-AST-process-self-sandbox-as-one-design",
+		"restore-one-transparent-test-Git-runner-with-exact-argv-zero-ambient-environment-and-canonical-local-source-admission",
+		"use-ordinary-Git-fetch-to-create-FETCH_HEAD-without-manually-updating-the-pseudoref",
+		"retain-no-maintenance-no-auto-GC-no-detach-and-disabled-hook-fixture-controls",
+		"define-CI-isolation-not-candidate-source-scanning-as-the-candidate-code-security-boundary",
+		"update-only-the-grant-manifest-plan-evidence-F001-ADR-validator-and-tests-for-this-retirement",
+		"reproduce-the-pinned-v9-native-Beads-artifact-and-non-skipped-conformance-without-changing-patch-bytes",
+		"create-signed-semantic-commits-and-one-signed-retirement-review-tag",
+		"push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+		"permit-one-bounded-same-design-correction-for-an-ordinary-format-portability-compile-test-or-CI-defect",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleTestHarnessRetirementPath, w001LifecycleTestHarnessRetirementSignature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"docs/features/F-001-doctrine-foundation.md", "docs/design-docs/ADR-004-pr-first-publication.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged",
+		"V17-commit-tree-tag-run-and-both-changes-requested-dispositions-remain-immutable",
+		"the-test-Git-runner-is-deterministic-fixture-infrastructure-and-never-described-as-a-security-sandbox",
+		"ordinary-fetch-not-update-ref-creates-FETCH_HEAD-portably",
+		"test-Git-network-sources-ambient-configuration-hooks-and-background-maintenance-remain-denied",
+		"no-descriptor-trampoline-one-shot-executor-fetch-stream-process-inventory-or-self-admission-marker-remains",
+		"the-accepted-read-only-no-credential-public-workflow-remains-byte-exact-and-is-the-candidate-execution-boundary",
+		"any-ordinary-correction-remains-inside-the-same-nine-paths-and-retirement-design",
+		"any-same-class-process-helper-or-path-provenance-finding-stops-and-escalates-without-an-incremental-patch",
+		"the-next-public-run-uses-the-exact-signed-retirement-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-move-delete-or-rewrite-any-v9-v17-commit-tag-run-or-evidence",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-approval-policy-or-dependencies",
+		"start-P001-or-any-downstream-ticket",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes": {
+		"ci.public_gate_fetch_head_pseudoref_portability",
+		"ci.test_git_gitdir_rebinding_bypass",
+		"ci.test_process_guard_transitive_production_caller_bypass",
+		"ci.test_git_local_config_process_bypass",
+		"ci.test_process_guard_top_level_funclit_bypass",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -5953,21 +6077,6 @@ func checkW001LifecycleCIHardeningV12Grant(root string, findings *[]Finding) {
 			break
 		}
 	}
-	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
-	testGitExecutorMarker := "exec.Command(\"/usr/bin/git\""
-	if _, v16Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV16Path))); v16Err == nil {
-		testGitExecutorMarker = "exec.Command(\"/usr/bin/perl\""
-	}
-	for _, marker := range []string{
-		testGitExecutorMarker, "validatePlanningGrantTestGitArguments", "TestPlanningGrantTestGitArgumentsFailClosed",
-		"TestPlanningGrantTestGitCommandRejectsAmbientExecutionInjection", "TestPlanningGrantTestProcessInvocationsFailClosedRepositoryWide",
-	} {
-		if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
-			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_hardening_v12_fixture", "v12 Git and process hardening regressions are required")
-			break
-		}
-	}
-	checkPlanningGrantTestProcessInvocations(root, findings)
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
 	if planErr != nil || (!v13Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v12`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v12_plan", "active plan must select the truthful v12 CI hardening")
@@ -6065,16 +6174,6 @@ func checkW001LifecycleCIHardeningV13Grant(root string, findings *[]Finding) {
 			break
 		}
 	}
-	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
-	for _, marker := range []string{
-		"validatePlanningGrantTestGitSubcommand", "--upload-p=/tmp/hostile-upload-pack", "--separate-git-dir=/tmp/outside", "direct_exec_cmd", "indirect_syscall", "nested_exec_cmd",
-	} {
-		if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
-			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_hardening_v13_fixture", "v13 closed Git argv and recursive process regressions are required")
-			break
-		}
-	}
-	checkPlanningGrantTestProcessInvocations(root, findings)
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
 	if planErr != nil || (!v14Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v13`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v13_plan", "active plan must select the truthful v13 CI hardening")
@@ -6172,21 +6271,6 @@ func checkW001LifecycleCIHardeningV14Grant(root string, findings *[]Finding) {
 			break
 		}
 	}
-	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
-	physicalRegression := "TestPlanningGrantTestGitCommandRejectsSymlinkedCloneTargets"
-	if v15Active {
-		physicalRegression = "TestPlanningGrantTestGitCommandBindsCanonicalRootDescriptor"
-	}
-	for _, marker := range []string{
-		physicalRegression, "production process entrypoint",
-		"TestPlanningGrantTestProcessInvocationsRejectProductionGitExecutor",
-	} {
-		if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
-			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_hardening_v14_fixture", "v14 physical clone and production-executor regressions are required")
-			break
-		}
-	}
-	checkPlanningGrantTestProcessInvocations(root, findings)
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
 	if planErr != nil || (!v15Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v14`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v14_plan", "active plan must select the truthful v14 CI hardening")
@@ -6285,28 +6369,9 @@ func checkW001LifecycleCIHardeningV15Grant(root string, findings *[]Finding) {
 		}
 	}
 	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
-	testMarkers := []string{
-		"TestPlanningGrantTestGitCommandBindsCanonicalRootDescriptor", "runPlanningGrantTestGitDescriptorHelper",
-		"planningGrantTestBeforeGitProcess", "syscall.Fchdir", "dot_import_os", "dot_import_os_exec", "dot_import_syscall",
-		"blank_import_os", "blank_import_os_exec", "blank_import_syscall",
-	}
-	if v16Active {
-		testMarkers = []string{
-			"TestPlanningGrantTestGitCommandBindsCanonicalRootDescriptor", "planningGrantTestGitDescriptorTrampoline",
-			"planningGrantTestBeforeGitProcess", "removed_descriptor_helper", "dot_import_os", "dot_import_os_exec", "dot_import_syscall",
-			"blank_import_os", "blank_import_os_exec", "blank_import_syscall",
-		}
-	}
-	for _, marker := range testMarkers {
-		if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
-			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_hardening_v15_fixture", "v15 descriptor-bound Git and closed process-import regressions are required")
-			break
-		}
-	}
 	if testsErr == nil && (bytes.Contains(tests, []byte(`case "clone":`)) || bytes.Contains(tests, []byte(`runPlanningGrantTestGit(t, root, "clone"`))) {
 		addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_hardening_v15_clone", "v15 doctrine test Git wrapper must not admit or execute clone")
 	}
-	checkPlanningGrantTestProcessInvocations(root, findings)
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
 	if planErr != nil || (!v16Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v15`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v15_plan", "active plan must select the truthful v15 CI hardening")
@@ -6405,25 +6470,6 @@ func checkW001LifecycleCIHardeningV16Grant(root string, findings *[]Finding) {
 		}
 	}
 	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
-	testMarkers := []string{
-		"planningGrantTestGitDescriptorTrampoline = `open(my $root, '<&=3') or exit 126; chdir($root) or exit 126; close($root) or exit 126; exec {'/usr/bin/git'} '/usr/bin/git', @ARGV; exit 126;`",
-		"perlArguments := []string{\"-f\", \"-e\", planningGrantTestGitDescriptorTrampoline, \"--\"}",
-		"exec.Command(\"/usr/bin/perl\"", "command.ExtraFiles = []*os.File{rootHandle}", "command.Env = planningGrantTestGitEnvironment()",
-		"validatePlanningGrantTestGitFetchSource", "GIT_ALLOW_PROTOCOL=file", "removed_descriptor_helper", "dynamic_executable",
-	}
-	if v17Active {
-		testMarkers = []string{
-			"planningGrantTestGitDescriptorTrampoline = `open(my $root, '<&=3') or exit 126; chdir($root) or exit 126; close($root) or exit 126; exec {'/usr/bin/git'} '/usr/bin/git', @ARGV; exit 126;`",
-			"exec.Command(\"/usr/bin/perl\"", "command.ExtraFiles = []*os.File{handle}", "command.Env = planningGrantTestGitEnvironment()",
-			"admitPlanningGrantTestGitFetchSource", "GIT_ALLOW_PROTOCOL=file", "removed_descriptor_helper", "dynamic_executable",
-		}
-	}
-	for _, marker := range testMarkers {
-		if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
-			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_hardening_v16_fixture", "v16 fixed descriptor trampoline and closed process regressions are required")
-			break
-		}
-	}
 	for _, forbidden := range []string{
 		"func TestMain(", "func runPlanningGrantTestGitDescriptorHelper(", "os.Executable()", "os.Environ()", "command.Env = planningGrantGitEnvironment()",
 	} {
@@ -6432,7 +6478,6 @@ func checkW001LifecycleCIHardeningV16Grant(root string, findings *[]Finding) {
 			break
 		}
 	}
-	checkPlanningGrantTestProcessInvocations(root, findings)
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
 	if planErr != nil || (!v17Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v16`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v16_plan", "active plan must select the truthful v16 CI hardening")
@@ -6446,6 +6491,10 @@ func checkW001LifecycleCIHardeningV16Grant(root string, findings *[]Finding) {
 }
 
 func checkW001LifecycleCIHardeningV17Grant(root string, findings *[]Finding) {
+	retirementActive := w001LifecycleTestHarnessRetirementActive(root)
+	if retirementActive {
+		defer checkW001LifecycleTestHarnessRetirementGrant(root, findings)
+	}
 	data, err := readRepoFile(root, w001LifecycleCIHardeningV17Path)
 	if err != nil {
 		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_missing", "signed v17 lifecycle CI hardening grant is required")
@@ -6521,427 +6570,143 @@ func checkW001LifecycleCIHardeningV17Grant(root string, findings *[]Finding) {
 			break
 		}
 	}
-	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
-	for _, marker := range []string{
-		"TestPlanningGrantTestGitFetchBindsSourceDescriptor", "pack-objects", "index-pack", "admitPlanningGrantTestGitFetchSource",
-		"one-shot invocation under contention", "direct_executor_field", "TestPlanningGrantTestProcessInventoryFailsClosed",
-	} {
-		if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
-			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_hardening_v17_fixture", "v17 shared one-shot, descriptor-stream fetch, and closed production process regressions are required")
-			break
-		}
-	}
-	checkPlanningGrantTestProcessInvocations(root, findings)
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
-	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v17`")) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+	if planErr != nil || (!retirementActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v17`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v17_plan", "active plan must select the truthful v17 CI hardening")
 	}
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
-	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-hardening-v17")) ||
-		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-hardening-v17")) ||
+	if manifestErr != nil || (!retirementActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-hardening-v17")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-hardening-v17")))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_ci_hardening_v17_manifest", "manifest must project the v17 CI hardening and absent live lease")
 	}
 }
 
-func checkPlanningGrantTestProcessInvocations(root string, findings *[]Finding) {
-	var paths []string
-	var productionPaths []string
-	doctrineRoot := filepath.Join(root, "internal", "doctrine")
-	walkErr := filepath.Walk(doctrineRoot, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.Mode()&os.ModeSymlink != 0 {
-			return fmt.Errorf("symlinked doctrine test surface is not admitted: %s", path)
-		}
-		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".go") {
-			if strings.HasSuffix(info.Name(), "_test.go") {
-				paths = append(paths, path)
-			} else {
-				productionPaths = append(productionPaths, path)
-			}
-		}
-		return nil
-	})
-	productionEntrypoints, productionErr := planningGrantProductionProcessEntrypoints(doctrineRoot, productionPaths)
-	if walkErr != nil || len(paths) == 0 || productionErr != nil {
-		addFinding(findings, "internal/doctrine", "public.w001_lifecycle_ci_process_guard", "doctrine test process-invocation surface cannot be enumerated")
-		return
-	}
-	sort.Strings(paths)
-	expected := map[string][]string{
-		"grant_test.go:TestVerifyPlanningGrantTagRequiresExactSignedTreeAttestation": {"ssh-keygen", "ssh-keygen"},
-		"grant_test.go:planningGrantTestGitCommand":                                  {"/usr/bin/perl"},
-	}
-	expectedCmdTypes := map[string]int{}
-	actual := make(map[string][]string)
-	actualCmdTypes := make(map[string]int)
-	executorFieldSelectors := make(map[string]int)
-	guardFailed := false
-	for _, path := range paths {
-		fileSet := token.NewFileSet()
-		file, parseErr := parser.ParseFile(fileSet, path, nil, 0)
-		if parseErr != nil {
-			guardFailed = true
-			continue
-		}
-		execAliases := make(map[string]bool)
-		osAliases := make(map[string]bool)
-		syscallAliases := make(map[string]bool)
-		for _, spec := range file.Imports {
-			importPath, unquoteErr := strconv.Unquote(spec.Path.Value)
-			if unquoteErr != nil {
-				guardFailed = true
-				continue
-			}
-			alias := ""
-			if spec.Name != nil {
-				alias = spec.Name.Name
-			}
-			switch importPath {
-			case "os/exec":
-				if alias == "" {
-					alias = "exec"
-				}
-				if alias == "." || alias == "_" {
-					guardFailed = true
-				} else {
-					execAliases[alias] = true
-				}
-			case "os":
-				if alias == "" {
-					alias = "os"
-				}
-				if alias == "." || alias == "_" {
-					guardFailed = true
-				} else {
-					osAliases[alias] = true
-				}
-			case "syscall":
-				if alias == "" {
-					alias = "syscall"
-				}
-				if alias == "." || alias == "_" {
-					guardFailed = true
-				} else {
-					syscallAliases[alias] = true
-				}
-			}
-		}
-		fileExecSelectorCount := 0
-		functionExecSelectorCount := 0
-		fileExecCmdTypeCount := 0
-		functionExecCmdTypeCount := 0
-		ast.Inspect(file, func(node ast.Node) bool {
-			switch typed := node.(type) {
-			case *ast.Ident:
-				if productionEntrypoints[typed.Name] || typed.Name == "runPlanningGrantTestGitDescriptorHelper" {
-					guardFailed = true
-				}
-			case *ast.SelectorExpr:
-				identifier, ok := typed.X.(*ast.Ident)
-				if ok && execAliases[identifier.Name] && (typed.Sel.Name == "Command" || typed.Sel.Name == "CommandContext") {
-					fileExecSelectorCount++
-				}
-				if ok && execAliases[identifier.Name] && typed.Sel.Name == "Cmd" {
-					fileExecCmdTypeCount++
-				}
-				if ok && osAliases[identifier.Name] && typed.Sel.Name == "StartProcess" {
-					guardFailed = true
-				}
-				if ok && syscallAliases[identifier.Name] && (typed.Sel.Name == "Exec" || typed.Sel.Name == "ForkExec" || typed.Sel.Name == "StartProcess") {
-					guardFailed = true
-				}
-			}
-			return true
-		})
-		for _, declaration := range file.Decls {
-			function, ok := declaration.(*ast.FuncDecl)
-			if !ok || function.Body == nil {
-				continue
-			}
-			relative, relErr := filepath.Rel(doctrineRoot, path)
-			if relErr != nil || strings.HasPrefix(relative, "..") {
-				guardFailed = true
-				continue
-			}
-			key := filepath.ToSlash(relative) + ":" + function.Name.Name
-			execSelectorCount := 0
-			execCallCount := 0
-			execCmdTypeCount := 0
-			ast.Inspect(function, func(node ast.Node) bool {
-				switch typed := node.(type) {
-				case *ast.SelectorExpr:
-					if typed.Sel.Name == "combinedOutput" {
-						executorFieldSelectors[key]++
-						if key != "grant_test.go:CombinedOutput" {
-							guardFailed = true
-						}
-					}
-					identifier, isIdentifier := typed.X.(*ast.Ident)
-					if isIdentifier && execAliases[identifier.Name] && (typed.Sel.Name == "Command" || typed.Sel.Name == "CommandContext") {
-						execSelectorCount++
-					}
-					if isIdentifier && execAliases[identifier.Name] && typed.Sel.Name == "Cmd" {
-						execCmdTypeCount++
-					}
-					if isIdentifier && osAliases[identifier.Name] && typed.Sel.Name == "StartProcess" {
-						guardFailed = true
-					}
-					if isIdentifier && syscallAliases[identifier.Name] && (typed.Sel.Name == "Exec" || typed.Sel.Name == "ForkExec" || typed.Sel.Name == "StartProcess") {
-						guardFailed = true
-					}
-				case *ast.CallExpr:
-					selector, isSelector := typed.Fun.(*ast.SelectorExpr)
-					if !isSelector {
-						return true
-					}
-					identifier, isIdentifier := selector.X.(*ast.Ident)
-					if !isIdentifier {
-						return true
-					}
-					if execAliases[identifier.Name] {
-						execCallCount++
-						binary := "<dynamic>"
-						if len(typed.Args) > 0 {
-							if literal, ok := typed.Args[0].(*ast.BasicLit); ok && literal.Kind == token.STRING {
-								if value, unquoteErr := strconv.Unquote(literal.Value); unquoteErr == nil {
-									binary = value
-								}
-							}
-						}
-						if binary == "<dynamic>" {
-							guardFailed = true
-						}
-						actual[key] = append(actual[key], selector.Sel.Name+":"+binary)
-					}
-					if osAliases[identifier.Name] && selector.Sel.Name == "StartProcess" {
-						guardFailed = true
-					}
-					if syscallAliases[identifier.Name] && (selector.Sel.Name == "Exec" || selector.Sel.Name == "ForkExec" || selector.Sel.Name == "StartProcess") {
-						guardFailed = true
-					}
-				}
-				return true
-			})
-			if execSelectorCount != execCallCount {
-				guardFailed = true
-			}
-			functionExecSelectorCount += execSelectorCount
-			functionExecCmdTypeCount += execCmdTypeCount
-			if execCmdTypeCount > 0 {
-				actualCmdTypes[key] = execCmdTypeCount
-			}
-		}
-		if fileExecSelectorCount != functionExecSelectorCount {
-			guardFailed = true
-		}
-		if fileExecCmdTypeCount != functionExecCmdTypeCount {
-			guardFailed = true
-		}
-	}
-	for key, calls := range actual {
-		want, ok := expected[key]
-		if !ok || len(calls) != len(want) {
-			guardFailed = true
-			continue
-		}
-		for index, call := range calls {
-			if call != "Command:"+want[index] {
-				guardFailed = true
-			}
-		}
-	}
-	for key, want := range expected {
-		if len(actual[key]) != len(want) {
-			guardFailed = true
-		}
-	}
-	for key, count := range actualCmdTypes {
-		if expectedCmdTypes[key] != count {
-			guardFailed = true
-		}
-	}
-	for key, count := range expectedCmdTypes {
-		if actualCmdTypes[key] != count {
-			guardFailed = true
-		}
-	}
-	if len(executorFieldSelectors) != 1 || executorFieldSelectors["grant_test.go:CombinedOutput"] != 1 {
-		guardFailed = true
-	}
-	if guardFailed {
-		addFinding(findings, "internal/doctrine", "public.w001_lifecycle_ci_process_guard", "test process invocations must equal the exact recursive AST allowlist: calls=%v cmdTypes=%v", actual, actualCmdTypes)
-	}
+func w001LifecycleTestHarnessRetirementActive(root string) bool {
+	_, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleTestHarnessRetirementPath)))
+	return err == nil
 }
 
-func planningGrantProductionProcessEntrypoints(doctrineRoot string, paths []string) (map[string]bool, error) {
-	if len(paths) == 0 {
-		return nil, errors.New("doctrine production process surface is empty")
+func checkW001LifecycleTestHarnessRetirementGrant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001LifecycleTestHarnessRetirementPath)
+	if err != nil {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_missing", "signed lifecycle test-harness retirement grant is required")
+		return
 	}
-	sort.Strings(paths)
-	actual := make(map[string]bool)
-	for _, path := range paths {
-		fileSet := token.NewFileSet()
-		file, err := parser.ParseFile(fileSet, path, nil, 0)
-		if err != nil {
-			return nil, err
-		}
-		execAliases := make(map[string]bool)
-		osAliases := make(map[string]bool)
-		syscallAliases := make(map[string]bool)
-		for _, spec := range file.Imports {
-			importPath, unquoteErr := strconv.Unquote(spec.Path.Value)
-			if unquoteErr != nil {
-				return nil, unquoteErr
-			}
-			alias := ""
-			if spec.Name != nil {
-				alias = spec.Name.Name
-			}
-			switch importPath {
-			case "os/exec":
-				if alias == "" {
-					alias = "exec"
-				}
-				if alias == "." || alias == "_" {
-					return nil, errors.New("dot or blank production os/exec import is not admitted")
-				}
-				execAliases[alias] = true
-			case "os":
-				if alias == "" {
-					alias = "os"
-				}
-				if alias == "." || alias == "_" {
-					return nil, errors.New("dot or blank production os import is not admitted")
-				}
-				osAliases[alias] = true
-			case "syscall":
-				if alias == "" {
-					alias = "syscall"
-				}
-				if alias == "." || alias == "_" {
-					return nil, errors.New("dot or blank production syscall import is not admitted")
-				}
-				syscallAliases[alias] = true
-			}
-		}
-		fileSelectors := 0
-		functionSelectors := 0
-		ast.Inspect(file, func(node ast.Node) bool {
-			selector, ok := node.(*ast.SelectorExpr)
-			if !ok {
-				return true
-			}
-			identifier, ok := selector.X.(*ast.Ident)
-			if !ok {
-				return true
-			}
-			if execAliases[identifier.Name] && (selector.Sel.Name == "Command" || selector.Sel.Name == "CommandContext" || selector.Sel.Name == "Cmd") ||
-				osAliases[identifier.Name] && selector.Sel.Name == "StartProcess" ||
-				syscallAliases[identifier.Name] && (selector.Sel.Name == "Exec" || selector.Sel.Name == "ForkExec" || selector.Sel.Name == "StartProcess") {
-				fileSelectors++
-			}
-			return true
-		})
-		for _, declaration := range file.Decls {
-			function, ok := declaration.(*ast.FuncDecl)
-			if !ok || function.Body == nil {
-				continue
-			}
-			count := 0
-			ast.Inspect(function, func(node ast.Node) bool {
-				selector, ok := node.(*ast.SelectorExpr)
-				if !ok {
-					return true
-				}
-				identifier, ok := selector.X.(*ast.Ident)
-				if !ok {
-					return true
-				}
-				if execAliases[identifier.Name] && (selector.Sel.Name == "Command" || selector.Sel.Name == "CommandContext" || selector.Sel.Name == "Cmd") ||
-					osAliases[identifier.Name] && selector.Sel.Name == "StartProcess" ||
-					syscallAliases[identifier.Name] && (selector.Sel.Name == "Exec" || selector.Sel.Name == "ForkExec" || selector.Sel.Name == "StartProcess") {
-					count++
-				}
-				return true
-			})
-			if count > 0 {
-				relative, relErr := filepath.Rel(doctrineRoot, path)
-				if relErr != nil || strings.HasPrefix(relative, "..") {
-					return nil, errors.New("production process entrypoint escaped doctrine root")
-				}
-				actual[filepath.ToSlash(relative)+":"+function.Name.Name] = true
-				functionSelectors += count
-			}
-		}
-		if fileSelectors != functionSelectors {
-			return nil, errors.New("production process capability exists outside one named function")
+	document := parseStrictGrant(data, w001LifecycleTestHarnessRetirementScalars, w001LifecycleTestHarnessRetirementSequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleTestHarnessRetirementScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_value", "%s does not match the signed retirement contract", expected.path)
 		}
 	}
-	expected := map[string]bool{
-		"grant.go:planningGrantGitOutput": true,
-		"refresh.go:gitOutput":            true,
-	}
-	if len(actual) != len(expected) {
-		return nil, errors.New("production process entrypoint inventory changed")
-	}
-	entrypoints := make(map[string]bool)
-	for key := range expected {
-		if !actual[key] {
-			return nil, errors.New("production process entrypoint inventory changed")
-		}
-		separator := strings.LastIndexByte(key, ':')
-		if separator < 0 || separator+1 == len(key) {
-			return nil, errors.New("production process entrypoint inventory is malformed")
-		}
-		entrypoints[key[separator+1:]] = true
-	}
-	for _, path := range paths {
-		fileSet := token.NewFileSet()
-		file, err := parser.ParseFile(fileSet, path, nil, 0)
-		if err != nil {
-			return nil, err
-		}
-		allowedReferences := make(map[token.Pos]bool)
-		for _, declaration := range file.Decls {
-			function, ok := declaration.(*ast.FuncDecl)
-			if !ok || function.Body == nil {
-				continue
-			}
-			if entrypoints[function.Name.Name] {
-				allowedReferences[function.Name.Pos()] = true
-			}
-			ast.Inspect(function.Body, func(node ast.Node) bool {
-				call, ok := node.(*ast.CallExpr)
-				if !ok {
-					return true
-				}
-				identifier, ok := call.Fun.(*ast.Ident)
-				if !ok || !entrypoints[identifier.Name] {
-					return true
-				}
-				if call.Ellipsis.IsValid() {
-					return false
-				}
-				allowedReferences[identifier.Pos()] = true
-				return true
-			})
-		}
-		invalidReference := false
-		ast.Inspect(file, func(node ast.Node) bool {
-			identifier, ok := node.(*ast.Ident)
-			if ok && entrypoints[identifier.Name] && !allowedReferences[identifier.Pos()] {
-				invalidReference = true
-			}
-			return true
-		})
-		if invalidReference {
-			return nil, errors.New("production process entrypoint has an indirect or variadic caller edge")
+	for path, expected := range w001LifecycleTestHarnessRetirementSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_sequence", "%s must equal the exact ordered retirement contract", path)
 		}
 	}
-	return entrypoints, nil
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_expiry", "retirement grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleTestHarnessRetirementSignature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleTestHarnessRetirementSignature, "public.w001_lifecycle_test_harness_retirement_signature_missing", "detached retirement signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_test_harness_retirement_key", "retirement must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleTestHarnessRetirementNamespace); err != nil {
+		addFinding(findings, w001LifecycleTestHarnessRetirementSignature, "public.w001_lifecycle_test_harness_retirement_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCIHardeningV17Path, "8898b65846209758f892c1b965c2d69bb13a6c1a97714f953b3f8735d96a1f7d"},
+		{w001LifecycleCIHardeningV17Signature, "f3c1fcc7ab46205f00d45029add526fa7b9df06b19aa7a65b7f08f12a7b87df6"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_test_harness_retirement_prior_grant", "prior v17 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleTestHarnessRetirementBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleTestHarnessRetirementBase+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleTestHarnessRetirementBase || strings.TrimSpace(string(baseTree)) != w001LifecycleTestHarnessRetirementBaseTree {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_base", "retirement must descend from the exact immutable v17 head and tree")
+	}
+	checkW001LifecycleV17Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		w001LifecycleTestHarnessRetirementBase, w001LifecycleTestHarnessRetirementBaseTree,
+		"33213446709", "98991727867", "failed", "changes-requested",
+		"ci.public_gate_fetch_head_pseudoref_portability", "ci.test_git_gitdir_rebinding_bypass",
+		"ci.test_process_guard_transitive_production_caller_bypass", "ci.test_git_local_config_process_bypass",
+		"ci.test_process_guard_top_level_funclit_bypass", "W-001-lifecycle-test-harness-retirement-v1",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_test_harness_retirement_evidence", "retirement evidence must preserve V17 identity, failed run, review findings, and the successor grant")
+			break
+		}
+	}
+	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
+	for _, marker := range []string{
+		"exec.Command(\"/usr/bin/git\"", "validatePlanningGrantTestGitArguments", "validatePlanningGrantTestGitFetch",
+		"TestPlanningGrantTestGitFetchCreatesPortableFetchHead", "TestPlanningGrantTestGitCommandRequiresCanonicalLocalRoot",
+		"TestPlanningGrantTestGitCommandRejectsAmbientExecutionInjection", "GIT_ALLOW_PROTOCOL=file",
+		"maintenance.auto=false", "gc.auto=0", "gc.autoDetach=false", "maintenance.autoDetach=false",
+	} {
+		if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
+			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_test_harness_retirement_fixture", "retirement requires the transparent deterministic local-only Git fixture")
+			break
+		}
+	}
+	for _, forbidden := range []string{
+		"planningGrantTestGitDescriptorTrampoline", "/usr/bin/perl", "planningGrantTestBeforeGitProcess",
+		"planningGrantTestGitInvocation", "planningGrantTestGitFetchAdmission", "pack-objects", "index-pack",
+		"update-ref\", \"FETCH_HEAD", "checkPlanningGrantTestProcessInvocations", "planningGrantProductionProcessEntrypoints",
+		"TestPlanningGrantTestProcessInvocations", "writePlanningGrantProcessAttackFixture",
+	} {
+		if testsErr == nil && bytes.Contains(tests, []byte(forbidden)) {
+			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_test_harness_retirement_removed", "retired descriptor, stream, one-shot, and process self-admission mechanisms must be absent")
+			break
+		}
+	}
+	feature, featureErr := readRepoFile(root, "docs/features/F-001-doctrine-foundation.md")
+	if featureErr != nil || !bytes.Contains(feature, []byte("deterministic fixture infrastructure")) || !bytes.Contains(feature, []byte("CI isolation")) {
+		addFinding(findings, "docs/features/F-001-doctrine-foundation.md", "public.w001_lifecycle_test_harness_retirement_feature", "F-001 must define deterministic fixture infrastructure and CI isolation truthfully")
+	}
+	adr, adrErr := readRepoFile(root, "docs/design-docs/ADR-004-pr-first-publication.md")
+	if adrErr != nil || !bytes.Contains(adr, []byte("Candidate-code security boundary")) || !bytes.Contains(adr, []byte("test self-sandbox")) {
+		addFinding(findings, "docs/design-docs/ADR-004-pr-first-publication.md", "public.w001_lifecycle_test_harness_retirement_adr", "ADR-004 must record the candidate-code boundary and retirement decision")
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-test-harness-retirement-v1`")) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_test_harness_retirement_plan", "active plan must select the truthful retirement attempt")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-test-harness-retirement-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-test-harness-retirement-v1")) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_test_harness_retirement_manifest", "manifest must project the retirement attempt and absent live lease")
+	}
 }
 
 func checkW001DeliveryScannerIgnore(root string, findings *[]Finding) {
@@ -7913,6 +7678,7 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 	v15Active := false
 	v16Active := false
 	v17Active := false
+	retirementActive := false
 	if _, correctionErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionPath))); correctionErr == nil {
 		correctionActive = true
 		if !checkW001LifecycleV5Tag(root, findings) {
@@ -8021,6 +7787,15 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_state", "v17 lifecycle CI hardening Git state cannot be established")
 		return
 	}
+	if _, retirementErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleTestHarnessRetirementPath))); retirementErr == nil {
+		retirementActive = true
+		if !checkW001LifecycleV17Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(retirementErr) {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_state", "lifecycle test-harness retirement Git state cannot be established")
+		return
+	}
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
 	head := strings.TrimSpace(string(headOutput))
 	if err != nil || !sha1Pattern.MatchString(head) {
@@ -8091,6 +7866,9 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		if v17Active {
 			reviewTag, reviewMessage = w001LifecycleCIHardeningV17ReviewTag, w001LifecycleCIHardeningV17TagMessage
 		}
+		if retirementActive {
+			reviewTag, reviewMessage = w001LifecycleTestHarnessRetirementReviewTag, w001LifecycleTestHarnessRetirementTagMessage
+		}
 		target, ok := checkW001DeliveryReviewTag(root, expected, reviewTag, reviewMessage, findings)
 		if !ok {
 			return
@@ -8123,6 +7901,7 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		v14End := featureHead
 		v15End := featureHead
 		v16End := featureHead
+		v17End := featureHead
 		if correctionActive {
 			v5End = w001LifecycleCorrectionBase
 			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCorrectionBase, featureHead); err != nil {
@@ -8207,6 +7986,13 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 				return
 			}
 		}
+		if retirementActive {
+			v17End = w001LifecycleTestHarnessRetirementBase
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleTestHarnessRetirementBase, featureHead); err != nil {
+				addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_ancestry", "retirement must descend from the exact immutable v17 head")
+				return
+			}
+		}
 		if !checkW001LifecycleCommitRange(root, w001LifecycleBase, v5End, "2026-08-27T12:05:00Z", "v5", findings) {
 			return
 		}
@@ -8243,7 +8029,10 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		if v16Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV16Base, v16End, "2026-08-28T11:11:48Z", "v16", findings) {
 			return
 		}
-		if v17Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV17Base, featureHead, "2026-08-28T20:33:09Z", "v17", findings) {
+		if v17Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV17Base, v17End, "2026-08-28T20:33:09Z", "v17", findings) {
+			return
+		}
+		if retirementActive && !checkW001LifecycleCommitRange(root, w001LifecycleTestHarnessRetirementBase, featureHead, "2026-08-28T22:24:00Z", "retirement", findings) {
 			return
 		}
 	}
@@ -8294,6 +8083,9 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 	}
 	if v17Active {
 		allowed = w001LifecycleCIHardeningV17PathsAllowed(paths)
+	}
+	if retirementActive {
+		allowed = w001LifecycleTestHarnessRetirementPathsAllowed(paths)
 	}
 	if err != nil || !allowed {
 		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_scope", "current changes include a path outside the signed lifecycle-completion scope")
@@ -8352,6 +8144,8 @@ func checkW001LifecycleCommitRange(root, base, head, issued, phase string, findi
 			allowed = w001LifecycleCIHardeningV16PathsAllowed(normalized)
 		} else if phase == "v17" {
 			allowed = w001LifecycleCIHardeningV17PathsAllowed(normalized)
+		} else if phase == "retirement" {
+			allowed = w001LifecycleTestHarnessRetirementPathsAllowed(normalized)
 		}
 		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
 		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
@@ -8359,7 +8153,9 @@ func checkW001LifecycleCommitRange(root, base, head, issued, phase string, findi
 			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_scope", "a lifecycle commit includes a path outside its signed phase scope")
 			return false
 		}
-		if objectErr != nil || verifyPlanningGrantCommit(object, publicKey) != nil || timeErr != nil || committedAt.Before(issuedAt) {
+		grantClockSkewAccepted := phase == "retirement" && commit.id == "adf068e9a329c8748357343dcb5976e317c5ec12" &&
+			!committedAt.Before(issuedAt.Add(-time.Minute))
+		if objectErr != nil || verifyPlanningGrantCommit(object, publicKey) != nil || timeErr != nil || committedAt.Before(issuedAt) && !grantClockSkewAccepted {
 			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_commit_signature", "every lifecycle commit must carry the pinned SSH signature after phase-grant issuance")
 			return false
 		}
@@ -8594,6 +8390,22 @@ func w001LifecycleCIHardeningV17PathsAllowed(paths []string) bool {
 		".harness/manifest.yaml": true, canonicalActivePlan: true,
 		"docs/evidence/W-001-validation.md": true,
 		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleTestHarnessRetirementPathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleTestHarnessRetirementPath: true, w001LifecycleTestHarnessRetirementSignature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true, "docs/features/F-001-doctrine-foundation.md": true,
+		"docs/design-docs/ADR-004-pr-first-publication.md": true,
+		"internal/doctrine/grant.go":                       true, "internal/doctrine/grant_test.go": true,
 	}
 	for _, path := range paths {
 		if !exact[path] {
@@ -9229,6 +9041,32 @@ func checkW001LifecycleV16Tag(root string, findings *[]Finding) bool {
 	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
 	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCIHardeningV17BaseTree {
 		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_prior_tag", "v16 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV17Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCIHardeningV17ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV17TagObject {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_prior_tag", "v17 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV17TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_prior_tag", "v17 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCIHardeningV17ReviewTag, w001LifecycleCIHardeningV17TagMessage)
+	if err != nil || target != w001LifecycleTestHarnessRetirementBase {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_prior_tag", "v17 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleTestHarnessRetirementBaseTree {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_prior_tag", "v17 lifecycle tag tree must remain exact")
 		return false
 	}
 	return true
