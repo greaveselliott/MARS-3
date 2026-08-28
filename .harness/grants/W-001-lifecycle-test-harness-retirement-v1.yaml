@@ -1,0 +1,128 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleTestHarnessRetirementGrant
+
+grant:
+  id: W-001-lifecycle-test-harness-retirement-v1
+  classification: PUBLIC
+  issuedAt: 2026-08-28T22:24:00Z
+  expiresAt: 2026-08-31T22:24:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 0ed9482fea1bd22bf4198ff9d9223e004853212a
+  baseTree: e1c3179abf82bef70f56ee330735072b9ed8b510
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-ci-hardening-v17
+  priorGrantSHA256: 8898b65846209758f892c1b965c2d69bb13a6c1a97714f953b3f8735d96a1f7d
+  priorGrantSignatureSHA256: f3c1fcc7ab46205f00d45029add526fa7b9df06b19aa7a65b7f08f12a7b87df6
+  priorReviewTag: mars3/w001-lifecycle-completion-v17
+  priorReviewTagObject: 3767eab4895d567ece26ab42eef006926fb8dddd
+  priorReviewTagTarget: 0ed9482fea1bd22bf4198ff9d9223e004853212a
+  priorReviewTagTree: e1c3179abf82bef70f56ee330735072b9ed8b510
+  priorRun: 33213446709
+  priorJob: 98991727867
+  priorRunDisposition: failed
+  priorQADisposition: changes-requested
+  priorSecurityDisposition: changes-requested
+  pullRequest: 10
+  successorReviewTag: mars3/w001-lifecycle-test-harness-retirement-v1
+  successorReviewTagMessage: MARS-3 W-001 lifecycle test-harness retirement attestation v1
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: foundation-maintainer
+  failureOwnership: foundation
+  purpose: retire the unprovable in-package Git test self-sandbox and restore a truthful deterministic fixture boundary
+  attemptId: w001-lifecycle-test-harness-retirement-v1
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  ordinaryCorrectionLimit: 1
+  allowedEffects:
+    - preserve-the-v9-runtime-qualification-and-v10-v17-immutable-history-runs-and-dispositions
+    - retire-the-descriptor-perl-one-shot-fetch-stream-and-AST-process-self-sandbox-as-one-design
+    - restore-one-transparent-test-Git-runner-with-exact-argv-zero-ambient-environment-and-canonical-local-source-admission
+    - use-ordinary-Git-fetch-to-create-FETCH_HEAD-without-manually-updating-the-pseudoref
+    - retain-no-maintenance-no-auto-GC-no-detach-and-disabled-hook-fixture-controls
+    - define-CI-isolation-not-candidate-source-scanning-as-the-candidate-code-security-boundary
+    - update-only-the-grant-manifest-plan-evidence-F001-ADR-validator-and-tests-for-this-retirement
+    - reproduce-the-pinned-v9-native-Beads-artifact-and-non-skipped-conformance-without-changing-patch-bytes
+    - create-signed-semantic-commits-and-one-signed-retirement-review-tag
+    - push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+    - permit-one-bounded-same-design-correction-for-an-ordinary-format-portability-compile-test-or-CI-defect
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-test-harness-retirement-v1.yaml
+    - .harness/grants/W-001-lifecycle-test-harness-retirement-v1.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - docs/features/F-001-doctrine-foundation.md
+    - docs/design-docs/ADR-004-pr-first-publication.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged
+    - V17-commit-tree-tag-run-and-both-changes-requested-dispositions-remain-immutable
+    - the-test-Git-runner-is-deterministic-fixture-infrastructure-and-never-described-as-a-security-sandbox
+    - ordinary-fetch-not-update-ref-creates-FETCH_HEAD-portably
+    - test-Git-network-sources-ambient-configuration-hooks-and-background-maintenance-remain-denied
+    - no-descriptor-trampoline-one-shot-executor-fetch-stream-process-inventory-or-self-admission-marker-remains
+    - the-accepted-read-only-no-credential-public-workflow-remains-byte-exact-and-is-the-candidate-execution-boundary
+    - any-ordinary-correction-remains-inside-the-same-nine-paths-and-retirement-design
+    - any-same-class-process-helper-or-path-provenance-finding-stops-and-escalates-without-an-incremental-patch
+    - the-next-public-run-uses-the-exact-signed-retirement-tree-and-tag
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged
+  prohibitedEffects:
+    - modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract
+    - mutate-M3-W001-or-any-other-Bead
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - rerun-move-delete-or-rewrite-any-v9-v17-commit-tag-run-or-evidence
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-approval-policy-or-dependencies
+    - start-P001-or-any-downstream-ticket
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - ci.public_gate_fetch_head_pseudoref_portability
+    - ci.test_git_gitdir_rebinding_bypass
+    - ci.test_process_guard_transitive_production_caller_bypass
+    - ci.test_git_local_config_process_bypass
+    - ci.test_process_guard_top_level_funclit_bypass
+  portabilityFinding: Git 2.55 refused update-ref FETCH_HEAD because FETCH_HEAD is a pseudoref written by fetch rather than a normal ref transaction
+  gitdirFinding: descriptor-binding only the outer directory could not bind Git's later mutable .git discovery
+  processFinding: same-package tests could reach ambient production process constructors transitively despite direct identifier admission
+  configurationFinding: repository-local Git configuration and attributes could still cause child processes outside the constructor inventory
+  structuralFinding: top-level function literals escaped the function-declaration-only executor-field scan
+  architectureDecision: retire the candidate-source self-sandbox and rely on the accepted isolated public workflow for candidate-code security
+  nextAction: prospective-whole-design-test-harness-retirement
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-test-harness-retirement-v1
+  detachedSignature: W-001-lifecycle-test-harness-retirement-v1.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
