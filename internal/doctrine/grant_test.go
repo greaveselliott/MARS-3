@@ -12,6 +12,7 @@ package doctrine
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,11 +21,62 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 )
 
-const wave1PlanningGrantFirstCommitFixture = "fc9f6641d0f739a401a4f7be3bc0ee575df1310a"
+const (
+	wave1PlanningGrantFirstCommitFixture = "fc9f6641d0f739a401a4f7be3bc0ee575df1310a"
+	planningGrantTestGitHelperEnv        = "MARS3_TEST_GIT_DESCRIPTOR_HELPER"
+	planningGrantTestGitArgumentsEnv     = "MARS3_TEST_GIT_ARGUMENTS"
+	planningGrantTestGitRootFD           = 3
+)
+
+var planningGrantTestBeforeGitProcess func()
+
+func TestMain(m *testing.M) {
+	if os.Getenv(planningGrantTestGitHelperEnv) == "1" {
+		os.Exit(runPlanningGrantTestGitDescriptorHelper())
+	}
+	os.Exit(m.Run())
+}
+
+func runPlanningGrantTestGitDescriptorHelper() int {
+	encoded := os.Getenv(planningGrantTestGitArgumentsEnv)
+	raw, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "invalid bounded Git helper arguments")
+		return 126
+	}
+	var arguments []string
+	if err := json.Unmarshal(raw, &arguments); err != nil || validatePlanningGrantTestGitArguments(arguments) != nil {
+		fmt.Fprintln(os.Stderr, "unadmitted bounded Git helper arguments")
+		return 126
+	}
+	if err := syscall.Fchdir(planningGrantTestGitRootFD); err != nil {
+		fmt.Fprintln(os.Stderr, "bounded Git helper root descriptor is unavailable")
+		return 126
+	}
+	bounded := []string{
+		"-c", "maintenance.auto=false",
+		"-c", "gc.auto=0",
+		"-c", "gc.autoDetach=false",
+		"-c", "maintenance.autoDetach=false",
+	}
+	command := exec.Command("/usr/bin/git", append(bounded, arguments...)...)
+	command.Env = planningGrantGitEnvironment()
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
+	if err := command.Run(); err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			return exitError.ExitCode()
+		}
+		fmt.Fprintln(os.Stderr, "bounded Git helper could not start")
+		return 126
+	}
+	return 0
+}
 
 func TestW001BootstrapGrantAcceptsPinnedSignedContract(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
@@ -117,7 +169,7 @@ func TestW001ExecutionAuthorizationFailsClosedWithoutPinnedSignature(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(t.TempDir(), "execution.json")
+	path := filepath.Join(planningGrantCanonicalTempDir(t), "execution.json")
 	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -255,7 +307,7 @@ func TestW001PostclaimGrantFailsClosed(t *testing.T) {
 
 func writeW001PostclaimGrantFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001PostclaimGrantPath, grant)
 	writePlanningGrantTestFile(t, root, w001PostclaimGrantSignature, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -300,7 +352,7 @@ func TestW001PostclaimCIFixRejectsTampering(t *testing.T) {
 		{name: "scope", old: "    - internal/doctrine/grant_test.go", new: "    - internal/authority/escape.go"},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			writePlanningGrantTestFile(t, root, w001PostclaimCIFixPath, bytes.Replace(addendum, []byte(testCase.old), []byte(testCase.new), 1))
 			writePlanningGrantTestFile(t, root, w001PostclaimCIFixSignature, signature)
 			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -404,7 +456,7 @@ func TestW001PostclaimSecurityFixFailsClosed(t *testing.T) {
 
 func writeW001PostclaimSecurityFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001PostclaimSecurityFixPath, grant)
 	writePlanningGrantTestFile(t, root, w001PostclaimSecurityFixSig, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -517,7 +569,7 @@ func TestW001PostclaimHookFixFailsClosed(t *testing.T) {
 
 func writeW001PostclaimHookFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001PostclaimHookFixPath, grant)
 	writePlanningGrantTestFile(t, root, w001PostclaimHookFixSig, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -578,7 +630,7 @@ func TestW001PostclaimPRFixFailsClosed(t *testing.T) {
 	})
 
 	t.Run("pull request event number", func(t *testing.T) {
-		root := t.TempDir()
+		root := planningGrantCanonicalTempDir(t)
 		writePlanningGrantTestFile(t, root, w001PostclaimPRFixPath, grant)
 		if w001PostclaimPullRequestNumberAllowed(root, 7) || !w001PostclaimPullRequestNumberAllowed(root, 8) {
 			t.Fatal("signed active PR number was not enforced")
@@ -588,7 +640,7 @@ func TestW001PostclaimPRFixFailsClosed(t *testing.T) {
 
 func writeW001PostclaimPRFixFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001PostclaimPRFixPath, grant)
 	writePlanningGrantTestFile(t, root, w001PostclaimPRFixSig, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -666,7 +718,7 @@ func TestW001PostclaimChronoFixFailsClosed(t *testing.T) {
 
 func writeW001PostclaimChronoFixFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001PostclaimChronoFixPath, grant)
 	writePlanningGrantTestFile(t, root, w001PostclaimChronoFixSig, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -722,7 +774,7 @@ func TestW001DeliveryGrantFailsClosed(t *testing.T) {
 
 	t.Run("implementation authority tamper", func(t *testing.T) {
 		tampered := bytes.Replace(grant, []byte("implementationAllowed: true"), []byte("implementationAllowed: false"), 1)
-		root := t.TempDir()
+		root := planningGrantCanonicalTempDir(t)
 		writePlanningGrantTestFile(t, root, w001DeliveryGrantPath, tampered)
 		writePlanningGrantTestFile(t, root, w001DeliveryGrantSignature, signature)
 		writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -735,7 +787,7 @@ func TestW001DeliveryGrantFailsClosed(t *testing.T) {
 
 	t.Run("path scope tamper", func(t *testing.T) {
 		tampered := bytes.Replace(grant, []byte("    - internal/authority/**"), []byte("    - internal/runtime/**"), 1)
-		root := t.TempDir()
+		root := planningGrantCanonicalTempDir(t)
 		writePlanningGrantTestFile(t, root, w001DeliveryGrantPath, tampered)
 		writePlanningGrantTestFile(t, root, w001DeliveryGrantSignature, signature)
 		writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -769,7 +821,7 @@ func TestW001DeliveryCIFixFailsClosed(t *testing.T) {
 	grant := read(w001DeliveryCIFixPath)
 	signature := read(w001DeliveryCIFixSignature)
 	tampered := bytes.Replace(grant, []byte("requiredTagger: release-manager"), []byte("requiredTagger: work-authority-engineer"), 1)
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	source, err := filepath.Abs(repo)
 	if err != nil {
@@ -814,7 +866,7 @@ func TestW001DeliveryScannerFixGrantTamperFails(t *testing.T) {
 		return data
 	}
 	tampered := bytes.Replace(read(w001DeliveryScannerFixPath), []byte("historyFindings: 10"), []byte("historyFindings: 11"), 1)
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	source, err := filepath.Abs(repo)
 	if err != nil {
@@ -858,7 +910,7 @@ func TestW001DeliveryScannerIgnoreFailsClosed(t *testing.T) {
 		{name: "duplicate", body: exact + w001DeliveryScannerFingerprints[0] + "\n"},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			runPlanningGrantTestGit(t, root, "init", "--quiet")
 			runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001DeliveryV1PreservedHead)
 			writePlanningGrantTestFile(t, root, w001DeliveryScannerIgnorePath, []byte(testCase.body))
@@ -877,7 +929,7 @@ func TestW001DeliveryScannerFingerprintSourcesFailClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001DeliveryV1PreservedHead)
 
@@ -928,7 +980,7 @@ func TestW001LifecycleCompletionGrantFailsClosed(t *testing.T) {
 	}
 	writeFixture := func(t *testing.T, grant []byte, evidence []byte) string {
 		t.Helper()
-		root := t.TempDir()
+		root := planningGrantCanonicalTempDir(t)
 		runPlanningGrantTestGit(t, root, "init", "--quiet")
 		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleBase)
 		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
@@ -1016,7 +1068,7 @@ func TestW001LifecycleCorrectionGrantFailsClosed(t *testing.T) {
 	}
 	writeFixture := func(t *testing.T, grant, evidence []byte) string {
 		t.Helper()
-		root := t.TempDir()
+		root := planningGrantCanonicalTempDir(t)
 		runPlanningGrantTestGit(t, root, "init", "--quiet")
 		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCorrectionBase)
 		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
@@ -1098,7 +1150,7 @@ func TestW001LifecycleCorrectionV7EvidenceBindingsFailClosed(t *testing.T) {
 	if len(findings) != 0 {
 		t.Fatalf("valid v7 lifecycle evidence bindings were rejected: %v", findings)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	evidence, err := os.ReadFile(filepath.Join(repo, "docs", "evidence", "W-001-validation.md"))
 	if err != nil {
 		t.Fatal(err)
@@ -1128,7 +1180,7 @@ func TestW001LifecycleCorrectionV7GrantFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCorrectionV7Base)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
@@ -1202,7 +1254,7 @@ func TestW001LifecycleCorrectionV8GrantFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCorrectionV8Base)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
@@ -1275,7 +1327,7 @@ func TestW001LifecycleCorrectionV9GrantFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCorrectionV9Base)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
@@ -1350,7 +1402,7 @@ func TestW001LifecycleStabilizationV10GrantFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleStabilizationV10Base)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
@@ -1424,7 +1476,7 @@ func TestW001LifecycleCIFencingV11GrantFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIFencingV11Base)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
@@ -1498,7 +1550,7 @@ func TestW001LifecycleCIHardeningV12GrantFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV12Base)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
@@ -1572,7 +1624,7 @@ func TestW001LifecycleCIHardeningV13GrantFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV13Base)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
@@ -1648,7 +1700,7 @@ func TestW001LifecycleCIHardeningV14GrantFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV14Base)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
@@ -1701,6 +1753,82 @@ func TestW001LifecycleCIHardeningV14PathScope(t *testing.T) {
 	}
 }
 
+func TestW001LifecycleCIHardeningV15GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIHardeningV15Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v15 lifecycle CI hardening was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV15GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV15Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCIHardeningV14ReviewTag+":refs/tags/"+w001LifecycleCIHardeningV14ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIHardeningV15Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIHardeningV15Path:      tampered,
+		w001LifecycleCIHardeningV15Signature: read(w001LifecycleCIHardeningV15Signature),
+		w001LifecycleCIHardeningV14Path:      read(w001LifecycleCIHardeningV14Path),
+		w001LifecycleCIHardeningV14Signature: read(w001LifecycleCIHardeningV14Signature),
+		wave1PlanningGrantKey:                read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":  read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                  read(canonicalActivePlan),
+		".harness/manifest.yaml":             read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":    read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIHardeningV15Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v15_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v15_signature") {
+		t.Fatalf("tampered v15 lifecycle CI hardening authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV15PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIHardeningV15Path,
+		w001LifecycleCIHardeningV15Signature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIHardeningV15PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v15 lifecycle CI hardening path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCIHardeningV14Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIHardeningV15PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v15 lifecycle CI hardening path was accepted: %s", path)
+		}
+	}
+}
+
 func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	object := planningGrantTestGitRawOutput(t, repo, "cat-file", "tag", w001DeliveryV2TagObject)
@@ -1722,10 +1850,9 @@ func TestW001DeliveryPullRequestCheckoutBindsEventHead(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	parent := t.TempDir()
+	parent := planningGrantCanonicalTempDir(t)
 	root := filepath.Join(parent, "repo")
-	runPlanningGrantTestGit(t, parent, "clone", "--quiet", "--no-local", repo, root)
-	feature := planningGrantTestGitOutput(t, root, "rev-parse", "HEAD^{commit}")
+	feature := initializePlanningGrantTestRepository(t, root, repo, "HEAD")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", repo, w001DeliveryBase)
 	tree := planningGrantTestGitOutput(t, root, "rev-parse", feature+"^{tree}")
 	merge := planningGrantTestGitOutput(t, root,
@@ -2090,7 +2217,7 @@ func writeW001PostclaimGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimCIFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
@@ -2112,7 +2239,7 @@ func writeW001PostclaimSecurityGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimSecurityFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
@@ -2136,7 +2263,7 @@ func writeW001PostclaimHookGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimHookFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
@@ -2160,7 +2287,7 @@ func writeW001PostclaimPRBindingGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimPRFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
@@ -2184,7 +2311,7 @@ func writeW001PostclaimChronologyGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimChronoFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
@@ -2215,7 +2342,7 @@ func scalarPathFromGrant(t *testing.T, grant []byte, key string) string {
 
 func writeW001BootstrapGrantFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001BootstrapGrantPath, grant)
 	writePlanningGrantTestFile(t, root, w001BootstrapGrantSignature, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -2260,7 +2387,7 @@ func TestWave1DirectMainTransitionRejectsTampering(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			writePlanningGrantTestFile(t, root, wave1DirectMainGrantPath, tampered)
 			writePlanningGrantTestFile(t, root, wave1DirectMainGrantSignature, signature)
 			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -2322,7 +2449,7 @@ func TestWave1PRFallbackRejectsTampering(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			writePlanningGrantTestFile(t, root, wave1PRFallbackPath, tampered)
 			writePlanningGrantTestFile(t, root, wave1PRFallbackSignature, signature)
 			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -2369,7 +2496,7 @@ func TestWave1PRFallbackMainCIFixRejectsTampering(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			writePlanningGrantTestFile(t, root, wave1MainCIFixPath, tampered)
 			writePlanningGrantTestFile(t, root, wave1MainCIFixSignature, signature)
 			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -2416,7 +2543,7 @@ func TestWave1PRFallbackFixtureFixRejectsTampering(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			writePlanningGrantTestFile(t, root, wave1CIFixtureFixPath, tampered)
 			writePlanningGrantTestFile(t, root, wave1CIFixtureFixSignature, signature)
 			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -2742,7 +2869,7 @@ func TestWave1V3CIRecoveryAddendumBindsExactProspectiveCorrection(t *testing.T) 
 
 func TestWave1PlanningGrantIsRequired(t *testing.T) {
 	var findings []Finding
-	checkWave1PlanningGrant(t.TempDir(), &findings)
+	checkWave1PlanningGrant(planningGrantCanonicalTempDir(t), &findings)
 	if !findingCodePresent(findings, "public.planning_grant_missing") {
 		t.Fatalf("missing planning grant was accepted: %v", findings)
 	}
@@ -3052,7 +3179,7 @@ func TestWave1PRFallbackMainSquashRejectsWrongTreeParentAndTarget(t *testing.T) 
 }
 
 func TestVerifyPlanningGrantTagRequiresExactSignedTreeAttestation(t *testing.T) {
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	keyPath := filepath.Join(root, "synthetic-tag-key")
 	command := exec.Command("ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", keyPath)
 	if output, err := command.CombinedOutput(); err != nil {
@@ -3094,7 +3221,7 @@ func writeWave1TransitionSquashFixture(t *testing.T, parent string) (string, str
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1PublishedMain)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+wave1TransitionTag+":refs/tags/"+wave1TransitionTag)
@@ -3122,7 +3249,7 @@ func writeWave1PRFallbackMainFixture(t *testing.T, reviewedTree bool) (string, s
 		t.Fatal(err)
 	}
 	sourceHead := planningGrantTestGitOutput(t, source, "rev-parse", "HEAD")
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	for _, revision := range []string{wave1PublishedMain, sourceHead} {
 		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, revision)
@@ -3217,7 +3344,7 @@ func loadPlanningGrantFixture(t *testing.T) ([]byte, []byte, []byte) {
 
 func writePlanningGrantFixture(t *testing.T, grant, signature, publicKey []byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantPath, grant)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantSignature, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -3231,7 +3358,7 @@ func writePlanningGrantGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1V3AddendumBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--detach", "FETCH_HEAD")
@@ -3387,7 +3514,7 @@ func writePlanningGrantGitHubEvent(t *testing.T, event map[string]any) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	const path = "event.json"
 	writePlanningGrantTestFile(t, root, path, data)
 	return filepath.Join(root, path)
@@ -3417,6 +3544,33 @@ func writePlanningGrantTestFile(t *testing.T, root, path string, data []byte) {
 	if err := os.WriteFile(fullPath, data, 0o644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func planningGrantCanonicalTempDir(t *testing.T) string {
+	t.Helper()
+	lexical := t.TempDir()
+	physical, err := filepath.EvalSymlinks(lexical)
+	if err != nil {
+		t.Fatal(err)
+	}
+	physical, err = filepath.Abs(filepath.Clean(physical))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return physical
+}
+
+func initializePlanningGrantTestRepository(t *testing.T, root, source, revision string) string {
+	t.Helper()
+	if err := os.Mkdir(root, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	if source == "" {
+		return ""
+	}
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, revision)
+	return planningGrantTestGitOutput(t, root, "rev-parse", "FETCH_HEAD^{commit}")
 }
 
 func runPlanningGrantTestGit(t *testing.T, root string, arguments ...string) {
@@ -3469,7 +3623,7 @@ func planningGrantTestGitCommand(root string, arguments ...string) (*planningGra
 	if err := validatePlanningGrantTestGitArguments(arguments); err != nil {
 		return nil, err
 	}
-	if err := validatePlanningGrantTestGitPaths(root, arguments); err != nil {
+	if _, err := canonicalPlanningGrantTestRoot(root); err != nil {
 		return nil, err
 	}
 	return &planningGrantTestGitInvocation{root: root, arguments: append([]string(nil), arguments...)}, nil
@@ -3483,62 +3637,29 @@ func executePlanningGrantTestGitCommand(root string, arguments []string) ([]byte
 	if err := validatePlanningGrantTestGitArguments(arguments); err != nil {
 		return nil, err
 	}
-	if err := validatePlanningGrantTestGitPaths(root, arguments); err != nil {
-		return nil, err
-	}
-	if err := reservePlanningGrantTestCloneTarget(root, arguments); err != nil {
-		return nil, err
-	}
-	canonicalRoot, err := canonicalPlanningGrantTestRoot(root)
+	rootHandle, err := openPlanningGrantTestGitRoot(root)
 	if err != nil {
 		return nil, err
 	}
-	bounded := []string{
-		"-c", "maintenance.auto=false",
-		"-c", "gc.auto=0",
-		"-c", "gc.autoDetach=false",
-		"-c", "maintenance.autoDetach=false",
-		"-C", canonicalRoot,
+	defer rootHandle.Close()
+	rawArguments, err := json.Marshal(arguments)
+	if err != nil {
+		return nil, fmt.Errorf("encode bounded Git arguments: %w", err)
 	}
-	command := exec.Command("/usr/bin/git", append(bounded, arguments...)...)
-	command.Env = planningGrantGitEnvironment()
+	executable, err := os.Executable()
+	if err != nil {
+		return nil, fmt.Errorf("resolve bounded Git descriptor helper: %w", err)
+	}
+	if planningGrantTestBeforeGitProcess != nil {
+		planningGrantTestBeforeGitProcess()
+	}
+	command := exec.Command(executable, "-test.run=^$")
+	command.ExtraFiles = []*os.File{rootHandle}
+	command.Env = append(planningGrantGitEnvironment(),
+		planningGrantTestGitHelperEnv+"=1",
+		planningGrantTestGitArgumentsEnv+"="+base64.StdEncoding.EncodeToString(rawArguments),
+	)
 	return command.CombinedOutput()
-}
-
-func validatePlanningGrantTestGitPaths(root string, arguments []string) error {
-	index := 0
-	for index < len(arguments) && arguments[index] == "-c" {
-		index += 2
-	}
-	if index >= len(arguments) || arguments[index] != "clone" {
-		return nil
-	}
-	target := arguments[len(arguments)-1]
-	if !filepath.IsAbs(target) {
-		return errors.New("Git clone target must be an absolute disposable path")
-	}
-	canonicalRoot, err := canonicalPlanningGrantTestRoot(root)
-	if err != nil {
-		return err
-	}
-	cleanRoot, err := filepath.Abs(filepath.Clean(root))
-	if err != nil {
-		return fmt.Errorf("resolve lexical disposable Git root: %w", err)
-	}
-	cleanTarget, err := filepath.Abs(filepath.Clean(target))
-	if err != nil || filepath.Dir(cleanTarget) != cleanRoot {
-		return fmt.Errorf("Git clone target must be a direct child of the disposable root: %q", target)
-	}
-	if _, err := os.Lstat(cleanTarget); err == nil {
-		return fmt.Errorf("Git clone target must not already exist: %q", target)
-	} else if !os.IsNotExist(err) {
-		return fmt.Errorf("inspect Git clone target: %w", err)
-	}
-	resolvedParent, err := filepath.EvalSymlinks(filepath.Dir(cleanTarget))
-	if err != nil || filepath.Clean(resolvedParent) != canonicalRoot {
-		return fmt.Errorf("Git clone target parent is not the canonical disposable root: %q", target)
-	}
-	return nil
 }
 
 func canonicalPlanningGrantTestRoot(root string) (string, error) {
@@ -3557,39 +3678,30 @@ func canonicalPlanningGrantTestRoot(root string) (string, error) {
 	if err != nil {
 		return "", errors.New("disposable Git root must have canonical physical ancestry")
 	}
-	return filepath.Clean(resolved), nil
+	if filepath.Clean(resolved) != cleanRoot {
+		return "", errors.New("disposable Git root must equal its canonical physical path")
+	}
+	return cleanRoot, nil
 }
 
-func reservePlanningGrantTestCloneTarget(root string, arguments []string) error {
-	index := 0
-	for index < len(arguments) && arguments[index] == "-c" {
-		index += 2
-	}
-	if index >= len(arguments) || arguments[index] != "clone" {
-		return nil
-	}
+func openPlanningGrantTestGitRoot(root string) (*os.File, error) {
 	canonicalRoot, err := canonicalPlanningGrantTestRoot(root)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	cleanRoot, err := filepath.Abs(filepath.Clean(root))
+	handle, err := os.Open(canonicalRoot)
 	if err != nil {
-		return fmt.Errorf("resolve lexical disposable Git root: %w", err)
+		return nil, fmt.Errorf("open canonical disposable Git root: %w", err)
 	}
-	target, err := filepath.Abs(filepath.Clean(arguments[len(arguments)-1]))
-	if err != nil || filepath.Dir(target) != cleanRoot {
-		return errors.New("Git clone target cannot be reserved outside the disposable root")
+	handleInfo, handleErr := handle.Stat()
+	pathInfo, pathErr := os.Lstat(canonicalRoot)
+	resolved, resolveErr := filepath.EvalSymlinks(canonicalRoot)
+	if handleErr != nil || pathErr != nil || resolveErr != nil || pathInfo.Mode()&os.ModeSymlink != 0 ||
+		!handleInfo.IsDir() || !pathInfo.IsDir() || !os.SameFile(handleInfo, pathInfo) || filepath.Clean(resolved) != canonicalRoot {
+		handle.Close()
+		return nil, errors.New("disposable Git root descriptor is not bound to the canonical directory")
 	}
-	if err := os.Mkdir(target, 0o700); err != nil {
-		return fmt.Errorf("reserve Git clone target: %w", err)
-	}
-	info, lstatErr := os.Lstat(target)
-	resolved, resolveErr := filepath.EvalSymlinks(target)
-	expected := filepath.Join(canonicalRoot, filepath.Base(target))
-	if lstatErr != nil || resolveErr != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() || filepath.Clean(resolved) != expected {
-		return errors.New("reserved Git clone target is not one canonical direct directory")
-	}
-	return nil
+	return handle, nil
 }
 
 func validatePlanningGrantTestGitArguments(arguments []string) error {
@@ -3643,10 +3755,6 @@ func validatePlanningGrantTestGitSubcommand(subcommand string, arguments []strin
 	switch subcommand {
 	case "init":
 		if exact("--quiet") {
-			return nil
-		}
-	case "clone":
-		if len(arguments) == 4 && arguments[0] == "--quiet" && arguments[1] == "--no-local" && nonOption(arguments[2]) && nonOption(arguments[3]) {
 			return nil
 		}
 	case "fetch":
@@ -3723,18 +3831,14 @@ func validatePlanningGrantTestGitSubcommand(subcommand string, arguments []strin
 }
 
 func TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance(t *testing.T) {
-	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
-	if err != nil {
-		t.Fatal(err)
-	}
-	parent := t.TempDir()
+	parent := planningGrantCanonicalTempDir(t)
 	hostileGlobal := filepath.Join(parent, "hostile-global-config")
 	if err := os.WriteFile(hostileGlobal, []byte("[maintenance]\n\tauto = true\n[gc]\n\tauto = 999\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	t.Setenv("GIT_CONFIG_GLOBAL", hostileGlobal)
 	root := filepath.Join(parent, "repo")
-	runPlanningGrantTestGit(t, parent, "clone", "--quiet", "--no-local", source, root)
+	initializePlanningGrantTestRepository(t, root, "", "")
 	for key, want := range map[string]string{
 		"maintenance.auto":       "false",
 		"gc.auto":                "0",
@@ -3754,7 +3858,7 @@ func TestPlanningGrantTestGitCommandRejectsAmbientExecutionInjection(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	execRoot := filepath.Join(root, "hostile-exec")
 	templateRoot := filepath.Join(root, "hostile-template")
 	if err := os.MkdirAll(filepath.Join(templateRoot, "hooks"), 0o755); err != nil {
@@ -3779,7 +3883,8 @@ func TestPlanningGrantTestGitCommandRejectsAmbientExecutionInjection(t *testing.
 	t.Setenv("GIT_CONFIG_KEY_0", "maintenance.auto")
 	t.Setenv("GIT_CONFIG_VALUE_0", "true")
 	clone := filepath.Join(root, "repo")
-	runPlanningGrantTestGit(t, root, "clone", "--quiet", "--no-local", source, clone)
+	initializePlanningGrantTestRepository(t, clone, source, "HEAD")
+	runPlanningGrantTestGit(t, clone, "checkout", "--quiet", "--force", "--detach", "FETCH_HEAD")
 	for _, sentinel := range []string{execSentinel, hookSentinel} {
 		if _, err := os.Lstat(sentinel); !os.IsNotExist(err) {
 			t.Fatalf("ambient Git execution injection ran: %s err=%v", sentinel, err)
@@ -3790,59 +3895,99 @@ func TestPlanningGrantTestGitCommandRejectsAmbientExecutionInjection(t *testing.
 	}
 }
 
-func TestPlanningGrantTestGitCommandRejectsSymlinkedCloneTargets(t *testing.T) {
-	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
-	if err != nil {
-		t.Fatal(err)
-	}
-	parent := t.TempDir()
-	outside := t.TempDir()
-
-	t.Run("symlinked ancestor", func(t *testing.T) {
-		link := filepath.Join(parent, "link")
-		if err := os.Symlink(outside, link); err != nil {
-			t.Fatal(err)
-		}
-		if _, err := planningGrantTestGitCommand(parent, "clone", "--quiet", "--no-local", source, filepath.Join(link, "repo")); err == nil {
-			t.Fatal("symlinked clone target ancestor was admitted")
-		}
-	})
-
-	t.Run("existing symlink target", func(t *testing.T) {
-		target := filepath.Join(parent, "target-link")
-		if err := os.Symlink(outside, target); err != nil {
-			t.Fatal(err)
-		}
-		if _, err := planningGrantTestGitCommand(parent, "clone", "--quiet", "--no-local", source, target); err == nil {
-			t.Fatal("symlinked clone target was admitted")
-		}
-	})
+func TestPlanningGrantTestGitCommandBindsCanonicalRootDescriptor(t *testing.T) {
+	parent := planningGrantCanonicalTempDir(t)
+	outside := planningGrantCanonicalTempDir(t)
 
 	t.Run("symlinked root", func(t *testing.T) {
-		rootLink := filepath.Join(t.TempDir(), "root-link")
+		rootLink := filepath.Join(planningGrantCanonicalTempDir(t), "root-link")
 		if err := os.Symlink(parent, rootLink); err != nil {
 			t.Fatal(err)
 		}
-		if _, err := planningGrantTestGitCommand(rootLink, "clone", "--quiet", "--no-local", source, filepath.Join(rootLink, "repo")); err == nil {
+		if _, err := planningGrantTestGitCommand(rootLink, "init", "--quiet"); err == nil {
 			t.Fatal("symlinked disposable root was admitted")
 		}
 	})
 
-	t.Run("replacement before execution", func(t *testing.T) {
-		root := t.TempDir()
-		target := filepath.Join(root, "repo")
-		command, err := planningGrantTestGitCommand(root, "clone", "--quiet", "--no-local", source, target)
+	t.Run("symlinked root ancestor", func(t *testing.T) {
+		physicalParent := planningGrantCanonicalTempDir(t)
+		physicalRoot := filepath.Join(physicalParent, "repo")
+		if err := os.Mkdir(physicalRoot, 0o700); err != nil {
+			t.Fatal(err)
+		}
+		aliasParent := filepath.Join(planningGrantCanonicalTempDir(t), "parent-alias")
+		if err := os.Symlink(physicalParent, aliasParent); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := planningGrantTestGitCommand(filepath.Join(aliasParent, "repo"), "init", "--quiet"); err == nil {
+			t.Fatal("disposable root below a symlinked ancestor was admitted")
+		}
+	})
+
+	t.Run("replacement after descriptor binding", func(t *testing.T) {
+		root := filepath.Join(parent, "repo")
+		if err := os.Mkdir(root, 0o700); err != nil {
+			t.Fatal(err)
+		}
+		command, err := planningGrantTestGitCommand(root, "init", "--quiet")
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := os.Symlink(outside, target); err != nil {
-			t.Fatal(err)
+		held := filepath.Join(parent, "held-repo")
+		planningGrantTestBeforeGitProcess = func() {
+			if err := os.Rename(root, held); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Symlink(outside, root); err != nil {
+				t.Fatal(err)
+			}
 		}
-		if output, err := command.CombinedOutput(); err == nil {
-			t.Fatalf("clone target replacement was admitted: %s", output)
+		t.Cleanup(func() { planningGrantTestBeforeGitProcess = nil })
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("descriptor-bound Git command failed after path replacement: %v: %s", err, output)
 		}
 		if _, err := os.Lstat(filepath.Join(outside, ".git")); !os.IsNotExist(err) {
-			t.Fatalf("replaced target produced an outside clone: %v", err)
+			t.Fatalf("path replacement redirected Git outside the bound root: %v", err)
+		}
+		if _, err := os.Lstat(filepath.Join(held, ".git")); err != nil {
+			t.Fatalf("descriptor-bound Git command missed the held physical root: %v", err)
+		}
+	})
+
+	t.Run("ancestor replacement after descriptor binding", func(t *testing.T) {
+		container := planningGrantCanonicalTempDir(t)
+		ancestor := filepath.Join(container, "ancestor")
+		root := filepath.Join(ancestor, "repo")
+		if err := os.MkdirAll(root, 0o700); err != nil {
+			t.Fatal(err)
+		}
+		outsideAncestor := planningGrantCanonicalTempDir(t)
+		outsideRoot := filepath.Join(outsideAncestor, "repo")
+		if err := os.Mkdir(outsideRoot, 0o700); err != nil {
+			t.Fatal(err)
+		}
+		command, err := planningGrantTestGitCommand(root, "init", "--quiet")
+		if err != nil {
+			t.Fatal(err)
+		}
+		heldAncestor := filepath.Join(container, "held-ancestor")
+		planningGrantTestBeforeGitProcess = func() {
+			if err := os.Rename(ancestor, heldAncestor); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Symlink(outsideAncestor, ancestor); err != nil {
+				t.Fatal(err)
+			}
+		}
+		t.Cleanup(func() { planningGrantTestBeforeGitProcess = nil })
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("descriptor-bound Git command failed after ancestor replacement: %v: %s", err, output)
+		}
+		if _, err := os.Lstat(filepath.Join(outsideRoot, ".git")); !os.IsNotExist(err) {
+			t.Fatalf("ancestor replacement redirected Git outside the bound root: %v", err)
+		}
+		if _, err := os.Lstat(filepath.Join(heldAncestor, "repo", ".git")); err != nil {
+			t.Fatalf("descriptor-bound Git command missed the held root after ancestor replacement: %v", err)
 		}
 	})
 }
@@ -3855,6 +4000,7 @@ func TestPlanningGrantTestGitArgumentsFailClosed(t *testing.T) {
 		{"--config-env=maintenance.auto=HOSTILE", "status"},
 		{"-C", "/tmp/hostile", "status"},
 		{"--exec-path=/tmp/hostile", "status"},
+		{"clone", "--quiet", "--no-local", "/tmp/source", "/tmp/target"},
 		{"clone", "--template=/tmp/hostile", "source", "target"},
 		{"clone", "--templ=/tmp/hostile", "source", "target"},
 		{"clone", "--upload-p=/tmp/hostile-upload-pack", "source", "target"},
@@ -3867,7 +4013,7 @@ func TestPlanningGrantTestGitArgumentsFailClosed(t *testing.T) {
 		{"config", "--local", "maintenance.auto", "true"},
 		{"config", "--global", "gc.auto", "999"},
 	} {
-		if _, err := planningGrantTestGitCommand(t.TempDir(), arguments...); err == nil {
+		if _, err := planningGrantTestGitCommand(planningGrantCanonicalTempDir(t), arguments...); err == nil {
 			t.Fatalf("unsafe disposable Git arguments were accepted: %v", arguments)
 		}
 	}
@@ -3912,6 +4058,30 @@ func TestAttack() { _ = (&exec.Cmd{Path: "/usr/bin/git", Args: []string{"git", "
 import "syscall"
 func TestAttack() { runner := syscall.ForkExec; _, _ = runner("/usr/bin/git", []string{"git", "status"}, nil) }
 `,
+		"dot_import_os": `package doctrine_test
+import . "os"
+func TestAttack() { _, _ = StartProcess("/usr/bin/git", []string{"git", "status"}, nil) }
+`,
+		"dot_import_os_exec": `package doctrine_test
+import . "os/exec"
+func TestAttack() { _ = Command("git", "status") }
+`,
+		"dot_import_syscall": `package doctrine_test
+import . "syscall"
+func TestAttack() { _, _ = ForkExec("/usr/bin/git", []string{"git", "status"}, nil) }
+`,
+		"blank_import_os": `package doctrine_test
+import _ "os"
+func TestAttack() {}
+`,
+		"blank_import_os_exec": `package doctrine_test
+import _ "os/exec"
+func TestAttack() {}
+`,
+		"blank_import_syscall": `package doctrine_test
+import _ "syscall"
+func TestAttack() {}
+`,
 		"nested_exec_cmd": `package nested
 import "os/exec"
 func TestAttack() { _ = (&exec.Cmd{Path: "/usr/bin/git", Args: []string{"git", "status"}}).Run() }
@@ -3943,7 +4113,7 @@ func TestAttack() { _, _ = planningGrantGitOutput(".", "status") }
 
 func writePlanningGrantProcessAttackFixture(t *testing.T, repo, name, attack string) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	destination := filepath.Join(root, "internal", "doctrine")
 	if err := os.MkdirAll(destination, 0o755); err != nil {
 		t.Fatal(err)

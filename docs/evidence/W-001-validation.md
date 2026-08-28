@@ -1025,3 +1025,80 @@ digest-pinned, network-disabled Gitleaks image
 detected the synthetic canary, then found no leak in the exact worktree or all
 89 commits of public history. This checkpoint is implementation evidence, not
 QA or Security acceptance and not merge, lease, or lifecycle authority.
+
+## Lifecycle-correction v14 review and v15 descriptor binding
+
+The immutable V14 candidate is head
+`d631bec4ed786116c13e36995722d91d48d64109`, tree
+`b9467f12b2031c5159ef749938bbd4f475eb6153`, signed tag object
+`f97b9ebd0150ee4d75bf691c16c176b792d42461`. Public run `33123061855`, job
+`98694494697`, passed every required gate. Independent QA and Security both
+returned `changes-requested` for that exact subject:
+
+- `ci.test_git_root_ancestor_alias_admitted`: the final root component was
+  checked, but a real directory reached through a symlinked ancestor remained
+  admitted;
+- `ci.test_git_clone_reservation_toctou`: clone target reservation and
+  pathname verification ended before Git consumed the writable destination;
+- `ci.test_process_guard_dot_import_bypass`: dot-imported `os` and `syscall`
+  exposed bare process entrypoints outside selector-only admission.
+
+The signed `W-001-lifecycle-ci-hardening-v15` grant binds V14 as base, preserves
+the V9 runtime and native-patch qualification bytes and all V10-V14 history,
+and permits only the bounded test correction and fresh qualification. The V15
+candidate removes `clone` from the exact Git argv schema and fixtures, prepares
+repositories with direct directory creation plus the existing closed
+`init`/`fetch`/`checkout` wrapper, rejects roots that differ from their resolved
+physical path, and holds a verified directory descriptor through child
+execution. A test-only descriptor helper changes directory through that handle
+before launching `/usr/bin/git`, so deterministic root or ancestor replacement
+cannot redirect Git to the replacement pathname. The recursive process guard
+now rejects dot or blank imports of `os`, `os/exec`, and `syscall`; adversarial
+fixtures cover the bare dot-imported and blank-import cases.
+
+Focused local regressions passed for descriptor binding, root and ancestor
+replacement, symlinked ancestry, clone-schema denial, hostile environment
+fencing, historical pull-request synthesis, and recursive dot/blank process
+imports. The focused suite passed ten consecutive runs and the Go race
+detector. `go vet ./...`, the complete doctrine suite excluding only the known
+linked-worktree public-root shape, and rebuilt doctrine, plan, and doc-sync
+validators all passed.
+
+Two fresh pinned Beads clones at commit
+`6c124203e771433a3550c348771a5b5e27fd3c21` applied the unchanged five patches
+in repository order with `git apply --unidiff-zero`. Both full six-file source
+diffs matched SHA-256
+`91b3e8dd5c8c0c01b5953c4c38ca508a150b05cd719f4e80fec293365afddf7f`;
+their `go.mod` and `go.sum` hashes remained
+`82794b69209f2d2e8ad23fccc94a84d07ac46fc99040964a89ff5566e42c8044`
+and `ad753874d566d22c81da097ed3d8d59f2f17ff6e69a437aca914ad178a488efb`.
+Two independently populated module caches passed `go mod verify` with
+networking disabled. Two fresh build caches in the exact pinned Linux/arm64
+builder produced byte-identical binaries at the V9-bound SHA-256
+`d72ab6b406a62930083cb9801d74336ea10fd7e871453c19f935252a77dccb18`;
+the builder Go executable remained
+`22201b57b855105df064a291863c3fc04f22a7431187a9205122aff42a0c825b`.
+
+An initial containerized native-test compile omitted the required
+`gms_pure_go` tag and failed closed on absent ICU headers. The corrected
+container route then exposed that the Beads readiness probe requires the
+Docker CLI as well as the mounted socket and skipped one server case; that run
+was rejected. The final Go 1.26.2 host runner used the independently verified
+module cache with `GOPROXY=off`, the exact `gms_pure_go` tag, and the cached
+digest-pinned Dolt/Ryuk images. Every selected bootstrap-claim,
+authority-claim, and authority-lifecycle case passed without a skip, including
+server-transaction denial, rollback/contention, all seven nonterminal
+outcomes, claim lineage, bounded retry, and recursive canonical-key rejection.
+The Dolt container was terminated. The exact reproduced Linux artifact then
+passed MARS-3 `TestNativeMutatorIntegration` inside the pinned builder with
+networking disabled.
+
+The credential-free PostgreSQL suite passed
+`TestPostgresLeaseLifecycleAndRestart` without a skip against an ephemeral
+loopback-only PostgreSQL 17.11 container at digest
+`sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0`.
+The container was stopped and auto-removed. This remains implementation
+evidence pending the signed checkpoint/tag, normal-clone public and scanner
+gates, public run, and independent QA and Security review. It makes no
+authority-runtime, native-patch, Beads, lease, merge, repository-setting, or
+production effect.

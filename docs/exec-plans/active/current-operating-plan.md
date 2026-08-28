@@ -156,8 +156,8 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the v14 physical-path and transitive-process
-  lifecycle correction to a signed immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
+- Required next transition: bind the v15 descriptor-bound Git and closed
+  process-import lifecycle correction to a signed immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
   conformance suites plus independent cold-build reproduction, then route that exact tree through QA and Security. No
   canonical handoff or later lifecycle mutation may execute until the reviewed
   tree is merged and a separate reconciliation authority binds the
@@ -283,6 +283,22 @@ bounded test wrapper, transitive production-executor denial, their adversarial
 regressions, and fresh immutable review. W-001 therefore remains
 `in-progress`; no merge, canonical lifecycle mutation, or live lease is
 authorized by this correction.
+
+Independent QA and Security changes-requested the immutable V14 checkpoint at
+head `d631bec4ed786116c13e36995722d91d48d64109`, tree
+`b9467f12b2031c5159ef749938bbd4f475eb6153`, after public run `33123061855`,
+job `98694494697`, passed. A real disposable root reached through a symlinked
+ancestor remained admitted (`ci.test_git_root_ancestor_alias_admitted`), clone
+target reservation was released before Git consumed the pathname
+(`ci.test_git_clone_reservation_toctou`), and dot-imported `os` or `syscall`
+process entrypoints escaped selector-only admission
+(`ci.test_process_guard_dot_import_bypass`). The signed
+`W-001-lifecycle-ci-hardening-v15` grant permits only removing the writable
+clone subprocess, descriptor-binding every remaining test Git process to the
+verified physical root, rejecting dot/blank guarded process imports, retaining
+the prior adversarial corpus, reproducing the pinned V9 native qualification,
+and fresh immutable review. W-001 therefore remains `in-progress`; no merge,
+canonical lifecycle mutation, or live lease is authorized by this correction.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation

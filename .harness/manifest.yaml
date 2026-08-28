@@ -13,8 +13,8 @@ authority:
   current_bead_state: in-progress
   current_bead_claimed: true
   plan_phase: delivery
-  active_delivery_grant: W-001-lifecycle-ci-hardening-v14
-  active_attempt: w001-lifecycle-ci-hardening-v14
+  active_delivery_grant: W-001-lifecycle-ci-hardening-v15
+  active_attempt: w001-lifecycle-ci-hardening-v15
   live_lease_state: absent
   durable_product_system: git
   markdown_ticket_authority: prohibited
