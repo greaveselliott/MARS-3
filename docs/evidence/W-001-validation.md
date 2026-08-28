@@ -1102,3 +1102,35 @@ evidence pending the signed checkpoint/tag, normal-clone public and scanner
 gates, public run, and independent QA and Security review. It makes no
 authority-runtime, native-patch, Beads, lease, merge, repository-setting, or
 production effect.
+
+### V15 implementation checkpoint
+
+The signed implementation checkpoint is commit
+`dbd55e1ad1b39fee3267a33a54d3306dbca660c5`, tree
+`83eb5e68413c6668266554c93693abc95f683c25`, with sole parent the immutable
+V14 head. Its seven changed paths are exactly the signed V15 grant scope; the
+diff remains empty for `api/**`, `internal/authority/**`, `database/**`,
+`.github/**`, `go.mod`, and `go.sum`. The commit has a valid pinned ED25519 Git
+signature.
+
+From a normal disposable clone of that exact commit, all of these commands
+passed with repository-relative working directories:
+
+```text
+mars3 doctrine check --repo .
+mars3 plan check --repo .
+mars3 docsync audit --repo .
+mars3 public-check --repo .
+go test ./... -count=1
+go vet ./...
+git diff --check
+git show --check --oneline --no-renames HEAD
+git verify-commit HEAD
+```
+
+The all-package run included the complete doctrine suite in 232.916 seconds.
+The digest-pinned, network-disabled Gitleaks image first detected one synthetic
+canary, then found no leak in the exact V15 worktree or all 91 commits of
+public history. This checkpoint and its qualification remain implementation
+evidence, not QA or Security acceptance, merge authority, canonical lifecycle
+authority, or lease authority.
