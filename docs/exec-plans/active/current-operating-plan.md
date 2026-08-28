@@ -156,9 +156,13 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the v16 closed descriptor launcher and
-  recursive process-provenance lifecycle correction to a signed immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
-  conformance suites plus independent cold-build reproduction, then route that exact tree through QA and Security. No
+- Required next transition: bind the V17 shared one-shot, descriptor-stream
+  fetch, and closed production-process inventory correction to a signed
+  immutable checkpoint; verify that exact tree from a normal clone through the
+  public and leak gates; then publish its signed tag, run exact-head CI, and
+  route it through independent QA and Security. The independent cold builds,
+  non-skipped native Beads suite, exact-artifact integration, and PostgreSQL
+  lifecycle suite have passed. No
   canonical handoff or later lifecycle mutation may execute until the reviewed
   tree is merged and a separate reconciliation authority binds the
   protected-main result.
@@ -315,6 +319,24 @@ dynamic or transitive process bypasses, restricting fetch to canonical local
 sources, and fresh qualification and review. W-001 therefore remains
 `in-progress`; no merge, canonical lifecycle mutation, or live lease is
 authorized by this correction.
+
+Independent QA accepted and Security changes-requested the immutable V16
+checkpoint at head `25d2f14e20e74f1415caa4118a93c359f9370031`, tree
+`d9bf0e3f89807c12c5be5a58ea68fd04715aa740`, after public run
+`33206197037`, job `98967743138`, passed. A copied invocation or extracted
+executor field could bypass the wrapper-level one-shot transition
+(`ci.test_git_invocation_one_shot_field_bypass`), the canonical local fetch
+source remained replaceable before Git consumed its pathname
+(`ci.test_git_fetch_source_toctou`), and same-package tests could call the
+ambient arbitrary-argv production `gitOutput` executor outside the test
+constructor inventory (`ci.test_process_guard_refresh_executor_bypass`). The
+signed `W-001-lifecycle-ci-hardening-v17` grant permits only moving one-shot
+consumption into shared captured state, replacing path-based fetch with a
+source- and destination-descriptor-bound pack stream, deriving and denying the
+closed production process-entry inventory from tests, retaining the prior
+regression corpus, and fresh qualification and review. W-001 therefore remains
+`in-progress`; no merge, canonical lifecycle mutation, live lease, or
+production effect is authorized by this correction.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation

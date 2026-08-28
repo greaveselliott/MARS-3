@@ -1859,6 +1859,82 @@ func TestW001LifecycleCIHardeningV16PathScope(t *testing.T) {
 	}
 }
 
+func TestW001LifecycleCIHardeningV17GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIHardeningV17Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v17 lifecycle CI hardening was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV17GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV17Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCIHardeningV16ReviewTag+":refs/tags/"+w001LifecycleCIHardeningV16ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIHardeningV17Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIHardeningV17Path:      tampered,
+		w001LifecycleCIHardeningV17Signature: read(w001LifecycleCIHardeningV17Signature),
+		w001LifecycleCIHardeningV16Path:      read(w001LifecycleCIHardeningV16Path),
+		w001LifecycleCIHardeningV16Signature: read(w001LifecycleCIHardeningV16Signature),
+		wave1PlanningGrantKey:                read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":  read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                  read(canonicalActivePlan),
+		".harness/manifest.yaml":             read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":    read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIHardeningV17Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v17_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v17_signature") {
+		t.Fatalf("tampered v17 lifecycle CI hardening authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV17PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIHardeningV17Path,
+		w001LifecycleCIHardeningV17Signature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIHardeningV17PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v17 lifecycle CI hardening path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCIHardeningV16Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIHardeningV17PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v17 lifecycle CI hardening path was accepted: %s", path)
+		}
+	}
+}
+
 func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	object := planningGrantTestGitRawOutput(t, repo, "cat-file", "tag", w001DeliveryV2TagObject)
@@ -3645,60 +3721,126 @@ func planningGrantTestGitTryOutput(root string, arguments ...string) ([]byte, er
 }
 
 type planningGrantTestGitInvocation struct {
-	mu             sync.Mutex
 	combinedOutput func() ([]byte, error)
+}
+
+type planningGrantTestGitFetchAdmission struct {
+	source      *os.File
+	revision    string
+	destination string
 }
 
 func planningGrantTestGitCommand(root string, arguments ...string) (*planningGrantTestGitInvocation, error) {
 	if err := validatePlanningGrantTestGitArguments(arguments); err != nil {
 		return nil, err
 	}
-	if err := validatePlanningGrantTestGitFetchSource(arguments); err != nil {
+	fetch, err := admitPlanningGrantTestGitFetchSource(arguments)
+	if err != nil {
 		return nil, err
 	}
 	rootHandle, err := openPlanningGrantTestGitRoot(root)
 	if err != nil {
+		if fetch != nil {
+			fetch.source.Close()
+		}
 		return nil, err
 	}
 	admittedArguments := append([]string(nil), arguments...)
-	return &planningGrantTestGitInvocation{combinedOutput: func() ([]byte, error) {
+	if fetch != nil {
+		admittedArguments = nil
+	}
+	execute := func() ([]byte, error) {
 		defer rootHandle.Close()
-		if err := validatePlanningGrantTestGitArguments(admittedArguments); err != nil {
-			return nil, err
+		if fetch != nil {
+			defer fetch.source.Close()
 		}
-		if err := validatePlanningGrantTestGitFetchSource(admittedArguments); err != nil {
-			return nil, err
+		if admittedArguments != nil {
+			if err := validatePlanningGrantTestGitArguments(admittedArguments); err != nil {
+				return nil, err
+			}
 		}
 		if planningGrantTestBeforeGitProcess != nil {
 			planningGrantTestBeforeGitProcess()
 		}
 		bounded := []string{
+			"-c", "core.hooksPath=/dev/null",
 			"-c", "maintenance.auto=false",
 			"-c", "gc.auto=0",
 			"-c", "gc.autoDetach=false",
 			"-c", "maintenance.autoDetach=false",
 		}
-		perlArguments := []string{"-f", "-e", planningGrantTestGitDescriptorTrampoline, "--"}
-		perlArguments = append(perlArguments, bounded...)
-		perlArguments = append(perlArguments, admittedArguments...)
-		command := exec.Command("/usr/bin/perl", perlArguments...)
-		command.ExtraFiles = []*os.File{rootHandle}
-		command.Env = planningGrantTestGitEnvironment()
-		return command.CombinedOutput()
-	}}, nil
+		run := func(handle *os.File, gitArguments []string, input []byte) ([]byte, error) {
+			perlArguments := []string{"-f", "-e", planningGrantTestGitDescriptorTrampoline, "--"}
+			perlArguments = append(perlArguments, bounded...)
+			perlArguments = append(perlArguments, gitArguments...)
+			command := exec.Command("/usr/bin/perl", perlArguments...)
+			command.ExtraFiles = []*os.File{handle}
+			command.Env = planningGrantTestGitEnvironment()
+			if input != nil {
+				command.Stdin = bytes.NewReader(input)
+			}
+			var stderr bytes.Buffer
+			command.Stderr = &stderr
+			output, runErr := command.Output()
+			if runErr != nil {
+				return append(output, stderr.Bytes()...), runErr
+			}
+			return output, nil
+		}
+		if fetch == nil {
+			return run(rootHandle, admittedArguments, nil)
+		}
+		resolved, resolveErr := run(fetch.source, []string{"rev-parse", "--verify", fetch.revision}, nil)
+		if resolveErr != nil {
+			return resolved, resolveErr
+		}
+		objectID := strings.TrimSpace(string(resolved))
+		if len(objectID) != 40 || !sha1Pattern.MatchString(objectID) {
+			return nil, errors.New("bounded Git fetch revision did not resolve to one SHA-1 object")
+		}
+		pack, packErr := run(fetch.source, []string{"pack-objects", "--stdout", "--revs"}, []byte(fetch.revision+"\n"))
+		if packErr != nil {
+			return pack, packErr
+		}
+		indexed, indexErr := run(rootHandle, []string{"index-pack", "--stdin", "--fix-thin"}, pack)
+		if indexErr != nil {
+			return indexed, indexErr
+		}
+		updated, updateErr := run(rootHandle, []string{"update-ref", "FETCH_HEAD", objectID}, nil)
+		if updateErr != nil {
+			return updated, updateErr
+		}
+		if fetch.destination != "" {
+			updated, updateErr = run(rootHandle, []string{"update-ref", fetch.destination, objectID}, nil)
+			if updateErr != nil {
+				return updated, updateErr
+			}
+		}
+		return nil, nil
+	}
+	var consumption sync.Mutex
+	consumed := false
+	oneShot := func() ([]byte, error) {
+		consumption.Lock()
+		if consumed {
+			consumption.Unlock()
+			return nil, errors.New("bounded Git invocation is unavailable or already consumed")
+		}
+		consumed = true
+		consumption.Unlock()
+		return execute()
+	}
+	return &planningGrantTestGitInvocation{combinedOutput: oneShot}, nil
 }
 
 func (invocation *planningGrantTestGitInvocation) CombinedOutput() ([]byte, error) {
 	if invocation == nil {
 		return nil, errors.New("bounded Git invocation is unavailable or already consumed")
 	}
-	invocation.mu.Lock()
-	defer invocation.mu.Unlock()
-	if invocation.combinedOutput == nil {
+	combinedOutput := invocation.combinedOutput
+	if combinedOutput == nil {
 		return nil, errors.New("bounded Git invocation is unavailable or already consumed")
 	}
-	combinedOutput := invocation.combinedOutput
-	invocation.combinedOutput = nil
 	return combinedOutput()
 }
 
@@ -3744,22 +3886,60 @@ func openPlanningGrantTestGitRoot(root string) (*os.File, error) {
 	return handle, nil
 }
 
-func validatePlanningGrantTestGitFetchSource(arguments []string) error {
+func admitPlanningGrantTestGitFetchSource(arguments []string) (*planningGrantTestGitFetchAdmission, error) {
 	for index, argument := range arguments {
 		if argument != "fetch" {
 			continue
 		}
-		if index+3 >= len(arguments) {
-			return errors.New("bounded Git fetch source is missing")
+		if index+4 >= len(arguments) {
+			return nil, errors.New("bounded Git fetch source or revision is missing")
 		}
 		source := filepath.Clean(arguments[index+3])
 		canonicalSource, err := canonicalPlanningGrantTestRoot(source)
 		if err != nil || !filepath.IsAbs(source) || source != canonicalSource {
-			return errors.New("bounded Git fetch source must be one canonical local directory")
+			return nil, errors.New("bounded Git fetch source must be one canonical local directory")
 		}
-		return nil
+		revision, destination, err := validatePlanningGrantTestGitFetchRefspec(arguments[index+4])
+		if err != nil {
+			return nil, err
+		}
+		handle, err := openPlanningGrantTestGitRoot(canonicalSource)
+		if err != nil {
+			return nil, fmt.Errorf("bind canonical bounded Git fetch source: %w", err)
+		}
+		return &planningGrantTestGitFetchAdmission{source: handle, revision: revision, destination: destination}, nil
 	}
-	return nil
+	return nil, nil
+}
+
+func validatePlanningGrantTestGitFetchRefspec(value string) (string, string, error) {
+	if value == "HEAD" || len(value) == 40 && sha1Pattern.MatchString(value) {
+		return value, "", nil
+	}
+	parts := strings.Split(value, ":")
+	if len(parts) != 2 || parts[0] != parts[1] || !validPlanningGrantTestTagRef(parts[0]) {
+		return "", "", errors.New("bounded Git fetch revision must be HEAD, one SHA-1 object, or one identical tag refspec")
+	}
+	return parts[0], parts[1], nil
+}
+
+func validPlanningGrantTestTagRef(ref string) bool {
+	if !strings.HasPrefix(ref, "refs/tags/") {
+		return false
+	}
+	name := strings.TrimPrefix(ref, "refs/tags/")
+	if name == "" || strings.HasPrefix(name, ".") || strings.HasSuffix(name, ".") || strings.HasSuffix(name, ".lock") ||
+		strings.Contains(name, "..") || strings.Contains(name, "//") || strings.Contains(name, "@{") {
+		return false
+	}
+	for _, character := range name {
+		if character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z' ||
+			character >= '0' && character <= '9' || strings.ContainsRune("-_./", character) {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 func planningGrantTestGitEnvironment() []string {
@@ -3917,6 +4097,7 @@ func TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance(t *testing.T) 
 	root := filepath.Join(parent, "repo")
 	initializePlanningGrantTestRepository(t, root, "", "")
 	for key, want := range map[string]string{
+		"core.hooksPath":         os.DevNull,
 		"maintenance.auto":       "false",
 		"gc.auto":                "0",
 		"gc.autoDetach":          "false",
@@ -3946,8 +4127,10 @@ func TestPlanningGrantTestGitCommandRejectsAmbientExecutionInjection(t *testing.
 	}
 	execSentinel := filepath.Join(root, "exec-path-ran")
 	hookSentinel := filepath.Join(root, "template-hook-ran")
+	localHookSentinel := filepath.Join(root, "local-hook-ran")
 	uploadPack := []byte(fmt.Sprintf("#!/bin/sh\n: > %q\nexec /usr/bin/git-upload-pack \"$@\"\n", execSentinel))
 	postCheckout := []byte(fmt.Sprintf("#!/bin/sh\n: > %q\n", hookSentinel))
+	localPostCheckout := []byte(fmt.Sprintf("#!/bin/sh\n: > %q\n", localHookSentinel))
 	if err := os.WriteFile(filepath.Join(execRoot, "git-upload-pack"), uploadPack, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -3967,14 +4150,17 @@ func TestPlanningGrantTestGitCommandRejectsAmbientExecutionInjection(t *testing.
 	t.Setenv("PATH", execRoot)
 	clone := filepath.Join(root, "repo")
 	initializePlanningGrantTestRepository(t, clone, source, "HEAD")
+	if err := os.WriteFile(filepath.Join(clone, ".git", "hooks", "post-checkout"), localPostCheckout, 0o755); err != nil {
+		t.Fatal(err)
+	}
 	runPlanningGrantTestGit(t, clone, "checkout", "--quiet", "--force", "--detach", "FETCH_HEAD")
-	for _, sentinel := range []string{execSentinel, hookSentinel} {
+	for _, sentinel := range []string{execSentinel, hookSentinel, localHookSentinel} {
 		if _, err := os.Lstat(sentinel); !os.IsNotExist(err) {
 			t.Fatalf("ambient Git execution injection ran: %s err=%v", sentinel, err)
 		}
 	}
-	if _, err := os.Lstat(filepath.Join(clone, ".git", "hooks", "post-checkout")); !os.IsNotExist(err) {
-		t.Fatalf("ambient Git template installed a hook: %v", err)
+	if installed, err := os.ReadFile(filepath.Join(clone, ".git", "hooks", "post-checkout")); err != nil || !bytes.Equal(installed, localPostCheckout) {
+		t.Fatalf("ambient Git template replaced the local hook fixture: err=%v", err)
 	}
 }
 
@@ -4076,12 +4262,13 @@ func TestPlanningGrantTestGitCommandBindsCanonicalRootDescriptor(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		copied := *command
 		results := make(chan error, 2)
-		for range 2 {
-			go func() {
-				_, runErr := command.CombinedOutput()
+		for _, invocation := range []*planningGrantTestGitInvocation{command, &copied} {
+			go func(candidate *planningGrantTestGitInvocation) {
+				_, runErr := candidate.CombinedOutput()
 				results <- runErr
-			}()
+			}(invocation)
 		}
 		succeeded := 0
 		for range 2 {
@@ -4132,6 +4319,47 @@ func TestPlanningGrantTestGitCommandBindsCanonicalRootDescriptor(t *testing.T) {
 	})
 }
 
+func TestPlanningGrantTestGitFetchBindsSourceDescriptor(t *testing.T) {
+	parent := planningGrantCanonicalTempDir(t)
+	source := filepath.Join(parent, "source")
+	replacement := filepath.Join(parent, "replacement")
+	target := filepath.Join(parent, "target")
+	initializePlanningGrantTestRepository(t, source, "", "")
+	writePlanningGrantTestFile(t, source, "identity.txt", []byte("original\n"))
+	commitPlanningGrantTestPaths(t, source, "original", "identity.txt")
+	originalCommit := planningGrantTestGitOutput(t, source, "rev-parse", "HEAD^{commit}")
+	initializePlanningGrantTestRepository(t, replacement, "", "")
+	writePlanningGrantTestFile(t, replacement, "identity.txt", []byte("replacement\n"))
+	commitPlanningGrantTestPaths(t, replacement, "replacement", "identity.txt")
+	replacementCommit := planningGrantTestGitOutput(t, replacement, "rev-parse", "HEAD^{commit}")
+	if originalCommit == replacementCommit {
+		t.Fatal("source replacement fixture did not create distinct commits")
+	}
+	initializePlanningGrantTestRepository(t, target, "", "")
+	command, err := planningGrantTestGitCommand(target, "fetch", "--quiet", "--no-tags", source, "HEAD")
+	if err != nil {
+		t.Fatal(err)
+	}
+	held := filepath.Join(parent, "held-source")
+	planningGrantTestBeforeGitProcess = func() {
+		if err := os.Rename(source, held); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Rename(replacement, source); err != nil {
+			t.Fatal(err)
+		}
+	}
+	t.Cleanup(func() { planningGrantTestBeforeGitProcess = nil })
+	output, runErr := command.CombinedOutput()
+	planningGrantTestBeforeGitProcess = nil
+	if runErr != nil {
+		t.Fatalf("descriptor-stream fetch failed after source replacement: %v: %s", runErr, output)
+	}
+	if got := planningGrantTestGitOutput(t, target, "rev-parse", "FETCH_HEAD^{commit}"); got != originalCommit {
+		t.Fatalf("source replacement redirected fetch: got %s want %s (replacement %s)", got, originalCommit, replacementCommit)
+	}
+}
+
 func TestPlanningGrantTestGitArgumentsFailClosed(t *testing.T) {
 	for _, arguments := range [][]string{
 		{"-c", "maintenance.auto=true", "status"},
@@ -4168,6 +4396,20 @@ func TestPlanningGrantTestGitArgumentsFailClosed(t *testing.T) {
 		}
 		if _, err := planningGrantTestGitCommand(root, "fetch", "--quiet", "--no-tags", alias, "HEAD"); err == nil {
 			t.Fatal("symlinked bounded Git fetch source was admitted")
+		}
+	})
+	t.Run("malformed fetch refspec", func(t *testing.T) {
+		root := planningGrantCanonicalTempDir(t)
+		source := planningGrantCanonicalTempDir(t)
+		for _, revision := range []string{
+			"HEAD\n--all",
+			"refs/tags/one:refs/tags/two",
+			"refs/tags/../escape:refs/tags/../escape",
+			"refs/tags/name.lock:refs/tags/name.lock",
+		} {
+			if _, err := planningGrantTestGitCommand(root, "fetch", "--quiet", "--no-tags", source, revision); err == nil {
+				t.Fatalf("malformed bounded Git fetch refspec was admitted: %q", revision)
+			}
 		}
 	})
 }
@@ -4246,6 +4488,9 @@ func TestAttack() { _ = runPlanningGrantTestGitDescriptorHelper() }
 import "os/exec"
 func TestAttack(path string) { _ = exec.Command(path, "status") }
 `,
+		"direct_executor_field": `package doctrine
+func TestAttack(root string) { invocation, _ := planningGrantTestGitCommand(root, "status"); run := invocation.combinedOutput; _, _ = run() }
+`,
 	}
 	for name, attack := range attacks {
 		t.Run(name, func(t *testing.T) {
@@ -4261,13 +4506,44 @@ func TestAttack(path string) { _ = exec.Command(path, "status") }
 
 func TestPlanningGrantTestProcessInvocationsRejectProductionGitExecutor(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
-	root := writePlanningGrantProcessAttackFixture(t, repo, "production_git_executor", `package doctrine
-func TestAttack() { _, _ = planningGrantGitOutput(".", "status") }
-`)
-	var findings []Finding
-	checkPlanningGrantTestProcessInvocations(root, &findings)
-	if !findingCodePresent(findings, "public.w001_lifecycle_ci_process_guard") {
-		t.Fatal("planningGrantGitOutput is not admitted from doctrine tests")
+	for name, executor := range map[string]string{
+		"planning_grant": "planningGrantGitOutput",
+		"refresh":        "gitOutput",
+	} {
+		t.Run(name, func(t *testing.T) {
+			attack := fmt.Sprintf("package doctrine\nfunc TestAttack() { _, _ = %s(\".\", \"status\") }\n", executor)
+			root := writePlanningGrantProcessAttackFixture(t, repo, "production_git_executor_"+name, attack)
+			var findings []Finding
+			checkPlanningGrantTestProcessInvocations(root, &findings)
+			if !findingCodePresent(findings, "public.w001_lifecycle_ci_process_guard") {
+				t.Fatalf("production process entrypoint %s was admitted from doctrine tests", executor)
+			}
+		})
+	}
+}
+
+func TestPlanningGrantTestProcessInventoryFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	for name, production := range map[string]string{
+		"unexpected": `package doctrine
+import "os/exec"
+func unexpectedProductionExecutor() { _ = exec.Command("/usr/bin/git", "status") }
+`,
+		"indirect_alias": "package doctrine\nvar alternateProductionExecutor = gitOutput\n",
+		"unparseable":    "package doctrine\nfunc broken(\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			root := writePlanningGrantProcessAttackFixture(t, repo, "production_inventory_"+name, "package doctrine\nfunc TestNoop() {}\n")
+			path := filepath.Join(root, "internal", "doctrine", "process_inventory.go")
+			if err := os.WriteFile(path, []byte(production), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			var findings []Finding
+			checkPlanningGrantTestProcessInvocations(root, &findings)
+			if !findingCodePresent(findings, "public.w001_lifecycle_ci_process_guard") {
+				t.Fatalf("changed production process inventory was admitted: %s", name)
+			}
+		})
 	}
 }
 
@@ -4283,7 +4559,7 @@ func writePlanningGrantProcessAttackFixture(t *testing.T, repo, name, attack str
 		t.Fatal(err)
 	}
 	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), "_test.go") {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".go") {
 			continue
 		}
 		content, err := os.ReadFile(filepath.Join(repo, "internal", "doctrine", entry.Name()))

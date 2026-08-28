@@ -1247,3 +1247,118 @@ This is qualified implementation evidence pending the final evidence commit,
 signed V16 tag, exact-head public run, and fresh independent QA and Security
 review. It grants no merge, canonical lifecycle, live lease, or production
 authority.
+
+### V16 immutable review and V17 descriptor-stream correction
+
+The signed V16 evidence checkpoint is
+`25d2f14e20e74f1415caa4118a93c359f9370031`, tree
+`d9bf0e3f89807c12c5be5a58ea68fd04715aa740`. Signed annotated tag object
+`125a596c00a5a00f40fbda002f38cc06e3f0b5cb` targets that exact commit and
+tree. Public run `33206197037`, job `98967743138`, passed every required gate.
+Independent QA returned `accepted`; independent Security returned
+`changes-requested` on the same immutable subject:
+
+- `ci.test_git_invocation_one_shot_field_bypass`: copied invocation values or
+  the extracted `combinedOutput` field could invoke the captured executor
+  outside the wrapper mutex and nil transition;
+- `ci.test_git_fetch_source_toctou`: fetch validated one canonical source
+  pathname before the deterministic process hook but did not bind that source
+  to a descriptor before Git consumed it;
+- `ci.test_process_guard_refresh_executor_bypass`: same-package tests could
+  call the ambient arbitrary-argv production `gitOutput` executor because the
+  recursive guard named only the planning-grant executor.
+
+Both reviewers confirmed that V16 closed the V15 self-executable helper and
+mutable Go test-image findings. Fresh normal-clone validators, the full suite,
+the focused race suite, vet, whitespace, signatures, topology, seven-path
+scope, exact tag/run binding, native qualification, PostgreSQL qualification,
+and leak scans passed. Those passing results do not override the three
+Security findings.
+
+The signed `W-001-lifecycle-ci-hardening-v17` grant binds the exact V16 head,
+tree, tag object, public run, QA acceptance, and Security changes-requested
+disposition. Its grant SHA-256 is
+`8898b65846209758f892c1b965c2d69bb13a6c1a97714f953b3f8735d96a1f7d`;
+its detached-signature SHA-256 is
+`f3c1fcc7ab46205f00d45029add526fa7b9df06b19aa7a65b7f08f12a7b87df6`.
+The detached signature verifies under namespace
+`mars3-w001-lifecycle-ci-hardening-v17` with pinned ED25519 fingerprint
+`SHA256:i5VSHF257DhXJ5l/9oOUGHnT2mrqgXYSMryQHRsSBx8`. It authorizes exactly
+seven paths and no merge, canonical Beads mutation, live lease, workflow,
+repository-control, production, or trust change.
+
+The V17 implementation moves the one-shot transition into mutex-protected
+state captured by the executor closure, so every invocation copy and extracted
+function value shares the same irreversible consumption state. Fetch opens and
+verifies both source and destination directory descriptors before returning an
+invocation. It resolves and packs the admitted revision while entered through
+the source descriptor, imports that byte stream through the destination
+descriptor, and updates only `FETCH_HEAD` plus an admitted identical tag
+refspec. No child receives or reopens the admitted source pathname. Every child
+still uses literal `/usr/bin/perl`, the byte-exact fd-3 trampoline, literal
+`/usr/bin/git`, and the fixed zero-ambient environment.
+
+The recursive process gate now inventories every direct production process
+entrypoint from all regular non-test Go source, requires that inventory to
+remain exactly `planningGrantGitOutput` and `gitOutput`, and rejects either
+identifier from every doctrine test. It also rejects direct
+`combinedOutput` field selectors outside the sole wrapper method, unexpected
+production constructors, malformed production source, symlinked surfaces,
+dynamic executables, indirect constructors, and dot or blank guarded imports.
+Deterministic regressions replace the fetch source after command admission,
+race copied invocation values, and inject both production executor names and a
+direct executor-field access into the recursive fixture corpus.
+
+The exact pre-commit V17 bytes passed the focused grant, shared one-shot,
+descriptor-bound fetch, closed-argv/environment, and recursive process corpus
+ten consecutive times in 29.775 seconds. The same boundary suite passed under
+the Go race detector in 13.260 seconds. `go vet ./...`, `git diff --check`, and
+rebuilt doctrine, plan, and doc-sync validators passed. The complete project
+suite passed with only the known linked-worktree `.git` public-root subtest
+excluded; `internal/doctrine` completed in 123.617 seconds. Public-check remains
+deferred to a normal clone because this delivery worktree represents `.git` as
+a link file outside the public source roots.
+
+Two fresh local clones of pinned Beads commit
+`6c124203e771433a3550c348771a5b5e27fd3c21` independently applied the same five
+V9 patches in their documented order. Both ordinary binary diff
+serializations matched the six-file SHA-256
+`91b3e8dd5c8c0c01b5953c4c38ca508a150b05cd719f4e80fec293365afddf7f`;
+their `go.mod` and `go.sum` hashes remained
+`82794b69209f2d2e8ad23fccc94a84d07ac46fc99040964a89ff5566e42c8044`
+and `ad753874d566d22c81da097ed3d8d59f2f17ff6e69a437aca914ad178a488efb`.
+Two independently populated module stores passed `go mod verify` while mounted
+read-only with networking disabled in the pinned Linux/arm64 builder at digest
+`sha256:b1a0cc29a7e13e0595e21087eeb930dc494976b18ba68279bf52c665f3170aa0`.
+Two fresh build caches then emitted byte-identical binaries at the V9-bound
+SHA-256 `d72ab6b406a62930083cb9801d74336ea10fd7e871453c19f935252a77dccb18`.
+
+The first copied bind-cache recovery failed closed when its offline verifier
+found missing module metadata. After independent population, Docker Desktop
+left the bind-mounted verification containers before execution in `created`
+state. That same cache route was abandoned after the second failure. A bounded
+named-volume route was used instead. Docker Desktop still could not start a
+no-bind `go version` container; a graceful restart replaced only its Linux VM,
+so the exact enumerated Docker Desktop processes were terminated and the app
+was relaunched once. The daemon then reported healthy version `20.10.23`, and
+all subsequent qualification completed. None of these rejected runs produced
+qualification evidence or touched repository, Beads, lease, or production
+state.
+
+The Go 1.26.2 host runner used `GOPROXY=off`, the exact `gms_pure_go` tag, and
+the cached digest-pinned Dolt/Ryuk images. Every selected bootstrap-claim,
+authority-claim, and authority-lifecycle case passed without a skip in 55.928
+seconds, including pre-effect server denial, rollback and contention, all seven
+nonterminal outcomes, claim lineage, bounded retry, and recursive
+canonical-key rejection. Dolt and Ryuk were terminated and removed. The exact
+reproduced Linux artifact then passed MARS-3 `TestNativeMutatorIntegration` in
+18.345 seconds inside the pinned builder with networking disabled.
+
+`TestPostgresLeaseLifecycleAndRestart` passed without a skip in 0.67 seconds
+against an ephemeral loopback-only PostgreSQL 17.11 container at digest
+`sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0`
+using synthetic test-only roles. The container was stopped and auto-removed;
+`docker ps -a` was empty after qualification. This remains implementation
+evidence pending signed commits and tag, normal-clone public and leak gates,
+exact-head CI, and fresh independent QA and Security review. It grants no
+merge, canonical lifecycle mutation, live lease, or production authority.
