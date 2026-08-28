@@ -12,7 +12,6 @@ package doctrine
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,62 +20,17 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
-	"syscall"
+	"sync"
 	"testing"
 	"time"
 )
 
 const (
-	wave1PlanningGrantFirstCommitFixture = "fc9f6641d0f739a401a4f7be3bc0ee575df1310a"
-	planningGrantTestGitHelperEnv        = "MARS3_TEST_GIT_DESCRIPTOR_HELPER"
-	planningGrantTestGitArgumentsEnv     = "MARS3_TEST_GIT_ARGUMENTS"
-	planningGrantTestGitRootFD           = 3
+	wave1PlanningGrantFirstCommitFixture     = "fc9f6641d0f739a401a4f7be3bc0ee575df1310a"
+	planningGrantTestGitDescriptorTrampoline = `open(my $root, '<&=3') or exit 126; chdir($root) or exit 126; close($root) or exit 126; exec {'/usr/bin/git'} '/usr/bin/git', @ARGV; exit 126;`
 )
 
 var planningGrantTestBeforeGitProcess func()
-
-func TestMain(m *testing.M) {
-	if os.Getenv(planningGrantTestGitHelperEnv) == "1" {
-		os.Exit(runPlanningGrantTestGitDescriptorHelper())
-	}
-	os.Exit(m.Run())
-}
-
-func runPlanningGrantTestGitDescriptorHelper() int {
-	encoded := os.Getenv(planningGrantTestGitArgumentsEnv)
-	raw, err := base64.StdEncoding.DecodeString(encoded)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "invalid bounded Git helper arguments")
-		return 126
-	}
-	var arguments []string
-	if err := json.Unmarshal(raw, &arguments); err != nil || validatePlanningGrantTestGitArguments(arguments) != nil {
-		fmt.Fprintln(os.Stderr, "unadmitted bounded Git helper arguments")
-		return 126
-	}
-	if err := syscall.Fchdir(planningGrantTestGitRootFD); err != nil {
-		fmt.Fprintln(os.Stderr, "bounded Git helper root descriptor is unavailable")
-		return 126
-	}
-	bounded := []string{
-		"-c", "maintenance.auto=false",
-		"-c", "gc.auto=0",
-		"-c", "gc.autoDetach=false",
-		"-c", "maintenance.autoDetach=false",
-	}
-	command := exec.Command("/usr/bin/git", append(bounded, arguments...)...)
-	command.Env = planningGrantGitEnvironment()
-	command.Stdout = os.Stdout
-	command.Stderr = os.Stderr
-	if err := command.Run(); err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			return exitError.ExitCode()
-		}
-		fmt.Fprintln(os.Stderr, "bounded Git helper could not start")
-		return 126
-	}
-	return 0
-}
 
 func TestW001BootstrapGrantAcceptsPinnedSignedContract(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
@@ -1825,6 +1779,82 @@ func TestW001LifecycleCIHardeningV15PathScope(t *testing.T) {
 	} {
 		if w001LifecycleCIHardeningV15PathsAllowed([]string{path}) {
 			t.Fatalf("out-of-scope v15 lifecycle CI hardening path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCIHardeningV16GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIHardeningV16Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v16 lifecycle CI hardening was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV16GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV16Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCIHardeningV15ReviewTag+":refs/tags/"+w001LifecycleCIHardeningV15ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIHardeningV16Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIHardeningV16Path:      tampered,
+		w001LifecycleCIHardeningV16Signature: read(w001LifecycleCIHardeningV16Signature),
+		w001LifecycleCIHardeningV15Path:      read(w001LifecycleCIHardeningV15Path),
+		w001LifecycleCIHardeningV15Signature: read(w001LifecycleCIHardeningV15Signature),
+		wave1PlanningGrantKey:                read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":  read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                  read(canonicalActivePlan),
+		".harness/manifest.yaml":             read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":    read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIHardeningV16Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v16_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v16_signature") {
+		t.Fatalf("tampered v16 lifecycle CI hardening authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV16PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIHardeningV16Path,
+		w001LifecycleCIHardeningV16Signature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIHardeningV16PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v16 lifecycle CI hardening path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCIHardeningV15Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIHardeningV16PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v16 lifecycle CI hardening path was accepted: %s", path)
 		}
 	}
 }
@@ -3615,51 +3645,61 @@ func planningGrantTestGitTryOutput(root string, arguments ...string) ([]byte, er
 }
 
 type planningGrantTestGitInvocation struct {
-	root      string
-	arguments []string
+	mu             sync.Mutex
+	combinedOutput func() ([]byte, error)
 }
 
 func planningGrantTestGitCommand(root string, arguments ...string) (*planningGrantTestGitInvocation, error) {
 	if err := validatePlanningGrantTestGitArguments(arguments); err != nil {
 		return nil, err
 	}
-	if _, err := canonicalPlanningGrantTestRoot(root); err != nil {
-		return nil, err
-	}
-	return &planningGrantTestGitInvocation{root: root, arguments: append([]string(nil), arguments...)}, nil
-}
-
-func (invocation *planningGrantTestGitInvocation) CombinedOutput() ([]byte, error) {
-	return executePlanningGrantTestGitCommand(invocation.root, invocation.arguments)
-}
-
-func executePlanningGrantTestGitCommand(root string, arguments []string) ([]byte, error) {
-	if err := validatePlanningGrantTestGitArguments(arguments); err != nil {
+	if err := validatePlanningGrantTestGitFetchSource(arguments); err != nil {
 		return nil, err
 	}
 	rootHandle, err := openPlanningGrantTestGitRoot(root)
 	if err != nil {
 		return nil, err
 	}
-	defer rootHandle.Close()
-	rawArguments, err := json.Marshal(arguments)
-	if err != nil {
-		return nil, fmt.Errorf("encode bounded Git arguments: %w", err)
+	admittedArguments := append([]string(nil), arguments...)
+	return &planningGrantTestGitInvocation{combinedOutput: func() ([]byte, error) {
+		defer rootHandle.Close()
+		if err := validatePlanningGrantTestGitArguments(admittedArguments); err != nil {
+			return nil, err
+		}
+		if err := validatePlanningGrantTestGitFetchSource(admittedArguments); err != nil {
+			return nil, err
+		}
+		if planningGrantTestBeforeGitProcess != nil {
+			planningGrantTestBeforeGitProcess()
+		}
+		bounded := []string{
+			"-c", "maintenance.auto=false",
+			"-c", "gc.auto=0",
+			"-c", "gc.autoDetach=false",
+			"-c", "maintenance.autoDetach=false",
+		}
+		perlArguments := []string{"-f", "-e", planningGrantTestGitDescriptorTrampoline, "--"}
+		perlArguments = append(perlArguments, bounded...)
+		perlArguments = append(perlArguments, admittedArguments...)
+		command := exec.Command("/usr/bin/perl", perlArguments...)
+		command.ExtraFiles = []*os.File{rootHandle}
+		command.Env = planningGrantTestGitEnvironment()
+		return command.CombinedOutput()
+	}}, nil
+}
+
+func (invocation *planningGrantTestGitInvocation) CombinedOutput() ([]byte, error) {
+	if invocation == nil {
+		return nil, errors.New("bounded Git invocation is unavailable or already consumed")
 	}
-	executable, err := os.Executable()
-	if err != nil {
-		return nil, fmt.Errorf("resolve bounded Git descriptor helper: %w", err)
+	invocation.mu.Lock()
+	defer invocation.mu.Unlock()
+	if invocation.combinedOutput == nil {
+		return nil, errors.New("bounded Git invocation is unavailable or already consumed")
 	}
-	if planningGrantTestBeforeGitProcess != nil {
-		planningGrantTestBeforeGitProcess()
-	}
-	command := exec.Command(executable, "-test.run=^$")
-	command.ExtraFiles = []*os.File{rootHandle}
-	command.Env = append(planningGrantGitEnvironment(),
-		planningGrantTestGitHelperEnv+"=1",
-		planningGrantTestGitArgumentsEnv+"="+base64.StdEncoding.EncodeToString(rawArguments),
-	)
-	return command.CombinedOutput()
+	combinedOutput := invocation.combinedOutput
+	invocation.combinedOutput = nil
+	return combinedOutput()
 }
 
 func canonicalPlanningGrantTestRoot(root string) (string, error) {
@@ -3702,6 +3742,43 @@ func openPlanningGrantTestGitRoot(root string) (*os.File, error) {
 		return nil, errors.New("disposable Git root descriptor is not bound to the canonical directory")
 	}
 	return handle, nil
+}
+
+func validatePlanningGrantTestGitFetchSource(arguments []string) error {
+	for index, argument := range arguments {
+		if argument != "fetch" {
+			continue
+		}
+		if index+3 >= len(arguments) {
+			return errors.New("bounded Git fetch source is missing")
+		}
+		source := filepath.Clean(arguments[index+3])
+		canonicalSource, err := canonicalPlanningGrantTestRoot(source)
+		if err != nil || !filepath.IsAbs(source) || source != canonicalSource {
+			return errors.New("bounded Git fetch source must be one canonical local directory")
+		}
+		return nil
+	}
+	return nil
+}
+
+func planningGrantTestGitEnvironment() []string {
+	return []string{
+		"GIT_ALLOW_PROTOCOL=file",
+		"GIT_ATTR_NOSYSTEM=1",
+		"GIT_CONFIG_GLOBAL=" + os.DevNull,
+		"GIT_CONFIG_NOSYSTEM=1",
+		"GIT_NO_REPLACE_OBJECTS=1",
+		"GIT_OPTIONAL_LOCKS=0",
+		"GIT_PROTOCOL_FROM_USER=0",
+		"GIT_TERMINAL_PROMPT=0",
+		"HOME=/nonexistent",
+		"LC_ALL=C",
+		"PATH=/usr/bin:/bin",
+		"PERL5LIB=",
+		"PERL5OPT=",
+		"TMPDIR=/tmp",
+	}
 }
 
 func validatePlanningGrantTestGitArguments(arguments []string) error {
@@ -3882,6 +3959,12 @@ func TestPlanningGrantTestGitCommandRejectsAmbientExecutionInjection(t *testing.
 	t.Setenv("GIT_CONFIG_COUNT", "1")
 	t.Setenv("GIT_CONFIG_KEY_0", "maintenance.auto")
 	t.Setenv("GIT_CONFIG_VALUE_0", "true")
+	t.Setenv("GIT_ALLOW_PROTOCOL", "ext:ssh:http:https:file")
+	t.Setenv("PERL5LIB", execRoot)
+	t.Setenv("PERL5OPT", "-MDefinitelyMissingMars3TestModule")
+	t.Setenv("LD_PRELOAD", "/nonexistent/mars3-test-loader.so")
+	t.Setenv("DYLD_INSERT_LIBRARIES", "/nonexistent/mars3-test-loader.dylib")
+	t.Setenv("PATH", execRoot)
 	clone := filepath.Join(root, "repo")
 	initializePlanningGrantTestRepository(t, clone, source, "HEAD")
 	runPlanningGrantTestGit(t, clone, "checkout", "--quiet", "--force", "--detach", "FETCH_HEAD")
@@ -3954,6 +4037,63 @@ func TestPlanningGrantTestGitCommandBindsCanonicalRootDescriptor(t *testing.T) {
 		}
 	})
 
+	t.Run("replacement between admission and execution", func(t *testing.T) {
+		root := filepath.Join(parent, "admitted-repo")
+		if err := os.Mkdir(root, 0o700); err != nil {
+			t.Fatal(err)
+		}
+		command, err := planningGrantTestGitCommand(root, "init", "--quiet")
+		if err != nil {
+			t.Fatal(err)
+		}
+		held := filepath.Join(parent, "admitted-held-repo")
+		if err := os.Rename(root, held); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Symlink(outside, root); err != nil {
+			t.Fatal(err)
+		}
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("admission-bound Git command failed after pathname replacement: %v: %s", err, output)
+		}
+		if _, err := os.Lstat(filepath.Join(outside, ".git")); !os.IsNotExist(err) {
+			t.Fatalf("post-admission path replacement redirected Git outside the bound root: %v", err)
+		}
+		if _, err := os.Lstat(filepath.Join(held, ".git")); err != nil {
+			t.Fatalf("admission-bound Git command missed the held physical root: %v", err)
+		}
+		if _, err := command.CombinedOutput(); err == nil {
+			t.Fatal("one-shot bounded Git invocation was reused")
+		}
+	})
+
+	t.Run("one-shot invocation under contention", func(t *testing.T) {
+		root := filepath.Join(parent, "contended-repo")
+		if err := os.Mkdir(root, 0o700); err != nil {
+			t.Fatal(err)
+		}
+		command, err := planningGrantTestGitCommand(root, "init", "--quiet")
+		if err != nil {
+			t.Fatal(err)
+		}
+		results := make(chan error, 2)
+		for range 2 {
+			go func() {
+				_, runErr := command.CombinedOutput()
+				results <- runErr
+			}()
+		}
+		succeeded := 0
+		for range 2 {
+			if runErr := <-results; runErr == nil {
+				succeeded++
+			}
+		}
+		if succeeded != 1 {
+			t.Fatalf("one-shot bounded Git invocation succeeded %d times, want 1", succeeded)
+		}
+	})
+
 	t.Run("ancestor replacement after descriptor binding", func(t *testing.T) {
 		container := planningGrantCanonicalTempDir(t)
 		ancestor := filepath.Join(container, "ancestor")
@@ -4009,6 +4149,8 @@ func TestPlanningGrantTestGitArgumentsFailClosed(t *testing.T) {
 		{"clone", "-u/tmp/hostile-upload-pack", "source", "target"},
 		{"clone", "--separate-git-dir=/tmp/outside", "source", "target"},
 		{"clone", "--quiet", "--no-local", "/tmp/source", "/tmp/outside"},
+		{"fetch", "--quiet", "--no-tags", "https://example.com/repository.git", "HEAD"},
+		{"fetch", "--quiet", "--no-tags", "ssh://example.com/repository.git", "HEAD"},
 		{"remote", "add", "hostile", "/tmp/source"},
 		{"config", "--local", "maintenance.auto", "true"},
 		{"config", "--global", "gc.auto", "999"},
@@ -4017,6 +4159,17 @@ func TestPlanningGrantTestGitArgumentsFailClosed(t *testing.T) {
 			t.Fatalf("unsafe disposable Git arguments were accepted: %v", arguments)
 		}
 	}
+	t.Run("symlinked fetch source", func(t *testing.T) {
+		root := planningGrantCanonicalTempDir(t)
+		source := planningGrantCanonicalTempDir(t)
+		alias := filepath.Join(planningGrantCanonicalTempDir(t), "source-alias")
+		if err := os.Symlink(source, alias); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := planningGrantTestGitCommand(root, "fetch", "--quiet", "--no-tags", alias, "HEAD"); err == nil {
+			t.Fatal("symlinked bounded Git fetch source was admitted")
+		}
+	})
 }
 
 func TestPlanningGrantTestProcessInvocationsFailClosedRepositoryWide(t *testing.T) {
@@ -4085,6 +4238,13 @@ func TestAttack() {}
 		"nested_exec_cmd": `package nested
 import "os/exec"
 func TestAttack() { _ = (&exec.Cmd{Path: "/usr/bin/git", Args: []string{"git", "status"}}).Run() }
+`,
+		"removed_descriptor_helper": `package doctrine
+func TestAttack() { _ = runPlanningGrantTestGitDescriptorHelper() }
+`,
+		"dynamic_executable": `package doctrine
+import "os/exec"
+func TestAttack(path string) { _ = exec.Command(path, "status") }
 `,
 	}
 	for name, attack := range attacks {

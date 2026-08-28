@@ -1,0 +1,116 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCIHardeningGrant
+
+grant:
+  id: W-001-lifecycle-ci-hardening-v16
+  classification: PUBLIC
+  issuedAt: 2026-08-28T11:11:48Z
+  expiresAt: 2026-08-31T11:11:48Z
+  repository: greaveselliott/MARS-3
+  baseCommit: a46f16deff2fc06c5d0d21377a3bb2c65e873fc9
+  baseTree: c2e482717f182040708cbf2551ee266de2485a30
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-ci-hardening-v15
+  priorGrantSHA256: b751be17403e0b41f75d853e0d8a4e6baa61101436a94bf61c47b42366ac409b
+  priorGrantSignatureSHA256: de2e0c92114e3aa4a4639206caa8a97d1ec39e8ab819989c7335c0df107e458e
+  priorReviewTag: mars3/w001-lifecycle-completion-v15
+  priorReviewTagObject: 71230aed1661a987dbd1b63b058180a6b33f7825
+  priorReviewTagTarget: a46f16deff2fc06c5d0d21377a3bb2c65e873fc9
+  priorReviewTagTree: c2e482717f182040708cbf2551ee266de2485a30
+  priorRun: 33165311496
+  priorJob: 98829194619
+  priorQADisposition: changes-requested
+  priorSecurityDisposition: changes-requested
+  pullRequest: 10
+  successorReviewTag: mars3/w001-lifecycle-completion-v16
+  successorReviewTagMessage: MARS-3 W-001 lifecycle CI closed descriptor launcher attestation v16
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: foundation-maintainer
+  failureOwnership: foundation
+  purpose: close descriptor-helper provenance and executable-image substitution bypasses
+  attemptId: w001-lifecycle-ci-hardening-v16
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  allowedEffects:
+    - preserve-the-v9-runtime-qualification-and-v10-v15-immutable-history-runs-and-dispositions
+    - remove-the-self-executable-descriptor-helper-TestMain-mode-and-environment-argument-channel
+    - launch-only-the-exact-system-Perl-descriptor-trampoline-with-fixed-non-input-code
+    - have-that-trampoline-fchdir-only-to-inherited-root-descriptor-three-and-exec-only-literal-usr-bin-git
+    - reject-dynamic-test-process-executables-and-direct-or-transitive-calls-to-removed-helper-surfaces
+    - restrict-test-Git-fetch-sources-to-canonical-local-directories-and-the-file-protocol
+    - retain-and-extend-all-v10-v15-environment-argv-process-and-physical-path-regressions
+    - update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening
+    - reproduce-the-pinned-v9-native-Beads-artifact-and-non-skipped-conformance-without-changing-patch-bytes
+    - create-signed-semantic-commits-and-one-signed-v16-release-manager-review-tag
+    - push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-ci-hardening-v16.yaml
+    - .harness/grants/W-001-lifecycle-ci-hardening-v16.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged
+    - no-test-process-executes-the-Go-test-image-or-selects-helper-mode-from-the-environment
+    - the-only-test-Git-process-constructor-uses-one-literal-system-executable-and-one-byte-exact-trampoline
+    - the-trampoline-consumes-no-code-or-command-from-input-and-enters-only-inherited-root-descriptor-three
+    - root-or-ancestor-replacement-cannot-redirect-any-admitted-test-Git-process
+    - direct-helper-calls-dynamic-executables-and-unexpected-process-callers-fail-closed-under-recursive-admission
+    - fetch-accepts-only-canonical-local-directories-with-network-protocols-disabled
+    - process-and-path-enumeration-fails-closed-on-unreadable-unparseable-or-symlinked-surfaces
+    - v15-QA-and-Security-changes-requested-dispositions-remain-durable
+    - the-next-public-run-uses-the-exact-signed-v16-tree-and-tag
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged
+  prohibitedEffects:
+    - modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract
+    - mutate-M3-W001-or-any-other-Bead
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - rerun-or-move-any-v9-v10-v11-v12-v13-v14-or-v15-commit-tag-or-run
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - ci.test_git_descriptor_helper_transitive_bypass
+    - ci.test_git_helper_executable_path_toctou
+  provenanceFinding: a same-package test could directly call the allowlisted helper with ambient environment and descriptor state
+  imageFinding: the mutable test-executable pathname was resolved before a deterministic substitution hook and executed without image binding
+  nextAction: prospective-fixed-descriptor-trampoline-and-closed-test-process-call-graph
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-ci-hardening-v16
+  detachedSignature: W-001-lifecycle-ci-hardening-v16.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

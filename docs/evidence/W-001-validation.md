@@ -1134,3 +1134,93 @@ canary, then found no leak in the exact V15 worktree or all 91 commits of
 public history. This checkpoint and its qualification remain implementation
 evidence, not QA or Security acceptance, merge authority, canonical lifecycle
 authority, or lease authority.
+
+### V15 immutable review and V16 closed launcher
+
+The signed V15 evidence commit is
+`a46f16deff2fc06c5d0d21377a3bb2c65e873fc9`, tree
+`c2e482717f182040708cbf2551ee266de2485a30`. Signed annotated tag object
+`71230aed1661a987dbd1b63b058180a6b33f7825` targets that exact commit and
+tree. Public run `33165311496`, job `98829194619`, passed every required gate.
+Independent QA and Security both returned `changes-requested` on that immutable
+subject despite the green gates:
+
+- `ci.test_git_descriptor_helper_transitive_bypass`: a same-package test could
+  call `runPlanningGrantTestGitDescriptorHelper` directly with ambient
+  environment and descriptor state, bypassing the wrapper's root-admission
+  provenance;
+- `ci.test_git_helper_executable_path_toctou`: the wrapper resolved
+  `os.Executable`, invoked its deterministic mutation hook, and then executed
+  the earlier unpinned pathname, while the AST allowlist represented every
+  dynamic executable expression identically.
+
+Both reviewers confirmed that V15 closed all three V14 findings. Their fresh
+normal-clone validation also passed the four validators, full package tests,
+focused ten-repeat and race suites, vet, whitespace, signatures, topology,
+seven-path scope, exact tag/run binding, and independent reproducible builds.
+The V9 native artifact remained `d72ab6b406a62930083cb9801d74336ea10fd7e871453c19f935252a77dccb18`;
+its selected native suites and project integration passed without skips. The
+ephemeral digest-pinned PostgreSQL 17.11 lifecycle suite also passed without a
+skip and removed its container. These passing results do not override either
+source-boundary finding.
+
+The signed `W-001-lifecycle-ci-hardening-v16` grant binds the exact V15 head,
+tree, tag object, public run, and both changes-requested dispositions. Its grant
+SHA-256 is `95fa2caa2befd270ed15f9c317a37ceec442b70c0826a869323d34c3d612d835`;
+its detached-signature SHA-256 is
+`26711612175f7969ec168159e535e7b6b7273641690ed4c486e609cddaa844e5`.
+The signature verifies under namespace
+`mars3-w001-lifecycle-ci-hardening-v16` with the pinned ED25519 fingerprint.
+It authorizes exactly seven paths and no merge, canonical Beads mutation, live
+lease, production effect, workflow or repository-control change.
+
+The V16 implementation removes the environment-selected `TestMain` mode,
+`os.Executable`, and the directly callable descriptor helper. The command
+constructor now validates its closed argv and canonical local fetch source,
+opens and verifies the root descriptor at invocation admission, and captures
+that handle inside a one-shot closure. Execution invokes literal
+`/usr/bin/perl` with one byte-exact, non-input program: it aliases inherited fd
+3, changes directory through that descriptor, closes the descriptor, and uses
+list-form `exec` of literal `/usr/bin/git` with only the already admitted argv.
+The launcher receives a fixed environment with only file transport admitted;
+ambient Git, Perl, loader, editor, shell, and executable-path inputs are absent.
+The recursive AST gate now rejects every dynamic process executable and every
+reference to the removed helper, and adversarial fixtures cover both cases plus
+network fetch sources. Root or ancestor replacement after command admission
+therefore cannot redirect the Git process.
+
+The exact pre-commit V16 bytes passed the focused grant, descriptor-admission,
+root/ancestor replacement, one-shot contention, environment, fetch, and
+recursive process suite ten consecutive times in 27.537 seconds. The same
+boundary suite passed under the Go race detector in 5.336 seconds. The complete
+project suite passed with only the known linked-worktree `.git` public-root
+subtest excluded; `internal/doctrine` completed in 87.028 seconds. `go vet
+./...`, `git diff --check`, and rebuilt doctrine, plan, and doc-sync validators
+passed. Public-check remains intentionally deferred to a normal clone because
+the delivery worktree represents `.git` as a link file outside the public
+source roots.
+
+Two new independent local clones of pinned Beads commit
+`6c124203e771433a3550c348771a5b5e27fd3c21` applied the five unchanged patches
+in their documented order. Both six-file source diffs matched
+`91b3e8dd5c8c0c01b5953c4c38ca508a150b05cd719f4e80fec293365afddf7f`;
+their `go.mod` and `go.sum` hashes remained
+`82794b69209f2d2e8ad23fccc94a84d07ac46fc99040964a89ff5566e42c8044`
+and `ad753874d566d22c81da097ed3d8d59f2f17ff6e69a437aca914ad178a488efb`.
+Distinct module and fresh build caches passed `go mod verify` with networking
+disabled in the pinned Linux/arm64 builder. Both outputs were byte-identical at
+`d72ab6b406a62930083cb9801d74336ea10fd7e871453c19f935252a77dccb18`.
+The selected bootstrap, authority-claim, and lifecycle suite passed every case
+without a skip against the digest-pinned Dolt container in 52.684 seconds and
+removed its containers. That exact Linux artifact passed MARS-3
+`TestNativeMutatorIntegration` inside the network-disabled pinned builder in
+12.004 seconds.
+
+The non-skipped `TestPostgresLeaseLifecycleAndRestart` suite passed against an
+ephemeral loopback-only PostgreSQL 17.11 container at digest
+`sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0`.
+The test itself completed in 0.61 seconds; the container was stopped and
+auto-removed. The digest-pinned, network-disabled Gitleaks image detected the
+existing synthetic canary with exit 42 and found no leak in the exact V16
+worktree. No canonical Beads workspace, live lease, production service, or
+repository setting was read or mutated by these qualifications.

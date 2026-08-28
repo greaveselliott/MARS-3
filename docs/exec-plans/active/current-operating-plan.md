@@ -156,8 +156,8 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the v15 descriptor-bound Git and closed
-  process-import lifecycle correction to a signed immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
+- Required next transition: bind the v16 closed descriptor launcher and
+  recursive process-provenance lifecycle correction to a signed immutable checkpoint, execute the non-skipped native Beads and PostgreSQL
   conformance suites plus independent cold-build reproduction, then route that exact tree through QA and Security. No
   canonical handoff or later lifecycle mutation may execute until the reviewed
   tree is merged and a separate reconciliation authority binds the
@@ -299,6 +299,22 @@ verified physical root, rejecting dot/blank guarded process imports, retaining
 the prior adversarial corpus, reproducing the pinned V9 native qualification,
 and fresh immutable review. W-001 therefore remains `in-progress`; no merge,
 canonical lifecycle mutation, or live lease is authorized by this correction.
+
+Independent QA and Security changes-requested the immutable V15 checkpoint at
+head `a46f16deff2fc06c5d0d21377a3bb2c65e873fc9`, tree
+`c2e482717f182040708cbf2551ee266de2485a30`, after public run `33165311496`,
+job `98829194619`, passed. The V14 findings were closed, but the new descriptor
+helper could be called directly outside its intended parent provenance
+(`ci.test_git_descriptor_helper_transitive_bypass`), and its mutable Go test
+executable pathname could be replaced between resolution and execution
+(`ci.test_git_helper_executable_path_toctou`). The prospective signed
+`W-001-lifecycle-ci-hardening-v16` grant permits only removing that self-exec
+helper surface, opening the root descriptor at command admission, using one
+fixed non-input descriptor trampoline and literal system executables, rejecting
+dynamic or transitive process bypasses, restricting fetch to canonical local
+sources, and fresh qualification and review. W-001 therefore remains
+`in-progress`; no merge, canonical lifecycle mutation, or live lease is
+authorized by this correction.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation
