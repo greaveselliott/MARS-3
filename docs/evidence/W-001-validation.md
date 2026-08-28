@@ -1224,3 +1224,26 @@ auto-removed. The digest-pinned, network-disabled Gitleaks image detected the
 existing synthetic canary with exit 42 and found no leak in the exact V16
 worktree. No canonical Beads workspace, live lease, production service, or
 repository setting was read or mutated by these qualifications.
+
+The signed V16 implementation checkpoint is commit
+`3cc199b4e165780067f1891d193ff1a54eadfe23`, tree
+`8846e5792f87c3147daee10ba21a7cc0c3b6071e`, with sole parent the exact V15
+head. Its diff contains exactly the seven V16-authorized paths and remains
+empty for `api/**`, `internal/authority/**`, `database/**`, `.github/**`,
+`go.mod`, and `go.sum`. The commit signature verifies as
+`engineer@example.com` with the pinned ED25519 fingerprint.
+
+A first disposable normal clone was intentionally rejected after its exact
+commit was checked out with detached `HEAD`; the lifecycle validator admits
+only the signed review branch or accepted `main`. Switching that same exact
+clone to local branch `codex/w-001-lifecycle-completion` preserved the commit
+and tree and made the checkout contract truthful. The unmodified
+`go test ./... -count=1` then passed every package; `internal/doctrine`
+completed in 99.225 seconds. `go vet ./...`, all four rebuilt validators,
+whitespace, show-check, commit-signature verification, and a clean checkout
+also passed. The digest-pinned, network-disabled Gitleaks image found no leak in
+the exact implementation worktree or all 93 commits of its public history.
+This is qualified implementation evidence pending the final evidence commit,
+signed V16 tag, exact-head public run, and fresh independent QA and Security
+review. It grants no merge, canonical lifecycle, live lease, or production
+authority.
