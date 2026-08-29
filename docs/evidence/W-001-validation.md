@@ -1583,3 +1583,53 @@ every package; `internal/doctrine` completed in 110.115 seconds. `go vet ./...`,
 checkout verification passed. This is qualified prospective implementation
 evidence only, pending a signed evidence checkpoint, distinct recovery tag,
 one fresh exact-head public run, and fresh independent QA then Security review.
+
+### Authority-recovery QA disposition and rejected-tag preservation
+
+The signed authority-recovery evidence checkpoint is head
+`5251ae37a2914e9f750d4c5900f46c7bb736b2d9`, tree
+`82a4a84cae31d0003aecddf654217cbfb2bd29a6`, with signed annotated recovery
+tag object `f561cb14a471e0cc773ba6b4bd81308ee8f0d873`. Exact-head public run
+`33224636939`, job `99025722797`, passed every doctrine, plan, DocSync, public,
+test/vet, whitespace, signature, canary, worktree-scan, and history-scan step.
+
+Independent QA returned `changes-requested` with
+`QA-W001-RECOVERY-001`. The original rejected retirement tag object
+`e08beb772696b078783d0c75d23c1029581cdeb1` was unreachable from every
+durable remote ref and absent from a fresh clone, even though evidence claimed
+both retirement tag objects were preserved. Security was not run because QA
+did not accept. All passing recovery evidence remains immutable but the
+recovery attempt is unaccepted.
+
+The rejected object still exists byte-for-byte in the governed source object
+database. It is an annotated tag whose original tag name is
+`mars3/w001-lifecycle-test-harness-retirement-v1`, target is
+`ce9d0e7e82a33350263acd6199219a5349ef9bce`, target tree is
+`3d6a1c44fa076d4755ec96c5755b45deae7a1ee5`, tagger is
+`MARS-3 Work Authority Engineer <engineer@example.com>`, message is
+`MARS-3 W-001 lifecycle test-harness retirement attestation v1`, and signature
+verifies with the pinned ED25519 key. It remains rejected and unaccepted.
+
+The prospective signed `W-001-lifecycle-evidence-preservation-v1` grant binds
+exact recovery head `5251ae37a2914e9f750d4c5900f46c7bb736b2d9` and tree
+`82a4a84cae31d0003aecddf654217cbfb2bd29a6`. Its grant SHA-256 is
+`c8a1741d3b5a53e563999b825cded8819618ca554172ea9d2c9d4edf92fc6bda`;
+its detached-signature SHA-256 is
+`3dd30a5c213fe762f0dc093fb303f717abe26d7652529347160236cfc04950ac`.
+The detached signature verifies under namespace
+`mars3-w001-lifecycle-evidence-preservation-v1` with pinned fingerprint
+`SHA256:i5VSHF257DhXJ5l/9oOUGHnT2mrqgXYSMryQHRsSBx8`. Signed grant-only commit
+`fd9e093bc3cc6a282fea3362e3058fba3e310d2c`, tree
+`36c8580fcd21fbe89ba27430e35626ec76e4a453`, was committed at
+`2026-08-29T01:05:53Z`, after the `2026-08-29T01:04:40Z` issue time.
+
+The grant authorizes publication of the existing rejected tag object under the
+distinct archival ref
+`refs/tags/mars3/w001-lifecycle-test-harness-retirement-rejected-v1`. The ref
+already resolves locally to exact object `e08beb772696b078783d0c75d23c1029581cdeb1`,
+target `ce9d0e7e82a33350263acd6199219a5349ef9bce`, and tree
+`3d6a1c44fa076d4755ec96c5755b45deae7a1ee5`. It is not a current review tag,
+does not authorize or accept the object, and must become fetchable from a fresh
+clone before QA may accept. W-001 remains `in-progress`; Security, merge,
+Beads/lease mutation, reconciliation, production change, and downstream work
+remain pending or unauthorized as applicable.

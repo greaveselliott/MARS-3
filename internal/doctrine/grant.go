@@ -316,6 +316,18 @@ const (
 	w001LifecycleRetirementTagObject             = "60edcd3fd4603d66d7dd4feedbdae034fff13efa"
 	w001LifecycleAuthorityRecoveryReviewTag      = "mars3/w001-lifecycle-authority-recovery-v1"
 	w001LifecycleAuthorityRecoveryTagMessage     = "MARS-3 W-001 lifecycle prospective authority recovery attestation v1"
+	w001LifecycleEvidencePreservationPath        = ".harness/grants/W-001-lifecycle-evidence-preservation-v1.yaml"
+	w001LifecycleEvidencePreservationSignature   = ".harness/grants/W-001-lifecycle-evidence-preservation-v1.yaml.sig"
+	w001LifecycleEvidencePreservationNamespace   = "mars3-w001-lifecycle-evidence-preservation-v1"
+	w001LifecycleEvidencePreservationBase        = "5251ae37a2914e9f750d4c5900f46c7bb736b2d9"
+	w001LifecycleEvidencePreservationBaseTree    = "82a4a84cae31d0003aecddf654217cbfb2bd29a6"
+	w001LifecycleAuthorityRecoveryTagObject      = "f561cb14a471e0cc773ba6b4bd81308ee8f0d873"
+	w001LifecycleRejectedRetirementTagObject     = "e08beb772696b078783d0c75d23c1029581cdeb1"
+	w001LifecycleRejectedRetirementTagTarget     = "ce9d0e7e82a33350263acd6199219a5349ef9bce"
+	w001LifecycleRejectedRetirementTagTree       = "3d6a1c44fa076d4755ec96c5755b45deae7a1ee5"
+	w001LifecycleRejectedRetirementArchiveTag    = "mars3/w001-lifecycle-test-harness-retirement-rejected-v1"
+	w001LifecycleEvidencePreservationReviewTag   = "mars3/w001-lifecycle-evidence-preservation-v1"
+	w001LifecycleEvidencePreservationTagMessage  = "MARS-3 W-001 lifecycle rejected-evidence preservation attestation v1"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -3954,6 +3966,121 @@ var w001LifecycleAuthorityRecoverySequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001LifecycleEvidencePreservationScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleEvidencePreservationGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-evidence-preservation-v1"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-29T01:04:40Z"},
+	{path: "grant.expiresAt", value: "2026-09-01T01:04:40Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleEvidencePreservationBase},
+	{path: "grant.baseTree", value: w001LifecycleEvidencePreservationBaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-authority-recovery-v1"},
+	{path: "grant.priorGrantSHA256", value: "68e8051b477eb9bd3c6846874794b9e83e5e4341f5784eb3569dc6c598c0150f"},
+	{path: "grant.priorGrantSignatureSHA256", value: "5eb415fbed952821daaebb10736b70a045ca6f1ee8e2e24834446436b81eea3b"},
+	{path: "grant.priorReviewTag", value: w001LifecycleAuthorityRecoveryReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleAuthorityRecoveryTagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleEvidencePreservationBase},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleEvidencePreservationBaseTree},
+	{path: "grant.priorRun", value: "33224636939"},
+	{path: "grant.priorJob", value: "99025722797"},
+	{path: "grant.priorRunDisposition", value: "success"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "not-run"},
+	{path: "grant.qaFinding", value: "QA-W001-RECOVERY-001"},
+	{path: "grant.archivalObject", value: w001LifecycleRejectedRetirementTagObject},
+	{path: "grant.archivalObjectType", value: "tag"},
+	{path: "grant.archivalTarget", value: w001LifecycleRejectedRetirementTagTarget},
+	{path: "grant.archivalTargetTree", value: w001LifecycleRejectedRetirementTagTree},
+	{path: "grant.archivalOriginalTag", value: w001LifecycleTestHarnessRetirementReviewTag},
+	{path: "grant.archivalOriginalTagMessage", value: w001LifecycleTestHarnessRetirementTagMessage},
+	{path: "grant.archivalOriginalTagger", value: "MARS-3 Work Authority Engineer <engineer@example.com>"},
+	{path: "grant.archivalRef", value: "refs/tags/" + w001LifecycleRejectedRetirementArchiveTag},
+	{path: "grant.successorReviewTag", value: w001LifecycleEvidencePreservationReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleEvidencePreservationTagMessage},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "preserve the exact rejected retirement tag object under a durable immutable ref without accepting or rewriting it"},
+	{path: "grant.attemptId", value: "w001-lifecycle-evidence-preservation-v1"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.preservationFinding", value: "the rejected retirement tag object was unreachable from every durable remote ref and absent from a fresh clone"},
+	{path: "findings.recoveryDecision", value: "publish the existing object under one distinct immutable archival ref without recreating accepting or rewriting it"},
+	{path: "findings.nextAction", value: "prospective-rejected-evidence-preservation-only"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleEvidencePreservationNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-evidence-preservation-v1.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleEvidencePreservationSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-authority-recovery-head-tree-tag-run-and-QA-disposition-immutably",
+		"publish-the-existing-e08beb-tag-object-byte-for-byte-under-the-distinct-archival-ref",
+		"verify-the-archived-object-original-target-tree-tagger-message-and-pinned-key-signature",
+		"keep-the-archival-ref-separate-from-current-review-tags-and-mark-the-object-rejected-and-unaccepted",
+		"update-only-the-new-grant-manifest-plan-evidence-validator-and-focused-regression",
+		"create-signed-semantic-commits-and-one-distinct-signed-evidence-preservation-review-tag",
+		"push-the-existing-review-branch-archival-ref-and-new-review-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleEvidencePreservationPath, w001LifecycleEvidencePreservationSignature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"every-new-preservation-commit-is-signed-and-chronologically-prospective",
+		"the-e08beb-object-is-fetchable-from-a-fresh-clone-through-the-exact-distinct-archival-ref",
+		"the-archival-object-remains-byte-exact-with-its-original-tag-name-target-tree-tagger-message-and-signature",
+		"the-archival-ref-is-never-selected-as-a-current-review-tag-or-treated-as-acceptance-evidence",
+		"the-authority-recovery-candidate-tag-run-and-QA-changes-requested-disposition-remain-immutable",
+		"the-retirement-design-deterministic-Git-fixture-and-prospective-chronology-rule-remain-unchanged",
+		"runtime-database-native-patch-workflow-dependency-product-and-authority-bytes-remain-unchanged",
+		"the-next-public-run-uses-the-exact-signed-evidence-preservation-tree-and-distinct-review-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"recreate-resign-rewrite-delete-or-move-the-e08beb-object-or-any-existing-commit-tag-run-review-or-evidence",
+		"point-the-existing-retirement-or-authority-recovery-tag-at-a-different-object",
+		"authorize-or-accept-the-rejected-retirement-tag-or-the-unaccepted-retirement-or-recovery-attempts",
+		"modify-the-retired-test-harness-design-or-add-process-helper-path-provenance-hardening",
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-approval-policy-or-dependencies",
+		"start-P001-or-any-downstream-ticket",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"findings.codes":     {"QA-W001-RECOVERY-001"},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -6712,6 +6839,7 @@ func w001LifecycleTestHarnessRetirementActive(root string) bool {
 
 func checkW001LifecycleTestHarnessRetirementGrant(root string, findings *[]Finding) {
 	recoveryActive := w001LifecycleAuthorityRecoveryActive(root)
+	preservationActive := w001LifecycleEvidencePreservationActive(root)
 	if recoveryActive {
 		defer checkW001LifecycleAuthorityRecoveryGrant(root, findings)
 	}
@@ -6826,15 +6954,18 @@ func checkW001LifecycleTestHarnessRetirementGrant(root string, findings *[]Findi
 	}
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
 	if planErr != nil || (!recoveryActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-test-harness-retirement-v1`"))) ||
-		(recoveryActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-authority-recovery-v1`"))) ||
+		(recoveryActive && !preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-authority-recovery-v1`"))) ||
+		(preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`"))) ||
 		!bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_test_harness_retirement_plan", "active plan must select the truthful retirement attempt")
 	}
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
 	if manifestErr != nil || (!recoveryActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-test-harness-retirement-v1")) ||
 		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-test-harness-retirement-v1")))) ||
-		(recoveryActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-authority-recovery-v1")) ||
+		(recoveryActive && !preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-authority-recovery-v1")) ||
 			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-authority-recovery-v1")))) ||
+		(preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
+			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-evidence-preservation-v1")))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_test_harness_retirement_manifest", "manifest must project the retirement attempt and absent live lease")
 	}
@@ -6846,6 +6977,10 @@ func w001LifecycleAuthorityRecoveryActive(root string) bool {
 }
 
 func checkW001LifecycleAuthorityRecoveryGrant(root string, findings *[]Finding) {
+	preservationActive := w001LifecycleEvidencePreservationActive(root)
+	if preservationActive {
+		defer checkW001LifecycleEvidencePreservationGrant(root, findings)
+	}
 	data, err := readRepoFile(root, w001LifecycleAuthorityRecoveryPath)
 	if err != nil {
 		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_missing", "signed lifecycle authority-recovery grant is required")
@@ -6931,16 +7066,124 @@ func checkW001LifecycleAuthorityRecoveryGrant(root string, findings *[]Finding) 
 		addFinding(findings, "internal/doctrine/grant.go", "public.w001_lifecycle_authority_recovery_chronology", "commit-specific retrospective grant admission must be absent")
 	}
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
-	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-authority-recovery-v1`")) ||
+	if planErr != nil || (!preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-authority-recovery-v1`"))) ||
+		(preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`"))) ||
 		!bytes.Contains(plan, []byte("unaccepted recovery preimage")) ||
 		!bytes.Contains(plan, []byte("W-001 remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_authority_recovery_plan", "active plan must select prospective recovery while W-001 remains in-progress")
 	}
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
-	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-authority-recovery-v1")) ||
-		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-authority-recovery-v1")) ||
+	if manifestErr != nil || (!preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-authority-recovery-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-authority-recovery-v1")))) ||
+		(preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
+			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-evidence-preservation-v1")))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_authority_recovery_manifest", "manifest must project prospective authority recovery and absent live lease")
+	}
+}
+
+func w001LifecycleEvidencePreservationActive(root string) bool {
+	_, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleEvidencePreservationPath)))
+	return err == nil
+}
+
+func checkW001LifecycleEvidencePreservationGrant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001LifecycleEvidencePreservationPath)
+	if err != nil {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_missing", "signed lifecycle evidence-preservation grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleEvidencePreservationScalars, w001LifecycleEvidencePreservationSequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleEvidencePreservationScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_value", "%s does not match the signed evidence-preservation contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleEvidencePreservationSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_sequence", "%s must equal the exact ordered evidence-preservation contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_expiry", "evidence-preservation grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleEvidencePreservationSignature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleEvidencePreservationSignature, "public.w001_lifecycle_evidence_preservation_signature_missing", "detached evidence-preservation signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_evidence_preservation_key", "evidence preservation must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleEvidencePreservationNamespace); err != nil {
+		addFinding(findings, w001LifecycleEvidencePreservationSignature, "public.w001_lifecycle_evidence_preservation_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleAuthorityRecoveryPath, "68e8051b477eb9bd3c6846874794b9e83e5e4341f5784eb3569dc6c598c0150f"},
+		{w001LifecycleAuthorityRecoverySignature, "5eb415fbed952821daaebb10736b70a045ca6f1ee8e2e24834446436b81eea3b"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_evidence_preservation_prior_grant", "authority-recovery grant material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleEvidencePreservationBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleEvidencePreservationBase+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleEvidencePreservationBase || strings.TrimSpace(string(baseTree)) != w001LifecycleEvidencePreservationBaseTree {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_base", "evidence preservation must descend from the exact immutable authority-recovery head and tree")
+	}
+	checkW001LifecycleAuthorityRecoveryTag(root, findings)
+	checkW001LifecycleArchivedRejectedRetirementTag(root, findings)
+	if w001LifecycleRejectedRetirementArchiveTag == w001LifecycleEvidencePreservationReviewTag ||
+		w001LifecycleRejectedRetirementArchiveTag == w001LifecycleTestHarnessRetirementReviewTag ||
+		w001LifecycleRejectedRetirementArchiveTag == w001LifecycleAuthorityRecoveryReviewTag {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_ref", "archival ref must remain distinct from every current review tag")
+	}
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		w001LifecycleEvidencePreservationBase, w001LifecycleEvidencePreservationBaseTree,
+		w001LifecycleAuthorityRecoveryTagObject, "33224636939", "99025722797",
+		"QA-W001-RECOVERY-001", "changes-requested", "Security", "not run",
+		w001LifecycleRejectedRetirementTagObject, w001LifecycleRejectedRetirementTagTarget,
+		w001LifecycleRejectedRetirementTagTree, w001LifecycleRejectedRetirementArchiveTag,
+		"rejected", "unaccepted", "W-001-lifecycle-evidence-preservation-v1", "prospective",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_evidence_preservation_evidence", "evidence must preserve the QA finding and bind the rejected tag object to its distinct archival ref")
+			break
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`")) ||
+		!bytes.Contains(plan, []byte(w001LifecycleRejectedRetirementArchiveTag)) ||
+		!bytes.Contains(plan, []byte("W-001 remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_evidence_preservation_plan", "active plan must select rejected-evidence preservation while W-001 remains in-progress")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-evidence-preservation-v1")) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_evidence_preservation_manifest", "manifest must project evidence preservation and absent live lease")
 	}
 }
 
@@ -7915,6 +8158,7 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 	v17Active := false
 	retirementActive := false
 	recoveryActive := false
+	preservationActive := false
 	if _, correctionErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionPath))); correctionErr == nil {
 		correctionActive = true
 		if !checkW001LifecycleV5Tag(root, findings) {
@@ -8041,6 +8285,15 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_state", "lifecycle authority-recovery Git state cannot be established")
 		return
 	}
+	if _, preservationErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleEvidencePreservationPath))); preservationErr == nil {
+		preservationActive = true
+		if !checkW001LifecycleAuthorityRecoveryTag(root, findings) || !checkW001LifecycleArchivedRejectedRetirementTag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(preservationErr) {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_state", "lifecycle evidence-preservation Git state cannot be established")
+		return
+	}
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
 	head := strings.TrimSpace(string(headOutput))
 	if err != nil || !sha1Pattern.MatchString(head) {
@@ -8117,6 +8370,9 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		if recoveryActive {
 			reviewTag, reviewMessage = w001LifecycleAuthorityRecoveryReviewTag, w001LifecycleAuthorityRecoveryTagMessage
 		}
+		if preservationActive {
+			reviewTag, reviewMessage = w001LifecycleEvidencePreservationReviewTag, w001LifecycleEvidencePreservationTagMessage
+		}
 		target, ok := checkW001DeliveryReviewTag(root, expected, reviewTag, reviewMessage, findings)
 		if !ok {
 			return
@@ -8150,6 +8406,7 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		v15End := featureHead
 		v16End := featureHead
 		v17End := featureHead
+		recoveryEnd := featureHead
 		if correctionActive {
 			v5End = w001LifecycleCorrectionBase
 			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCorrectionBase, featureHead); err != nil {
@@ -8247,6 +8504,13 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 				return
 			}
 		}
+		if preservationActive {
+			recoveryEnd = w001LifecycleEvidencePreservationBase
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleEvidencePreservationBase, featureHead); err != nil {
+				addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_ancestry", "evidence preservation must descend from the exact immutable authority-recovery head")
+				return
+			}
+		}
 		if !checkW001LifecycleCommitRange(root, w001LifecycleBase, v5End, "2026-08-27T12:05:00Z", "v5", findings) {
 			return
 		}
@@ -8289,7 +8553,10 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 		if retirementActive && !recoveryActive && !checkW001LifecycleCommitRange(root, w001LifecycleTestHarnessRetirementBase, featureHead, "2026-08-28T22:24:00Z", "retirement", findings) {
 			return
 		}
-		if recoveryActive && !checkW001LifecycleCommitRange(root, w001LifecycleAuthorityRecoveryBase, featureHead, "2026-08-29T00:28:29Z", "authority-recovery", findings) {
+		if recoveryActive && !checkW001LifecycleCommitRange(root, w001LifecycleAuthorityRecoveryBase, recoveryEnd, "2026-08-29T00:28:29Z", "authority-recovery", findings) {
+			return
+		}
+		if preservationActive && !checkW001LifecycleCommitRange(root, w001LifecycleEvidencePreservationBase, featureHead, "2026-08-29T01:04:40Z", "evidence-preservation", findings) {
 			return
 		}
 	}
@@ -8346,6 +8613,9 @@ func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
 	}
 	if recoveryActive {
 		allowed = w001LifecycleAuthorityRecoveryPathsAllowed(paths)
+	}
+	if preservationActive {
+		allowed = w001LifecycleEvidencePreservationPathsAllowed(paths)
 	}
 	if err != nil || !allowed {
 		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_scope", "current changes include a path outside the signed lifecycle-completion scope")
@@ -8408,6 +8678,8 @@ func checkW001LifecycleCommitRange(root, base, head, issued, phase string, findi
 			allowed = w001LifecycleTestHarnessRetirementPathsAllowed(normalized)
 		} else if phase == "authority-recovery" {
 			allowed = w001LifecycleAuthorityRecoveryPathsAllowed(normalized)
+		} else if phase == "evidence-preservation" {
+			allowed = w001LifecycleEvidencePreservationPathsAllowed(normalized)
 		}
 		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
 		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
@@ -8682,6 +8954,21 @@ func w001LifecycleTestHarnessRetirementPathsAllowed(paths []string) bool {
 func w001LifecycleAuthorityRecoveryPathsAllowed(paths []string) bool {
 	exact := map[string]bool{
 		w001LifecycleAuthorityRecoveryPath: true, w001LifecycleAuthorityRecoverySignature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleEvidencePreservationPathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleEvidencePreservationPath: true, w001LifecycleEvidencePreservationSignature: true,
 		".harness/manifest.yaml": true, canonicalActivePlan: true,
 		"docs/evidence/W-001-validation.md": true,
 		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
@@ -9372,6 +9659,58 @@ func checkW001LifecycleRetirementTag(root string, findings *[]Finding) bool {
 	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
 	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleAuthorityRecoveryBaseTree {
 		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_prior_tag", "retirement tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleAuthorityRecoveryTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleAuthorityRecoveryReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleAuthorityRecoveryTagObject {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_prior_tag", "authority-recovery tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleAuthorityRecoveryTagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_prior_tag", "authority-recovery tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleAuthorityRecoveryReviewTag, w001LifecycleAuthorityRecoveryTagMessage)
+	if err != nil || target != w001LifecycleEvidencePreservationBase {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_prior_tag", "authority-recovery tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleEvidencePreservationBaseTree {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_prior_tag", "authority-recovery tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleArchivedRejectedRetirementTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleRejectedRetirementArchiveTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleRejectedRetirementTagObject {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_archive", "archival ref must expose the exact rejected retirement tag object")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleRejectedRetirementTagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_archive", "archived rejected retirement tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTagForIdentity(object, publicKey, w001LifecycleTestHarnessRetirementReviewTag, w001LifecycleTestHarnessRetirementTagMessage, "engineer@example.com")
+	if err != nil || target != w001LifecycleRejectedRetirementTagTarget {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_archive", "archived tag must retain its original rejected identity, target, message, and signature")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleRejectedRetirementTagTree {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_archive", "archived rejected retirement tag tree must remain exact")
 		return false
 	}
 	return true

@@ -157,18 +157,19 @@ The Orchestrator may schedule it only through a later truthful plan transition.
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
 - Required next transition: execute the prospective signed
-  `W-001-lifecycle-authority-recovery-v1` grant from exact unaccepted preimage
-  head `0b0195ba0953d1d6d387aad699605ff864cfac1d`, tree
-  `f96506ca6b7b053d41d4067eb1c926b9d4b39b40`. Remove the retrospective
-  commit-time exception, retain the retirement design byte-for-byte, and bind
-  only new chronologically prospective commits to a distinct signed recovery
-  tag. Verify that exact recovery tree through one fresh exact-head public run,
-  then route it through independent QA followed by Security. The complete
-  retirement attempt, its two tag objects, two public runs, and prior reviews
-  remain immutable but unaccepted evidence. No canonical handoff or later
-  lifecycle mutation may execute until the prospective recovery receives both
-  independent acceptances, is separately authorized for merge, and a later
-  reconciliation authority binds the protected-main result.
+  `W-001-lifecycle-evidence-preservation-v1` grant from exact recovery head
+  `5251ae37a2914e9f750d4c5900f46c7bb736b2d9`, tree
+  `82a4a84cae31d0003aecddf654217cbfb2bd29a6`. Preserve the existing rejected
+  retirement tag object `e08beb772696b078783d0c75d23c1029581cdeb1`
+  byte-for-byte under distinct archival tag
+  `mars3/w001-lifecycle-test-harness-retirement-rejected-v1`; never select that
+  ref as a current review tag or acceptance signal. Retain the retirement and
+  recovery design bytes, publish one distinct signed preservation candidate,
+  verify it through one fresh exact-head public run, then route it through
+  independent QA followed by Security. No canonical handoff or later lifecycle
+  mutation may execute until both independent reviews accept, merge is
+  separately authorized, and a later reconciliation authority binds the
+  protected-main result.
 
 The W-001 bootstrap grant is deliberately not a live lease: it is
 human-directed, binds one base commit and attempt, permits only canonical W-001
@@ -389,6 +390,22 @@ keeping the retirement fixture bytes unchanged. The next evidence must be a
 distinct signed recovery tag, one fresh exact-head public run, and fresh QA
 then Security review. W-001 remains `in-progress`; merge, Beads/lease mutation,
 production change, and downstream work remain unauthorized.
+
+The prospective authority-recovery candidate reached signed head
+`5251ae37a2914e9f750d4c5900f46c7bb736b2d9`, tree
+`82a4a84cae31d0003aecddf654217cbfb2bd29a6`, signed tag object
+`f561cb14a471e0cc773ba6b4bd81308ee8f0d873`, and successful exact-head public
+run `33224636939` / job `99025722797`. Independent QA returned
+`changes-requested` with `QA-W001-RECOVERY-001`: the first rejected retirement
+tag object `e08beb772696b078783d0c75d23c1029581cdeb1` remained unreachable from
+every remote ref and absent from a fresh clone. Security was not run because QA
+did not accept. The signed `W-001-lifecycle-evidence-preservation-v1` grant
+authorizes only byte-exact publication of that existing object under
+`mars3/w001-lifecycle-test-harness-retirement-rejected-v1`, the seven-path
+validation/evidence projection, and one fresh signed candidate/run/review
+sequence. The archival ref remains rejected and unaccepted evidence. W-001
+remains `in-progress`; merge, Beads/lease mutation, production change, and
+downstream work remain unauthorized.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation
