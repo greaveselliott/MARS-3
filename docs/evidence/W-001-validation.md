@@ -1707,3 +1707,49 @@ tree is squash-merged to protected main, and a fresh one-hour signed execution
 authorization binds the protected-main commit/run plus external Beads and
 PostgreSQL identities. No credential, database URL, raw authority payload,
 production effect, or downstream ticket is authorized.
+
+### Terminal-reconciliation implementation qualification
+
+The signed implementation checkpoint is commit
+`20335cbc274785ee68651b244a11d5f768abe30b`. It adds the deep
+`closeout.Run` composition and thin `mars3-authority terminal-reconcile`
+command. Dry-run performs only signed-boundary and canonical-store reads;
+apply composes the existing typed claim-reconciliation, handoff, ordered QA and
+Security verdict, completed-run, merge-reconciliation, and terminal-close
+gateway methods. Every step carries the returned `WorkVersion` and integrity
+postimage into the next CAS. A completed claim saga whose lease was released
+before an unknown handoff receipt is recovered by exact idempotency key,
+intent, work, and full released-fence validation; it cannot issue a second
+lease. The public receipt excludes paths, credentials, connection strings, raw
+authority documents, and private state.
+
+Local qualification found one bounded pre-publication correction set. Commit
+`c77683ef9d3e5b69ab8147c315de30e3e0fcfc10` preserves the legacy bootstrap
+command byte attestation against immutable PR #10 base
+`f6073696fab0ecf9e80d34f5c199ca54f431b5f7` while the terminal validator owns
+the grant-authorized current command. Commit
+`654d2b5271886e75b0426d7baaeedb839d2d5210` adds the required existing F-002,
+ADR-001, and code-map lineage markers to the three new source/test files. This
+consumes the grant's one ordinary qualification correction. It does not alter
+the terminal architecture, workflow, dependencies, API, database, gateway,
+Beads store, PostgreSQL store, production, or downstream work.
+
+The implementation checkpoint tree is
+`889a0c6319125c92682ef3211fd09f92104188f0`. Its four commits form a
+prospective, signed, one-parent chain from the exact signed base. The complete
+base-to-checkpoint diff is exactly the eleven authorized paths. Doctrine,
+plan, and DocSync checks passed in the source worktree. Public-check and the
+embedded full-suite public assertion correctly rejected that linked
+worktree's `.git` pointer; no validator weakening was made.
+
+A fresh normal local clone at the exact checkpoint passed doctrine, plan,
+DocSync, public-check, `git diff --check`, and `git show --check`. In that clean
+clone, unmodified `go test ./... -count=1` passed every package, with
+`internal/doctrine` completing in 111.148 seconds; `go vet ./...` passed.
+Focused closeout, command, signed-grant, prospective execution-window,
+workspace-identity, released-lease recovery, and terminal-scope tests passed
+ten consecutive times. The same focused suite passed with the race detector.
+This remains qualified implementation evidence only: a final signed evidence
+checkpoint, signed annotated review tag, exact-head public CI, independent QA
+then Security, protected-main merge, fresh one-hour execution authorization,
+canonical dry-run/apply, and external readback are still required.
