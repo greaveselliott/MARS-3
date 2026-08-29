@@ -847,15 +847,15 @@ func TestW001DeliveryScannerIgnoreFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	exact := strings.Join(w001DeliveryScannerFingerprints, "\n") + "\n"
+	exact := strings.Join(w001DeliveryScannerLegacyFingerprints, "\n") + "\n"
 	for _, testCase := range []struct {
 		name string
 		body string
 	}{
 		{name: "changed", body: strings.Replace(exact, "0faf9071", "1faf9071", 1)},
 		{name: "extra", body: exact + "*:generic-api-key:*\n"},
-		{name: "missing", body: strings.TrimPrefix(exact, w001DeliveryScannerFingerprints[0]+"\n")},
-		{name: "duplicate", body: exact + w001DeliveryScannerFingerprints[0] + "\n"},
+		{name: "missing", body: strings.TrimPrefix(exact, w001DeliveryScannerLegacyFingerprints[0]+"\n")},
+		{name: "duplicate", body: exact + w001DeliveryScannerLegacyFingerprints[0] + "\n"},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			root := planningGrantCanonicalTempDir(t)
@@ -2061,6 +2061,47 @@ func TestW001TerminalCIRecoveryPathScope(t *testing.T) {
 		if w001TerminalCIRecoveryPathsAllowed([]string{path}) {
 			t.Fatalf("out-of-scope terminal CI-recovery path accepted: %s", path)
 		}
+	}
+}
+
+func TestW001TerminalHistoryScanRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalHistoryScanRecoveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal history-scan recovery was rejected: %v", findings)
+	}
+}
+
+func TestW001TerminalHistoryScanRecoveryPathScope(t *testing.T) {
+	for _, path := range w001TerminalHistoryScanRecoverySequences["grant.authorizedPaths"] {
+		if !w001TerminalHistoryScanRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal history-scan recovery path rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		"internal/authority/closeout/closeout.go", "internal/authority/closeout/closeout_test.go",
+		"cmd/mars3-authority/main.go", ".github/workflows/foundation-quality.yml", "go.mod",
+	} {
+		if w001TerminalHistoryScanRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal history-scan recovery path accepted: %s", path)
+		}
+	}
+}
+
+func TestW001TerminalHistoryScannerFingerprintIsExactAndImmutable(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001DeliveryScannerFingerprintSources(repo, []string{w001TerminalHistoryScannerFingerprint}, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("exact terminal history scanner fingerprint was rejected: %v", findings)
+	}
+
+	wrongLine := strings.TrimSuffix(w001TerminalHistoryScannerFingerprint, ":231") + ":232"
+	findings = nil
+	checkW001DeliveryScannerFingerprintSources(repo, []string{wrongLine}, &findings)
+	if !findingCodePresent(findings, "public.w001_delivery_scanner_history") {
+		t.Fatalf("non-authorized terminal history scanner tuple was accepted: %v", findings)
 	}
 }
 

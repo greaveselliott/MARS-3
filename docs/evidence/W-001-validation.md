@@ -1788,3 +1788,33 @@ database, gateway, Beads/PostgreSQL stores, workflow, dependencies, product,
 canonical state, and production remain unchanged. The recovery allows one
 distinct signed v2 review tag and fresh CI, QA, and Security on PR #11. Any
 further failure stops and escalates; no additional correction is authorized.
+
+### Exact terminal history-scanner recovery
+
+The scanner-safe fixture replacement is signed at head
+`8dcb71192107589c4a5abe5e2d84ff8825c4d17f`, tree
+`ad4a78f374e64c6f0e38e9a43cdec86eef03ab78`. Worktree scanning is clean, but
+the required full-history scan truthfully rediscovers the immutable public UUID
+fixture in implementation commit `20335cbc274785ee68651b244a11d5f768abe30b`.
+The exact non-secret finding is
+`20335cbc274785ee68651b244a11d5f768abe30b:internal/authority/closeout/closeout_test.go:generic-api-key:231`.
+The rejected v1 candidate, tag object, failed run, first recovery grant, and
+recovered fixture head remain immutable and unaccepted.
+
+The prospective signed `W-001-lifecycle-terminal-history-scan-recovery-v1`
+grant binds the exact recovered head and tree. Its SHA-256 is
+`fc721be90f8a98435d8041b3709f26a2c86c22eca576cab31a3d2edd842ae32d` and its
+detached-signature SHA-256 is
+`3086ab04191ee657bc7a5e84afb93b974ea888b0bb0ed84c8433ef157cfac463`.
+Signed grant-only commit `02825a52e6484613154374b0bf1b2102179647d7`,
+tree `0b334898d6e8d04bfda64b74b078019c81e78c89`, was committed after the
+grant's `2026-08-29T15:03:58Z` issue time. Its sole scanner effect is to extend
+the closed ignore file from ten to eleven exact commit:path:rule:line tuples.
+Wildcards, scanner configuration changes, source rewrites, and any
+runtime, workflow, dependency, canonical Beads/PostgreSQL, production, or
+downstream effect remain prohibited. The exact source tuple must resolve to a
+nonempty line in the immutable commit and must be an ancestor of the signed
+recovery base. Fresh pinned worktree and full-history scans, clean-clone gates,
+one signed v2 tag, exact-head CI, independent QA, and then independent Security
+are required. Any further CI or review failure stops the attempt. W-001 remains
+`in-progress`.

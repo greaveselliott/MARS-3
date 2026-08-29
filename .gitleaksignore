@@ -8,3 +8,4 @@
 85848a524d40e3041199c21b89e82f2cf8910b39:internal/authority/beads/store_test.go:generic-api-key:365
 9e39ae0e7653f300635ad36f0728d5698e4eb954:internal/authority/gateway/effect_test.go:generic-api-key:217
 e055ddab2e1f47b1eed68593893510894a3cce7f:internal/authority/gateway/effect_test.go:generic-api-key:204
+20335cbc274785ee68651b244a11d5f768abe30b:internal/authority/closeout/closeout_test.go:generic-api-key:231

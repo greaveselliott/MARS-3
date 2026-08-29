@@ -157,13 +157,17 @@ The Orchestrator may schedule it only through a later truthful plan transition.
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
 - Required next transition: execute the prospective signed
-  `W-001-lifecycle-terminal-ci-recovery-v1` grant from rejected candidate
-  `cff16fda43acd9d621f701064427b0d7fc3bf30d`, tree
-  `447cac655e6d4d34bce9a8f9641a677e3e7511cc`. Its signed v1 tag and failed
-  public run `33250298926` remain immutable. Replace only the public UUID test
-  literal that triggered the pinned scanner with a deterministic equivalent,
-  publish one distinct signed v2 tag on PR #11, and require fresh exact-head CI,
-  independent QA, then independent Security. No further correction is
+  `W-001-lifecycle-terminal-history-scan-recovery-v1` grant from exact recovered
+  fixture head `8dcb71192107589c4a5abe5e2d84ff8825c4d17f`, tree
+  `ad4a78f374e64c6f0e38e9a43cdec86eef03ab78`. The signed v1 tag and failed
+  public run `33250298926` remain immutable, as does the consumed
+  `W-001-lifecycle-terminal-ci-recovery-v1` first recovery from rejected head
+  `cff16fda43acd9d621f701064427b0d7fc3bf30d`. Admit
+  only the exact immutable non-secret fingerprint
+  `20335cbc274785ee68651b244a11d5f768abe30b:internal/authority/closeout/closeout_test.go:generic-api-key:231`
+  as the eleventh closed history-scanner entry, publish one distinct signed v2
+  tag on PR #11, and require fresh exact-head CI, independent QA, then
+  independent Security. Any further failure stops; no additional correction is
   authorized. After an accepted exact-tree squash, one fresh one-hour signed
   execution authorization may bind the reviewed helper, protected-main run,
   canonical Beads workspace and binary, and PostgreSQL fence generation. Only

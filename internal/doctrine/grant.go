@@ -352,6 +352,14 @@ const (
 	w001TerminalCIRecoveryTagMessage             = "MARS-3 W-001 lifecycle terminal reconciliation attestation v2"
 	w001TerminalCIRecoveryGrantSHA256            = "8380dfd8eba71c349f2fc2ac00265d59f43256d147db4be45ff07f2279f6558e"
 	w001TerminalCIRecoverySignatureSHA256        = "196c0e472c0ac54942ccaa6e7c46380ade3bb042f44fbdc10a1fdc73f0dd3242"
+	w001TerminalHistoryScanRecoveryPath          = ".harness/grants/W-001-lifecycle-terminal-history-scan-recovery-v1.yaml"
+	w001TerminalHistoryScanRecoverySignature     = ".harness/grants/W-001-lifecycle-terminal-history-scan-recovery-v1.yaml.sig"
+	w001TerminalHistoryScanRecoveryNamespace     = "mars3-w001-lifecycle-terminal-history-scan-recovery-v1"
+	w001TerminalHistoryScanRecoveryBase          = "8dcb71192107589c4a5abe5e2d84ff8825c4d17f"
+	w001TerminalHistoryScanRecoveryBaseTree      = "ad4a78f374e64c6f0e38e9a43cdec86eef03ab78"
+	w001TerminalHistoryScanRecoveryGrantSHA256   = "fc721be90f8a98435d8041b3709f26a2c86c22eca576cab31a3d2edd842ae32d"
+	w001TerminalHistoryScanRecoverySigSHA256     = "3086ab04191ee657bc7a5e84afb93b974ea888b0bb0ed84c8433ef157cfac463"
+	w001TerminalHistoryScannerFingerprint        = "20335cbc274785ee68651b244a11d5f768abe30b:internal/authority/closeout/closeout_test.go:generic-api-key:231"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -2326,7 +2334,7 @@ var w001DeliveryCIFixSequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
-var w001DeliveryScannerFingerprints = []string{
+var w001DeliveryScannerLegacyFingerprints = []string{
 	"0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:96",
 	"0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:109",
 	"0faf90716d40aa3c5251c0a9c887cc70f06cfa1e:internal/authority/beads/store_test.go:generic-api-key:129",
@@ -2338,6 +2346,11 @@ var w001DeliveryScannerFingerprints = []string{
 	"9e39ae0e7653f300635ad36f0728d5698e4eb954:internal/authority/gateway/effect_test.go:generic-api-key:217",
 	"e055ddab2e1f47b1eed68593893510894a3cce7f:internal/authority/gateway/effect_test.go:generic-api-key:204",
 }
+
+var w001DeliveryScannerFingerprints = append(
+	append([]string(nil), w001DeliveryScannerLegacyFingerprints...),
+	w001TerminalHistoryScannerFingerprint,
+)
 
 var w001DeliveryScannerFixScalars = []grantScalarExpectation{
 	{path: "schemaVersion", value: "1"},
@@ -2429,7 +2442,7 @@ var w001DeliveryScannerFixSequences = map[string][]string{
 		"autonomous-mutation",
 		"trust-escalation",
 	},
-	"finding.allowedFingerprints": w001DeliveryScannerFingerprints,
+	"finding.allowedFingerprints": w001DeliveryScannerLegacyFingerprints,
 	"verification.order":          {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
@@ -4385,6 +4398,102 @@ var w001TerminalCIRecoverySequences = map[string][]string{
 	"verification.order": {
 		"signed-grant-only-commit", "exact-fixture-regression-and-pinned-scanner", "clean-normal-clone-full-gates",
 		"signed-evidence-checkpoint-and-v2-review-tag", "exact-head-public-CI", "qa", "security-reviewer", "protected-main-merge-and-CI",
+	},
+}
+
+var w001TerminalHistoryScanRecoveryScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleTerminalHistoryScanRecoveryGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-terminal-history-scan-recovery-v1"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-29T15:03:58Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T15:03:58Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001TerminalHistoryScanRecoveryBase},
+	{path: "grant.baseTree", value: w001TerminalHistoryScanRecoveryBaseTree},
+	{path: "grant.workingBranch", value: w001TerminalReconciliationBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-terminal-ci-recovery-v1"},
+	{path: "grant.priorGrantSHA256", value: w001TerminalCIRecoveryGrantSHA256},
+	{path: "grant.priorGrantSignatureSHA256", value: w001TerminalCIRecoverySignatureSHA256},
+	{path: "grant.rejectedCandidateHead", value: w001TerminalCIRecoveryBase},
+	{path: "grant.rejectedCandidateTree", value: w001TerminalCIRecoveryBaseTree},
+	{path: "grant.rejectedReviewTag", value: w001TerminalReconciliationReviewTag},
+	{path: "grant.rejectedReviewTagObject", value: w001TerminalV1TagObject},
+	{path: "grant.rejectedRun", value: "33250298926"},
+	{path: "grant.rejectedJob", value: "99094724907"},
+	{path: "grant.recoveredFixtureHead", value: w001TerminalHistoryScanRecoveryBase},
+	{path: "grant.recoveredFixtureTree", value: w001TerminalHistoryScanRecoveryBaseTree},
+	{path: "grant.failureCode", value: "ci.history_secret_scan_preserved_public_uuid_fixture"},
+	{path: "grant.pullRequest", value: "11"},
+	{path: "grant.successorReviewTag", value: w001TerminalCIRecoveryReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001TerminalCIRecoveryTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "pipeline-fixer"},
+	{path: "grant.purpose", value: "admit one exact immutable public UUID fixture fingerprint to the existing closed history-scanner exception set"},
+	{path: "grant.attemptId", value: "w001-lifecycle-terminal-history-scan-recovery-v1"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "grant.ordinaryCorrectionLimit", value: "0"},
+	{path: "finding.sourceCommit", value: "20335cbc274785ee68651b244a11d5f768abe30b"},
+	{path: "finding.file", value: "internal/authority/closeout/closeout_test.go"},
+	{path: "finding.lineAtSource", value: "231"},
+	{path: "finding.scannerRule", value: "generic-api-key"},
+	{path: "finding.fingerprint", value: w001TerminalHistoryScannerFingerprint},
+	{path: "finding.valueClassification", value: "public-noncredential-authority-generation-fixture-in-immutable-history"},
+	{path: "finding.requiredDisposition", value: "exact-fingerprint-only-history-ignore"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001TerminalHistoryScanRecoveryNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-terminal-history-scan-recovery-v1.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001TerminalHistoryScanRecoverySequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-all-prior-candidates-tags-runs-grants-and-evidence-immutably",
+		"append-one-exact-immutable-public-fixture-fingerprint-to-the-closed-history-scanner-ignore-file",
+		"extend-the-terminal-validator-and-focused-tests-for-exact-eleven-fingerprint-admission",
+		"update-only-this-grant-manifest-active-plan-evidence-scanner-ignore-and-terminal-validator-tests",
+		"create-signed-semantic-commits-and-one-distinct-signed-v2-review-tag",
+		"push-the-existing-branch-and-v2-tag-rerun-exact-head-CI-and-obtain-independent-QA-then-Security-review",
+		"squash-merge-pull-request-11-only-after-QA-and-Security-accept-the-exact-v2-reviewed-tree",
+	},
+	"grant.authorizedPaths": {
+		w001TerminalHistoryScanRecoveryPath, w001TerminalHistoryScanRecoverySignature, w001DeliveryScannerIgnorePath,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"every-new-commit-and-tag-is-signed-and-chronologically-prospective",
+		"the-v1-candidate-tag-run-finding-and-first-recovery-remain-immutable-and-rejected",
+		"the-new-ignore-entry-is-one-exact-commit-path-rule-line-tuple-with-a-nonempty-immutable-source-line",
+		"the-existing-ten-scanner-fingerprints-remain-byte-exact-and-no-wildcard-ignore-is-admitted",
+		"terminal-runtime-command-store-gateway-database-workflow-dependency-and-product-bytes-remain-identical-to-the-recovered-fixture-head",
+		"exact-head-CI-precedes-independent-QA-which-precedes-independent-Security",
+		"any-further-CI-review-authority-or-security-failure-stops-and-escalates-without-an-incremental-successor",
+	},
+	"grant.prohibitedEffects": {
+		"move-delete-rewrite-resign-or-accept-any-prior-candidate-tag-commit-run-or-review",
+		"modify-any-path-outside-the-exact-eight-path-scope",
+		"add-a-wildcard-rule-path-or-line-scanner-ignore",
+		"modify-closeout-runtime-command-API-database-gateway-Beads-store-PostgreSQL-store-workflow-dependencies-product-or-production",
+		"canonical-Beads-PostgreSQL-lifecycle-or-lease-mutation",
+		"create-any-additional-correction-attempt-or-review-tag",
+		"start-P001-production-or-any-downstream-ticket",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"verification.order": {
+		"signed-grant-only-commit", "exact-fingerprint-source-regression-and-pinned-worktree-plus-history-scanners",
+		"clean-normal-clone-full-gates", "signed-evidence-checkpoint-and-v2-review-tag", "exact-head-public-CI",
+		"qa", "security-reviewer", "protected-main-merge-and-CI",
 	},
 }
 
@@ -7513,7 +7622,10 @@ func w001TerminalReconciliationActive(root string) bool {
 
 func checkW001TerminalReconciliationGrant(root string, findings *[]Finding) {
 	recoveryActive := w001TerminalCIRecoveryActive(root)
-	if recoveryActive {
+	historyScanRecoveryActive := w001TerminalHistoryScanRecoveryActive(root)
+	if historyScanRecoveryActive {
+		defer checkW001TerminalHistoryScanRecoveryGrant(root, findings)
+	} else if recoveryActive {
 		defer checkW001TerminalCIRecoveryGrant(root, findings)
 	}
 	data, err := readRepoFile(root, w001TerminalReconciliationPath)
@@ -7579,8 +7691,10 @@ func checkW001TerminalReconciliationGrant(root string, findings *[]Finding) {
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
 	if manifestErr != nil || !recoveryActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-reconciliation-v1")) ||
 		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-reconciliation-v1"))) ||
-		recoveryActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-ci-recovery-v1")) ||
+		recoveryActive && !historyScanRecoveryActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-ci-recovery-v1")) ||
 			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-ci-recovery-v1"))) ||
+		historyScanRecoveryActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-history-scan-recovery-v1")) ||
+			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-history-scan-recovery-v1"))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_terminal_manifest", "manifest must project terminal reconciliation and absent live lease before canonical apply")
 	}
@@ -7669,8 +7783,9 @@ func checkW001TerminalCIRecoveryGrant(root string, findings *[]Finding) {
 		addFinding(findings, canonicalActivePlan, "public.w001_terminal_ci_recovery_plan", "active plan must select the bounded terminal CI recovery while W-001 remains in-progress")
 	}
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
-	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-ci-recovery-v1")) ||
-		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-ci-recovery-v1")) ||
+	historyScanRecoveryActive := w001TerminalHistoryScanRecoveryActive(root)
+	if manifestErr != nil || (!historyScanRecoveryActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-ci-recovery-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-ci-recovery-v1")))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_terminal_ci_recovery_manifest", "manifest must project terminal CI recovery and absent live lease")
 	}
@@ -7684,7 +7799,103 @@ func checkW001TerminalCIRecoveryGrant(root string, findings *[]Finding) {
 	}
 }
 
+func w001TerminalHistoryScanRecoveryActive(root string) bool {
+	_, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001TerminalHistoryScanRecoveryPath)))
+	return err == nil
+}
+
+func checkW001TerminalHistoryScanRecoveryGrant(root string, findings *[]Finding) {
+	checkW001TerminalCIRecoveryGrant(root, findings)
+	data, err := readRepoFile(root, w001TerminalHistoryScanRecoveryPath)
+	if err != nil {
+		addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_missing", "signed terminal history-scan recovery grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001TerminalHistoryScanRecoveryScalars, w001TerminalHistoryScanRecoverySequences,
+		[]string{"grant", "finding", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_schema", "%s", message)
+	}
+	for _, expected := range w001TerminalHistoryScanRecoveryScalars {
+		values := document.scalars[expected.path]
+		if len(values) != 1 || values[0] != expected.value {
+			addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_value", "%s does not match the signed history-scan recovery contract", expected.path)
+		}
+	}
+	for path, expected := range w001TerminalHistoryScanRecoverySequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_sequence", "%s must equal the exact ordered history-scan recovery contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "finding", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 24*time.Hour {
+		addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_expiry", "terminal history-scan recovery must use one RFC3339 interval no longer than 24 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001TerminalHistoryScanRecoverySignature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if fileSHA256(data) != w001TerminalHistoryScanRecoveryGrantSHA256 || signatureErr != nil ||
+		fileSHA256(signature) != w001TerminalHistoryScanRecoverySigSHA256 || !keyValid ||
+		verifySSHSig(data, signature, publicKey, w001TerminalHistoryScanRecoveryNamespace) != nil {
+		addFinding(findings, w001TerminalHistoryScanRecoverySignature, "public.w001_terminal_history_scan_recovery_signature", "terminal history-scan recovery grant and detached signature must remain byte-exact and verify with the pinned key")
+	}
+	for _, binding := range []struct{ path, digest string }{
+		{w001TerminalCIRecoveryPath, w001TerminalCIRecoveryGrantSHA256},
+		{w001TerminalCIRecoverySignature, w001TerminalCIRecoverySignatureSHA256},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_terminal_history_scan_recovery_prior_grant", "prior terminal CI-recovery grant material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001TerminalHistoryScanRecoveryBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001TerminalHistoryScanRecoveryBase+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001TerminalHistoryScanRecoveryBase ||
+		strings.TrimSpace(string(baseTree)) != w001TerminalHistoryScanRecoveryBaseTree ||
+		!checkW001TerminalCIRecoveryCommitRange(root, w001TerminalHistoryScanRecoveryBase, findings) {
+		addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_base", "terminal history-scan recovery must descend from the exact signed fixture-recovery head and tree")
+	}
+	tagObject, objectErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+w001TerminalReconciliationReviewTag+"^{tag}")
+	tagTarget, targetErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+w001TerminalReconciliationReviewTag+"^{}")
+	if objectErr != nil || targetErr != nil || strings.TrimSpace(string(tagObject)) != w001TerminalV1TagObject || strings.TrimSpace(string(tagTarget)) != w001TerminalCIRecoveryBase {
+		addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_prior_tag", "rejected v1 candidate tag must remain exact and immutable")
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-terminal-history-scan-recovery-v1`")) ||
+		!bytes.Contains(plan, []byte(w001TerminalHistoryScanRecoveryBase)) || !bytes.Contains(plan, []byte("W-001 remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_terminal_history_scan_recovery_plan", "active plan must select the exact history-scan recovery while W-001 remains in-progress")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-history-scan-recovery-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-history-scan-recovery-v1")) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_terminal_history_scan_recovery_manifest", "manifest must project terminal history-scan recovery and absent live lease")
+	}
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{w001TerminalHistoryScanRecoveryBase, w001TerminalHistoryScanRecoveryBaseTree,
+		w001TerminalHistoryScannerFingerprint, "W-001-lifecycle-terminal-history-scan-recovery-v1", "eleven", "rejected"} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_terminal_history_scan_recovery_evidence", "history-scan recovery evidence must preserve prior rejection and bind the exact eleventh fingerprint")
+			break
+		}
+	}
+	checkW001DeliveryScannerIgnore(root, findings)
+}
+
 func checkW001TerminalReconciliationGitDiff(root string, findings *[]Finding) {
+	if w001TerminalHistoryScanRecoveryActive(root) {
+		checkW001TerminalHistoryScanRecoveryGitDiff(root, findings)
+		return
+	}
 	if w001TerminalCIRecoveryActive(root) {
 		checkW001TerminalCIRecoveryGitDiff(root, findings)
 		return
@@ -7854,6 +8065,108 @@ func w001TerminalCIRecoveryPathsAllowed(paths []string) bool {
 	return planningGrantPathsAllowed(paths, authorized)
 }
 
+func checkW001TerminalHistoryScanRecoveryGitDiff(root string, findings *[]Finding) {
+	top, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
+	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(top))) {
+		addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_git", "Git metadata must resolve to the audited repository root")
+		return
+	}
+	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
+	head := strings.TrimSpace(string(headOutput))
+	if err != nil || !sha1Pattern.MatchString(head) {
+		addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_head", "terminal history-scan recovery HEAD must resolve to one exact commit")
+		return
+	}
+	branchOutput, branchErr := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
+	branch := strings.TrimSpace(string(branchOutput))
+	featureHead := head
+	requireTag, mainTreeCheck := false, false
+	switch {
+	case branchErr == nil && branch == w001TerminalReconciliationBranch && os.Getenv("GITHUB_ACTIONS") != "true":
+		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001TerminalHistoryScanRecoveryBase, head); err != nil {
+			addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_ancestry", "local history-scan recovery must descend from the exact fixture-recovery head")
+			return
+		}
+	case branchErr == nil && branch == "main" && os.Getenv("GITHUB_ACTIONS") != "true":
+		requireTag, mainTreeCheck = true, true
+	case os.Getenv("GITHUB_ACTIONS") == "true":
+		checkout, ok := w001TerminalGitHubCheckout(root, head, branch, findings)
+		if !ok {
+			return
+		}
+		featureHead, requireTag, mainTreeCheck = checkout.expectedHead, true, checkout.kind == planningGrantMainSquash
+	default:
+		addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_branch", "terminal history-scan recovery requires its signed branch or accepted protected main")
+		return
+	}
+	if requireTag {
+		expected := featureHead
+		if mainTreeCheck {
+			expected = ""
+		}
+		target, ok := checkW001DeliveryReviewTag(root, expected, w001TerminalCIRecoveryReviewTag, w001TerminalCIRecoveryTagMessage, findings)
+		if !ok {
+			return
+		}
+		featureHead = target
+	}
+	if mainTreeCheck {
+		parents, err := planningGrantCommitParents(root, head)
+		mainTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", featureHead+"^{tree}")
+		if err != nil || len(parents) != 1 || parents[0] != w001TerminalReconciliationBase || strings.TrimSpace(string(mainTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_main", "accepted terminal history-scan recovery must be one exact-tree squash over the signed PR 11 base")
+			return
+		}
+	}
+	if !checkW001TerminalHistoryScanRecoveryCommitRange(root, featureHead, findings) {
+		return
+	}
+	tracked, trackedErr := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
+	untracked, untrackedErr := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
+	paths, normalizeErr := normalizedPlanningGrantGitPaths(tracked, untracked)
+	if trackedErr != nil || untrackedErr != nil || normalizeErr != nil || !w001TerminalHistoryScanRecoveryPathsAllowed(paths) {
+		addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_scope", "current changes include a path outside the signed terminal history-scan recovery scope")
+	}
+}
+
+func checkW001TerminalHistoryScanRecoveryCommitRange(root, head string, findings *[]Finding) bool {
+	commits, err := planningGrantCommitRangeFrom(root, w001TerminalHistoryScanRecoveryBase, head)
+	if err != nil || len(commits) < 2 {
+		addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_history", "terminal history-scan recovery requires a signed grant commit and one implementation/evidence commit")
+		return false
+	}
+	publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_terminal_history_scan_recovery_signature", "terminal history-scan recovery commits require the pinned genesis signer")
+		return false
+	}
+	issuedAt, _ := time.Parse(time.RFC3339, "2026-08-29T15:03:58Z")
+	previous := w001TerminalHistoryScanRecoveryBase
+	for _, commit := range commits {
+		paths, pathErr := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
+		normalized, normalizeErr := normalizedPlanningGrantGitPaths(paths)
+		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
+		if len(commit.parents) != 1 || commit.parents[0] != previous || pathErr != nil || normalizeErr != nil ||
+			!w001TerminalHistoryScanRecoveryPathsAllowed(normalized) || objectErr != nil || verifyPlanningGrantCommit(object, publicKey) != nil ||
+			timeErr != nil || committedAt.Before(issuedAt) {
+			addFinding(findings, w001TerminalHistoryScanRecoveryPath, "public.w001_terminal_history_scan_recovery_history", "every terminal history-scan recovery commit must be a prospective signed one-parent scoped commit")
+			return false
+		}
+		previous = commit.id
+	}
+	return true
+}
+
+func w001TerminalHistoryScanRecoveryPathsAllowed(paths []string) bool {
+	authorized := make(map[string]bool, len(w001TerminalHistoryScanRecoverySequences["grant.authorizedPaths"]))
+	for _, path := range w001TerminalHistoryScanRecoverySequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return planningGrantPathsAllowed(paths, authorized)
+}
+
 func w001TerminalGitHubCheckout(root, head, branch string, findings *[]Finding) (planningGrantCheckout, bool) {
 	if os.Getenv("CI") != "true" || os.Getenv("GITHUB_ACTIONS") != "true" || os.Getenv("RUNNER_ENVIRONMENT") != "github-hosted" ||
 		os.Getenv("GITHUB_REPOSITORY") != planningGrantRepository || os.Getenv("GITHUB_WORKFLOW") != planningGrantWorkflow ||
@@ -7949,12 +8262,18 @@ func w001TerminalReconciliationPathsAllowed(paths []string) bool {
 
 func checkW001DeliveryScannerIgnore(root string, findings *[]Finding) {
 	data, err := readRepoFile(root, w001DeliveryScannerIgnorePath)
-	expected := strings.Join(w001DeliveryScannerFingerprints, "\n") + "\n"
+	fingerprints := w001DeliveryScannerLegacyFingerprints
+	label := "ten"
+	if w001TerminalHistoryScanRecoveryActive(root) {
+		fingerprints = w001DeliveryScannerFingerprints
+		label = "eleven"
+	}
+	expected := strings.Join(fingerprints, "\n") + "\n"
 	if err != nil || string(data) != expected {
-		addFinding(findings, w001DeliveryScannerIgnorePath, "public.w001_delivery_scanner_ignore", "scanner ignore must equal the exact signed ten-fingerprint file")
+		addFinding(findings, w001DeliveryScannerIgnorePath, "public.w001_delivery_scanner_ignore", "scanner ignore must equal the exact signed %s-fingerprint file", label)
 		return
 	}
-	checkW001DeliveryScannerFingerprintSources(root, w001DeliveryScannerFingerprints, findings)
+	checkW001DeliveryScannerFingerprintSources(root, fingerprints, findings)
 }
 
 func checkW001DeliveryScannerFingerprintSources(root string, fingerprints []string, findings *[]Finding) {
@@ -7980,7 +8299,11 @@ func checkW001DeliveryScannerFingerprintSources(root string, fingerprints []stri
 			addFinding(findings, w001DeliveryScannerIgnorePath, "public.w001_delivery_scanner_fingerprint", "scanner fingerprint line is invalid")
 			continue
 		}
-		if _, ancestryErr := planningGrantGitOutput(root, "merge-base", "--is-ancestor", parts[0], w001DeliveryV1PreservedHead); ancestryErr != nil {
+		ancestryHead := w001DeliveryV1PreservedHead
+		if fingerprint == w001TerminalHistoryScannerFingerprint && w001TerminalHistoryScanRecoveryActive(root) {
+			ancestryHead = w001TerminalHistoryScanRecoveryBase
+		}
+		if _, ancestryErr := planningGrantGitOutput(root, "merge-base", "--is-ancestor", parts[0], ancestryHead); ancestryErr != nil {
 			addFinding(findings, w001DeliveryScannerIgnorePath, "public.w001_delivery_scanner_history", "scanner fingerprint commit must belong to the preserved delivery-v1 history")
 			continue
 		}
