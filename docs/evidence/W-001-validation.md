@@ -1818,3 +1818,22 @@ recovery base. Fresh pinned worktree and full-history scans, clean-clone gates,
 one signed v2 tag, exact-head CI, independent QA, and then independent Security
 are required. Any further CI or review failure stops the attempt. W-001 remains
 `in-progress`.
+
+Signed implementation commit `974799b1a9246ef40d1afba04a0a1cc858e25f27`,
+tree `a1a85b006841fa9fe27a2684a3b924be85a6944e`, changes exactly the six
+remaining paths allowed by the grant; together with grant-only commit
+`02825a52e6484613154374b0bf1b2102179647d7`, the base-to-head diff is exactly
+the eight authorized paths. The focused signed-grant, path-scope, scanner-ignore,
+source-tuple, and prior-recovery suite passed ten consecutive runs and passed
+under the Go race detector.
+
+A fresh normal clone of that exact implementation commit passed doctrine,
+plan, DocSync, public-check, whitespace, and show-check. Unmodified
+`go test ./... -count=1` passed every package, with `internal/doctrine`
+completing in 113.975 seconds, and `go vet ./...` passed. The digest-pinned,
+network-disabled Gitleaks image
+`docker.io/zricethezav/gitleaks@sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba`
+found no leak in the worktree and no leak across all 116 commits of history.
+This is local qualification only; the signed v2 review tag, exact-head public
+CI, independent QA, independent Security, and protected-main merge remain
+pending.
