@@ -4847,6 +4847,12 @@ func checkW001BootstrapGrant(root string, findings *[]Finding) {
 			expectedDigest = w001PostclaimSecurityHelperSHA
 		}
 		content, err := readRepoFile(root, path)
+		// The terminal grant explicitly extends the bootstrap command after the
+		// accepted PR 10 squash. Preserve the bootstrap byte attestation against
+		// that immutable base while the terminal validator owns current bytes.
+		if w001TerminalReconciliationActive(root) && binding.pathField == "toolchain.helperCommandPath" {
+			content, err = planningGrantGitOutput(root, "show", w001TerminalReconciliationBase+":"+path)
+		}
 		if err != nil || !sha256Pattern.MatchString(expectedDigest) || fileSHA256(content) != expectedDigest {
 			addFinding(findings, path, binding.code, "bootstrap helper material must match its exact signed SHA-256")
 		}
