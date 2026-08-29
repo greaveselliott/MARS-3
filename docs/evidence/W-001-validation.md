@@ -1485,3 +1485,24 @@ Gitleaks was unavailable; the unchanged exact workflow's canary, worktree, and
 history scanner steps remain required at exact-head CI. This is qualified
 implementation evidence pending the signed evidence checkpoint, retirement
 tag, exact-head public run, and independent QA followed by Security review.
+
+The first signed evidence checkpoint was commit
+`ce9d0e7e82a33350263acd6199219a5349ef9bce`, tree
+`3d6a1c44fa076d4755ec96c5755b45deae7a1ee5`. Signed annotated retirement tag
+object `e08beb772696b078783d0c75d23c1029581cdeb1` targeted that exact commit and
+tree, but its tagger was the synthetic Work Authority Engineer identity
+`engineer@example.com`. Exact-head public run `33218389712`, job
+`99007023124`, therefore failed at doctrine with
+`public.w001_delivery_tag_identity`: the delivery validator requires the
+synthetic Release Manager identity `release-manager@example.com` for review
+tags. Later plan, public, test, whitespace, canary, and scanner steps were
+skipped; the run is failure evidence, not acceptance evidence.
+
+The user authorized one publication-only correction after that failure. It may
+record this disposition, create one signed evidence commit, and replace only
+`mars3/w001-lifecycle-test-harness-retirement-v1` with a signed annotated tag
+using `MARS-3 Release Manager <release-manager@example.com>` and the exact
+grant-bound message. It then permits branch/tag publication, fresh exact-head
+CI, and independent QA followed by Security. It authorizes no source,
+workflow, dependency, runtime, API, database, native-patch, product,
+Beads/lease, merge, downstream-ticket, or production change.
