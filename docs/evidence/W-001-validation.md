@@ -1890,3 +1890,36 @@ found no leak in the exact worktree and no leak across all 119 commits of
 history. This remains local qualification only; the signed v3 review tag,
 exact-head public CI, independent QA, independent Security, and protected-main
 merge remain pending.
+
+### QA-rejected v3 and prospective exact-tagger v4 recovery
+
+The v3 candidate is immutably rejected at signed head
+`70ed4a5c502ff3184479d08fd50a19e10cd4af0b`, tree
+`39134c754f2263f2ec10d9bd4e42789ab86cf0fd`, and signed annotated tag object
+`5f621e96520d933b4ff5c751948d9dd4710a7f0c`. Exact-head run
+`33264433302`, job `99131880421`, passed every public gate. Independent QA
+returned `changes-requested` with finding
+`public.w001_terminal_tag_identity_name_not_exact`: the actual v3 tag uses
+`MARS-3 Release Manager <release-manager@example.com>`, but the validator
+matched only `release-manager@example.com` and would also accept a different
+name. Independent Security did not run, and PR #11 was not merged.
+
+The prospective signed `W-001-lifecycle-terminal-exact-tagger-recovery-v1`
+grant supersedes the v3 stop clause only for exact name-plus-email enforcement
+and a wrong-name/correct-email regression. Its SHA-256 is
+`c9ccb6480d9b96b31b45c131288256c04a3f30b868b2c527682d80b16f10a33c`;
+its detached-signature SHA-256 is
+`e178e5f0e3fbb109dd9750740b2f71b394fc1adad510c4d115d76ae4e6c517a5`.
+Signed grant-only commit `d95d46a61aab9761cf502dc34c4ecd59df85dc74`,
+tree `d4d1bca8f9b618527e8dce8ab1bfc074eaf22b9a`, was committed after the
+grant's `2026-08-29T22:39:34Z` issue time.
+
+The adversarial regression first reproduced the defect by accepting a signed
+`Wrong Name <release-manager@example.com>` tag, then passed after the narrow
+tag-header parser required the exact signed name and email. Recovery may update
+only the seven signed grant, manifest, plan, evidence, terminal-validator, and
+focused-test paths. Runtime, command, workflow, dependency, scanner, API,
+database, gateway, canonical Beads/PostgreSQL, lease, production, product, and
+downstream bytes and effects remain prohibited. One distinct v4 tag, fresh
+exact-head CI, independent QA, and then independent Security are required.
+Any further failure stops the attempt. W-001 remains `in-progress`.

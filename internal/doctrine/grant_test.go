@@ -2042,13 +2042,6 @@ func TestW001TerminalCIRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
 	if len(findings) != 0 {
 		t.Fatalf("valid signed W-001 terminal CI recovery was rejected: %v", findings)
 	}
-	grant, err := LoadW001TerminalReconciliationGrant(repo, time.Date(2026, 8, 29, 12, 0, 0, 0, time.UTC))
-	if err != nil {
-		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
-	}
-	if grant.ReviewTag != w001TerminalTagIdentityRecoveryReviewTag {
-		t.Fatalf("terminal recovery review tag=%q", grant.ReviewTag)
-	}
 }
 
 func TestW001TerminalCIRecoveryPathScope(t *testing.T) {
@@ -2096,13 +2089,6 @@ func TestW001TerminalTagIdentityRecoveryGrantAcceptsPinnedSignedContract(t *test
 	if len(findings) != 0 {
 		t.Fatalf("valid signed W-001 terminal tag-identity recovery was rejected: %v", findings)
 	}
-	grant, err := LoadW001TerminalReconciliationGrant(repo, time.Date(2026, 8, 29, 17, 0, 0, 0, time.UTC))
-	if err != nil {
-		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
-	}
-	if grant.ReviewTag != w001TerminalTagIdentityRecoveryReviewTag {
-		t.Fatalf("terminal tag-identity recovery review tag=%q", grant.ReviewTag)
-	}
 }
 
 func TestW001TerminalTagIdentityRecoveryPathScope(t *testing.T) {
@@ -2133,12 +2119,49 @@ func TestW001TerminalV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	target, err := verifyPinnedPlanningGrantTagForIdentity(object, publicKey, w001TerminalCIRecoveryReviewTag, w001TerminalCIRecoveryTagMessage, "engineer@example.com")
+	target, err := verifyPinnedPlanningGrantTagForIdentity(object, publicKey, w001TerminalCIRecoveryReviewTag, w001TerminalCIRecoveryTagMessage, "MARS-3 Work Authority Engineer", "engineer@example.com")
 	if err != nil || target != w001TerminalTagIdentityRecoveryBase {
 		t.Fatalf("authorized historical terminal v2 Engineer tag was rejected: target=%q err=%v", target, err)
 	}
 	if _, err := verifyPinnedPlanningGrantTag(object, publicKey, w001TerminalCIRecoveryReviewTag, w001TerminalCIRecoveryTagMessage); err == nil {
 		t.Fatal("historical terminal v2 Engineer tag was accepted as a Release Manager review tag")
+	}
+}
+
+func TestW001TerminalExactTaggerRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalExactTaggerRecoveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal exact-tagger recovery was rejected: %v", findings)
+	}
+	grant, err := LoadW001TerminalReconciliationGrant(repo, time.Date(2026, 8, 29, 23, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
+	}
+	if grant.ReviewTag != w001TerminalExactTaggerRecoveryReviewTag {
+		t.Fatalf("terminal exact-tagger recovery review tag=%q", grant.ReviewTag)
+	}
+}
+
+func TestW001TerminalExactTaggerRecoveryPathScope(t *testing.T) {
+	var authorized []string
+	for _, path := range w001TerminalExactTaggerRecoverySequences["grant.authorizedPaths"] {
+		if !w001TerminalExactTaggerRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal exact-tagger recovery path rejected: %s", path)
+		}
+		authorized = append(authorized, path)
+	}
+	if !w001TerminalExactTaggerRecoveryPathsAllowed(authorized) {
+		t.Fatal("exact seven-path terminal exact-tagger recovery scope was rejected")
+	}
+	for _, path := range []string{
+		"internal/authority/closeout/closeout.go", "cmd/mars3-authority/main.go",
+		".github/workflows/foundation-quality.yml", "go.mod", "internal/authority/gateway/lifecycle.go",
+	} {
+		if w001TerminalExactTaggerRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal exact-tagger recovery path accepted: %s", path)
+		}
 	}
 }
 
@@ -2234,7 +2257,7 @@ func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	target, err := verifyPinnedPlanningGrantTagForIdentity(object, publicKey, w001DeliveryReviewTag, w001DeliveryReviewTagMessage, "engineer@example.com")
+	target, err := verifyPinnedPlanningGrantTagForIdentity(object, publicKey, w001DeliveryReviewTag, w001DeliveryReviewTagMessage, "MARS-3 Work Authority Engineer", "engineer@example.com")
 	if err != nil || target != w001DeliveryCIFixBase {
 		t.Fatalf("authorized historical Engineer tag was rejected: target=%q err=%v", target, err)
 	}
@@ -3610,6 +3633,24 @@ func TestVerifyPlanningGrantTagRequiresExactSignedTreeAttestation(t *testing.T) 
 	tampered := bytes.Replace(object, []byte(wave1PublicationTagMessage), []byte("different tree attestation"), 1)
 	if _, err := verifyPlanningGrantTag(tampered, publicKey); err == nil {
 		t.Fatal("tampered signed tag was accepted")
+	}
+
+	wrongNameSigned := bytes.Replace(signed, []byte("MARS-3 Release Manager"), []byte("Wrong Name"), 1)
+	wrongNamePath := filepath.Join(root, "wrong-name-tag-object")
+	if err := os.WriteFile(wrongNamePath, wrongNameSigned, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	command = exec.Command("ssh-keygen", "-Y", "sign", "-f", keyPath, "-n", planningGrantCommitNS, wrongNamePath)
+	if output, err := command.CombinedOutput(); err != nil {
+		t.Fatalf("sign wrong-name tag: %v: %s", err, output)
+	}
+	wrongNameSignature, err := os.ReadFile(wrongNamePath + ".sig")
+	if err != nil {
+		t.Fatal(err)
+	}
+	wrongNameObject := append(append([]byte(nil), wrongNameSigned...), wrongNameSignature...)
+	if _, err := verifyPlanningGrantTag(wrongNameObject, publicKey); err == nil {
+		t.Fatal("wrong tagger name with the required email was accepted")
 	}
 }
 
