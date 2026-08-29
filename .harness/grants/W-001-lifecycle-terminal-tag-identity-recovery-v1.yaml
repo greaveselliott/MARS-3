@@ -1,0 +1,101 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleTerminalTagIdentityRecoveryGrant
+
+grant:
+  id: W-001-lifecycle-terminal-tag-identity-recovery-v1
+  classification: PUBLIC
+  issuedAt: 2026-08-29T16:40:47Z
+  expiresAt: 2026-08-30T16:40:47Z
+  repository: greaveselliott/MARS-3
+  baseCommit: b80dfbb289f150cbe812dcb67a289227e20c9cea
+  baseTree: ea8739b1339ce20460ec665cd6082552079c2d83
+  workingBranch: codex/w-001-terminal-reconciliation
+  priorGrant: W-001-lifecycle-terminal-history-scan-recovery-v1
+  priorGrantSHA256: fc721be90f8a98435d8041b3709f26a2c86c22eca576cab31a3d2edd842ae32d
+  priorGrantSignatureSHA256: 3086ab04191ee657bc7a5e84afb93b974ea888b0bb0ed84c8433ef157cfac463
+  rejectedReviewTag: mars3/w001-lifecycle-terminal-reconciliation-v2
+  rejectedReviewTagObject: 7682185819444d1fc38c863aa9ed869827146eca
+  rejectedReviewTagTarget: b80dfbb289f150cbe812dcb67a289227e20c9cea
+  rejectedTaggerEmail: engineer@example.com
+  failedRun: 33260154000
+  failedJob: 99120586295
+  failureCode: public.w001_delivery_tag_identity
+  pullRequest: 11
+  successorReviewTag: mars3/w001-lifecycle-terminal-reconciliation-v3
+  successorReviewTagMessage: MARS-3 W-001 lifecycle terminal reconciliation attestation v3
+  requiredTaggerName: MARS-3 Release Manager
+  requiredTaggerEmail: release-manager@example.com
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: release-manager
+  purpose: preserve the failed v2 tag and publish one distinct release-manager-signed v3 review tag over an otherwise unchanged terminal candidate
+  attemptId: w001-lifecycle-terminal-tag-identity-recovery-v1
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  ordinaryCorrectionLimit: 0
+  allowedEffects:
+    - preserve-all-prior-candidates-tags-runs-grants-and-evidence-immutably
+    - update-only-this-grant-manifest-active-plan-evidence-terminal-validator-and-focused-tests
+    - require-the-distinct-v3-review-tag-to-use-the-release-manager-public-identity-and-pinned-signing-key
+    - create-signed-semantic-commits-and-one-distinct-signed-v3-review-tag
+    - push-the-existing-branch-and-v3-tag-rerun-exact-head-CI-and-obtain-independent-QA-then-Security-review
+    - squash-merge-pull-request-11-only-after-QA-and-Security-accept-the-exact-v3-reviewed-tree
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-terminal-tag-identity-recovery-v1.yaml
+    - .harness/grants/W-001-lifecycle-terminal-tag-identity-recovery-v1.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - every-new-commit-and-tag-is-signed-and-chronologically-prospective
+    - the-v1-and-v2-tags-their-targets-and-failed-runs-remain-immutable-and-rejected
+    - the-v3-tag-is-distinct-targets-the-exact-current-feature-head-and-uses-release-manager@example.com
+    - terminal-runtime-command-store-gateway-database-workflow-dependency-scanner-and-product-bytes-remain-identical-to-the-base
+    - exact-head-CI-precedes-independent-QA-which-precedes-independent-Security
+    - any-further-CI-review-authority-or-security-failure-stops-and-escalates-without-an-incremental-successor
+  prohibitedEffects:
+    - move-delete-rewrite-resign-or-accept-any-prior-candidate-tag-commit-run-or-review
+    - modify-any-path-outside-the-exact-seven-path-scope
+    - modify-runtime-command-API-database-gateway-Beads-store-PostgreSQL-store-workflow-dependencies-scanner-policy-product-or-production
+    - canonical-Beads-PostgreSQL-lifecycle-or-lease-mutation
+    - create-any-additional-correction-attempt-or-review-tag
+    - start-P001-production-or-any-downstream-ticket
+    - autonomous-mutation
+    - trust-escalation
+
+finding:
+  run: 33260154000
+  job: 99120586295
+  step: Check doctrine
+  code: public.w001_delivery_tag_identity
+  failedTag: mars3/w001-lifecycle-terminal-reconciliation-v2
+  failedTagObject: 7682185819444d1fc38c863aa9ed869827146eca
+  observedTaggerEmail: engineer@example.com
+  requiredTaggerEmail: release-manager@example.com
+  requiredDisposition: preserve-v2-and-publish-distinct-release-manager-v3
+
+verification:
+  order:
+    - signed-grant-only-commit
+    - exact-tag-identity-and-prior-tag-immutability-regressions
+    - clean-normal-clone-full-gates
+    - signed-evidence-checkpoint-and-v3-review-tag
+    - exact-head-public-CI
+    - qa
+    - security-reviewer
+    - protected-main-merge-and-CI
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-terminal-tag-identity-recovery-v1
+  detachedSignature: W-001-lifecycle-terminal-tag-identity-recovery-v1.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
