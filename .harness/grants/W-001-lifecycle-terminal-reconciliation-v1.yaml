@@ -1,0 +1,149 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleTerminalReconciliationGrant
+
+grant:
+  id: W-001-lifecycle-terminal-reconciliation-v1
+  classification: PUBLIC
+  issuedAt: 2026-08-29T10:53:24Z
+  expiresAt: 2026-09-01T10:53:24Z
+  repository: greaveselliott/MARS-3
+  baseCommit: f6073696fab0ecf9e80d34f5c199ca54f431b5f7
+  baseTree: 1025c59672c70b8d14ad904315677ffac56b9b81
+  baseParent: 7f35c8a7112946a9569efe6085f49da8fd28530e
+  workingBranch: codex/w-001-terminal-reconciliation
+  priorGrant: W-001-lifecycle-evidence-preservation-v1
+  priorGrantSHA256: c8a1741d3b5a53e563999b825cded8819618ca554172ea9d2c9d4edf92fc6bda
+  priorGrantSignatureSHA256: 3dd30a5c213fe762f0dc093fb303f717abe26d7652529347160236cfc04950ac
+  acceptedCandidateHead: 56c2a8d95927bc552882aacc30aa886ea0be9ba5
+  acceptedCandidateTree: 1025c59672c70b8d14ad904315677ffac56b9b81
+  acceptedReviewTag: mars3/w001-lifecycle-evidence-preservation-v1
+  acceptedReviewTagObject: eb8838eccd63f42f5a81bdcdd32cd597d84bfc2c
+  archivalRef: refs/tags/mars3/w001-lifecycle-test-harness-retirement-rejected-v1
+  archivalObject: e08beb772696b078783d0c75d23c1029581cdeb1
+  acceptedRun: 33226093357
+  acceptedJob: 99030041600
+  acceptedQADisposition: accepted
+  acceptedSecurityDisposition: accepted
+  mergedCommit: f6073696fab0ecf9e80d34f5c199ca54f431b5f7
+  mergedTree: 1025c59672c70b8d14ad904315677ffac56b9b81
+  mergedPullRequest: 10
+  protectedMainRun: 33246178629
+  protectedMainJob: 99083920743
+  successorPullRequest: 11
+  successorReviewTag: mars3/w001-lifecycle-terminal-reconciliation-v1
+  successorReviewTagMessage: MARS-3 W-001 lifecycle terminal reconciliation attestation v1
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: work-authority-engineer
+  failureOwnership: foundation
+  purpose: deliver one reviewed gateway-only W-001 terminal closeout path and execute it once against the canonical stores after protected-main acceptance
+  attemptId: w001-lifecycle-terminal-reconciliation-v1
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: true
+  developmentLeaseAllowed: true
+  ordinaryCorrectionLimit: 1
+  executionAuthorizationTTL: 1h
+  allowedEffects:
+    - preserve-the-accepted-candidate-merge-tags-runs-QA-and-Security-evidence-immutably
+    - add-one-deep-one-shot-closeout-module-and-thin-command-using-existing-gateway-Beads-and-PostgreSQL-interfaces
+    - add-dry-run-validation-with-zero-canonical-mutation-and-public-safe-output
+    - update-only-this-grant-manifest-active-plan-evidence-validator-focused-tests-closeout-module-and-command
+    - qualify-in-disposable-local-Beads-and-PostgreSQL-stores-without-production-effects
+    - create-signed-semantic-commits-and-one-signed-terminal-reconciliation-review-tag
+    - push-the-new-branch-and-review-tag-open-pull-request-11-and-run-exact-head-CI
+    - obtain-fresh-independent-QA-then-Security-review-before-merge
+    - use-at-most-one-bounded-ordinary-formatting-portability-compilation-test-or-CI-correction-within-the-same-eleven-path-design
+    - squash-merge-pull-request-11-only-after-QA-and-Security-accept-the-exact-reviewed-tree
+    - after-merge-consume-one-fresh-one-hour-signed-execution-authorization-bound-to-the-protected-main-tree-run-and-external-store-identities
+    - issue-or-idempotently-replay-exactly-one-bounded-W001-development-lease-from-the-existing-canonical-claim
+    - handoff-release-review-order-run-reconciliation-terminal-close-and-exact-readback-through-the-existing-authority-gateway
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-terminal-reconciliation-v1.yaml
+    - .harness/grants/W-001-lifecycle-terminal-reconciliation-v1.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+    - internal/authority/closeout/closeout.go
+    - internal/authority/closeout/closeout_test.go
+    - cmd/mars3-authority/main.go
+    - cmd/mars3-authority/main_test.go
+  requiredProperties:
+    - every-new-commit-and-tag-is-signed-and-chronologically-prospective
+    - every-implementation-publication-review-merge-and-canonical-effect-matches-this-exact-base-branch-path-and-effect-boundary
+    - dry-run-verifies-signatures-Git-and-CI-identity-canonical-preimage-workspace-binary-and-store-readiness-with-zero-state-mutation
+    - apply-requires-the-exact-protected-main-successor-tree-and-a-fresh-one-hour-detached-execution-authorization
+    - the-execution-authorization-binds-the-reviewed-head-tag-QA-Security-merged-commit-tree-PR-protected-main-run-workspace-instance-and-Beads-binary
+    - all-W001-mutations-flow-through-existing-typed-gateway-methods-with-version-and-integrity-chaining-after-every-CAS
+    - the-development-lease-is-bounded-to-W001-this-attempt-the-accepted-main-and-the-terminal-closeout-effect
+    - handoff-releases-the-live-lease-before-QA-and-Security-verdicts
+    - QA-acceptance-precedes-Security-acceptance-which-precedes-the-completed-run-disposition
+    - reconciliation-binds-the-accepted-candidate-head-merged-commit-merged-tree-pull-request-and-protected-main-run
+    - terminal-close-occurs-only-after-the-completed-run-and-reconciliation-and-produces-native-and-lifecycle-done
+    - retries-and-unknown-effect-recovery-are-idempotent-and-reconcile-current-canonical-state-before-any-new-effect
+    - receipt-and-logs-are-public-safe-and-never-contain-credentials-database-URLs-raw-authority-payloads-or-private-provider-state
+    - no-Bead-other-than-M3-W001-is-read-for-mutation-or-mutated
+    - same-class-authority-security-or-path-provenance-recurrence-stops-and-escalates-without-an-incremental-successor
+  prohibitedEffects:
+    - direct-Beads-Dolt-SQL-or-generic-bd-mutation-outside-the-existing-authority-store-and-gateway
+    - mutate-any-Bead-other-than-M3-W001
+    - issue-renew-release-or-revoke-any-persistent-production-cross-ticket-or-non-W001-lease
+    - apply-before-exact-head-CI-independent-QA-and-independent-Security-acceptance-and-protected-main-merge
+    - apply-without-the-fresh-one-hour-signed-execution-authorization-or-securely-mounted-canonical-Beads-and-PostgreSQL-handles
+    - expose-store-handles-credentials-private-keys-signature-inputs-raw-payloads-or-private-data
+    - modify-workflow-ruleset-repository-settings-trust-roots-approval-policy-dependencies-go-modules-API-database-gateway-Beads-store-PostgreSQL-store-product-or-runtime
+    - recreate-the-deleted-codex-w-001-lifecycle-completion-branch
+    - rewrite-delete-move-or-resign-any-existing-commit-tag-run-review-or-evidence
+    - start-P001-or-any-downstream-ticket-before-explicit-W001-terminal-handoff-and-fresh-authority
+    - production-deployment-production-data-mutation-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+terminalSequence:
+  order:
+    - reconcile-one-bounded-development-lease-from-the-existing-bootstrap-claim
+    - handoff-and-release-the-live-lease
+    - record-independent-QA-accepted
+    - record-independent-Security-accepted
+    - record-delivery-orchestrator-completed-run
+    - record-exact-accepted-head-merged-commit-tree-pull-request-and-protected-main-run-reconciliation
+    - close-M3-W001-to-native-and-lifecycle-done
+    - read-back-Beads-lifecycle-events-projection-and-lease-absence
+
+verification:
+  order:
+    - local-disposable-qualification
+    - exact-head-public-CI
+    - qa
+    - security-reviewer
+    - protected-main-merge-and-CI
+    - fresh-execution-authorization
+    - canonical-dry-run
+    - canonical-apply
+    - canonical-readback
+    - delivery-orchestrator-terminal-handoff
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  externalPostgreSQLReadbackRequired: true
+  canonicalLifecycleMutationDeferredUntilProtectedMain: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-terminal-reconciliation-v1
+  detachedSignature: W-001-lifecycle-terminal-reconciliation-v1.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
