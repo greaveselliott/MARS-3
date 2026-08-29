@@ -1837,3 +1837,35 @@ found no leak in the worktree and no leak across all 116 commits of history.
 This is local qualification only; the signed v2 review tag, exact-head public
 CI, independent QA, independent Security, and protected-main merge remain
 pending.
+
+### Rejected v2 tag identity and prospective v3 recovery
+
+The terminal history-scanner candidate is immutably rejected at signed head
+`b80dfbb289f150cbe812dcb67a289227e20c9cea`, tree
+`ea8739b1339ce20460ec665cd6082552079c2d83`, and signed annotated v2 tag object
+`7682185819444d1fc38c863aa9ed869827146eca`. Exact-head run `33260154000`, job
+`99120586295`, failed at `Check doctrine` with
+`public.w001_delivery_tag_identity`: the v2 tag used
+`engineer@example.com`, while the signed review contract requires
+`release-manager@example.com`. All later CI steps were skipped. The v2 tag,
+target, message, signature, failed run, and changes-requested disposition remain
+immutable and are not acceptance evidence.
+
+The prospective signed `W-001-lifecycle-terminal-tag-identity-recovery-v1`
+grant binds that exact head, tree, tag object, run, job, observed identity, and
+required Release Manager identity. Its SHA-256 is
+`5522bf5cc0245c5f432fecd8b765aaf5ffc5e2a0a2c13933f15f77fd2f08e28f`; its
+detached-signature SHA-256 is
+`25dcd076db3dea9f834a5c00ea9332534f58c3aaef439aac7a0c435d732869f0`.
+Signed grant-only commit `3a28830b64faf2d2d62e6ed5ede1b0a4a7a9434b`, tree
+`009864d983f5bfaaf81da7b6c3605d01e4087a66`, was committed after the grant's
+`2026-08-29T16:40:47Z` issue time.
+
+Recovery may update only the seven signed grant, manifest, plan, evidence, and
+terminal-validator/test paths. Runtime, command, workflow, dependency, scanner,
+API, database, gateway, canonical Beads/PostgreSQL, production, product, and
+downstream bytes remain unchanged. One distinct v3 tag must target the exact
+new feature head and must verify under the pinned key with tagger identity
+`MARS-3 Release Manager <release-manager@example.com>`. Fresh exact-head CI
+must precede independent QA and then independent Security. Any further failure
+stops the attempt. W-001 remains `in-progress`.

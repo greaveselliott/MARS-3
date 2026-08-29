@@ -2046,7 +2046,7 @@ func TestW001TerminalCIRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
 	}
-	if grant.ReviewTag != w001TerminalCIRecoveryReviewTag {
+	if grant.ReviewTag != w001TerminalTagIdentityRecoveryReviewTag {
 		t.Fatalf("terminal recovery review tag=%q", grant.ReviewTag)
 	}
 }
@@ -2086,6 +2086,59 @@ func TestW001TerminalHistoryScanRecoveryPathScope(t *testing.T) {
 		if w001TerminalHistoryScanRecoveryPathsAllowed([]string{path}) {
 			t.Fatalf("out-of-scope terminal history-scan recovery path accepted: %s", path)
 		}
+	}
+}
+
+func TestW001TerminalTagIdentityRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalTagIdentityRecoveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal tag-identity recovery was rejected: %v", findings)
+	}
+	grant, err := LoadW001TerminalReconciliationGrant(repo, time.Date(2026, 8, 29, 17, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
+	}
+	if grant.ReviewTag != w001TerminalTagIdentityRecoveryReviewTag {
+		t.Fatalf("terminal tag-identity recovery review tag=%q", grant.ReviewTag)
+	}
+}
+
+func TestW001TerminalTagIdentityRecoveryPathScope(t *testing.T) {
+	var authorized []string
+	for _, path := range w001TerminalTagIdentityRecoverySequences["grant.authorizedPaths"] {
+		if !w001TerminalTagIdentityRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal tag-identity recovery path rejected: %s", path)
+		}
+		authorized = append(authorized, path)
+	}
+	if !w001TerminalTagIdentityRecoveryPathsAllowed(authorized) {
+		t.Fatal("exact seven-path terminal tag-identity recovery scope was rejected")
+	}
+	for _, path := range []string{
+		"internal/authority/closeout/closeout.go", "cmd/mars3-authority/main.go",
+		".github/workflows/foundation-quality.yml", "go.mod", "internal/authority/gateway/lifecycle.go",
+	} {
+		if w001TerminalTagIdentityRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal tag-identity recovery path accepted: %s", path)
+		}
+	}
+}
+
+func TestW001TerminalV2TagIdentityIsHistoricalOnly(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	object := planningGrantTestGitRawOutput(t, repo, "cat-file", "tag", w001TerminalV2TagObject)
+	publicKey, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(wave1PlanningGrantKey)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	target, err := verifyPinnedPlanningGrantTagForIdentity(object, publicKey, w001TerminalCIRecoveryReviewTag, w001TerminalCIRecoveryTagMessage, "engineer@example.com")
+	if err != nil || target != w001TerminalTagIdentityRecoveryBase {
+		t.Fatalf("authorized historical terminal v2 Engineer tag was rejected: target=%q err=%v", target, err)
+	}
+	if _, err := verifyPinnedPlanningGrantTag(object, publicKey, w001TerminalCIRecoveryReviewTag, w001TerminalCIRecoveryTagMessage); err == nil {
+		t.Fatal("historical terminal v2 Engineer tag was accepted as a Release Manager review tag")
 	}
 }
 

@@ -157,18 +157,20 @@ The Orchestrator may schedule it only through a later truthful plan transition.
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
 - Required next transition: execute the prospective signed
-  `W-001-lifecycle-terminal-history-scan-recovery-v1` grant from exact recovered
-  fixture head `8dcb71192107589c4a5abe5e2d84ff8825c4d17f`, tree
-  `ad4a78f374e64c6f0e38e9a43cdec86eef03ab78`. The signed v1 tag and failed
-  public run `33250298926` remain immutable, as does the consumed
-  `W-001-lifecycle-terminal-ci-recovery-v1` first recovery from rejected head
-  `cff16fda43acd9d621f701064427b0d7fc3bf30d`. Admit
-  only the exact immutable non-secret fingerprint
-  `20335cbc274785ee68651b244a11d5f768abe30b:internal/authority/closeout/closeout_test.go:generic-api-key:231`
-  as the eleventh closed history-scanner entry, publish one distinct signed v2
-  tag on PR #11, and require fresh exact-head CI, independent QA, then
-  independent Security. Any further failure stops; no additional correction is
-  authorized. After an accepted exact-tree squash, one fresh one-hour signed
+  `W-001-lifecycle-terminal-tag-identity-recovery-v1` grant from exact failed
+  v2 head `b80dfbb289f150cbe812dcb67a289227e20c9cea`, tree
+  `ea8739b1339ce20460ec665cd6082552079c2d83`. Preserve signed v2 tag object
+  `7682185819444d1fc38c863aa9ed869827146eca` and failed run/job
+  `33260154000`/`99120586295` immutably. The consumed
+  `W-001-lifecycle-terminal-history-scan-recovery-v1` from head
+  `8dcb71192107589c4a5abe5e2d84ff8825c4d17f`, tree
+  `ad4a78f374e64c6f0e38e9a43cdec86eef03ab78`, and the earlier
+  `W-001-lifecycle-terminal-ci-recovery-v1` from rejected head
+  `cff16fda43acd9d621f701064427b0d7fc3bf30d` remain preserved. Publish one
+  distinct signed v3 tag on PR #11 using `MARS-3 Release Manager
+  <release-manager@example.com>`, then require fresh exact-head CI, independent
+  QA, and independent Security. Any further failure stops; no additional
+  correction is authorized. After an accepted exact-tree squash, one fresh one-hour signed
   execution authorization may bind the reviewed helper, protected-main run,
   canonical Beads workspace and binary, and PostgreSQL fence generation. Only
   then may the helper issue one bounded W-001 lease, release it during handoff,
