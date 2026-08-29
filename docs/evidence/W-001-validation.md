@@ -1506,3 +1506,55 @@ grant-bound message. It then permits branch/tag publication, fresh exact-head
 CI, and independent QA followed by Security. It authorizes no source,
 workflow, dependency, runtime, API, database, native-patch, product,
 Beads/lease, merge, downstream-ticket, or production change.
+
+### Retirement disposition and prospective authority recovery
+
+The publication-only correction produced signed evidence commit
+`0b0195ba0953d1d6d387aad699605ff864cfac1d`, tree
+`f96506ca6b7b053d41d4067eb1c926b9d4b39b40`, and signed annotated retirement
+tag object `60edcd3fd4603d66d7dd4feedbdae034fff13efa`. The tag uses the required
+`MARS-3 Release Manager <release-manager@example.com>` identity and targets
+that exact commit and tree. Exact-head public run `33222628400`, job
+`99019716295`, passed doctrine, plan, public, full test, vet, whitespace,
+signature, canary, worktree scan, and history scan gates. Independent QA
+returned `accepted` against the same immutable subject.
+
+Independent Security returned `changes-requested`. The retirement architecture
+and deterministic Git fixture were accepted, but two signed-authority findings
+prevent the successful run from becoming acceptance evidence:
+
+- `authority.retirement_grant_retroactive_admission`: retirement grant commit
+  `adf068e9a329c8748357343dcb5976e317c5ec12` was committed at
+  `2026-08-28T22:23:41Z`, nineteen seconds before the signed grant's
+  `2026-08-28T22:24:00Z` issue time, and the validator admitted that exact
+  commit through a 60-second retrospective exception.
+- `authority.retirement_publication_out_of_scope_retry`: the signed retirement
+  grant's one ordinary correction was already consumed before the retirement
+  tag was replaced and the second public run was started.
+
+Both retirement tag objects, both public runs, and both review dispositions are
+immutable evidence. Neither the successful run nor its accepted QA review is
+accepted delivery authority, and this record does not retroactively authorize
+any retirement commit, tag, run, review, or publication.
+
+The prospective signed
+`W-001-lifecycle-authority-recovery-v1` grant adopts exact head
+`0b0195ba0953d1d6d387aad699605ff864cfac1d` and tree
+`f96506ca6b7b053d41d4067eb1c926b9d4b39b40` only as an unaccepted recovery
+preimage. It was issued at `2026-08-29T00:28:29Z`. Its grant SHA-256 is
+`68e8051b477eb9bd3c6846874794b9e83e5e4341f5784eb3569dc6c598c0150f`;
+its detached-signature SHA-256 is
+`5eb415fbed952821daaebb10736b70a045ca6f1ee8e2e24834446436b81eea3b`.
+The detached signature verifies under namespace
+`mars3-w001-lifecycle-authority-recovery-v1` with pinned ED25519 fingerprint
+`SHA256:i5VSHF257DhXJ5l/9oOUGHnT2mrqgXYSMryQHRsSBx8`. Signed grant-only commit
+`ff303a95d9216d839f5b5abfe3feceb64e412e91` was committed at
+`2026-08-29T00:29:37Z`, after grant issuance, and verifies with the pinned key.
+
+The recovery may remove only the retrospective validator exception and add its
+focused chronology regression while retaining the complete retirement design
+and deterministic fixture bytes unchanged. It requires a distinct signed tag
+`mars3/w001-lifecycle-authority-recovery-v1`, one fresh exact-head public run,
+and fresh independent QA followed by Security. W-001 remains `in-progress`;
+merge, Beads/lease mutation, reconciliation, production change, and downstream
+work remain unauthorized.

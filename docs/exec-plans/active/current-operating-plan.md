@@ -156,20 +156,19 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: bind the signed
-  `W-001-lifecycle-test-harness-retirement-v1` whole-design retirement to one
-  immutable checkpoint; verify that exact tree from a normal clone through the
-  public and leak gates; then publish its signed tag, run exact-head CI, and
-  route it through independent QA followed by Security. The retirement
-  replaces the descriptor/Perl/one-shot/fetch-stream/AST self-sandbox with a
-  transparent deterministic local Git fixture and treats the accepted
-  read-only, no-credential public workflow as the candidate-code security
-  boundary. The independent cold builds, non-skipped native Beads suite,
-  exact-artifact integration, and PostgreSQL lifecycle suite remain preserved.
-  No
-  canonical handoff or later lifecycle mutation may execute until the reviewed
-  tree is merged and a separate reconciliation authority binds the
-  protected-main result.
+- Required next transition: execute the prospective signed
+  `W-001-lifecycle-authority-recovery-v1` grant from exact unaccepted preimage
+  head `0b0195ba0953d1d6d387aad699605ff864cfac1d`, tree
+  `f96506ca6b7b053d41d4067eb1c926b9d4b39b40`. Remove the retrospective
+  commit-time exception, retain the retirement design byte-for-byte, and bind
+  only new chronologically prospective commits to a distinct signed recovery
+  tag. Verify that exact recovery tree through one fresh exact-head public run,
+  then route it through independent QA followed by Security. The complete
+  retirement attempt, its two tag objects, two public runs, and prior reviews
+  remain immutable but unaccepted evidence. No canonical handoff or later
+  lifecycle mutation may execute until the prospective recovery receives both
+  independent acceptances, is separately authorized for merge, and a later
+  reconciliation authority binds the protected-main result.
 
 The W-001 bootstrap grant is deliberately not a live lease: it is
 human-directed, binds one base commit and attempt, permits only canonical W-001
@@ -371,6 +370,25 @@ sandbox. Candidate-code security is owned by the immutable, read-only,
 no-credential public workflow and independent review. W-001 therefore remains
 `in-progress`; no merge, canonical lifecycle mutation, live lease, downstream
 ticket, or production effect is authorized by this retirement.
+
+The completed retirement architecture is not accepted delivery authority.
+Its first signed tag object
+`e08beb772696b078783d0c75d23c1029581cdeb1` and failed public run
+`33218389712` / job `99007023124` are preserved alongside corrected signed tag
+object `60edcd3fd4603d66d7dd4feedbdae034fff13efa` and successful public run
+`33222628400` / job `99019716295`. Independent QA accepted exact head
+`0b0195ba0953d1d6d387aad699605ff864cfac1d`, tree
+`f96506ca6b7b053d41d4067eb1c926b9d4b39b40`; Security returned
+`changes-requested` with
+`authority.retirement_grant_retroactive_admission` and
+`authority.retirement_publication_out_of_scope_retry`. The signed
+`W-001-lifecycle-authority-recovery-v1` grant adopts that exact tree only as an
+unaccepted recovery preimage. It authorizes removal of the commit-specific
+timestamp exception and one new prospective signed publication boundary while
+keeping the retirement fixture bytes unchanged. The next evidence must be a
+distinct signed recovery tag, one fresh exact-head public run, and fresh QA
+then Security review. W-001 remains `in-progress`; merge, Beads/lease mutation,
+production change, and downstream work remain unauthorized.
 
 This is candidate implementation evidence only. F-002 scenarios remain
 `failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation

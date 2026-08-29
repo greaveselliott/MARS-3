@@ -1929,6 +1929,41 @@ func TestW001LifecycleCIHardeningV17PathScope(t *testing.T) {
 	}
 }
 
+func TestW001LifecycleAuthorityRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleAuthorityRecoveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 lifecycle authority recovery was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleAuthorityRecoveryPathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleAuthorityRecoveryPath,
+		w001LifecycleAuthorityRecoverySignature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleAuthorityRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("authorized lifecycle authority-recovery path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleTestHarnessRetirementPath,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleAuthorityRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope lifecycle authority-recovery path was accepted: %s", path)
+		}
+	}
+}
+
 func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	object := planningGrantTestGitRawOutput(t, repo, "cat-file", "tag", w001DeliveryV2TagObject)
@@ -4126,6 +4161,25 @@ func TestPlanningGrantTestGitArgumentsFailClosed(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestPlanningGrantCommitAuthorityIsProspective(t *testing.T) {
+	issuedAt := time.Date(2026, time.August, 29, 0, 28, 29, 0, time.UTC)
+	for _, test := range []struct {
+		name        string
+		committedAt time.Time
+		want        bool
+	}{
+		{name: "nineteen seconds before issuance", committedAt: issuedAt.Add(-19 * time.Second), want: false},
+		{name: "exactly at issuance", committedAt: issuedAt, want: true},
+		{name: "after issuance", committedAt: issuedAt.Add(time.Second), want: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := planningGrantCommitAtOrAfterGrant(test.committedAt, issuedAt); got != test.want {
+				t.Fatalf("planningGrantCommitAtOrAfterGrant(%s, %s) = %t, want %t", test.committedAt, issuedAt, got, test.want)
+			}
+		})
+	}
 }
 
 func assertPlanningGrantTestGitConfigAbsent(t *testing.T, root, scope, key string) {
