@@ -1,0 +1,103 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleTerminalHistoryScanRecoveryGrant
+
+grant:
+  id: W-001-lifecycle-terminal-history-scan-recovery-v1
+  classification: PUBLIC
+  issuedAt: 2026-08-29T15:03:58Z
+  expiresAt: 2026-08-30T15:03:58Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 8dcb71192107589c4a5abe5e2d84ff8825c4d17f
+  baseTree: ad4a78f374e64c6f0e38e9a43cdec86eef03ab78
+  workingBranch: codex/w-001-terminal-reconciliation
+  priorGrant: W-001-lifecycle-terminal-ci-recovery-v1
+  priorGrantSHA256: 8380dfd8eba71c349f2fc2ac00265d59f43256d147db4be45ff07f2279f6558e
+  priorGrantSignatureSHA256: 196c0e472c0ac54942ccaa6e7c46380ade3bb042f44fbdc10a1fdc73f0dd3242
+  rejectedCandidateHead: cff16fda43acd9d621f701064427b0d7fc3bf30d
+  rejectedCandidateTree: 447cac655e6d4d34bce9a8f9641a677e3e7511cc
+  rejectedReviewTag: mars3/w001-lifecycle-terminal-reconciliation-v1
+  rejectedReviewTagObject: 06a9075aef9a3741eca7b5ea03f6d9aca0ab2dda
+  rejectedRun: 33250298926
+  rejectedJob: 99094724907
+  recoveredFixtureHead: 8dcb71192107589c4a5abe5e2d84ff8825c4d17f
+  recoveredFixtureTree: ad4a78f374e64c6f0e38e9a43cdec86eef03ab78
+  failureCode: ci.history_secret_scan_preserved_public_uuid_fixture
+  pullRequest: 11
+  successorReviewTag: mars3/w001-lifecycle-terminal-reconciliation-v2
+  successorReviewTagMessage: MARS-3 W-001 lifecycle terminal reconciliation attestation v2
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: pipeline-fixer
+  purpose: admit one exact immutable public UUID fixture fingerprint to the existing closed history-scanner exception set
+  attemptId: w001-lifecycle-terminal-history-scan-recovery-v1
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  ordinaryCorrectionLimit: 0
+  allowedEffects:
+    - preserve-all-prior-candidates-tags-runs-grants-and-evidence-immutably
+    - append-one-exact-immutable-public-fixture-fingerprint-to-the-closed-history-scanner-ignore-file
+    - extend-the-terminal-validator-and-focused-tests-for-exact-eleven-fingerprint-admission
+    - update-only-this-grant-manifest-active-plan-evidence-scanner-ignore-and-terminal-validator-tests
+    - create-signed-semantic-commits-and-one-distinct-signed-v2-review-tag
+    - push-the-existing-branch-and-v2-tag-rerun-exact-head-CI-and-obtain-independent-QA-then-Security-review
+    - squash-merge-pull-request-11-only-after-QA-and-Security-accept-the-exact-v2-reviewed-tree
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-terminal-history-scan-recovery-v1.yaml
+    - .harness/grants/W-001-lifecycle-terminal-history-scan-recovery-v1.yaml.sig
+    - .gitleaksignore
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - every-new-commit-and-tag-is-signed-and-chronologically-prospective
+    - the-v1-candidate-tag-run-finding-and-first-recovery-remain-immutable-and-rejected
+    - the-new-ignore-entry-is-one-exact-commit-path-rule-line-tuple-with-a-nonempty-immutable-source-line
+    - the-existing-ten-scanner-fingerprints-remain-byte-exact-and-no-wildcard-ignore-is-admitted
+    - terminal-runtime-command-store-gateway-database-workflow-dependency-and-product-bytes-remain-identical-to-the-recovered-fixture-head
+    - exact-head-CI-precedes-independent-QA-which-precedes-independent-Security
+    - any-further-CI-review-authority-or-security-failure-stops-and-escalates-without-an-incremental-successor
+  prohibitedEffects:
+    - move-delete-rewrite-resign-or-accept-any-prior-candidate-tag-commit-run-or-review
+    - modify-any-path-outside-the-exact-eight-path-scope
+    - add-a-wildcard-rule-path-or-line-scanner-ignore
+    - modify-closeout-runtime-command-API-database-gateway-Beads-store-PostgreSQL-store-workflow-dependencies-product-or-production
+    - canonical-Beads-PostgreSQL-lifecycle-or-lease-mutation
+    - create-any-additional-correction-attempt-or-review-tag
+    - start-P001-production-or-any-downstream-ticket
+    - autonomous-mutation
+    - trust-escalation
+
+finding:
+  sourceCommit: 20335cbc274785ee68651b244a11d5f768abe30b
+  file: internal/authority/closeout/closeout_test.go
+  lineAtSource: 231
+  scannerRule: generic-api-key
+  fingerprint: 20335cbc274785ee68651b244a11d5f768abe30b:internal/authority/closeout/closeout_test.go:generic-api-key:231
+  valueClassification: public-noncredential-authority-generation-fixture-in-immutable-history
+  requiredDisposition: exact-fingerprint-only-history-ignore
+
+verification:
+  order:
+    - signed-grant-only-commit
+    - exact-fingerprint-source-regression-and-pinned-worktree-plus-history-scanners
+    - clean-normal-clone-full-gates
+    - signed-evidence-checkpoint-and-v2-review-tag
+    - exact-head-public-CI
+    - qa
+    - security-reviewer
+    - protected-main-merge-and-CI
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-terminal-history-scan-recovery-v1
+  detachedSignature: W-001-lifecycle-terminal-history-scan-recovery-v1.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

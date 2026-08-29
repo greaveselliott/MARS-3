@@ -847,15 +847,15 @@ func TestW001DeliveryScannerIgnoreFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	exact := strings.Join(w001DeliveryScannerFingerprints, "\n") + "\n"
+	exact := strings.Join(w001DeliveryScannerLegacyFingerprints, "\n") + "\n"
 	for _, testCase := range []struct {
 		name string
 		body string
 	}{
 		{name: "changed", body: strings.Replace(exact, "0faf9071", "1faf9071", 1)},
 		{name: "extra", body: exact + "*:generic-api-key:*\n"},
-		{name: "missing", body: strings.TrimPrefix(exact, w001DeliveryScannerFingerprints[0]+"\n")},
-		{name: "duplicate", body: exact + w001DeliveryScannerFingerprints[0] + "\n"},
+		{name: "missing", body: strings.TrimPrefix(exact, w001DeliveryScannerLegacyFingerprints[0]+"\n")},
+		{name: "duplicate", body: exact + w001DeliveryScannerLegacyFingerprints[0] + "\n"},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			root := planningGrantCanonicalTempDir(t)
@@ -1999,6 +1999,240 @@ func TestW001LifecycleEvidencePreservationPathScope(t *testing.T) {
 	}
 }
 
+func TestW001TerminalReconciliationGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalReconciliationGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal reconciliation was rejected: %v", findings)
+	}
+	grant, err := LoadW001TerminalReconciliationGrant(repo, time.Date(2026, 8, 29, 11, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
+	}
+	if grant.ID != "W-001-lifecycle-terminal-reconciliation-v1" || grant.Bead != "M3-W001" ||
+		grant.BaseCommit != w001TerminalReconciliationBase || grant.AcceptedCandidateHead != "56c2a8d95927bc552882aacc30aa886ea0be9ba5" ||
+		grant.ExpectedVersion.IssueMutationSequence != 1 || grant.ExpectedVersion.DependencyGraphRevision != 1 {
+		t.Fatalf("terminal grant projection=%#v", grant)
+	}
+}
+
+func TestW001TerminalReconciliationPathScope(t *testing.T) {
+	for _, path := range []string{
+		w001TerminalReconciliationPath, w001TerminalReconciliationSignature, ".harness/manifest.yaml", canonicalActivePlan,
+		"docs/evidence/W-001-validation.md", "internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+		"internal/authority/closeout/closeout.go", "internal/authority/closeout/closeout_test.go",
+		"cmd/mars3-authority/main.go", "cmd/mars3-authority/main_test.go",
+	} {
+		if !w001TerminalReconciliationPathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal path rejected: %s", path)
+		}
+	}
+	for _, path := range []string{".github/workflows/foundation-quality.yml", "go.mod", "api/authority/v1/types.go", "internal/authority/gateway/lifecycle.go", "database/authority/001_work_authority.sql"} {
+		if w001TerminalReconciliationPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal path accepted: %s", path)
+		}
+	}
+}
+
+func TestW001TerminalCIRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalCIRecoveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal CI recovery was rejected: %v", findings)
+	}
+}
+
+func TestW001TerminalCIRecoveryPathScope(t *testing.T) {
+	for _, path := range w001TerminalCIRecoverySequences["grant.authorizedPaths"] {
+		if !w001TerminalCIRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal CI-recovery path rejected: %s", path)
+		}
+	}
+	for _, path := range []string{"internal/authority/closeout/closeout.go", "cmd/mars3-authority/main.go", ".github/workflows/foundation-quality.yml", "go.mod"} {
+		if w001TerminalCIRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal CI-recovery path accepted: %s", path)
+		}
+	}
+}
+
+func TestW001TerminalHistoryScanRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalHistoryScanRecoveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal history-scan recovery was rejected: %v", findings)
+	}
+}
+
+func TestW001TerminalHistoryScanRecoveryPathScope(t *testing.T) {
+	for _, path := range w001TerminalHistoryScanRecoverySequences["grant.authorizedPaths"] {
+		if !w001TerminalHistoryScanRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal history-scan recovery path rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		"internal/authority/closeout/closeout.go", "internal/authority/closeout/closeout_test.go",
+		"cmd/mars3-authority/main.go", ".github/workflows/foundation-quality.yml", "go.mod",
+	} {
+		if w001TerminalHistoryScanRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal history-scan recovery path accepted: %s", path)
+		}
+	}
+}
+
+func TestW001TerminalTagIdentityRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalTagIdentityRecoveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal tag-identity recovery was rejected: %v", findings)
+	}
+}
+
+func TestW001TerminalTagIdentityRecoveryPathScope(t *testing.T) {
+	var authorized []string
+	for _, path := range w001TerminalTagIdentityRecoverySequences["grant.authorizedPaths"] {
+		if !w001TerminalTagIdentityRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal tag-identity recovery path rejected: %s", path)
+		}
+		authorized = append(authorized, path)
+	}
+	if !w001TerminalTagIdentityRecoveryPathsAllowed(authorized) {
+		t.Fatal("exact seven-path terminal tag-identity recovery scope was rejected")
+	}
+	for _, path := range []string{
+		"internal/authority/closeout/closeout.go", "cmd/mars3-authority/main.go",
+		".github/workflows/foundation-quality.yml", "go.mod", "internal/authority/gateway/lifecycle.go",
+	} {
+		if w001TerminalTagIdentityRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal tag-identity recovery path accepted: %s", path)
+		}
+	}
+}
+
+func TestW001TerminalV2TagIdentityIsHistoricalOnly(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	object := planningGrantTestGitRawOutput(t, repo, "cat-file", "tag", w001TerminalV2TagObject)
+	publicKey, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(wave1PlanningGrantKey)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	target, err := verifyPinnedPlanningGrantTagForIdentity(object, publicKey, w001TerminalCIRecoveryReviewTag, w001TerminalCIRecoveryTagMessage, "MARS-3 Work Authority Engineer", "engineer@example.com")
+	if err != nil || target != w001TerminalTagIdentityRecoveryBase {
+		t.Fatalf("authorized historical terminal v2 Engineer tag was rejected: target=%q err=%v", target, err)
+	}
+	if _, err := verifyPinnedPlanningGrantTag(object, publicKey, w001TerminalCIRecoveryReviewTag, w001TerminalCIRecoveryTagMessage); err == nil {
+		t.Fatal("historical terminal v2 Engineer tag was accepted as a Release Manager review tag")
+	}
+}
+
+func TestW001TerminalExactTaggerRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalExactTaggerRecoveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal exact-tagger recovery was rejected: %v", findings)
+	}
+	grant, err := LoadW001TerminalReconciliationGrant(repo, time.Date(2026, 8, 29, 23, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
+	}
+	if grant.ReviewTag != w001TerminalExactTaggerRecoveryReviewTag {
+		t.Fatalf("terminal exact-tagger recovery review tag=%q", grant.ReviewTag)
+	}
+}
+
+func TestW001TerminalExactTaggerRecoveryPathScope(t *testing.T) {
+	var authorized []string
+	for _, path := range w001TerminalExactTaggerRecoverySequences["grant.authorizedPaths"] {
+		if !w001TerminalExactTaggerRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal exact-tagger recovery path rejected: %s", path)
+		}
+		authorized = append(authorized, path)
+	}
+	if !w001TerminalExactTaggerRecoveryPathsAllowed(authorized) {
+		t.Fatal("exact seven-path terminal exact-tagger recovery scope was rejected")
+	}
+	for _, path := range []string{
+		"internal/authority/closeout/closeout.go", "cmd/mars3-authority/main.go",
+		".github/workflows/foundation-quality.yml", "go.mod", "internal/authority/gateway/lifecycle.go",
+	} {
+		if w001TerminalExactTaggerRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal exact-tagger recovery path accepted: %s", path)
+		}
+	}
+}
+
+func TestW001TerminalHistoryScannerFingerprintIsExactAndImmutable(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001DeliveryScannerFingerprintSources(repo, []string{w001TerminalHistoryScannerFingerprint}, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("exact terminal history scanner fingerprint was rejected: %v", findings)
+	}
+
+	wrongLine := strings.TrimSuffix(w001TerminalHistoryScannerFingerprint, ":231") + ":232"
+	findings = nil
+	checkW001DeliveryScannerFingerprintSources(repo, []string{wrongLine}, &findings)
+	if !findingCodePresent(findings, "public.w001_delivery_scanner_history") {
+		t.Fatalf("non-authorized terminal history scanner tuple was accepted: %v", findings)
+	}
+}
+
+func TestW001TerminalExecutionAuthorizationRequiresCanonicalJSON(t *testing.T) {
+	authorization := W001TerminalReconciliationExecutionAuthorization{
+		SchemaVersion: 1, Kind: "MARS3W001TerminalReconciliationExecutionAuthorization", Classification: "PUBLIC",
+		GrantID: "W-001-lifecycle-terminal-reconciliation-v1", Repository: planningGrantRepository,
+		AttemptID: "w001-lifecycle-terminal-reconciliation-v1", Bead: "M3-W001", TenantID: "tenant-academy", ProjectID: "project-mars3",
+		ReviewTag: w001TerminalReconciliationReviewTag, ReviewTagObject: strings.Repeat("f", 40), ReviewedFeatureCommit: strings.Repeat("a", 40), PullRequest: 11,
+		MergedCommit: strings.Repeat("b", 40), MergedTree: strings.Repeat("c", 40), ProtectedMainCheckRun: 1,
+		QAReviewedCommit: strings.Repeat("a", 40), QADisposition: "accepted", SecurityReviewedCommit: strings.Repeat("a", 40), SecurityDisposition: "accepted",
+		BeadsBinarySHA256: strings.Repeat("d", 64), WorkspaceInstanceSHA256: strings.Repeat("e", 64), FenceGeneration: "generation-terminal",
+		AllowedEffect: "execute-one-gateway-only-W001-terminal-reconciliation", IssuedAt: "2026-08-29T12:00:00Z", ExpiresAt: "2026-08-29T13:00:00Z",
+	}
+	data, err := json.Marshal(authorization)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data = append(data, '\n')
+	decoded, err := decodeW001TerminalExecutionAuthorization(data)
+	if err != nil || decoded != authorization {
+		t.Fatalf("decoded=%#v err=%v", decoded, err)
+	}
+	if _, err := decodeW001TerminalExecutionAuthorization(bytes.Replace(data, []byte(`"schemaVersion":1`), []byte(`"schemaVersion":1,"extra":true`), 1)); err == nil {
+		t.Fatal("unknown execution-authorization field was accepted")
+	}
+	if _, err := decodeW001TerminalExecutionAuthorization(bytes.TrimSpace(data)); err == nil {
+		t.Fatal("noncanonical execution authorization was accepted")
+	}
+}
+
+func TestW001TerminalExecutionAuthorizationWindowIsProspectiveAndBounded(t *testing.T) {
+	issuedAt := time.Date(2026, 8, 29, 12, 0, 0, 0, time.UTC)
+	expiresAt := issuedAt.Add(time.Hour)
+	for _, test := range []struct {
+		name string
+		now  time.Time
+		want bool
+	}{
+		{name: "nanosecond before issuance", now: issuedAt.Add(-time.Nanosecond), want: false},
+		{name: "exactly at issuance", now: issuedAt, want: true},
+		{name: "inside window", now: expiresAt.Add(-time.Nanosecond), want: true},
+		{name: "exactly at expiry", now: expiresAt, want: false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := validW001TerminalExecutionWindow(test.now, issuedAt, expiresAt); got != test.want {
+				t.Fatalf("validW001TerminalExecutionWindow(%s)=%t want=%t", test.now, got, test.want)
+			}
+		})
+	}
+	if validW001TerminalExecutionWindow(issuedAt, issuedAt, expiresAt.Add(time.Nanosecond)) {
+		t.Fatal("execution window longer than one hour was accepted")
+	}
+}
+
 func TestW001LifecycleArchivedRejectedRetirementTagIsDurableAndUnaccepted(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	var findings []Finding
@@ -2023,7 +2257,7 @@ func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	target, err := verifyPinnedPlanningGrantTagForIdentity(object, publicKey, w001DeliveryReviewTag, w001DeliveryReviewTagMessage, "engineer@example.com")
+	target, err := verifyPinnedPlanningGrantTagForIdentity(object, publicKey, w001DeliveryReviewTag, w001DeliveryReviewTagMessage, "MARS-3 Work Authority Engineer", "engineer@example.com")
 	if err != nil || target != w001DeliveryCIFixBase {
 		t.Fatalf("authorized historical Engineer tag was rejected: target=%q err=%v", target, err)
 	}
@@ -3399,6 +3633,24 @@ func TestVerifyPlanningGrantTagRequiresExactSignedTreeAttestation(t *testing.T) 
 	tampered := bytes.Replace(object, []byte(wave1PublicationTagMessage), []byte("different tree attestation"), 1)
 	if _, err := verifyPlanningGrantTag(tampered, publicKey); err == nil {
 		t.Fatal("tampered signed tag was accepted")
+	}
+
+	wrongNameSigned := bytes.Replace(signed, []byte("MARS-3 Release Manager"), []byte("Wrong Name"), 1)
+	wrongNamePath := filepath.Join(root, "wrong-name-tag-object")
+	if err := os.WriteFile(wrongNamePath, wrongNameSigned, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	command = exec.Command("ssh-keygen", "-Y", "sign", "-f", keyPath, "-n", planningGrantCommitNS, wrongNamePath)
+	if output, err := command.CombinedOutput(); err != nil {
+		t.Fatalf("sign wrong-name tag: %v: %s", err, output)
+	}
+	wrongNameSignature, err := os.ReadFile(wrongNamePath + ".sig")
+	if err != nil {
+		t.Fatal(err)
+	}
+	wrongNameObject := append(append([]byte(nil), wrongNameSigned...), wrongNameSignature...)
+	if _, err := verifyPlanningGrantTag(wrongNameObject, publicKey); err == nil {
+		t.Fatal("wrong tagger name with the required email was accepted")
 	}
 }
 

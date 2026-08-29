@@ -2,7 +2,7 @@
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
-**Updated:** 2026-08-28
+**Updated:** 2026-08-29
 **Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
@@ -157,19 +157,37 @@ The Orchestrator may schedule it only through a later truthful plan transition.
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
 - Required next transition: execute the prospective signed
-  `W-001-lifecycle-evidence-preservation-v1` grant from exact recovery head
-  `5251ae37a2914e9f750d4c5900f46c7bb736b2d9`, tree
-  `82a4a84cae31d0003aecddf654217cbfb2bd29a6`. Preserve the existing rejected
-  retirement tag object `e08beb772696b078783d0c75d23c1029581cdeb1`
-  byte-for-byte under distinct archival tag
-  `mars3/w001-lifecycle-test-harness-retirement-rejected-v1`; never select that
-  ref as a current review tag or acceptance signal. Retain the retirement and
-  recovery design bytes, publish one distinct signed preservation candidate,
-  verify it through one fresh exact-head public run, then route it through
-  independent QA followed by Security. No canonical handoff or later lifecycle
-  mutation may execute until both independent reviews accept, merge is
-  separately authorized, and a later reconciliation authority binds the
-  protected-main result.
+  `W-001-lifecycle-terminal-exact-tagger-recovery-v1` grant from exact
+  QA-rejected v3 head `70ed4a5c502ff3184479d08fd50a19e10cd4af0b`,
+  tree `39134c754f2263f2ec10d9bd4e42789ab86cf0fd`. Preserve signed v3 tag
+  object `5f621e96520d933b4ff5c751948d9dd4710a7f0c`, passed run/job
+  `33264433302`/`99131880421`, and QA finding
+  `public.w001_terminal_tag_identity_name_not_exact` immutably; Security did
+  not run. This grant supersedes the stop clause in the consumed
+  `W-001-lifecycle-terminal-tag-identity-recovery-v1` only for exact tagger
+  name-plus-email enforcement and a wrong-name/correct-email regression. That
+  consumed recovery from v2 head
+  `b80dfbb289f150cbe812dcb67a289227e20c9cea`, tree
+  `ea8739b1339ce20460ec665cd6082552079c2d83`, the prior signed v2 tag object
+  `7682185819444d1fc38c863aa9ed869827146eca`, and the earlier
+  `W-001-lifecycle-terminal-history-scan-recovery-v1` from head
+  `8dcb71192107589c4a5abe5e2d84ff8825c4d17f`, tree
+  `ad4a78f374e64c6f0e38e9a43cdec86eef03ab78`, and
+  `W-001-lifecycle-terminal-ci-recovery-v1` from rejected head
+  `cff16fda43acd9d621f701064427b0d7fc3bf30d` remain preserved. Publish one
+  distinct signed v4 tag on PR #11 using exact identity `MARS-3 Release
+  Manager <release-manager@example.com>`, then require fresh exact-head CI,
+  independent QA, and independent Security. Any further failure stops; no
+  additional correction is authorized. After an accepted exact-tree squash,
+  one fresh one-hour signed
+  execution authorization may bind the reviewed helper, protected-main run,
+  canonical Beads workspace and binary, and PostgreSQL fence generation. Only
+  then may the helper issue one bounded W-001 lease, release it during handoff,
+  record the already-accepted QA and Security evidence against candidate
+  `56c2a8d95927bc552882aacc30aa886ea0be9ba5`, record the completed run and PR
+  #10 reconciliation, close W-001, and read back terminal state. W-001 remains
+  `in-progress` until that canonical gateway sequence succeeds; P-001 and all
+  production work remain excluded.
 
 The W-001 bootstrap grant is deliberately not a live lease: it is
 human-directed, binds one base commit and attempt, permits only canonical W-001

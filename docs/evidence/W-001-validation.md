@@ -1662,3 +1662,286 @@ show-check, protected-surface diff, and clean-checkout checks passed. This is
 qualified prospective implementation evidence pending a signed evidence
 checkpoint, distinct preservation review tag, one exact-head public run, and
 fresh independent QA then Security review.
+
+### Accepted evidence-preservation merge and deferred terminal closeout
+
+The evidence-preservation candidate completed at signed head
+`56c2a8d95927bc552882aacc30aa886ea0be9ba5`, tree
+`1025c59672c70b8d14ad904315677ffac56b9b81`, and signed annotated review tag
+object `eb8838eccd63f42f5a81bdcdd32cd597d84bfc2c`. The distinct archival ref
+`mars3/w001-lifecycle-test-harness-retirement-rejected-v1` resolves in a fresh
+normal clone to exact rejected tag object
+`e08beb772696b078783d0c75d23c1029581cdeb1`; it remains rejected and is not an
+acceptance signal. Exact-head public run `33226093357`, job `99030041600`,
+passed. Independent QA accepted and closed `QA-W001-RECOVERY-001`; Independent
+Security accepted with `security.w001_evidence_preservation.accepted`. No open
+finding remained on that immutable tree.
+
+User-authorized PR #10 squash-merged the accepted candidate at protected-main
+commit `f6073696fab0ecf9e80d34f5c199ca54f431b5f7`, sole parent
+`7f35c8a7112946a9569efe6085f49da8fd28530e`, with tree
+`1025c59672c70b8d14ad904315677ffac56b9b81` exactly equal to the reviewed
+candidate tree. Protected-main run `33246178629`, job `99083920743`, passed.
+The review and archival tags remain exact. This merge accepted the gateway and
+its durable evidence; it did not mutate canonical Beads or PostgreSQL state,
+and M3-W001 remains `in-progress` with no live lease.
+
+The prospective signed `W-001-lifecycle-terminal-reconciliation-v1` grant is
+the only current closeout authority. It binds base commit
+`f6073696fab0ecf9e80d34f5c199ca54f431b5f7`, base tree
+`1025c59672c70b8d14ad904315677ffac56b9b81`, the accepted candidate and both
+passed runs, and exactly eleven implementation/evidence paths. Its grant-only
+commit is `ce12312228ce2a4b57e9d68c7113c90c85018b4f`, committed after the grant's
+`2026-08-29T10:53:24Z` issue time. The grant SHA-256 is
+`835841a5cd5b1cbcb1debb4a6a98c4ce2eb83ccff396f84b4823444bb504eef5`; its
+detached-signature SHA-256 is
+`ca4e2376f65c6dc23e90a4e925330c1f5f3f84163148758c907f6b14234f2e9b`, and
+the signature verifies under namespace
+`mars3-w001-lifecycle-terminal-reconciliation-v1` with the pinned ED25519 key.
+
+The implementation adds one gateway-only closeout composition. Dry-run must
+verify the exact signed Git/CI and canonical store preimage with zero mutation.
+Canonical apply remains deferred until the exact PR #11 candidate passes CI,
+Independent QA and Independent Security accept the same immutable tree, the
+tree is squash-merged to protected main, and a fresh one-hour signed execution
+authorization binds the protected-main commit/run plus external Beads and
+PostgreSQL identities. No credential, database URL, raw authority payload,
+production effect, or downstream ticket is authorized.
+
+### Terminal-reconciliation implementation qualification
+
+The signed implementation checkpoint is commit
+`20335cbc274785ee68651b244a11d5f768abe30b`. It adds the deep
+`closeout.Run` composition and thin `mars3-authority terminal-reconcile`
+command. Dry-run performs only signed-boundary and canonical-store reads;
+apply composes the existing typed claim-reconciliation, handoff, ordered QA and
+Security verdict, completed-run, merge-reconciliation, and terminal-close
+gateway methods. Every step carries the returned `WorkVersion` and integrity
+postimage into the next CAS. A completed claim saga whose lease was released
+before an unknown handoff receipt is recovered by exact idempotency key,
+intent, work, and full released-fence validation; it cannot issue a second
+lease. The public receipt excludes paths, credentials, connection strings, raw
+authority documents, and private state.
+
+Local qualification found one bounded pre-publication correction set. Commit
+`c77683ef9d3e5b69ab8147c315de30e3e0fcfc10` preserves the legacy bootstrap
+command byte attestation against immutable PR #10 base
+`f6073696fab0ecf9e80d34f5c199ca54f431b5f7` while the terminal validator owns
+the grant-authorized current command. Commit
+`654d2b5271886e75b0426d7baaeedb839d2d5210` adds the required existing F-002,
+ADR-001, and code-map lineage markers to the three new source/test files. This
+consumes the grant's one ordinary qualification correction. It does not alter
+the terminal architecture, workflow, dependencies, API, database, gateway,
+Beads store, PostgreSQL store, production, or downstream work.
+
+The implementation checkpoint tree is
+`889a0c6319125c92682ef3211fd09f92104188f0`. Its four commits form a
+prospective, signed, one-parent chain from the exact signed base. The complete
+base-to-checkpoint diff is exactly the eleven authorized paths. Doctrine,
+plan, and DocSync checks passed in the source worktree. Public-check and the
+embedded full-suite public assertion correctly rejected that linked
+worktree's `.git` pointer; no validator weakening was made.
+
+A fresh normal local clone at the exact checkpoint passed doctrine, plan,
+DocSync, public-check, `git diff --check`, and `git show --check`. In that clean
+clone, unmodified `go test ./... -count=1` passed every package, with
+`internal/doctrine` completing in 111.148 seconds; `go vet ./...` passed.
+Focused closeout, command, signed-grant, prospective execution-window,
+workspace-identity, released-lease recovery, and terminal-scope tests passed
+ten consecutive times. The same focused suite passed with the race detector.
+This remains qualified implementation evidence only: a final signed evidence
+checkpoint, signed annotated review tag, exact-head public CI, independent QA
+then Security, protected-main merge, fresh one-hour execution authorization,
+canonical dry-run/apply, and external readback are still required.
+
+### Rejected terminal v1 candidate and bounded CI recovery
+
+The first terminal-reconciliation candidate is immutably rejected at signed
+head `cff16fda43acd9d621f701064427b0d7fc3bf30d`, tree
+`447cac655e6d4d34bce9a8f9641a677e3e7511cc`, and signed annotated v1 tag
+object `06a9075aef9a3741eca7b5ea03f6d9aca0ab2dda`. PR #11 public run
+`33250298926`, job `99094724907`, passed doctrine, plan, DocSync, public
+validation, tests/vet, whitespace, commit/tag validation, and the synthetic
+scanner canary. Its worktree scan returned one `generic-api-key` finding at
+`internal/authority/closeout/closeout_test.go:239`. Read-only replay with the
+same pinned scanner identified the value as the public canonical
+authority-generation UUID used by `closeoutFixture`; it is not a credential.
+The v1 commit, tag, run, and failed disposition remain immutable and are not
+acceptance evidence.
+
+The prospective signed `W-001-lifecycle-terminal-ci-recovery-v1` grant binds
+that exact rejected head, tree, tag object, run, job, file, line, rule, and
+fingerprint. Its grant SHA-256 is
+`8380dfd8eba71c349f2fc2ac00265d59f43256d147db4be45ff07f2279f6558e`;
+its detached-signature SHA-256 is
+`196c0e472c0ac54942ccaa6e7c46380ade3bb042f44fbdc10a1fdc73f0dd3242`.
+The signature verifies under namespace
+`mars3-w001-lifecycle-terminal-ci-recovery-v1` with the pinned ED25519 key.
+Signed grant-only commit `411a864ee213019b3700c9668772a10df6263f54`,
+tree `808f0680497734b575a2c0de0ec333c512660f1f`, was committed at
+`2026-08-29T11:34:50Z`, after its `2026-08-29T11:33:56Z` issue time.
+
+Recovery may change only the scanner-triggering public test literal into a
+deterministic byte-identical value plus this signed grant, manifest, plan,
+evidence, and terminal validator/tests. Closeout runtime, command, API,
+database, gateway, Beads/PostgreSQL stores, workflow, dependencies, product,
+canonical state, and production remain unchanged. The recovery allows one
+distinct signed v2 review tag and fresh CI, QA, and Security on PR #11. Any
+further failure stops and escalates; no additional correction is authorized.
+
+### Exact terminal history-scanner recovery
+
+The scanner-safe fixture replacement is signed at head
+`8dcb71192107589c4a5abe5e2d84ff8825c4d17f`, tree
+`ad4a78f374e64c6f0e38e9a43cdec86eef03ab78`. Worktree scanning is clean, but
+the required full-history scan truthfully rediscovers the immutable public UUID
+fixture in implementation commit `20335cbc274785ee68651b244a11d5f768abe30b`.
+The exact non-secret finding is
+`20335cbc274785ee68651b244a11d5f768abe30b:internal/authority/closeout/closeout_test.go:generic-api-key:231`.
+The rejected v1 candidate, tag object, failed run, first recovery grant, and
+recovered fixture head remain immutable and unaccepted.
+
+The prospective signed `W-001-lifecycle-terminal-history-scan-recovery-v1`
+grant binds the exact recovered head and tree. Its SHA-256 is
+`fc721be90f8a98435d8041b3709f26a2c86c22eca576cab31a3d2edd842ae32d` and its
+detached-signature SHA-256 is
+`3086ab04191ee657bc7a5e84afb93b974ea888b0bb0ed84c8433ef157cfac463`.
+Signed grant-only commit `02825a52e6484613154374b0bf1b2102179647d7`,
+tree `0b334898d6e8d04bfda64b74b078019c81e78c89`, was committed after the
+grant's `2026-08-29T15:03:58Z` issue time. Its sole scanner effect is to extend
+the closed ignore file from ten to eleven exact commit:path:rule:line tuples.
+Wildcards, scanner configuration changes, source rewrites, and any
+runtime, workflow, dependency, canonical Beads/PostgreSQL, production, or
+downstream effect remain prohibited. The exact source tuple must resolve to a
+nonempty line in the immutable commit and must be an ancestor of the signed
+recovery base. Fresh pinned worktree and full-history scans, clean-clone gates,
+one signed v2 tag, exact-head CI, independent QA, and then independent Security
+are required. Any further CI or review failure stops the attempt. W-001 remains
+`in-progress`.
+
+Signed implementation commit `974799b1a9246ef40d1afba04a0a1cc858e25f27`,
+tree `a1a85b006841fa9fe27a2684a3b924be85a6944e`, changes exactly the six
+remaining paths allowed by the grant; together with grant-only commit
+`02825a52e6484613154374b0bf1b2102179647d7`, the base-to-head diff is exactly
+the eight authorized paths. The focused signed-grant, path-scope, scanner-ignore,
+source-tuple, and prior-recovery suite passed ten consecutive runs and passed
+under the Go race detector.
+
+A fresh normal clone of that exact implementation commit passed doctrine,
+plan, DocSync, public-check, whitespace, and show-check. Unmodified
+`go test ./... -count=1` passed every package, with `internal/doctrine`
+completing in 113.975 seconds, and `go vet ./...` passed. The digest-pinned,
+network-disabled Gitleaks image
+`docker.io/zricethezav/gitleaks@sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba`
+found no leak in the worktree and no leak across all 116 commits of history.
+This is local qualification only; the signed v2 review tag, exact-head public
+CI, independent QA, independent Security, and protected-main merge remain
+pending.
+
+### Rejected v2 tag identity and prospective v3 recovery
+
+The terminal history-scanner candidate is immutably rejected at signed head
+`b80dfbb289f150cbe812dcb67a289227e20c9cea`, tree
+`ea8739b1339ce20460ec665cd6082552079c2d83`, and signed annotated v2 tag object
+`7682185819444d1fc38c863aa9ed869827146eca`. Exact-head run `33260154000`, job
+`99120586295`, failed at `Check doctrine` with
+`public.w001_delivery_tag_identity`: the v2 tag used
+`engineer@example.com`, while the signed review contract requires
+`release-manager@example.com`. All later CI steps were skipped. The v2 tag,
+target, message, signature, failed run, and changes-requested disposition remain
+immutable and are not acceptance evidence.
+
+The prospective signed `W-001-lifecycle-terminal-tag-identity-recovery-v1`
+grant binds that exact head, tree, tag object, run, job, observed identity, and
+required Release Manager identity. Its SHA-256 is
+`5522bf5cc0245c5f432fecd8b765aaf5ffc5e2a0a2c13933f15f77fd2f08e28f`; its
+detached-signature SHA-256 is
+`25dcd076db3dea9f834a5c00ea9332534f58c3aaef439aac7a0c435d732869f0`.
+Signed grant-only commit `3a28830b64faf2d2d62e6ed5ede1b0a4a7a9434b`, tree
+`009864d983f5bfaaf81da7b6c3605d01e4087a66`, was committed after the grant's
+`2026-08-29T16:40:47Z` issue time.
+
+Recovery may update only the seven signed grant, manifest, plan, evidence, and
+terminal-validator/test paths. Runtime, command, workflow, dependency, scanner,
+API, database, gateway, canonical Beads/PostgreSQL, production, product, and
+downstream bytes remain unchanged. One distinct v3 tag must target the exact
+new feature head and must verify under the pinned key with tagger identity
+`MARS-3 Release Manager <release-manager@example.com>`. Fresh exact-head CI
+must precede independent QA and then independent Security. Any further failure
+stops the attempt. W-001 remains `in-progress`.
+
+Signed implementation commit
+`a34640a73b2113c738017a66734fb6ea96beb0b4`, tree
+`33b2cec58006b457553ee2a9afdc397bcb181af4`, changes the five remaining
+manifest, plan, evidence, terminal-validator, and focused-test paths. Together
+with grant-only commit `3a28830b64faf2d2d62e6ed5ede1b0a4a7a9434b`, the
+base-to-head diff is exactly the seven authorized paths. Both commits verify
+under the pinned ED25519 Git key.
+
+The focused terminal tag-identity, prior-recovery, path-scope, and scanner
+regressions passed ten consecutive runs and passed under the Go race detector.
+A fresh normal clone of the exact implementation commit passed doctrine, plan,
+DocSync, public-check, whitespace, and show-check. Unmodified
+`go test ./... -count=1` passed every package, with `internal/doctrine`
+completing in 147.025 seconds, and `go vet ./...` passed. The digest-pinned,
+network-disabled Gitleaks image
+`docker.io/zricethezav/gitleaks@sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba`
+found no leak in the exact worktree and no leak across all 119 commits of
+history. This remains local qualification only; the signed v3 review tag,
+exact-head public CI, independent QA, independent Security, and protected-main
+merge remain pending.
+
+### QA-rejected v3 and prospective exact-tagger v4 recovery
+
+The v3 candidate is immutably rejected at signed head
+`70ed4a5c502ff3184479d08fd50a19e10cd4af0b`, tree
+`39134c754f2263f2ec10d9bd4e42789ab86cf0fd`, and signed annotated tag object
+`5f621e96520d933b4ff5c751948d9dd4710a7f0c`. Exact-head run
+`33264433302`, job `99131880421`, passed every public gate. Independent QA
+returned `changes-requested` with finding
+`public.w001_terminal_tag_identity_name_not_exact`: the actual v3 tag uses
+`MARS-3 Release Manager <release-manager@example.com>`, but the validator
+matched only `release-manager@example.com` and would also accept a different
+name. Independent Security did not run, and PR #11 was not merged.
+
+The prospective signed `W-001-lifecycle-terminal-exact-tagger-recovery-v1`
+grant supersedes the v3 stop clause only for exact name-plus-email enforcement
+and a wrong-name/correct-email regression. Its SHA-256 is
+`c9ccb6480d9b96b31b45c131288256c04a3f30b868b2c527682d80b16f10a33c`;
+its detached-signature SHA-256 is
+`e178e5f0e3fbb109dd9750740b2f71b394fc1adad510c4d115d76ae4e6c517a5`.
+Signed grant-only commit `d95d46a61aab9761cf502dc34c4ecd59df85dc74`,
+tree `d4d1bca8f9b618527e8dce8ab1bfc074eaf22b9a`, was committed after the
+grant's `2026-08-29T22:39:34Z` issue time.
+
+The adversarial regression first reproduced the defect by accepting a signed
+`Wrong Name <release-manager@example.com>` tag, then passed after the narrow
+tag-header parser required the exact signed name and email. Recovery may update
+only the seven signed grant, manifest, plan, evidence, terminal-validator, and
+focused-test paths. Runtime, command, workflow, dependency, scanner, API,
+database, gateway, canonical Beads/PostgreSQL, lease, production, product, and
+downstream bytes and effects remain prohibited. One distinct v4 tag, fresh
+exact-head CI, independent QA, and then independent Security are required.
+Any further failure stops the attempt. W-001 remains `in-progress`.
+
+Signed implementation commit
+`8df0fb62c4f2b0624b5891695d8f651e8a55b10a`, tree
+`3c4ef3998fc830fef8cce7749491ed3fe30c6d6b`, changes the five remaining
+manifest, plan, evidence, terminal-validator, and focused-test paths. Together
+with grant-only commit `d95d46a61aab9761cf502dc34c4ecd59df85dc74`,
+the base-to-head diff is exactly the seven authorized paths. Both commits
+verify under the pinned ED25519 Git key.
+
+The signed wrong-name/correct-email regression failed before the parser change
+and passed after exact name-plus-email enforcement. The focused exact-tagger,
+prior-recovery, and path-scope suite passed ten consecutive runs and passed
+under the Go race detector. A fresh normal clone of the exact implementation
+commit passed doctrine, plan, DocSync, public-check, whitespace, and show-check.
+Unmodified `go test ./... -count=1` passed every package, with
+`internal/doctrine` completing in 159.583 seconds, and `go vet ./...` passed.
+The digest-pinned, network-disabled Gitleaks image
+`docker.io/zricethezav/gitleaks@sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba`
+found no leak in the exact worktree and no leak across all 122 commits of
+history. This remains local qualification only; the signed v4 review tag,
+exact-head public CI, independent QA, independent Security, and protected-main
+merge remain pending.
