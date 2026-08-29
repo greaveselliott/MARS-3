@@ -1558,3 +1558,28 @@ and deterministic fixture bytes unchanged. It requires a distinct signed tag
 and fresh independent QA followed by Security. W-001 remains `in-progress`;
 merge, Beads/lease mutation, reconciliation, production change, and downstream
 work remain unauthorized.
+
+The signed prospective recovery implementation checkpoint is commit
+`2e00e8a6bf1fda7cc170d6cfc2da847c4742fb35`, tree
+`2b312ddac56bcdd230a3abd925654b8063043651`, with sole parent the signed
+grant-only commit. Both recovery commits verify with the pinned ED25519 key and
+were committed after the grant's issue time. The exact recovery-preimage diff
+contains only the seven signed paths. Diffs remain empty for `api/**`,
+`internal/authority/**`, `database/**`, `.github/**`, `go.mod`, and `go.sum`;
+the retirement fixture, workflow, dependencies, authority runtime, database,
+native patches, and product contracts remain unchanged.
+
+Focused authority-recovery, prospective-chronology, and deterministic Git
+fixture tests passed once in 1.671 seconds and ten consecutive times in 9.488
+seconds; the same focused suite passed under the race detector in 2.352
+seconds. Doctrine, plan, and doc-sync repository checks passed in the source
+worktree. Its public check retained the expected linked-worktree-only `.git`
+scope rejection.
+
+A fresh normal clone with a real `.git` directory checked out the exact signed
+implementation commit and tree. The unmodified `go test ./... -count=1` passed
+every package; `internal/doctrine` completed in 110.115 seconds. `go vet ./...`,
+`git diff --check`, commit show-check, protected-surface diff checks, and clean
+checkout verification passed. This is qualified prospective implementation
+evidence only, pending a signed evidence checkpoint, distinct recovery tag,
+one fresh exact-head public run, and fresh independent QA then Security review.
