@@ -2,7 +2,7 @@
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
-**Updated:** 2026-08-28
+**Updated:** 2026-08-29
 **Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
@@ -157,19 +157,19 @@ The Orchestrator may schedule it only through a later truthful plan transition.
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
 - Required next transition: execute the prospective signed
-  `W-001-lifecycle-evidence-preservation-v1` grant from exact recovery head
-  `5251ae37a2914e9f750d4c5900f46c7bb736b2d9`, tree
-  `82a4a84cae31d0003aecddf654217cbfb2bd29a6`. Preserve the existing rejected
-  retirement tag object `e08beb772696b078783d0c75d23c1029581cdeb1`
-  byte-for-byte under distinct archival tag
-  `mars3/w001-lifecycle-test-harness-retirement-rejected-v1`; never select that
-  ref as a current review tag or acceptance signal. Retain the retirement and
-  recovery design bytes, publish one distinct signed preservation candidate,
-  verify it through one fresh exact-head public run, then route it through
-  independent QA followed by Security. No canonical handoff or later lifecycle
-  mutation may execute until both independent reviews accept, merge is
-  separately authorized, and a later reconciliation authority binds the
-  protected-main result.
+  `W-001-lifecycle-terminal-reconciliation-v1` grant from protected-main commit
+  `f6073696fab0ecf9e80d34f5c199ca54f431b5f7`, tree
+  `1025c59672c70b8d14ad904315677ffac56b9b81`. Add one deep, gateway-only
+  closeout path, publish it through PR #11, and obtain exact-head CI plus
+  independent QA followed by Security. After an accepted exact-tree squash,
+  one fresh one-hour signed execution authorization may bind the reviewed
+  helper, protected-main run, canonical Beads workspace and binary, and
+  PostgreSQL fence generation. Only then may the helper issue one bounded
+  W-001 lease, release it during handoff, record the already-accepted QA and
+  Security evidence against candidate `56c2a8d95927bc552882aacc30aa886ea0be9ba5`,
+  record the completed run and PR #10 reconciliation, close W-001, and read
+  back terminal state. W-001 remains `in-progress` until that canonical
+  gateway sequence succeeds; P-001 and all production work remain excluded.
 
 The W-001 bootstrap grant is deliberately not a live lease: it is
 human-directed, binds one base commit and attempt, permits only canonical W-001

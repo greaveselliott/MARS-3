@@ -1999,6 +1999,94 @@ func TestW001LifecycleEvidencePreservationPathScope(t *testing.T) {
 	}
 }
 
+func TestW001TerminalReconciliationGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalReconciliationGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal reconciliation was rejected: %v", findings)
+	}
+	grant, err := LoadW001TerminalReconciliationGrant(repo, time.Date(2026, 8, 29, 11, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
+	}
+	if grant.ID != "W-001-lifecycle-terminal-reconciliation-v1" || grant.Bead != "M3-W001" ||
+		grant.BaseCommit != w001TerminalReconciliationBase || grant.AcceptedCandidateHead != "56c2a8d95927bc552882aacc30aa886ea0be9ba5" ||
+		grant.ExpectedVersion.IssueMutationSequence != 1 || grant.ExpectedVersion.DependencyGraphRevision != 1 {
+		t.Fatalf("terminal grant projection=%#v", grant)
+	}
+}
+
+func TestW001TerminalReconciliationPathScope(t *testing.T) {
+	for _, path := range []string{
+		w001TerminalReconciliationPath, w001TerminalReconciliationSignature, ".harness/manifest.yaml", canonicalActivePlan,
+		"docs/evidence/W-001-validation.md", "internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+		"internal/authority/closeout/closeout.go", "internal/authority/closeout/closeout_test.go",
+		"cmd/mars3-authority/main.go", "cmd/mars3-authority/main_test.go",
+	} {
+		if !w001TerminalReconciliationPathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal path rejected: %s", path)
+		}
+	}
+	for _, path := range []string{".github/workflows/foundation-quality.yml", "go.mod", "api/authority/v1/types.go", "internal/authority/gateway/lifecycle.go", "database/authority/001_work_authority.sql"} {
+		if w001TerminalReconciliationPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal path accepted: %s", path)
+		}
+	}
+}
+
+func TestW001TerminalExecutionAuthorizationRequiresCanonicalJSON(t *testing.T) {
+	authorization := W001TerminalReconciliationExecutionAuthorization{
+		SchemaVersion: 1, Kind: "MARS3W001TerminalReconciliationExecutionAuthorization", Classification: "PUBLIC",
+		GrantID: "W-001-lifecycle-terminal-reconciliation-v1", Repository: planningGrantRepository,
+		AttemptID: "w001-lifecycle-terminal-reconciliation-v1", Bead: "M3-W001", TenantID: "tenant-academy", ProjectID: "project-mars3",
+		ReviewTag: w001TerminalReconciliationReviewTag, ReviewTagObject: strings.Repeat("f", 40), ReviewedFeatureCommit: strings.Repeat("a", 40), PullRequest: 11,
+		MergedCommit: strings.Repeat("b", 40), MergedTree: strings.Repeat("c", 40), ProtectedMainCheckRun: 1,
+		QAReviewedCommit: strings.Repeat("a", 40), QADisposition: "accepted", SecurityReviewedCommit: strings.Repeat("a", 40), SecurityDisposition: "accepted",
+		BeadsBinarySHA256: strings.Repeat("d", 64), WorkspaceInstanceSHA256: strings.Repeat("e", 64), FenceGeneration: "generation-terminal",
+		AllowedEffect: "execute-one-gateway-only-W001-terminal-reconciliation", IssuedAt: "2026-08-29T12:00:00Z", ExpiresAt: "2026-08-29T13:00:00Z",
+	}
+	data, err := json.Marshal(authorization)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data = append(data, '\n')
+	decoded, err := decodeW001TerminalExecutionAuthorization(data)
+	if err != nil || decoded != authorization {
+		t.Fatalf("decoded=%#v err=%v", decoded, err)
+	}
+	if _, err := decodeW001TerminalExecutionAuthorization(bytes.Replace(data, []byte(`"schemaVersion":1`), []byte(`"schemaVersion":1,"extra":true`), 1)); err == nil {
+		t.Fatal("unknown execution-authorization field was accepted")
+	}
+	if _, err := decodeW001TerminalExecutionAuthorization(bytes.TrimSpace(data)); err == nil {
+		t.Fatal("noncanonical execution authorization was accepted")
+	}
+}
+
+func TestW001TerminalExecutionAuthorizationWindowIsProspectiveAndBounded(t *testing.T) {
+	issuedAt := time.Date(2026, 8, 29, 12, 0, 0, 0, time.UTC)
+	expiresAt := issuedAt.Add(time.Hour)
+	for _, test := range []struct {
+		name string
+		now  time.Time
+		want bool
+	}{
+		{name: "nanosecond before issuance", now: issuedAt.Add(-time.Nanosecond), want: false},
+		{name: "exactly at issuance", now: issuedAt, want: true},
+		{name: "inside window", now: expiresAt.Add(-time.Nanosecond), want: true},
+		{name: "exactly at expiry", now: expiresAt, want: false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := validW001TerminalExecutionWindow(test.now, issuedAt, expiresAt); got != test.want {
+				t.Fatalf("validW001TerminalExecutionWindow(%s)=%t want=%t", test.now, got, test.want)
+			}
+		})
+	}
+	if validW001TerminalExecutionWindow(issuedAt, issuedAt, expiresAt.Add(time.Nanosecond)) {
+		t.Fatal("execution window longer than one hour was accepted")
+	}
+}
+
 func TestW001LifecycleArchivedRejectedRetirementTagIsDurableAndUnaccepted(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	var findings []Finding

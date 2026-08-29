@@ -1662,3 +1662,48 @@ show-check, protected-surface diff, and clean-checkout checks passed. This is
 qualified prospective implementation evidence pending a signed evidence
 checkpoint, distinct preservation review tag, one exact-head public run, and
 fresh independent QA then Security review.
+
+### Accepted evidence-preservation merge and deferred terminal closeout
+
+The evidence-preservation candidate completed at signed head
+`56c2a8d95927bc552882aacc30aa886ea0be9ba5`, tree
+`1025c59672c70b8d14ad904315677ffac56b9b81`, and signed annotated review tag
+object `eb8838eccd63f42f5a81bdcdd32cd597d84bfc2c`. The distinct archival ref
+`mars3/w001-lifecycle-test-harness-retirement-rejected-v1` resolves in a fresh
+normal clone to exact rejected tag object
+`e08beb772696b078783d0c75d23c1029581cdeb1`; it remains rejected and is not an
+acceptance signal. Exact-head public run `33226093357`, job `99030041600`,
+passed. Independent QA accepted and closed `QA-W001-RECOVERY-001`; Independent
+Security accepted with `security.w001_evidence_preservation.accepted`. No open
+finding remained on that immutable tree.
+
+User-authorized PR #10 squash-merged the accepted candidate at protected-main
+commit `f6073696fab0ecf9e80d34f5c199ca54f431b5f7`, sole parent
+`7f35c8a7112946a9569efe6085f49da8fd28530e`, with tree
+`1025c59672c70b8d14ad904315677ffac56b9b81` exactly equal to the reviewed
+candidate tree. Protected-main run `33246178629`, job `99083920743`, passed.
+The review and archival tags remain exact. This merge accepted the gateway and
+its durable evidence; it did not mutate canonical Beads or PostgreSQL state,
+and M3-W001 remains `in-progress` with no live lease.
+
+The prospective signed `W-001-lifecycle-terminal-reconciliation-v1` grant is
+the only current closeout authority. It binds base commit
+`f6073696fab0ecf9e80d34f5c199ca54f431b5f7`, base tree
+`1025c59672c70b8d14ad904315677ffac56b9b81`, the accepted candidate and both
+passed runs, and exactly eleven implementation/evidence paths. Its grant-only
+commit is `ce12312228ce2a4b57e9d68c7113c90c85018b4f`, committed after the grant's
+`2026-08-29T10:53:24Z` issue time. The grant SHA-256 is
+`835841a5cd5b1cbcb1debb4a6a98c4ce2eb83ccff396f84b4823444bb504eef5`; its
+detached-signature SHA-256 is
+`ca4e2376f65c6dc23e90a4e925330c1f5f3f84163148758c907f6b14234f2e9b`, and
+the signature verifies under namespace
+`mars3-w001-lifecycle-terminal-reconciliation-v1` with the pinned ED25519 key.
+
+The implementation adds one gateway-only closeout composition. Dry-run must
+verify the exact signed Git/CI and canonical store preimage with zero mutation.
+Canonical apply remains deferred until the exact PR #11 candidate passes CI,
+Independent QA and Independent Security accept the same immutable tree, the
+tree is squash-merged to protected main, and a fresh one-hour signed execution
+authorization binds the protected-main commit/run plus external Beads and
+PostgreSQL identities. No credential, database URL, raw authority payload,
+production effect, or downstream ticket is authorized.

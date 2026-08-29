@@ -24,7 +24,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
+
+	authorityv1 "github.com/greaveselliott/MARS-3/api/authority/v1"
 )
 
 const (
@@ -328,6 +331,17 @@ const (
 	w001LifecycleRejectedRetirementArchiveTag    = "mars3/w001-lifecycle-test-harness-retirement-rejected-v1"
 	w001LifecycleEvidencePreservationReviewTag   = "mars3/w001-lifecycle-evidence-preservation-v1"
 	w001LifecycleEvidencePreservationTagMessage  = "MARS-3 W-001 lifecycle rejected-evidence preservation attestation v1"
+	w001TerminalReconciliationPath               = ".harness/grants/W-001-lifecycle-terminal-reconciliation-v1.yaml"
+	w001TerminalReconciliationSignature          = ".harness/grants/W-001-lifecycle-terminal-reconciliation-v1.yaml.sig"
+	w001TerminalReconciliationNamespace          = "mars3-w001-lifecycle-terminal-reconciliation-v1"
+	w001TerminalExecutionNamespace               = "mars3-w001-lifecycle-terminal-reconciliation-execution-v1"
+	w001TerminalReconciliationBase               = "f6073696fab0ecf9e80d34f5c199ca54f431b5f7"
+	w001TerminalReconciliationBaseTree           = "1025c59672c70b8d14ad904315677ffac56b9b81"
+	w001TerminalReconciliationBranch             = "codex/w-001-terminal-reconciliation"
+	w001TerminalReconciliationReviewTag          = "mars3/w001-lifecycle-terminal-reconciliation-v1"
+	w001TerminalReconciliationTagMessage         = "MARS-3 W-001 lifecycle terminal reconciliation attestation v1"
+	w001TerminalGrantSHA256                      = "835841a5cd5b1cbcb1debb4a6a98c4ce2eb83ccff396f84b4823444bb504eef5"
+	w001TerminalGrantSignatureSHA256             = "ca4e2376f65c6dc23e90a4e925330c1f5f3f84163148758c907f6b14234f2e9b"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -439,6 +453,63 @@ type W001DeliveryGrant struct {
 	DependencyGraphRevision      uint64
 	CanonicalWorkMutationAllowed bool
 	DevelopmentLeaseAllowed      bool
+}
+
+// W001TerminalReconciliationGrant is the minimal public projection used by
+// the post-review one-shot closeout module.
+type W001TerminalReconciliationGrant struct {
+	ID                      string
+	Repository              string
+	Bead                    string
+	Assignee                string
+	AttemptID               string
+	CanonicalClaimAttemptID string
+	BaseCommit              string
+	BaseTree                string
+	WorkingBranch           string
+	ReviewTag               string
+	AcceptedCandidateHead   string
+	AcceptedCandidateTree   string
+	MergedCommit            string
+	MergedTree              string
+	MergedPullRequest       int
+	ProtectedMainRun        int64
+	ExpectedNativeStatus    string
+	ExpectedLifecycleState  string
+	ExpectedVersion         authorityv1.WorkVersion
+	ExpiresAt               time.Time
+}
+
+// W001TerminalReconciliationExecutionAuthorization is a short-lived signed
+// post-review token. It binds the exact reviewed helper, merged main, CI run,
+// and external store identities without exposing any store credential.
+type W001TerminalReconciliationExecutionAuthorization struct {
+	SchemaVersion           int    `json:"schemaVersion"`
+	Kind                    string `json:"kind"`
+	Classification          string `json:"classification"`
+	GrantID                 string `json:"grantId"`
+	Repository              string `json:"repository"`
+	AttemptID               string `json:"attemptId"`
+	Bead                    string `json:"bead"`
+	TenantID                string `json:"tenantId"`
+	ProjectID               string `json:"projectId"`
+	ReviewTag               string `json:"reviewTag"`
+	ReviewTagObject         string `json:"reviewTagObject"`
+	ReviewedFeatureCommit   string `json:"reviewedFeatureCommit"`
+	PullRequest             int    `json:"pullRequest"`
+	MergedCommit            string `json:"mergedCommit"`
+	MergedTree              string `json:"mergedTree"`
+	ProtectedMainCheckRun   int64  `json:"protectedMainCheckRun"`
+	QAReviewedCommit        string `json:"qaReviewedCommit"`
+	QADisposition           string `json:"qaDisposition"`
+	SecurityReviewedCommit  string `json:"securityReviewedCommit"`
+	SecurityDisposition     string `json:"securityDisposition"`
+	BeadsBinarySHA256       string `json:"beadsBinarySHA256"`
+	WorkspaceInstanceSHA256 string `json:"workspaceInstanceSHA256"`
+	FenceGeneration         string `json:"fenceGeneration"`
+	AllowedEffect           string `json:"allowedEffect"`
+	IssuedAt                string `json:"issuedAt"`
+	ExpiresAt               string `json:"expiresAt"`
 }
 
 type grantScalarExpectation struct {
@@ -4081,6 +4152,142 @@ var w001LifecycleEvidencePreservationSequences = map[string][]string{
 	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001TerminalReconciliationScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleTerminalReconciliationGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-terminal-reconciliation-v1"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-29T10:53:24Z"},
+	{path: "grant.expiresAt", value: "2026-09-01T10:53:24Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001TerminalReconciliationBase},
+	{path: "grant.baseTree", value: w001TerminalReconciliationBaseTree},
+	{path: "grant.baseParent", value: w001LifecycleBase},
+	{path: "grant.workingBranch", value: w001TerminalReconciliationBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-evidence-preservation-v1"},
+	{path: "grant.priorGrantSHA256", value: "c8a1741d3b5a53e563999b825cded8819618ca554172ea9d2c9d4edf92fc6bda"},
+	{path: "grant.priorGrantSignatureSHA256", value: "3dd30a5c213fe762f0dc093fb303f717abe26d7652529347160236cfc04950ac"},
+	{path: "grant.acceptedCandidateHead", value: "56c2a8d95927bc552882aacc30aa886ea0be9ba5"},
+	{path: "grant.acceptedCandidateTree", value: w001TerminalReconciliationBaseTree},
+	{path: "grant.acceptedReviewTag", value: w001LifecycleEvidencePreservationReviewTag},
+	{path: "grant.acceptedReviewTagObject", value: "eb8838eccd63f42f5a81bdcdd32cd597d84bfc2c"},
+	{path: "grant.archivalRef", value: "refs/tags/" + w001LifecycleRejectedRetirementArchiveTag},
+	{path: "grant.archivalObject", value: w001LifecycleRejectedRetirementTagObject},
+	{path: "grant.acceptedRun", value: "33226093357"},
+	{path: "grant.acceptedJob", value: "99030041600"},
+	{path: "grant.acceptedQADisposition", value: "accepted"},
+	{path: "grant.acceptedSecurityDisposition", value: "accepted"},
+	{path: "grant.mergedCommit", value: w001TerminalReconciliationBase},
+	{path: "grant.mergedTree", value: w001TerminalReconciliationBaseTree},
+	{path: "grant.mergedPullRequest", value: "10"},
+	{path: "grant.protectedMainRun", value: "33246178629"},
+	{path: "grant.protectedMainJob", value: "99083920743"},
+	{path: "grant.successorPullRequest", value: "11"},
+	{path: "grant.successorReviewTag", value: w001TerminalReconciliationReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001TerminalReconciliationTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "work-authority-engineer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "deliver one reviewed gateway-only W-001 terminal closeout path and execute it once against the canonical stores after protected-main acceptance"},
+	{path: "grant.attemptId", value: "w001-lifecycle-terminal-reconciliation-v1"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "true"},
+	{path: "grant.developmentLeaseAllowed", value: "true"},
+	{path: "grant.ordinaryCorrectionLimit", value: "1"},
+	{path: "grant.executionAuthorizationTTL", value: "1h"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.externalPostgreSQLReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferredUntilProtectedMain", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001TerminalReconciliationNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-terminal-reconciliation-v1.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001TerminalReconciliationSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-accepted-candidate-merge-tags-runs-QA-and-Security-evidence-immutably",
+		"add-one-deep-one-shot-closeout-module-and-thin-command-using-existing-gateway-Beads-and-PostgreSQL-interfaces",
+		"add-dry-run-validation-with-zero-canonical-mutation-and-public-safe-output",
+		"update-only-this-grant-manifest-active-plan-evidence-validator-focused-tests-closeout-module-and-command",
+		"qualify-in-disposable-local-Beads-and-PostgreSQL-stores-without-production-effects",
+		"create-signed-semantic-commits-and-one-signed-terminal-reconciliation-review-tag",
+		"push-the-new-branch-and-review-tag-open-pull-request-11-and-run-exact-head-CI",
+		"obtain-fresh-independent-QA-then-Security-review-before-merge",
+		"use-at-most-one-bounded-ordinary-formatting-portability-compilation-test-or-CI-correction-within-the-same-eleven-path-design",
+		"squash-merge-pull-request-11-only-after-QA-and-Security-accept-the-exact-reviewed-tree",
+		"after-merge-consume-one-fresh-one-hour-signed-execution-authorization-bound-to-the-protected-main-tree-run-and-external-store-identities",
+		"issue-or-idempotently-replay-exactly-one-bounded-W001-development-lease-from-the-existing-canonical-claim",
+		"handoff-release-review-order-run-reconciliation-terminal-close-and-exact-readback-through-the-existing-authority-gateway",
+	},
+	"grant.authorizedPaths": {
+		w001TerminalReconciliationPath, w001TerminalReconciliationSignature, ".harness/manifest.yaml", canonicalActivePlan,
+		"docs/evidence/W-001-validation.md", "internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+		"internal/authority/closeout/closeout.go", "internal/authority/closeout/closeout_test.go",
+		"cmd/mars3-authority/main.go", "cmd/mars3-authority/main_test.go",
+	},
+	"grant.requiredProperties": {
+		"every-new-commit-and-tag-is-signed-and-chronologically-prospective",
+		"every-implementation-publication-review-merge-and-canonical-effect-matches-this-exact-base-branch-path-and-effect-boundary",
+		"dry-run-verifies-signatures-Git-and-CI-identity-canonical-preimage-workspace-binary-and-store-readiness-with-zero-state-mutation",
+		"apply-requires-the-exact-protected-main-successor-tree-and-a-fresh-one-hour-detached-execution-authorization",
+		"the-execution-authorization-binds-the-reviewed-head-tag-QA-Security-merged-commit-tree-PR-protected-main-run-workspace-instance-and-Beads-binary",
+		"all-W001-mutations-flow-through-existing-typed-gateway-methods-with-version-and-integrity-chaining-after-every-CAS",
+		"the-development-lease-is-bounded-to-W001-this-attempt-the-accepted-main-and-the-terminal-closeout-effect",
+		"handoff-releases-the-live-lease-before-QA-and-Security-verdicts",
+		"QA-acceptance-precedes-Security-acceptance-which-precedes-the-completed-run-disposition",
+		"reconciliation-binds-the-accepted-candidate-head-merged-commit-merged-tree-pull-request-and-protected-main-run",
+		"terminal-close-occurs-only-after-the-completed-run-and-reconciliation-and-produces-native-and-lifecycle-done",
+		"retries-and-unknown-effect-recovery-are-idempotent-and-reconcile-current-canonical-state-before-any-new-effect",
+		"receipt-and-logs-are-public-safe-and-never-contain-credentials-database-URLs-raw-authority-payloads-or-private-provider-state",
+		"no-Bead-other-than-M3-W001-is-read-for-mutation-or-mutated",
+		"same-class-authority-security-or-path-provenance-recurrence-stops-and-escalates-without-an-incremental-successor",
+	},
+	"grant.prohibitedEffects": {
+		"direct-Beads-Dolt-SQL-or-generic-bd-mutation-outside-the-existing-authority-store-and-gateway",
+		"mutate-any-Bead-other-than-M3-W001",
+		"issue-renew-release-or-revoke-any-persistent-production-cross-ticket-or-non-W001-lease",
+		"apply-before-exact-head-CI-independent-QA-and-independent-Security-acceptance-and-protected-main-merge",
+		"apply-without-the-fresh-one-hour-signed-execution-authorization-or-securely-mounted-canonical-Beads-and-PostgreSQL-handles",
+		"expose-store-handles-credentials-private-keys-signature-inputs-raw-payloads-or-private-data",
+		"modify-workflow-ruleset-repository-settings-trust-roots-approval-policy-dependencies-go-modules-API-database-gateway-Beads-store-PostgreSQL-store-product-or-runtime",
+		"recreate-the-deleted-codex-w-001-lifecycle-completion-branch",
+		"rewrite-delete-move-or-resign-any-existing-commit-tag-run-review-or-evidence",
+		"start-P001-or-any-downstream-ticket-before-explicit-W001-terminal-handoff-and-fresh-authority",
+		"production-deployment-production-data-mutation-or-destructive-migration",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"terminalSequence.order": {
+		"reconcile-one-bounded-development-lease-from-the-existing-bootstrap-claim",
+		"handoff-and-release-the-live-lease",
+		"record-independent-QA-accepted",
+		"record-independent-Security-accepted",
+		"record-delivery-orchestrator-completed-run",
+		"record-exact-accepted-head-merged-commit-tree-pull-request-and-protected-main-run-reconciliation",
+		"close-M3-W001-to-native-and-lifecycle-done",
+		"read-back-Beads-lifecycle-events-projection-and-lease-absence",
+	},
+	"verification.order": {
+		"local-disposable-qualification", "exact-head-public-CI", "qa", "security-reviewer", "protected-main-merge-and-CI",
+		"fresh-execution-authorization", "canonical-dry-run", "canonical-apply", "canonical-readback", "delivery-orchestrator-terminal-handoff",
+	},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -6840,6 +7047,7 @@ func w001LifecycleTestHarnessRetirementActive(root string) bool {
 func checkW001LifecycleTestHarnessRetirementGrant(root string, findings *[]Finding) {
 	recoveryActive := w001LifecycleAuthorityRecoveryActive(root)
 	preservationActive := w001LifecycleEvidencePreservationActive(root)
+	terminalActive := w001TerminalReconciliationActive(root)
 	if recoveryActive {
 		defer checkW001LifecycleAuthorityRecoveryGrant(root, findings)
 	}
@@ -6955,7 +7163,7 @@ func checkW001LifecycleTestHarnessRetirementGrant(root string, findings *[]Findi
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
 	if planErr != nil || (!recoveryActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-test-harness-retirement-v1`"))) ||
 		(recoveryActive && !preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-authority-recovery-v1`"))) ||
-		(preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`"))) ||
+		(preservationActive && !terminalActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`"))) ||
 		!bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_test_harness_retirement_plan", "active plan must select the truthful retirement attempt")
 	}
@@ -6964,7 +7172,7 @@ func checkW001LifecycleTestHarnessRetirementGrant(root string, findings *[]Findi
 		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-test-harness-retirement-v1")))) ||
 		(recoveryActive && !preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-authority-recovery-v1")) ||
 			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-authority-recovery-v1")))) ||
-		(preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
+		(preservationActive && !terminalActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
 			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-evidence-preservation-v1")))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_test_harness_retirement_manifest", "manifest must project the retirement attempt and absent live lease")
@@ -6978,6 +7186,7 @@ func w001LifecycleAuthorityRecoveryActive(root string) bool {
 
 func checkW001LifecycleAuthorityRecoveryGrant(root string, findings *[]Finding) {
 	preservationActive := w001LifecycleEvidencePreservationActive(root)
+	terminalActive := w001TerminalReconciliationActive(root)
 	if preservationActive {
 		defer checkW001LifecycleEvidencePreservationGrant(root, findings)
 	}
@@ -7067,7 +7276,7 @@ func checkW001LifecycleAuthorityRecoveryGrant(root string, findings *[]Finding) 
 	}
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
 	if planErr != nil || (!preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-authority-recovery-v1`"))) ||
-		(preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`"))) ||
+		(preservationActive && !terminalActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`"))) ||
 		!bytes.Contains(plan, []byte("unaccepted recovery preimage")) ||
 		!bytes.Contains(plan, []byte("W-001 remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_authority_recovery_plan", "active plan must select prospective recovery while W-001 remains in-progress")
@@ -7075,7 +7284,7 @@ func checkW001LifecycleAuthorityRecoveryGrant(root string, findings *[]Finding) 
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
 	if manifestErr != nil || (!preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-authority-recovery-v1")) ||
 		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-authority-recovery-v1")))) ||
-		(preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
+		(preservationActive && !terminalActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
 			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-evidence-preservation-v1")))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_authority_recovery_manifest", "manifest must project prospective authority recovery and absent live lease")
@@ -7088,6 +7297,10 @@ func w001LifecycleEvidencePreservationActive(root string) bool {
 }
 
 func checkW001LifecycleEvidencePreservationGrant(root string, findings *[]Finding) {
+	terminalActive := w001TerminalReconciliationActive(root)
+	if terminalActive {
+		defer checkW001TerminalReconciliationGrant(root, findings)
+	}
 	data, err := readRepoFile(root, w001LifecycleEvidencePreservationPath)
 	if err != nil {
 		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_missing", "signed lifecycle evidence-preservation grant is required")
@@ -7174,17 +7387,257 @@ func checkW001LifecycleEvidencePreservationGrant(root string, findings *[]Findin
 		}
 	}
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
-	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`")) ||
+	if planErr != nil || !terminalActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`")) ||
 		!bytes.Contains(plan, []byte(w001LifecycleRejectedRetirementArchiveTag)) ||
 		!bytes.Contains(plan, []byte("W-001 remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_evidence_preservation_plan", "active plan must select rejected-evidence preservation while W-001 remains in-progress")
 	}
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
-	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
-		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-evidence-preservation-v1")) ||
+	if manifestErr != nil || !terminalActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-evidence-preservation-v1"))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_evidence_preservation_manifest", "manifest must project evidence preservation and absent live lease")
 	}
+}
+
+func w001TerminalReconciliationActive(root string) bool {
+	_, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001TerminalReconciliationPath)))
+	return err == nil
+}
+
+func checkW001TerminalReconciliationGrant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001TerminalReconciliationPath)
+	if err != nil {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_grant_missing", "signed W-001 terminal-reconciliation grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001TerminalReconciliationScalars, w001TerminalReconciliationSequences,
+		[]string{"grant", "canonicalPreimage", "terminalSequence", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_grant_schema", "%s", message)
+	}
+	for _, expected := range w001TerminalReconciliationScalars {
+		values := document.scalars[expected.path]
+		if len(values) != 1 || values[0] != expected.value {
+			addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_grant_value", "%s does not match the signed terminal-reconciliation contract", expected.path)
+		}
+	}
+	for path, expected := range w001TerminalReconciliationSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_grant_sequence", "%s must equal the exact ordered terminal-reconciliation contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "canonicalPreimage", "terminalSequence", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_grant_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_grant_expiry", "terminal-reconciliation grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001TerminalReconciliationSignature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if fileSHA256(data) != w001TerminalGrantSHA256 || signatureErr != nil || fileSHA256(signature) != w001TerminalGrantSignatureSHA256 ||
+		!keyValid || verifySSHSig(data, signature, publicKey, w001TerminalReconciliationNamespace) != nil {
+		addFinding(findings, w001TerminalReconciliationSignature, "public.w001_terminal_grant_signature", "terminal-reconciliation grant and detached signature must remain byte-exact and verify with the pinned key")
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001TerminalReconciliationBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001TerminalReconciliationBase+"^{tree}")
+	parents, parentErr := planningGrantCommitParents(root, w001TerminalReconciliationBase)
+	if baseErr != nil || treeErr != nil || parentErr != nil || strings.TrimSpace(string(base)) != w001TerminalReconciliationBase ||
+		strings.TrimSpace(string(baseTree)) != w001TerminalReconciliationBaseTree || len(parents) != 1 || parents[0] != w001LifecycleBase {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_base", "terminal reconciliation must descend from the exact accepted PR 10 squash and tree")
+	}
+	acceptedObject, objectErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+w001LifecycleEvidencePreservationReviewTag+"^{tag}")
+	acceptedTarget, targetErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+w001LifecycleEvidencePreservationReviewTag+"^{}")
+	if objectErr != nil || targetErr != nil || strings.TrimSpace(string(acceptedObject)) != "eb8838eccd63f42f5a81bdcdd32cd597d84bfc2c" ||
+		strings.TrimSpace(string(acceptedTarget)) != "56c2a8d95927bc552882aacc30aa886ea0be9ba5" {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_prior_tag", "accepted W-001 candidate review tag must remain exact")
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-terminal-reconciliation-v1`")) ||
+		!bytes.Contains(plan, []byte(w001TerminalReconciliationBase)) || !bytes.Contains(plan, []byte("W-001 remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_terminal_plan", "active plan must select the bounded terminal reconciliation while canonical W-001 remains in-progress")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-reconciliation-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-reconciliation-v1")) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_terminal_manifest", "manifest must project terminal reconciliation and absent live lease before canonical apply")
+	}
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{w001TerminalReconciliationBase, w001TerminalReconciliationBaseTree, "56c2a8d95927bc552882aacc30aa886ea0be9ba5",
+		"eb8838eccd63f42f5a81bdcdd32cd597d84bfc2c", "33226093357", "33246178629", "Independent QA", "Independent Security",
+		"accepted", "W-001-lifecycle-terminal-reconciliation-v1", "gateway-only"} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_terminal_evidence", "terminal evidence must preserve the accepted merge and bind the new deferred canonical closeout")
+			break
+		}
+	}
+}
+
+func checkW001TerminalReconciliationGitDiff(root string, findings *[]Finding) {
+	top, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
+	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(top))) {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_git", "Git metadata must resolve to the audited repository root")
+		return
+	}
+	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
+	head := strings.TrimSpace(string(headOutput))
+	if err != nil || !sha1Pattern.MatchString(head) {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_head", "terminal reconciliation HEAD must resolve to one exact commit")
+		return
+	}
+	branchOutput, branchErr := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
+	branch := strings.TrimSpace(string(branchOutput))
+	featureHead := head
+	requireTag, mainTreeCheck := false, false
+	switch {
+	case branchErr == nil && branch == w001TerminalReconciliationBranch && os.Getenv("GITHUB_ACTIONS") != "true":
+		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001TerminalReconciliationBase, head); err != nil {
+			addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_ancestry", "local terminal reconciliation must descend from the exact accepted PR 10 squash")
+			return
+		}
+	case branchErr == nil && branch == "main" && os.Getenv("GITHUB_ACTIONS") != "true":
+		requireTag, mainTreeCheck = true, true
+	case os.Getenv("GITHUB_ACTIONS") == "true":
+		checkout, ok := w001TerminalGitHubCheckout(root, head, branch, findings)
+		if !ok {
+			return
+		}
+		featureHead, requireTag, mainTreeCheck = checkout.expectedHead, true, checkout.kind == planningGrantMainSquash
+	default:
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_branch", "terminal reconciliation requires its signed branch or accepted protected main")
+		return
+	}
+	if requireTag {
+		expected := featureHead
+		if mainTreeCheck {
+			expected = ""
+		}
+		target, ok := checkW001DeliveryReviewTag(root, expected, w001TerminalReconciliationReviewTag, w001TerminalReconciliationTagMessage, findings)
+		if !ok {
+			return
+		}
+		featureHead = target
+	}
+	if mainTreeCheck {
+		parents, err := planningGrantCommitParents(root, head)
+		mainTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", featureHead+"^{tree}")
+		if err != nil || len(parents) != 1 || parents[0] != w001TerminalReconciliationBase || strings.TrimSpace(string(mainTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_main", "accepted terminal reconciliation must be one exact-tree squash over the signed base")
+			return
+		}
+	}
+	if !checkW001TerminalCommitRange(root, featureHead, findings) {
+		return
+	}
+	tracked, trackedErr := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
+	untracked, untrackedErr := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
+	paths, normalizeErr := normalizedPlanningGrantGitPaths(tracked, untracked)
+	if trackedErr != nil || untrackedErr != nil || normalizeErr != nil || !w001TerminalReconciliationPathsAllowed(paths) {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_scope", "current changes include a path outside the signed terminal-reconciliation scope")
+	}
+}
+
+func w001TerminalGitHubCheckout(root, head, branch string, findings *[]Finding) (planningGrantCheckout, bool) {
+	if os.Getenv("CI") != "true" || os.Getenv("GITHUB_ACTIONS") != "true" || os.Getenv("RUNNER_ENVIRONMENT") != "github-hosted" ||
+		os.Getenv("GITHUB_REPOSITORY") != planningGrantRepository || os.Getenv("GITHUB_WORKFLOW") != planningGrantWorkflow ||
+		os.Getenv("GITHUB_JOB") != planningGrantWorkflowJob || os.Getenv("GITHUB_SHA") != head || !samePlanningGrantRepositoryRoot(root, os.Getenv("GITHUB_WORKSPACE")) {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_runner", "terminal reconciliation CI lacks canonical runner identity")
+		return planningGrantCheckout{}, false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ID")); !ok {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_runner", "terminal reconciliation GitHub run ID is invalid")
+		return planningGrantCheckout{}, false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ATTEMPT")); !ok {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_runner", "terminal reconciliation GitHub run attempt is invalid")
+		return planningGrantCheckout{}, false
+	}
+	workflow, workflowErr := readRepoFile(root, planningGrantWorkflowPath)
+	if workflowErr != nil || fileSHA256(workflow) != canonicalFoundationWorkflowSHA256 {
+		addFinding(findings, planningGrantWorkflowPath, "public.w001_terminal_workflow", "terminal reconciliation workflow bytes do not match the pinned digest")
+		return planningGrantCheckout{}, false
+	}
+	event, ok := readPlanningGrantGitHubEvent(os.Getenv("GITHUB_EVENT_PATH"))
+	if !ok || event.Repository.FullName != planningGrantRepository {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_event", "terminal reconciliation GitHub event identity is invalid")
+		return planningGrantCheckout{}, false
+	}
+	workflowPrefix := planningGrantRepository + "/" + planningGrantWorkflowPath + "@"
+	switch os.Getenv("GITHUB_EVENT_NAME") {
+	case "pull_request":
+		ref := os.Getenv("GITHUB_REF")
+		workflowRef := os.Getenv("GITHUB_WORKFLOW_REF")
+		if branch != "" || ref != "refs/pull/11/merge" || event.Number != 11 || event.PullRequest == nil ||
+			os.Getenv("GITHUB_HEAD_REF") != w001TerminalReconciliationBranch || os.Getenv("GITHUB_BASE_REF") != "main" ||
+			event.PullRequest.Head.Ref != w001TerminalReconciliationBranch || event.PullRequest.Base.Ref != "main" || event.PullRequest.Base.SHA != w001TerminalReconciliationBase ||
+			!sha1Pattern.MatchString(event.PullRequest.Head.SHA) || !validAdvisoryPullRequestMergeSHA(event.PullRequest.MergeCommitSHA) ||
+			workflowRef != workflowPrefix+ref && workflowRef != workflowPrefix+"refs/heads/main" {
+			addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_event", "pull-request event does not bind the signed terminal branch and base")
+			return planningGrantCheckout{}, false
+		}
+		parents, err := planningGrantCommitParents(root, head)
+		mergeTree, mergeErr := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, featureErr := planningGrantGitOutput(root, "rev-parse", "--verify", event.PullRequest.Head.SHA+"^{tree}")
+		if err != nil || len(parents) != 2 || parents[0] != w001TerminalReconciliationBase || parents[1] != event.PullRequest.Head.SHA ||
+			mergeErr != nil || featureErr != nil || strings.TrimSpace(string(mergeTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_pr_topology", "pull-request checkout must be the exact-tree two-parent synthetic merge")
+			return planningGrantCheckout{}, false
+		}
+		return planningGrantCheckout{kind: planningGrantPullRequestMerge, expectedHead: event.PullRequest.Head.SHA}, true
+	case "push":
+		if branch != "" && branch != "main" || os.Getenv("GITHUB_REF") != "refs/heads/main" || os.Getenv("GITHUB_REF_PROTECTED") != "true" ||
+			os.Getenv("GITHUB_HEAD_REF") != "" || os.Getenv("GITHUB_BASE_REF") != "" || os.Getenv("GITHUB_WORKFLOW_REF") != workflowPrefix+"refs/heads/main" ||
+			event.Ref != "refs/heads/main" || event.Before != w001TerminalReconciliationBase || event.After != head || event.HeadCommit == nil || event.HeadCommit.ID != head || event.PullRequest != nil {
+			addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_event", "protected-main event does not bind the terminal squash")
+			return planningGrantCheckout{}, false
+		}
+		return planningGrantCheckout{kind: planningGrantMainSquash, expectedHead: head}, true
+	default:
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_event", "unsupported GitHub event for terminal reconciliation")
+		return planningGrantCheckout{}, false
+	}
+}
+
+func checkW001TerminalCommitRange(root, head string, findings *[]Finding) bool {
+	commits, err := planningGrantCommitRangeFrom(root, w001TerminalReconciliationBase, head)
+	if err != nil || len(commits) < 2 {
+		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_history", "terminal reconciliation requires a signed grant commit and implementation history")
+		return false
+	}
+	publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+	issuedAt, _ := time.Parse(time.RFC3339, "2026-08-29T10:53:24Z")
+	previous := w001TerminalReconciliationBase
+	for _, commit := range commits {
+		paths, pathErr := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
+		normalized, normalizeErr := normalizedPlanningGrantGitPaths(paths)
+		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
+		if len(commit.parents) != 1 || commit.parents[0] != previous || pathErr != nil || normalizeErr != nil || !w001TerminalReconciliationPathsAllowed(normalized) ||
+			objectErr != nil || verifyPlanningGrantCommit(object, publicKey) != nil || timeErr != nil || committedAt.Before(issuedAt) {
+			addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_history", "every terminal-reconciliation commit must be a prospective signed one-parent scoped commit")
+			return false
+		}
+		previous = commit.id
+	}
+	return true
+}
+
+func w001TerminalReconciliationPathsAllowed(paths []string) bool {
+	authorized := make(map[string]bool, len(w001TerminalReconciliationSequences["grant.authorizedPaths"]))
+	for _, path := range w001TerminalReconciliationSequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return planningGrantPathsAllowed(paths, authorized)
 }
 
 func checkW001DeliveryScannerIgnore(root string, findings *[]Finding) {
@@ -7461,6 +7914,158 @@ func loadW001DeliveryGrant(repo string, now time.Time) (W001DeliveryGrant, error
 		CanonicalWorkMutationAllowed: scalarValue(document, "grant.canonicalWorkMutationAllowed") == "true",
 		DevelopmentLeaseAllowed:      scalarValue(document, "grant.developmentLeaseAllowed") == "true",
 	}, nil
+}
+
+// LoadW001TerminalReconciliationGrant validates the complete prospective
+// closeout contract and returns only the fields needed by the one-shot module.
+func LoadW001TerminalReconciliationGrant(repo string, now time.Time) (W001TerminalReconciliationGrant, error) {
+	root, err := repositoryRoot(repo)
+	if err != nil {
+		return W001TerminalReconciliationGrant{}, err
+	}
+	var findings []Finding
+	checkW001TerminalReconciliationGrant(root, &findings)
+	if len(findings) != 0 {
+		sortFindings(findings)
+		return W001TerminalReconciliationGrant{}, fmt.Errorf("W-001 terminal grant validation failed: %s", findings[0].Code)
+	}
+	data, err := readRepoFile(root, w001TerminalReconciliationPath)
+	if err != nil {
+		return W001TerminalReconciliationGrant{}, err
+	}
+	document := parseStrictGrant(data, w001TerminalReconciliationScalars, w001TerminalReconciliationSequences,
+		[]string{"grant", "canonicalPreimage", "terminalSequence", "verification", "integrity"})
+	expiresAt, err := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if err != nil || !now.Before(expiresAt) {
+		return W001TerminalReconciliationGrant{}, errors.New("W-001 terminal-reconciliation grant has expired")
+	}
+	sequence, err := strconv.ParseUint(scalarValue(document, "canonicalPreimage.issueMutationSequence"), 10, 64)
+	if err != nil {
+		return W001TerminalReconciliationGrant{}, errors.New("W-001 terminal mutation sequence is invalid")
+	}
+	revision, err := strconv.ParseUint(scalarValue(document, "canonicalPreimage.dependencyGraphRevision"), 10, 64)
+	if err != nil {
+		return W001TerminalReconciliationGrant{}, errors.New("W-001 terminal dependency revision is invalid")
+	}
+	pullRequest, err := strconv.Atoi(scalarValue(document, "grant.mergedPullRequest"))
+	if err != nil {
+		return W001TerminalReconciliationGrant{}, errors.New("W-001 merged pull request is invalid")
+	}
+	protectedRun, err := strconv.ParseInt(scalarValue(document, "grant.protectedMainRun"), 10, 64)
+	if err != nil {
+		return W001TerminalReconciliationGrant{}, errors.New("W-001 protected-main run is invalid")
+	}
+	bootstrapData, err := readRepoFile(root, w001BootstrapGrantPath)
+	if err != nil {
+		return W001TerminalReconciliationGrant{}, err
+	}
+	bootstrapDocument := parseStrictGrant(bootstrapData, w001BootstrapGrantScalars, w001BootstrapGrantSequences,
+		[]string{"grant", "expected", "postimage", "toolchain", "verification", "integrity"})
+	return W001TerminalReconciliationGrant{
+		ID: scalarValue(document, "grant.id"), Repository: scalarValue(document, "grant.repository"),
+		Bead: scalarValue(document, "canonicalPreimage.bead"), Assignee: "work-authority-engineer",
+		AttemptID: scalarValue(document, "grant.attemptId"), CanonicalClaimAttemptID: scalarValue(bootstrapDocument, "grant.attemptId"),
+		BaseCommit: scalarValue(document, "grant.baseCommit"), BaseTree: scalarValue(document, "grant.baseTree"),
+		WorkingBranch: scalarValue(document, "grant.workingBranch"), ReviewTag: scalarValue(document, "grant.successorReviewTag"),
+		AcceptedCandidateHead: scalarValue(document, "grant.acceptedCandidateHead"), AcceptedCandidateTree: scalarValue(document, "grant.acceptedCandidateTree"),
+		MergedCommit: scalarValue(document, "grant.mergedCommit"), MergedTree: scalarValue(document, "grant.mergedTree"),
+		MergedPullRequest: pullRequest, ProtectedMainRun: protectedRun,
+		ExpectedNativeStatus: scalarValue(document, "canonicalPreimage.nativeStatus"), ExpectedLifecycleState: scalarValue(document, "canonicalPreimage.lifecycleState"),
+		ExpectedVersion: authorityv1.WorkVersion{AuthorityGeneration: scalarValue(document, "canonicalPreimage.workVersionGeneration"),
+			IssueIncarnation: scalarValue(document, "canonicalPreimage.workVersionIncarnation"), IssueMutationSequence: sequence, DependencyGraphRevision: revision},
+		ExpiresAt: expiresAt,
+	}, nil
+}
+
+// LoadW001TerminalReconciliationExecutionAuthorization verifies one canonical
+// JSON object and its detached signature under a distinct one-hour namespace.
+func LoadW001TerminalReconciliationExecutionAuthorization(repo, path string, grant W001TerminalReconciliationGrant, now time.Time) (W001TerminalReconciliationExecutionAuthorization, error) {
+	root, err := repositoryRoot(repo)
+	if err != nil {
+		return W001TerminalReconciliationExecutionAuthorization{}, err
+	}
+	if path == "" || filepath.Ext(path) != ".json" {
+		return W001TerminalReconciliationExecutionAuthorization{}, errors.New("terminal execution authorization must be one explicit JSON file")
+	}
+	for _, candidate := range []string{path, path + ".sig"} {
+		info, err := os.Lstat(candidate)
+		if err != nil || !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 {
+			return W001TerminalReconciliationExecutionAuthorization{}, errors.New("terminal execution authorization and signature must be regular files")
+		}
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return W001TerminalReconciliationExecutionAuthorization{}, err
+	}
+	authorization, err := decodeW001TerminalExecutionAuthorization(data)
+	if err != nil {
+		return W001TerminalReconciliationExecutionAuthorization{}, err
+	}
+	signature, err := os.ReadFile(path + ".sig")
+	if err != nil {
+		return W001TerminalReconciliationExecutionAuthorization{}, err
+	}
+	publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest ||
+		verifySSHSig(data, signature, publicKey, w001TerminalExecutionNamespace) != nil {
+		return W001TerminalReconciliationExecutionAuthorization{}, errors.New("terminal execution authorization signature is invalid")
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, authorization.IssuedAt)
+	expiresAt, expiryErr := time.Parse(time.RFC3339, authorization.ExpiresAt)
+	if issueErr != nil || expiryErr != nil || !validW001TerminalExecutionWindow(now, issuedAt, expiresAt) {
+		return W001TerminalReconciliationExecutionAuthorization{}, errors.New("terminal execution authorization is outside its signed one-hour validity window")
+	}
+	if authorization.SchemaVersion != 1 || authorization.Kind != "MARS3W001TerminalReconciliationExecutionAuthorization" || authorization.Classification != "PUBLIC" ||
+		authorization.GrantID != grant.ID || authorization.Repository != grant.Repository || authorization.AttemptID != grant.AttemptID || authorization.Bead != grant.Bead ||
+		authorization.ReviewTag != grant.ReviewTag || !sha1Pattern.MatchString(authorization.ReviewTagObject) || authorization.PullRequest != 11 || authorization.ProtectedMainCheckRun <= 0 ||
+		authorization.QADisposition != "accepted" || authorization.SecurityDisposition != "accepted" ||
+		authorization.QAReviewedCommit != authorization.ReviewedFeatureCommit || authorization.SecurityReviewedCommit != authorization.ReviewedFeatureCommit ||
+		!sha1Pattern.MatchString(authorization.ReviewedFeatureCommit) || !sha1Pattern.MatchString(authorization.MergedCommit) ||
+		!sha1Pattern.MatchString(authorization.MergedTree) || authorization.MergedCommit == authorization.ReviewedFeatureCommit ||
+		!sha256Pattern.MatchString(authorization.BeadsBinarySHA256) || !sha256Pattern.MatchString(authorization.WorkspaceInstanceSHA256) ||
+		!runtimeAuthorityToken(authorization.TenantID) || !runtimeAuthorityToken(authorization.ProjectID) || !runtimeAuthorityToken(authorization.FenceGeneration) ||
+		authorization.AllowedEffect != "execute-one-gateway-only-W001-terminal-reconciliation" {
+		return W001TerminalReconciliationExecutionAuthorization{}, errors.New("terminal execution authorization does not match the exact post-review contract")
+	}
+	return authorization, nil
+}
+
+func validW001TerminalExecutionWindow(now, issuedAt, expiresAt time.Time) bool {
+	return !now.Before(issuedAt) && now.Before(expiresAt) && expiresAt.Sub(issuedAt) > 0 && expiresAt.Sub(issuedAt) <= time.Hour
+}
+
+func decodeW001TerminalExecutionAuthorization(data []byte) (W001TerminalReconciliationExecutionAuthorization, error) {
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	var authorization W001TerminalReconciliationExecutionAuthorization
+	if err := decoder.Decode(&authorization); err != nil {
+		return W001TerminalReconciliationExecutionAuthorization{}, fmt.Errorf("decode terminal execution authorization: %w", err)
+	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+		return W001TerminalReconciliationExecutionAuthorization{}, errors.New("terminal execution authorization must contain exactly one JSON object")
+	}
+	canonical, err := json.Marshal(authorization)
+	if err != nil {
+		return W001TerminalReconciliationExecutionAuthorization{}, err
+	}
+	canonical = append(canonical, '\n')
+	if !bytes.Equal(data, canonical) {
+		return W001TerminalReconciliationExecutionAuthorization{}, errors.New("terminal execution authorization must use canonical JSON with one trailing newline")
+	}
+	return authorization, nil
+}
+
+func runtimeAuthorityToken(value string) bool {
+	if value == "" || len(value) > 128 {
+		return false
+	}
+	for index, char := range value {
+		if index == 0 && !unicode.IsLetter(char) && !unicode.IsDigit(char) ||
+			!unicode.IsLetter(char) && !unicode.IsDigit(char) && !strings.ContainsRune("._:-", char) {
+			return false
+		}
+	}
+	return true
 }
 
 // LoadW001BootstrapExecutionAuthorization verifies the separately signed,
@@ -8130,6 +8735,10 @@ func w001PostclaimChronoFixPathSet() map[string]bool {
 }
 
 func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
+	if w001TerminalReconciliationActive(root) {
+		checkW001TerminalReconciliationGitDiff(root, findings)
+		return
+	}
 	topLevel, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
 	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(topLevel))) {
 		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_git", "Git metadata must resolve to the audited repository root")
