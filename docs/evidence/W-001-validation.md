@@ -1633,3 +1633,32 @@ does not authorize or accept the object, and must become fetchable from a fresh
 clone before QA may accept. W-001 remains `in-progress`; Security, merge,
 Beads/lease mutation, reconciliation, production change, and downstream work
 remain pending or unauthorized as applicable.
+
+The signed evidence-preservation implementation checkpoint is commit
+`5c5cc086bb5099f4cfd16c1e8c4cd5230d8ca78e`, tree
+`0b593f90f2188e585dfe497483ecb416e25d3ff6`, with sole parent the signed
+grant-only commit. Both preservation commits verify with the pinned ED25519
+key and were committed after grant issuance. The exact preservation-base diff
+contains only the seven authorized paths; protected runtime, database,
+workflow, dependency, product, feature, and product-spec surfaces are
+unchanged.
+
+Focused evidence-preservation, archival-tag, prospective-chronology, and
+deterministic Git fixture tests passed once in 1.697 seconds and ten
+consecutive times in 10.379 seconds; the same focused suite passed under the
+race detector in 2.418 seconds. Doctrine, plan, and DocSync repository checks,
+`go vet ./...`, and whitespace checks passed.
+
+A fresh normal clone with a real `.git` directory checked out exact commit
+`5c5cc086bb5099f4cfd16c1e8c4cd5230d8ca78e` and tree
+`0b593f90f2188e585dfe497483ecb416e25d3ff6`. In that clone, archival ref
+`mars3/w001-lifecycle-test-harness-retirement-rejected-v1` resolved to tag
+object `e08beb772696b078783d0c75d23c1029581cdeb1`, target
+`ce9d0e7e82a33350263acd6199219a5349ef9bce`, and tree
+`3d6a1c44fa076d4755ec96c5755b45deae7a1ee5`; the object type was `tag`.
+The unmodified `go test ./... -count=1` passed every package, with
+`internal/doctrine` completing in 111.320 seconds. Vet, whitespace,
+show-check, protected-surface diff, and clean-checkout checks passed. This is
+qualified prospective implementation evidence pending a signed evidence
+checkpoint, distinct preservation review tag, one exact-head public run, and
+fresh independent QA then Security review.
