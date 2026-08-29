@@ -1,0 +1,123 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleEvidencePreservationGrant
+
+grant:
+  id: W-001-lifecycle-evidence-preservation-v1
+  classification: PUBLIC
+  issuedAt: 2026-08-29T01:04:40Z
+  expiresAt: 2026-09-01T01:04:40Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 5251ae37a2914e9f750d4c5900f46c7bb736b2d9
+  baseTree: 82a4a84cae31d0003aecddf654217cbfb2bd29a6
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-authority-recovery-v1
+  priorGrantSHA256: 68e8051b477eb9bd3c6846874794b9e83e5e4341f5784eb3569dc6c598c0150f
+  priorGrantSignatureSHA256: 5eb415fbed952821daaebb10736b70a045ca6f1ee8e2e24834446436b81eea3b
+  priorReviewTag: mars3/w001-lifecycle-authority-recovery-v1
+  priorReviewTagObject: f561cb14a471e0cc773ba6b4bd81308ee8f0d873
+  priorReviewTagTarget: 5251ae37a2914e9f750d4c5900f46c7bb736b2d9
+  priorReviewTagTree: 82a4a84cae31d0003aecddf654217cbfb2bd29a6
+  priorRun: 33224636939
+  priorJob: 99025722797
+  priorRunDisposition: success
+  priorQADisposition: changes-requested
+  priorSecurityDisposition: not-run
+  qaFinding: QA-W001-RECOVERY-001
+  archivalObject: e08beb772696b078783d0c75d23c1029581cdeb1
+  archivalObjectType: tag
+  archivalTarget: ce9d0e7e82a33350263acd6199219a5349ef9bce
+  archivalTargetTree: 3d6a1c44fa076d4755ec96c5755b45deae7a1ee5
+  archivalOriginalTag: mars3/w001-lifecycle-test-harness-retirement-v1
+  archivalOriginalTagMessage: MARS-3 W-001 lifecycle test-harness retirement attestation v1
+  archivalOriginalTagger: MARS-3 Work Authority Engineer <engineer@example.com>
+  archivalRef: refs/tags/mars3/w001-lifecycle-test-harness-retirement-rejected-v1
+  successorReviewTag: mars3/w001-lifecycle-evidence-preservation-v1
+  successorReviewTagMessage: MARS-3 W-001 lifecycle rejected-evidence preservation attestation v1
+  pullRequest: 10
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: foundation-maintainer
+  failureOwnership: foundation
+  purpose: preserve the exact rejected retirement tag object under a durable immutable ref without accepting or rewriting it
+  attemptId: w001-lifecycle-evidence-preservation-v1
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  allowedEffects:
+    - preserve-the-authority-recovery-head-tree-tag-run-and-QA-disposition-immutably
+    - publish-the-existing-e08beb-tag-object-byte-for-byte-under-the-distinct-archival-ref
+    - verify-the-archived-object-original-target-tree-tagger-message-and-pinned-key-signature
+    - keep-the-archival-ref-separate-from-current-review-tags-and-mark-the-object-rejected-and-unaccepted
+    - update-only-the-new-grant-manifest-plan-evidence-validator-and-focused-regression
+    - create-signed-semantic-commits-and-one-distinct-signed-evidence-preservation-review-tag
+    - push-the-existing-review-branch-archival-ref-and-new-review-tag-and-run-one-fresh-pull-request-10-gate
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-evidence-preservation-v1.yaml
+    - .harness/grants/W-001-lifecycle-evidence-preservation-v1.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - every-new-preservation-commit-is-signed-and-chronologically-prospective
+    - the-e08beb-object-is-fetchable-from-a-fresh-clone-through-the-exact-distinct-archival-ref
+    - the-archival-object-remains-byte-exact-with-its-original-tag-name-target-tree-tagger-message-and-signature
+    - the-archival-ref-is-never-selected-as-a-current-review-tag-or-treated-as-acceptance-evidence
+    - the-authority-recovery-candidate-tag-run-and-QA-changes-requested-disposition-remain-immutable
+    - the-retirement-design-deterministic-Git-fixture-and-prospective-chronology-rule-remain-unchanged
+    - runtime-database-native-patch-workflow-dependency-product-and-authority-bytes-remain-unchanged
+    - the-next-public-run-uses-the-exact-signed-evidence-preservation-tree-and-distinct-review-tag
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged
+  prohibitedEffects:
+    - recreate-resign-rewrite-delete-or-move-the-e08beb-object-or-any-existing-commit-tag-run-review-or-evidence
+    - point-the-existing-retirement-or-authority-recovery-tag-at-a-different-object
+    - authorize-or-accept-the-rejected-retirement-tag-or-the-unaccepted-retirement-or-recovery-attempts
+    - modify-the-retired-test-harness-design-or-add-process-helper-path-provenance-hardening
+    - modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract
+    - mutate-M3-W001-or-any-other-Bead
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-approval-policy-or-dependencies
+    - start-P001-or-any-downstream-ticket
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - QA-W001-RECOVERY-001
+  preservationFinding: the rejected retirement tag object was unreachable from every durable remote ref and absent from a fresh clone
+  recoveryDecision: publish the existing object under one distinct immutable archival ref without recreating accepting or rewriting it
+  nextAction: prospective-rejected-evidence-preservation-only
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-evidence-preservation-v1
+  detachedSignature: W-001-lifecycle-evidence-preservation-v1.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
