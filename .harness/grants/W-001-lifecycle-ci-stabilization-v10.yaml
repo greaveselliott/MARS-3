@@ -1,0 +1,106 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCIStabilizationGrant
+
+grant:
+  id: W-001-lifecycle-ci-stabilization-v10
+  classification: PUBLIC
+  issuedAt: 2026-08-27T18:43:00Z
+  expiresAt: 2026-08-30T18:43:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: ad845ff81f1e64b9e4110162a77a65a844891731
+  baseTree: e4a08e5a4b211003dc29609a0128856eec306061
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-correction-v9
+  priorReviewTag: mars3/w001-lifecycle-completion-v9
+  priorReviewTagObject: 47933c4957b9af2e8d7a38f971d7a20c5de8122f
+  priorReviewTagTarget: ad845ff81f1e64b9e4110162a77a65a844891731
+  priorReviewTagTree: e4a08e5a4b211003dc29609a0128856eec306061
+  pullRequest: 10
+  failedRun: 33104553091
+  failedAttemptOneJob: 98630789458
+  failedAttemptTwoJob: 98631170195
+  priorQADisposition: not-requested-ci-blocked
+  priorSecurityDisposition: not-requested-ci-blocked
+  successorReviewTag: mars3/w001-lifecycle-completion-v10
+  successorReviewTagMessage: MARS-3 W-001 lifecycle CI stabilization tree attestation v10
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: foundation-maintainer
+  failureOwnership: foundation
+  purpose: stabilize disposable doctrine Git fixtures after two bounded identical pack-cleanup races without changing authority behavior
+  attemptId: w001-lifecycle-ci-stabilization-v10
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  allowedEffects:
+    - preserve-the-v9-commit-tree-tag-and-two-failed-CI-attempts
+    - record-the-normalized-TempDir-Git-pack-cleanup-fingerprint-and-exhausted-retry
+    - disable-auto-maintenance-auto-gc-and-detached-background-cleanup-on-every-disposable-test-Git-command
+    - assert-the-test-only-Git-wrapper-applies-the-bounded-configuration
+    - update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-stabilization
+    - create-signed-semantic-commits-and-one-signed-v10-release-manager-review-tag
+    - push-the-existing-review-branch-and-tag-and-rerun-pull-request-10-once
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-ci-stabilization-v10.yaml
+    - .harness/grants/W-001-lifecycle-ci-stabilization-v10.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v9-authority-runtime-contract-and-qualification-bytes-remain-unchanged
+    - every-disposable-test-Git-command-disables-maintenance-auto-gc-auto-detach-and-maintenance-auto-detach
+    - the-correction-mutates-no-user-global-system-or-production-Git-configuration
+    - both-v9-CI-attempts-remain-preserved-as-foundation-owned-failures
+    - the-next-public-run-uses-the-exact-signed-v10-tree-and-tag
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged
+  prohibitedEffects:
+    - modify-authority-runtime-native-Beads-patches-database-schema-or-API-contract
+    - mutate-M3-W001-or-any-other-Bead
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - rerun-the-failed-v9-commit-a-third-time
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - move-delete-or-reuse-the-v9-review-tag
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+failure:
+  normalizedFingerprint: ci/doctrine-tempdir-git-pack-cleanup
+  outcome: exhausted-two-identical-retries
+  attemptOneFinding: TestW001LifecycleCorrectionV7GrantFailsClosed TempDir RemoveAll pack directory not empty
+  attemptTwoFinding: TestW001LifecycleCompletionGrantFailsClosed and TestW001LifecycleCorrectionGrantFailsClosed TempDir RemoveAll pack directory not empty
+  nextAction: prospective-test-fixture-stabilization
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-ci-stabilization-v10
+  detachedSignature: W-001-lifecycle-ci-stabilization-v10.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

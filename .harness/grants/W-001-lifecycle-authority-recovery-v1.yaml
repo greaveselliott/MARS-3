@@ -1,0 +1,121 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleAuthorityRecoveryGrant
+
+grant:
+  id: W-001-lifecycle-authority-recovery-v1
+  classification: PUBLIC
+  issuedAt: 2026-08-29T00:28:29Z
+  expiresAt: 2026-09-01T00:28:29Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 0b0195ba0953d1d6d387aad699605ff864cfac1d
+  baseTree: f96506ca6b7b053d41d4067eb1c926b9d4b39b40
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-test-harness-retirement-v1
+  priorGrantSHA256: 4d2cc1ba4f537715283631e2b2f57a6098b522bc0135e3dc8bff4254aa5e19b3
+  priorGrantSignatureSHA256: 4e093b74ce43191da23d9e34d68c77bbe3428f38fee5c75612580e708ec06486
+  priorReviewTag: mars3/w001-lifecycle-test-harness-retirement-v1
+  priorReviewTagObject: 60edcd3fd4603d66d7dd4feedbdae034fff13efa
+  priorReviewTagTarget: 0b0195ba0953d1d6d387aad699605ff864cfac1d
+  priorReviewTagTree: f96506ca6b7b053d41d4067eb1c926b9d4b39b40
+  priorRun: 33222628400
+  priorJob: 99019716295
+  priorRunDisposition: unaccepted-success
+  priorQADisposition: accepted
+  priorSecurityDisposition: changes-requested
+  rejectedReviewTagObject: e08beb772696b078783d0c75d23c1029581cdeb1
+  rejectedRun: 33218389712
+  rejectedJob: 99007023124
+  pullRequest: 10
+  successorReviewTag: mars3/w001-lifecycle-authority-recovery-v1
+  successorReviewTagMessage: MARS-3 W-001 lifecycle prospective authority recovery attestation v1
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: foundation-maintainer
+  failureOwnership: foundation
+  purpose: establish prospective signed authority without retroactively accepting the retirement attempt
+  attemptId: w001-lifecycle-authority-recovery-v1
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  allowedEffects:
+    - preserve-V17-and-the-entire-retirement-attempt-as-immutable-unaccepted-evidence
+    - adopt-the-exact-unaccepted-head-and-tree-only-as-the-recovery-preimage
+    - remove-the-commit-specific-retroactive-grant-timestamp-exception
+    - require-every-recovery-commit-to-be-at-or-after-this-grant-issuedAt
+    - stop-treating-the-retirement-commit-range-tag-or-runs-as-accepted-authority-evidence
+    - retain-the-complete-test-harness-retirement-and-deterministic-fixture-design-byte-for-byte
+    - update-only-the-new-grant-manifest-plan-evidence-validator-and-focused-regression
+    - create-signed-semantic-commits-and-one-distinct-signed-authority-recovery-review-tag
+    - push-the-existing-review-branch-and-new-tag-and-run-one-fresh-pull-request-10-gate
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-authority-recovery-v1.yaml
+    - .harness/grants/W-001-lifecycle-authority-recovery-v1.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - the-current-base-tree-is-an-unaccepted-recovery-preimage-not-retroactive-acceptance
+    - every-new-recovery-commit-is-signed-and-chronologically-prospective
+    - the-retirement-grant-tags-runs-QA-and-Security-dispositions-remain-immutable-evidence
+    - no-validator-exception-admits-a-commit-before-its-governing-grant-issuedAt
+    - the-retired-self-sandbox-remains-absent-and-no-new-hardening-design-is-introduced
+    - the-deterministic-Git-fixture-and-immutable-CI-security-boundary-remain-unchanged
+    - runtime-database-native-patch-workflow-dependency-product-and-authority-bytes-remain-unchanged
+    - the-next-public-run-uses-the-exact-signed-authority-recovery-tree-and-distinct-tag
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged
+  prohibitedEffects:
+    - retroactively-authorize-or-accept-any-retirement-commit-tag-run-review-or-publication
+    - modify-the-retired-test-harness-design-or-add-process-helper-path-provenance-hardening
+    - modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract
+    - mutate-M3-W001-or-any-other-Bead
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - delete-move-or-rewrite-any-V17-or-retirement-commit-tag-run-review-or-evidence
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-approval-policy-or-dependencies
+    - start-P001-or-any-downstream-ticket
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - authority.retirement_grant_retroactive_admission
+    - authority.retirement_publication_out_of_scope_retry
+  chronologyFinding: the retirement validator admitted one exact grant commit nineteen seconds before the signed issuedAt
+  publicationFinding: the retirement attempt consumed its correction allowance before replacing its tag and rerunning CI
+  securityDesignDisposition: accepted
+  recoveryDecision: preserve the retirement attempt as unaccepted evidence and establish a new prospective signed publication boundary
+  nextAction: prospective-authority-recovery-only
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-authority-recovery-v1
+  detachedSignature: W-001-lifecycle-authority-recovery-v1.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

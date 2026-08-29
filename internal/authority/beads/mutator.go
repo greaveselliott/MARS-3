@@ -26,6 +26,7 @@ import (
 	"time"
 
 	authorityv1 "github.com/greaveselliott/MARS-3/api/authority/v1"
+	"github.com/greaveselliott/MARS-3/internal/authority/gateway"
 )
 
 // NativeMutator invokes the reviewed Beads v1.2.2 gateway-CAS patch. The
@@ -84,6 +85,200 @@ func (mutator *NativeMutator) CompareAndSwapClaim(ctx context.Context, claim Ato
 		return nil, ErrAtomicCASRequired
 	}
 	return post, nil
+}
+
+func (mutator *NativeMutator) CompareAndSwapLifecycle(ctx context.Context, transition AtomicLifecycleTransition) ([]byte, error) {
+	if mutator.verifyBoundary() != nil || !validAtomicLifecycleTransition(transition) {
+		return nil, ErrAtomicCASRequired
+	}
+	workspaceDigest, err := authorityWorkspaceDigest(mutator.reader.workspace, mutator.reader.projectID)
+	if err != nil {
+		return nil, ErrAtomicCASRequired
+	}
+	scratchHome, err := os.MkdirTemp("", "mars3-beads-lifecycle-")
+	if err != nil {
+		return nil, ErrAtomicCASRequired
+	}
+	command := exec.CommandContext(ctx, mutator.binary,
+		"-C", ".", "--actor", transition.Transition.PrincipalProfileID, "--json", "batch", "--message", "MARS-3 governed lifecycle transition")
+	command.Dir = mutator.reader.workspace
+	command.Env = mutator.environment(scratchHome, workspaceDigest)
+	command.Stdin = strings.NewReader(authorityTransitionScript(transition))
+	var stdout, stderr boundedBuffer
+	command.Stdout, command.Stderr = &stdout, &stderr
+	commandErr := command.Run()
+	cleanupErr := os.RemoveAll(scratchHome)
+	if cleanupErr != nil {
+		return nil, ErrAtomicCASRequired
+	}
+	if commandErr != nil {
+		if staleAuthorityTransition(stderr.Bytes()) {
+			return nil, ErrCASStale
+		}
+		return nil, fmt.Errorf("%w: authority-transition.%s", ErrAtomicCASRequired, authorityTransitionFailureClass(stderr.Bytes()))
+	}
+	if !validAuthorityTransitionReceipt(stdout.Bytes(), transition.BeadID) {
+		return nil, fmt.Errorf("%w: authority-transition.receipt", ErrAtomicCASRequired)
+	}
+	post, err := mutator.reader.ReadIssue(ctx, transition.BeadID)
+	if err != nil {
+		return nil, ErrAtomicCASRequired
+	}
+	return post, nil
+}
+
+type nativeLifecycleIntent struct {
+	Operation               string                           `json:"operation"`
+	PrincipalProfileID      string                           `json:"principalProfileId"`
+	AttemptID               string                           `json:"attemptId,omitempty"`
+	CanonicalClaimAttemptID string                           `json:"canonicalClaimAttemptId,omitempty"`
+	HandoffFenceDigest      string                           `json:"handoffFenceDigest,omitempty"`
+	HeadSHA                 string                           `json:"headSHA"`
+	EvidenceRefs            []string                         `json:"evidenceRefs"`
+	NextProfileID           string                           `json:"nextProfileId,omitempty"`
+	Verdict                 authorityv1.ReviewVerdict        `json:"verdict,omitempty"`
+	RunStatus               authorityv1.RunDispositionStatus `json:"runStatus,omitempty"`
+	Failure                 *authorityv1.FailureContext      `json:"failure,omitempty"`
+	MergedSHA               string                           `json:"mergedSHA,omitempty"`
+	MergedTree              string                           `json:"mergedTree,omitempty"`
+	PullRequestID           string                           `json:"pullRequestId,omitempty"`
+	ProtectedMainRunID      string                           `json:"protectedMainRunId,omitempty"`
+	IdempotencyKey          string                           `json:"idempotencyKey"`
+}
+
+func lifecycleIntent(transition gateway.LifecycleMutation) nativeLifecycleIntent {
+	return nativeLifecycleIntent{
+		Operation: string(transition.Operation), PrincipalProfileID: transition.PrincipalProfileID,
+		AttemptID: transition.AttemptID, CanonicalClaimAttemptID: transition.CanonicalClaimAttemptID, HandoffFenceDigest: transition.HandoffFenceDigest,
+		HeadSHA: transition.HeadSHA, EvidenceRefs: append([]string(nil), transition.EvidenceRefs...),
+		NextProfileID: transition.NextProfileID, Verdict: transition.Verdict, RunStatus: transition.RunStatus,
+		MergedSHA: transition.MergedSHA, MergedTree: transition.MergedTree, PullRequestID: transition.PullRequestID,
+		ProtectedMainRunID: transition.ProtectedMainRunID, IdempotencyKey: transition.IdempotencyKey, Failure: cloneFailureContext(transition.Failure),
+	}
+}
+
+func validAtomicLifecycleTransition(transition AtomicLifecycleTransition) bool {
+	intent := lifecycleIntent(transition.Transition)
+	if !safeToken(transition.BeadID) || !safeToken(intent.PrincipalProfileID) || !isLowerHex(intent.HeadSHA, 40) && !isLowerHex(intent.HeadSHA, 64) ||
+		!safeToken(intent.IdempotencyKey) || !validLifecycleIntent(intent) || !validWorkVersion(transition.ExpectedVersion) || !validIntegrity(transition.ExpectedIntegrity) ||
+		transition.ExpectedStatus != "in_progress" || !safeToken(transition.ExpectedAssignee) || !validRFC3339(transition.ExpectedCreatedAt) ||
+		!validRFC3339(transition.ExpectedUpdatedAt) || !isLowerHex(transition.ExpectedDigest, 64) || !isLowerHex(transition.MetadataSHA256, 64) ||
+		!isLowerHex(transition.LabelsSHA256, 64) || !isLowerHex(transition.DependenciesSHA256, 64) ||
+		len(intent.EvidenceRefs) == 0 || len(intent.EvidenceRefs) > 16 || hasDuplicateStrings(intent.EvidenceRefs) ||
+		len(transition.PostMetadata) == 0 || len(transition.PostMetadata) > 1<<20 || rejectDuplicateJSONKeys(transition.PostMetadata) != nil {
+		return false
+	}
+	for _, reference := range intent.EvidenceRefs {
+		if !safeToken(reference) {
+			return false
+		}
+	}
+	switch transition.Transition.Operation {
+	case gateway.LifecycleHandoff:
+		return transition.PostStatus == "in_progress" && transition.RemoveLabel == "in-progress" && transition.AddLabel == "in-review"
+	case gateway.LifecycleReview:
+		if transition.Transition.Verdict == authorityv1.ReviewChangesRequested || transition.Transition.Verdict == authorityv1.ReviewBlocked {
+			return transition.PostStatus == "in_progress" && transition.RemoveLabel == "in-review" && transition.AddLabel == "in-progress"
+		}
+		return transition.PostStatus == "in_progress" && transition.RemoveLabel == "" && transition.AddLabel == ""
+	case gateway.LifecycleRun:
+		if transition.Transition.RunStatus != authorityv1.RunCompleted && transition.Transition.RunStatus != authorityv1.RunInReview {
+			return transition.PostStatus == "in_progress" &&
+				(transition.RemoveLabel == "" && transition.AddLabel == "" || transition.RemoveLabel == "in-review" && transition.AddLabel == "in-progress")
+		}
+		return transition.PostStatus == "in_progress" && transition.RemoveLabel == "" && transition.AddLabel == ""
+	case gateway.LifecycleReconcile:
+		return transition.PostStatus == "in_progress" && transition.RemoveLabel == "" && transition.AddLabel == ""
+	case gateway.LifecycleTerminal:
+		return transition.PostStatus == "closed" && transition.RemoveLabel == "in-review" && transition.AddLabel == "done"
+	default:
+		return false
+	}
+}
+
+func validLifecycleIntent(intent nativeLifecycleIntent) bool {
+	noAttempt := intent.AttemptID == "" && intent.CanonicalClaimAttemptID == "" && intent.HandoffFenceDigest == ""
+	noMerge := intent.MergedSHA == "" && intent.MergedTree == "" && intent.PullRequestID == "" && intent.ProtectedMainRunID == ""
+	switch gateway.LifecycleOperation(intent.Operation) {
+	case gateway.LifecycleHandoff:
+		return safeToken(intent.AttemptID) && safeToken(intent.CanonicalClaimAttemptID) && isLowerHex(intent.HandoffFenceDigest, 64) &&
+			safeToken(intent.NextProfileID) && intent.Verdict == "" && intent.RunStatus == "" && intent.Failure == nil && noMerge
+	case gateway.LifecycleReview:
+		return noAttempt && intent.NextProfileID == "" && validLifecycleReviewFailure(intent.Verdict, intent.Failure) && intent.RunStatus == "" && noMerge
+	case gateway.LifecycleRun:
+		return noAttempt && intent.NextProfileID == "" && intent.Verdict == "" && validLifecycleRunFailure(intent.RunStatus, intent.Failure) && noMerge
+	case gateway.LifecycleReconcile:
+		return noAttempt && intent.NextProfileID == "" && intent.Verdict == "" && intent.RunStatus == "" && intent.Failure == nil &&
+			(isLowerHex(intent.MergedSHA, 40) || isLowerHex(intent.MergedSHA, 64)) &&
+			(isLowerHex(intent.MergedTree, 40) || isLowerHex(intent.MergedTree, 64)) && safeToken(intent.PullRequestID) && safeToken(intent.ProtectedMainRunID)
+	case gateway.LifecycleTerminal:
+		return noAttempt && intent.NextProfileID == "" && intent.Verdict == "" && intent.RunStatus == "" && intent.Failure == nil && noMerge
+	default:
+		return false
+	}
+}
+
+func authorityTransitionScript(transition AtomicLifecycleTransition) string {
+	intentJSON, _ := json.Marshal(lifecycleIntent(transition.Transition))
+	return fmt.Sprintf("authority-transition %s expected_status=%s expected_assignee=%s expected_created_at=%s expected_updated_at=%s expected_metadata_sha256=%s expected_labels_sha256=%s expected_dependencies_sha256=%s transition_base64=%s post_status=%s remove_label=%s add_label=%s post_metadata_base64=%s\n",
+		transition.BeadID, transition.ExpectedStatus, transition.ExpectedAssignee, transition.ExpectedCreatedAt, transition.ExpectedUpdatedAt,
+		transition.MetadataSHA256, transition.LabelsSHA256, transition.DependenciesSHA256,
+		base64.RawStdEncoding.EncodeToString(intentJSON), transition.PostStatus, transition.RemoveLabel, transition.AddLabel,
+		base64.RawStdEncoding.EncodeToString(transition.PostMetadata))
+}
+
+func staleAuthorityTransition(stderr []byte) bool {
+	message := string(stderr)
+	for _, fingerprint := range []string{
+		"authority-transition: issue precondition mismatch", "authority-transition: metadata precondition mismatch",
+		"authority-transition: label precondition mismatch", "authority-transition: dependency precondition mismatch",
+	} {
+		if strings.Contains(message, fingerprint) {
+			return true
+		}
+	}
+	return false
+}
+
+func authorityTransitionFailureClass(stderr []byte) string {
+	message := string(stderr)
+	for _, check := range []struct{ fingerprint, class string }{
+		{"authority-transition: direct", "boundary"}, {"authority-transition: transaction", "transaction"},
+		{"authority-transition: post metadata", "post-metadata"}, {"authority-transition: issue update", "issue-update"},
+		{"authority-transition: close issue", "issue-close"}, {"authority-transition: remove lifecycle label", "label-update"},
+		{"authority-transition: add lifecycle label", "label-update"},
+	} {
+		if strings.Contains(message, check.fingerprint) {
+			return check.class
+		}
+	}
+	return "execution"
+}
+
+func validAuthorityTransitionReceipt(raw []byte, beadID string) bool {
+	if rejectDuplicateJSONKeys(raw) != nil {
+		return false
+	}
+	var receipt struct {
+		Operations    int    `json:"operations"`
+		SchemaVersion int    `json:"schema_version"`
+		Status        string `json:"status"`
+		Results       []struct {
+			Line   int    `json:"line"`
+			Op     string `json:"op"`
+			Target string `json:"target"`
+		} `json:"results"`
+	}
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if decoder.Decode(&receipt) != nil || receipt.Operations != 1 || receipt.SchemaVersion != 1 || receipt.Status != "ok" || len(receipt.Results) != 1 {
+		return false
+	}
+	if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+		return false
+	}
+	result := receipt.Results[0]
+	return result.Line == 1 && result.Op == "authority-transition" && result.Target == beadID
 }
 
 func (mutator *NativeMutator) verifyBoundary() error {

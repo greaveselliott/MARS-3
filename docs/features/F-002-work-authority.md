@@ -69,13 +69,38 @@
    validation before a simulated effect and records a bounded receipt. Earlier
    validation, a Temporal token, or cached projection state is insufficient.
    S-002 later applies this contract to real external-effect brokers.
-6. A handoff releases implementation authority and moves the canonical Bead to
-   `in-review` by expected-version transition. QA and then Security record only
-   their own verdict against the same immutable commit.
-7. `changes-requested` reopens M3-W001 rather than creating a duplicate. A
-   subsequent attempt receives a newer epoch. Only the Delivery Orchestrator
-   requests `done` after accepted reviews, merge, completed run disposition,
-   and reconciliation.
+6. A handoff binds the current execution attempt separately from the immutable
+   canonical claim attempt, persists a digest of the complete normalized fence,
+   releases the exact owning implementation lease, and moves the canonical
+   Bead to `in-review` by one expected-version native transaction. An unknown
+   post-release outcome is re-read from Beads and may report replay success
+   only after the original receipt is verified or a deterministic
+   reconciliation receipt is appended; the released lease cannot authorize
+   another write. QA and then Security record only their own verdict against
+   the same immutable commit, and every review operation rejects an active
+   implementation lease for that Bead.
+7. `changes-requested` or `blocked` review reopens M3-W001 rather than creating
+   a duplicate. Every noncompleted run is recorded with public-safe failure
+   context and a normalized fingerprint; an explicit `in-review` run retains
+   review state while other noncompleted outcomes reopen the same Bead. The
+   first occurrence is attempt 1. One equivalent retry is attempt 2 and must
+   become durably `blocked`; a third automatic occurrence is denied across
+   current and archived cycles. Rehandoff archives the earlier cycle and its
+   run history, and a subsequent attempt receives a newer epoch.
+   Only the Delivery Orchestrator records the completed run and merge
+   reconciliation, then requests `done` after accepted reviews. The terminal
+   record retains exactly one complete type-specific WorkClaim or
+   BootstrapClaim, detailed public-safe evidence, and append-only prior cycles
+   after closure. Null, malformed, incomplete, dual, or type-confused claim
+   objects fail closed. Every current and archived handoff must name the sole
+   retained claim attempt, and legacy lifecycle scalars are absent or exactly
+   derived from their detailed records. Authority metadata keys must also be
+   exact canonical spellings at every typed object boundary; duplicate,
+   case-folded, or otherwise unknown aliases fail before decoding. When an
+   active record has no detailed lifecycle evidence, accepted, completed,
+   reconciled, and blocker legacy fields must be empty. Dependency readiness
+   uses validated detailed lifecycle evidence when present and rejects any
+   contradiction with its legacy projection.
 8. Projection consumers replay journal events exactly once in sequence. On an
    irrecoverable gap, truncation, unknown checkpoint, or version conflict, they
    mark the view stale and non-authorizing, discard it, then ask the gateway for
@@ -247,6 +272,16 @@ and opaque trace references.
   immutable commit and may not hold an implementation lease during review.
 - Only the Delivery Orchestrator may record dependency replans, terminal run
   disposition, reconciliation, and a prerequisite-complete `done` transition.
+- Handoff, verdict, run, reconciliation, and terminal idempotency keys are
+  unique across the current and archived review cycles. An exact historical
+  replay returns its verified record only after the matching durable receipt
+  exists or a deterministic reconciliation receipt is appended. A different
+  request using that key fails. Every handoff record retains the immutable
+  canonical-claim attempt and a digest of the complete normalized fence.
+- Every noncompleted run has a public-safe normalized fingerprint. The first
+  occurrence uses attempt 1; the sole equivalent retry uses attempt 2 and
+  records `blocked`; any third equivalent automatic occurrence is rejected,
+  including when earlier occurrences are in archived review cycles.
 - A skill, profile maximum, provider session, Temporal task, or cached event
   does not grant permission.
 
@@ -276,6 +311,9 @@ and digest; digests prove integrity, never freshness by themselves.
 backlog --claim+lease--> in-progress --handoff--> in-review
 backlog --signed W-001 atomic bootstrap claim (no capability)--> in-progress
 in-review --changes-requested--> in-progress
+in-review --blocked review+failure context--> in-progress
+in-review --blocked|failed|preempted|cancelled|no-work|changes-requested run+failure context--> in-progress
+in-review --in-review run--> in-review --accepted reviews+completed run--> in-review
 in-review --accepted chain+merge+completed run+reconcile--> done
 backlog|in-progress|in-review --authorized supersession--> superseded
 
@@ -318,9 +356,12 @@ uncertainty blocks retry until separately authorized reconciliation.
 Every later mutation uses the normal live-lease transition above. P-001 and all
 subsequent work receive no equivalent exception.
 
-A blocked run remains in its truthful lifecycle with `blocker`, `blocked_by`,
-failure fingerprint, attempt count, and `next_action`. Missing evidence or an
-unknown receipt cannot take any transition to `done`.
+A blocked review and every noncompleted run retain public-safe `reason`,
+`blocked_by` where applicable, normalized failure fingerprint, bounded attempt
+count, and `next_action`. Except for an explicit `in-review` run, they reopen
+the same Bead to `in-progress`; a later handoff archives the earlier review and
+run history. Missing evidence or an unknown receipt cannot take any transition
+to `done`.
 
 ### Failure behavior
 
@@ -342,6 +383,9 @@ equivalent repeated failure is recorded and escalated rather than looped.
   stable error response.
 - A deterministic ready-set fixture proving lineage, dependency, blocker, role,
   and lifecycle validation against canonical Beads versions.
+- Recursive canonical-key fixtures for every native authority metadata object,
+  plus dependency fixtures proving that versioned, claim-bearing, empty/null,
+  and detail-key-bearing records cannot downgrade to sparse legacy readiness.
 - A→B→A fixtures for issue fields and dependency edges, plus delete/recreate of
   the same display ID, proving mutation sequence, graph revision, and
   incarnation—not content digests—make every old observation stale.

@@ -158,6 +158,9 @@ func NewWithClaims(store ClaimStore, sagas ClaimSagaStore, events EventSink, now
 		return nil, err
 	}
 	service.claims = store
+	if lifecycle, ok := store.(LifecycleStore); ok {
+		service.lifecycle = lifecycle
+	}
 	service.sagas = sagas
 	if leases, ok := sagas.(LeaseValidator); ok {
 		service.leases = leases
@@ -449,7 +452,19 @@ func (s *Service) revalidateStoredClaim(ctx context.Context, principal authority
 }
 
 func equalWorkItems(left, right authorityv1.WorkItem) bool {
-	return left.TenantID == right.TenantID && left.ProjectID == right.ProjectID && left.BeadID == right.BeadID && left.DisplayID == right.DisplayID && left.NativeStatus == right.NativeStatus && left.LifecycleState == right.LifecycleState && left.Assignee == right.Assignee && left.ClaimAttemptID == right.ClaimAttemptID && equalStrings(left.GoalIDs, right.GoalIDs) && equalStrings(left.ProductDecisionIDs, right.ProductDecisionIDs) && left.FeatureID == right.FeatureID && equalStrings(left.ScenarioIDs, right.ScenarioIDs) && equalStrings(left.ExclusivePaths, right.ExclusivePaths) && equalStrings(left.VerificationOrder, right.VerificationOrder) && equalStrings(left.Blockers, right.Blockers) && equalDependencies(left.Dependencies, right.Dependencies) && equalLabels(left.Labels, right.Labels) && left.Version == right.Version && left.Integrity == right.Integrity
+	return left.TenantID == right.TenantID && left.ProjectID == right.ProjectID && left.BeadID == right.BeadID && left.DisplayID == right.DisplayID && left.NativeStatus == right.NativeStatus && left.LifecycleState == right.LifecycleState && left.Assignee == right.Assignee && left.ClaimAttemptID == right.ClaimAttemptID && equalStrings(left.GoalIDs, right.GoalIDs) && equalStrings(left.ProductDecisionIDs, right.ProductDecisionIDs) && left.FeatureID == right.FeatureID && equalStrings(left.ScenarioIDs, right.ScenarioIDs) && equalStrings(left.ExclusivePaths, right.ExclusivePaths) && equalStrings(left.VerificationOrder, right.VerificationOrder) && equalStrings(left.Blockers, right.Blockers) && equalDependencies(left.Dependencies, right.Dependencies) && equalLabels(left.Labels, right.Labels) && left.Version == right.Version && left.Integrity == right.Integrity && lifecycleRecordsDigest(left) == lifecycleRecordsDigest(right)
+}
+
+func lifecycleRecordsDigest(item authorityv1.WorkItem) string {
+	return deterministicJSONDigest(struct {
+		Handoff        *authorityv1.HandoffRecord
+		Reviews        []authorityv1.ReviewRecord
+		ReviewHistory  []authorityv1.ReviewCycle
+		RunHistory     []authorityv1.RunDispositionRecord
+		RunDisposition *authorityv1.RunDispositionRecord
+		Reconciliation *authorityv1.ReconciliationRecord
+		Terminal       *authorityv1.TerminalRecord
+	}{item.Handoff, item.Reviews, item.ReviewHistory, item.RunHistory, item.RunDisposition, item.Reconciliation, item.Terminal})
 }
 
 func validClaimLease(lease authorityv1.CapabilityLease, request LeaseRequest, now time.Time) bool {

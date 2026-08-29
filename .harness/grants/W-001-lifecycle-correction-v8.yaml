@@ -1,0 +1,121 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCorrectionGrant
+
+grant:
+  id: W-001-lifecycle-correction-v8
+  classification: PUBLIC
+  issuedAt: 2026-08-27T16:29:00Z
+  expiresAt: 2026-08-30T16:29:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 36d8c981ebde65e694416caf16fc02d50aac2a67
+  baseTree: be55454779c2c0dd08adc08666c2b7ee3826448f
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-correction-v7
+  priorGrantSHA256: ee5866add69534ff82dafba945d17959949584f91746551c67be3af70a9fbff2
+  priorGrantSignatureSHA256: 33070c3d15d4e9b121c3812538a47510a8bd3b996ebb845c94ebb648e3148009
+  priorReviewTag: mars3/w001-lifecycle-completion-v7
+  priorReviewTagObject: 217585d45ec414f55e5d326419a4f79b96a48915
+  priorReviewTagTarget: 36d8c981ebde65e694416caf16fc02d50aac2a67
+  priorReviewTagTree: be55454779c2c0dd08adc08666c2b7ee3826448f
+  pullRequest: 10
+  priorRun: 33091727157
+  priorJob: 98586729802
+  priorQADisposition: changes-requested
+  priorSecurityDisposition: changes-requested
+  successorReviewTag: mars3/w001-lifecycle-completion-v8
+  successorReviewTagMessage: MARS-3 W-001 lifecycle correction tree attestation v8
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: work-authority-engineer
+  failureOwnership: foundation
+  purpose: close the exact v7 canonical-key legacy-scalar and dependency-readiness findings without canonical mutation
+  attemptId: w001-lifecycle-correction-v8
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: true
+  allowedEffects:
+    - preserve-the-v7-commits-tag-run-and-changes-requested-dispositions
+    - reject-case-folded-or-other-noncanonical-authority-metadata-keys-before-typed-decoding
+    - require-legacy-lifecycle-scalars-to-be-empty-when-detailed-evidence-is-absent
+    - derive-dependency-readiness-from-consistent-detailed-evidence-or-reject-the-projection
+    - mirror-the-corrections-in-the-pinned-native-Beads-transaction-path
+    - execute-non-skipped-native-Beads-and-PostgreSQL-qualification
+    - preserve-an-independent-reproducible-patched-Beads-source-digest-and-binary-hash
+    - update-the-active-plan-feature-spec-evidence-and-manifest-with-the-truthful-v8-correction
+    - create-signed-semantic-commits-and-one-signed-v8-release-manager-review-tag
+    - push-the-existing-review-branch-and-tag-and-update-pull-request-10
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-correction-v8.yaml
+    - .harness/grants/W-001-lifecycle-correction-v8.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/features/F-002-work-authority.md
+    - docs/product-specs/work-authority.md
+    - docs/evidence/W-001-validation.md
+    - internal/authority/beads/**
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - authority-metadata-object-keys-are-unique-and-canonical-under-case-folding-before-typed-decoding
+    - active-records-without-detailed-evidence-cannot-claim-accepted-completed-reconciled-or-blocked-state
+    - detailed-dependency-lifecycle-records-and-legacy-scalars-cannot-contradict-each-other
+    - dependency-readiness-is-derived-from-valid-detailed-evidence-when-it-exists
+    - project-adapter-and-native-transaction-enforce-the-same-fail-closed-contract
+    - native-and-PostgreSQL-qualification-execute-without-skips
+    - independent-cold-builds-reproduce-the-bound-patched-Beads-binary
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged-until-fresh-review-and-merge
+  prohibitedEffects:
+    - mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths
+    - mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - move-delete-or-reuse-the-v7-review-tag
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - lifecycle.claim_key_alias_not_canonical
+    - lifecycle.legacy_active_scalar_contradiction
+    - lifecycle.dependency_detailed_state_ignored
+  normalizedFingerprint: pr10-v7/canonical-key-legacy-dependency-correction
+  reviewedHead: 36d8c981ebde65e694416caf16fc02d50aac2a67
+  reviewedTree: be55454779c2c0dd08adc08666c2b7ee3826448f
+  result: changes-requested-same-ticket-remains-in-progress
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  assignee: work-authority-engineer
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  nativeBeadsNoSkipRequired: true
+  postgresNoSkipRequired: true
+  independentColdBuildsRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-correction-v8
+  detachedSignature: W-001-lifecycle-correction-v8.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

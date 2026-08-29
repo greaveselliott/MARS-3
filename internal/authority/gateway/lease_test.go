@@ -28,6 +28,18 @@ func (store *memorySagaStore) GetLease(_ context.Context, tenantID, projectID, l
 	return authorityv1.CapabilityLease{}, errors.New("lease not found")
 }
 
+func (store *memorySagaStore) ActiveLeaseForBead(_ context.Context, tenantID, projectID, beadID string) (authorityv1.CapabilityLease, bool, error) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	for _, saga := range store.sagas {
+		lease := saga.Lease
+		if lease.TenantID == tenantID && lease.ProjectID == projectID && lease.BeadID == beadID && lease.Active && lease.State == authorityv1.LeaseActive && lease.ExpiresAt.After(store.now) {
+			return cloneSaga(saga).Lease, true, nil
+		}
+	}
+	return authorityv1.CapabilityLease{}, false, nil
+}
+
 func (store *memorySagaStore) ValidateFence(ctx context.Context, fence authorityv1.FencingTuple) (authorityv1.CapabilityLease, error) {
 	lease, err := store.GetLease(ctx, fence.TenantID, fence.ProjectID, fence.LeaseID)
 	if err != nil || !leaseTupleMatches(lease, fence) || !lease.Active || !lease.ExpiresAt.After(store.now) {

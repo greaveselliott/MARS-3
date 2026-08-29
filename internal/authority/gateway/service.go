@@ -120,6 +120,7 @@ type WorkMutationLocker interface {
 // exposes their handles to callers.
 type Service struct {
 	store      WorkStore
+	lifecycle  LifecycleStore
 	claims     ClaimStore
 	sagas      ClaimSagaStore
 	leases     LeaseValidator
@@ -465,6 +466,15 @@ func normalizeWorkItem(item authorityv1.WorkItem) authorityv1.WorkItem {
 	item.Dependencies = append([]authorityv1.Dependency(nil), item.Dependencies...)
 	sort.Slice(item.Dependencies, func(i, j int) bool { return item.Dependencies[i].BeadID < item.Dependencies[j].BeadID })
 	item.Labels = sortedLabels(item.Labels)
+	if len(item.Reviews) == 0 {
+		item.Reviews = nil
+	}
+	if len(item.ReviewHistory) == 0 {
+		item.ReviewHistory = nil
+	}
+	if len(item.RunHistory) == 0 {
+		item.RunHistory = nil
+	}
 	return item
 }
 
@@ -526,7 +536,7 @@ func knownLabel(label authorityv1.Label) bool {
 
 func knownCapability(capability authorityv1.Capability) bool {
 	switch capability {
-	case authorityv1.CapabilityWorkRead, authorityv1.CapabilityWorkClaim, authorityv1.CapabilityWorkStatus, authorityv1.CapabilityWorkHandoff, authorityv1.CapabilityReviewRecord, authorityv1.CapabilityRunDisposition, authorityv1.CapabilityLeaseIssue, authorityv1.CapabilityLeaseRenew, authorityv1.CapabilityLeaseRelease, authorityv1.CapabilityLeaseRevoke, authorityv1.CapabilityEffectValidate, authorityv1.CapabilityTicketDelivery:
+	case authorityv1.CapabilityWorkRead, authorityv1.CapabilityWorkClaim, authorityv1.CapabilityWorkStatus, authorityv1.CapabilityWorkHandoff, authorityv1.CapabilityReviewRecord, authorityv1.CapabilityRunDisposition, authorityv1.CapabilityWorkReconcile, authorityv1.CapabilityWorkClose, authorityv1.CapabilityLeaseIssue, authorityv1.CapabilityLeaseRenew, authorityv1.CapabilityLeaseRelease, authorityv1.CapabilityLeaseRevoke, authorityv1.CapabilityEffectValidate, authorityv1.CapabilityTicketDelivery:
 		return true
 	default:
 		return false

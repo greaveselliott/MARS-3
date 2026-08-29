@@ -26,6 +26,11 @@
 8. Verification-order entries are executable identity IDs. Each must resolve
    to a declared role or to a profile backed by a declared principal; display
    labels and undeclared aliases never grant routing authority.
+9. Test Git execution is deterministic fixture infrastructure, not a security
+   sandbox. Candidate-code security comes from CI isolation: the accepted
+   immutable workflow is read-only, retains no checkout credentials, receives
+   no repository secrets or write token for fork pull requests, and is followed
+   by independent review.
 
 ## Step-by-step behavior
 
@@ -124,6 +129,9 @@ instead of inferring safety from one recognized spelling
 extra steps, runner or shell changes, dynamically constructed commands, and all
 other execution mutations outside the structural allowlists
 **And** deterministic tests, vet, diff checks, and secret history scan pass
+**And** fixture Git calls use exact admitted arguments, zero ambient
+configuration, canonical local-only sources, disabled hooks, and disabled
+background maintenance without claiming to sandbox same-package test code
 **And** independent human QA and Security review the same immutable commit for
 semantic or unrecognized disclosure risks that pattern checks cannot prove.
 

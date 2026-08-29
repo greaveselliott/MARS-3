@@ -72,6 +72,26 @@ The scanner must first reject a synthetic canary, then scan both the worktree
 and complete history. A newer release that fails that canary is not qualified
 merely because its version number is higher.
 
+### Candidate-code security boundary
+
+The public workflow, not test source introspection, is the candidate-code
+security boundary. Go tests necessarily execute candidate bytes. They do so in
+the accepted immutable job with read-only repository permissions, checkout
+credentials disabled, no fork secrets or write token, and exact pinned actions
+and scanner containers. The signed candidate identity, exact-head run, and
+ordered independent QA then Security review complete that boundary.
+
+The W-001 test self-sandbox is retired as a whole design. Its descriptor/Perl
+launcher, captured one-shot executor, fetch pack/index stream, and recursive
+AST process inventory repeatedly tried to constrain arbitrary same-package test
+code from within that same code and could not close process, path, Git-config,
+or syntax-equivalence classes. The remaining Git runner is deterministic
+fixture infrastructure only: literal system Git, exact admitted arguments,
+zero ambient environment, canonical local-only fetch sources, disabled hooks,
+and disabled automatic maintenance. Ordinary `git fetch` owns `FETCH_HEAD`.
+These controls make tests repeatable and local; they do not grant authority or
+replace workflow isolation and immutable review.
+
 ## Consequences
 
 Git hosting outages block publication but do not justify a local completion

@@ -405,6 +405,46 @@ func TestNativeMutatorIntegration(t *testing.T) {
 	if _, err := store.CompareAndSwapClaim(context.Background(), mutation); !errors.Is(err, gateway.ErrStaleWorkVersion) {
 		t.Fatalf("replayed stale claim error=%v", err)
 	}
+	head := strings.Repeat("b", 40)
+	applyLifecycle := func(current authorityv1.WorkItem, transition gateway.LifecycleMutation) authorityv1.WorkItem {
+		t.Helper()
+		transition.TenantID, transition.ProjectID, transition.BeadID = "tenant-fixture", "project-fixture", current.BeadID
+		transition.ExpectedVersion, transition.ExpectedIntegrity = current.Version, current.Integrity
+		next, err := store.CompareAndSwapLifecycle(context.Background(), transition)
+		if err != nil {
+			t.Fatalf("native %s: %v", transition.Operation, err)
+		}
+		return next
+	}
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleHandoff, PrincipalProfileID: "work-authority-engineer", AttemptID: "execution-native-001",
+		CanonicalClaimAttemptID: mutation.AttemptID, HandoffFenceDigest: strings.Repeat("e", 64), HeadSHA: head, EvidenceRefs: []string{"evidence-handoff"},
+		NextProfileID: "qa", IdempotencyKey: "handoff-native",
+	})
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleReview, PrincipalProfileID: "qa", HeadSHA: head, Verdict: authorityv1.ReviewAccepted,
+		EvidenceRefs: []string{"evidence-qa"}, IdempotencyKey: "review-qa-native",
+	})
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleReview, PrincipalProfileID: "security-reviewer", HeadSHA: head, Verdict: authorityv1.ReviewAccepted,
+		EvidenceRefs: []string{"evidence-security"}, IdempotencyKey: "review-security-native",
+	})
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleRun, PrincipalProfileID: "delivery-orchestrator", HeadSHA: head, RunStatus: authorityv1.RunCompleted,
+		EvidenceRefs: []string{"evidence-run"}, IdempotencyKey: "run-native",
+	})
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleReconcile, PrincipalProfileID: "delivery-orchestrator", HeadSHA: head,
+		MergedSHA: strings.Repeat("c", 40), MergedTree: strings.Repeat("d", 40), PullRequestID: "pr-native", ProtectedMainRunID: "run-native",
+		EvidenceRefs: []string{"evidence-merge"}, IdempotencyKey: "reconcile-native",
+	})
+	post = applyLifecycle(post, gateway.LifecycleMutation{
+		Operation: gateway.LifecycleTerminal, PrincipalProfileID: "delivery-orchestrator", HeadSHA: head,
+		EvidenceRefs: []string{"evidence-terminal"}, IdempotencyKey: "terminal-native",
+	})
+	if post.LifecycleState != authorityv1.LifecycleDone || post.NativeStatus != "closed" || post.ClaimAttemptID != mutation.AttemptID || post.Terminal == nil || post.Version.IssueMutationSequence != 8 {
+		t.Fatalf("native lifecycle terminal=%#v", post)
+	}
 }
 
 func boundedFixtureError(output []byte) string {
@@ -468,4 +508,111 @@ func issueFixture(t *testing.T, lifecycle authorityv1.LifecycleState, attemptID,
 		t.Fatal(err)
 	}
 	return data
+}
+
+func mutateFixtureMetadata(t *testing.T, raw []byte, mutate func(map[string]any)) []byte {
+	t.Helper()
+	var issues []map[string]any
+	if err := json.Unmarshal(raw, &issues); err != nil || len(issues) != 1 {
+		t.Fatalf("decode fixture: %v", err)
+	}
+	metadata, ok := issues[0]["metadata"].(map[string]any)
+	if !ok {
+		t.Fatal("fixture metadata missing")
+	}
+	mutate(metadata)
+	encoded, err := json.Marshal(issues)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return encoded
+}
+
+func TestProjectionRejectsCaseFoldedClaimAlias(t *testing.T) {
+	raw := issueFixture(t, authorityv1.LifecycleInProgress, "canonical-attempt", "work-authority-engineer", 2, false)
+	raw = mutateFixtureMetadata(t, raw, func(metadata map[string]any) {
+		metadata["workclaim"] = map[string]any{
+			"attemptId": "case-alias-attempt", "idempotencyKey": "case-alias-key",
+			"baseCommit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+		}
+	})
+	if _, err := decodeIssueSnapshot(raw, "tenant-fixture", "project-fixture", []authorityv1.Label{authorityv1.LabelPublicAccepted}); !errors.Is(err, ErrProjectionInvalid) {
+		t.Fatalf("case-folded claim alias error=%v", err)
+	}
+}
+
+func TestProjectionRejectsLegacyTerminalScalarsWithoutDetailedRecords(t *testing.T) {
+	raw := issueFixture(t, authorityv1.LifecycleInProgress, "canonical-attempt", "work-authority-engineer", 2, false)
+	raw = mutateFixtureMetadata(t, raw, func(metadata map[string]any) {
+		metadata["reviewAccepted"] = true
+		metadata["runDisposition"] = "completed"
+		metadata["reconciled"] = true
+	})
+	if _, err := decodeIssueSnapshot(raw, "tenant-fixture", "project-fixture", []authorityv1.Label{authorityv1.LabelPublicAccepted}); !errors.Is(err, ErrProjectionInvalid) {
+		t.Fatalf("orphan legacy lifecycle scalars error=%v", err)
+	}
+}
+
+func TestProjectionRejectsDependencyDetailedLifecycleContradiction(t *testing.T) {
+	raw := issueFixture(t, authorityv1.LifecycleBacklog, "", "", 1, false)
+	var issues []map[string]any
+	if err := json.Unmarshal(raw, &issues); err != nil {
+		t.Fatal(err)
+	}
+	dependency := issues[0]["dependencies"].([]any)[0].(map[string]any)
+	metadata := dependency["metadata"].(map[string]any)
+	metadata["runDispositionRecord"] = map[string]any{
+		"principalProfileId": "delivery-orchestrator", "status": "failed",
+		"headSHA": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "evidenceRefs": []any{"evidence-failed"},
+		"idempotencyKey": "run-failed", "failure": map[string]any{
+			"reason": "runtime-failed", "failure_fingerprint": "runtime-failed", "attempt": float64(1), "next_action": "retry-once",
+		},
+	}
+	encoded, err := json.Marshal(issues)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := decodeIssueSnapshot(encoded, "tenant-fixture", "project-fixture", []authorityv1.Label{authorityv1.LabelPublicAccepted}); !errors.Is(err, ErrProjectionInvalid) {
+		t.Fatalf("dependency scalar/detail contradiction error=%v", err)
+	}
+}
+
+func TestProjectionRejectsVersionedDependencyWithStrippedLifecycleEvidence(t *testing.T) {
+	for _, fixture := range []struct {
+		name       string
+		emptyProof bool
+	}{
+		{name: "omitted-detailed-keys"},
+		{name: "empty-and-null-detailed-keys", emptyProof: true},
+	} {
+		t.Run(fixture.name, func(t *testing.T) {
+			raw := issueFixture(t, authorityv1.LifecycleBacklog, "", "", 1, false)
+			var issues []map[string]any
+			if err := json.Unmarshal(raw, &issues); err != nil {
+				t.Fatal(err)
+			}
+			dependency := issues[0]["dependencies"].([]any)[0].(map[string]any)
+			metadata := dependency["metadata"].(map[string]any)
+			metadata["workVersion"] = map[string]any{
+				"authorityGeneration": "dependency-generation", "issueIncarnation": "dependency-incarnation",
+				"issueMutationSequence": float64(8), "dependencyGraphRevision": float64(3),
+			}
+			metadata["workClaim"] = map[string]any{
+				"attemptId": "dependency-attempt", "idempotencyKey": "dependency-claim",
+				"baseCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			}
+			if fixture.emptyProof {
+				metadata["reviewRecords"] = []any{}
+				metadata["runDispositionRecord"] = nil
+				metadata["terminalRecord"] = nil
+			}
+			encoded, err := json.Marshal(issues)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := decodeIssueSnapshot(encoded, "tenant-fixture", "project-fixture", []authorityv1.Label{authorityv1.LabelPublicAccepted}); !errors.Is(err, ErrProjectionInvalid) {
+				t.Fatalf("versioned dependency with stripped lifecycle evidence error=%v", err)
+			}
+		})
+	}
 }

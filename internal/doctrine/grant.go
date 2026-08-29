@@ -188,6 +188,146 @@ const (
 	w001DeliveryScannerFixTagMessage  = "MARS-3 W-001 delivery tree attestation v4"
 	w001DeliveryV1PreservedHead       = "919f1189fb0703e42bcc11570a59527ad8e7a444"
 	w001DeliveryScannerIgnorePath     = ".gitleaksignore"
+	w001LifecycleGrantPath            = ".harness/grants/W-001-lifecycle-completion-v5.yaml"
+	w001LifecycleGrantSignature       = ".harness/grants/W-001-lifecycle-completion-v5.yaml.sig"
+	w001LifecycleGrantNamespace       = "mars3-w001-lifecycle-completion-v5"
+	w001LifecycleBase                 = "7f35c8a7112946a9569efe6085f49da8fd28530e"
+	w001LifecycleBaseTree             = "5a9f006b0cd65364c2fdcfb403efd554f0e34dda"
+	w001LifecycleBranch               = "codex/w-001-lifecycle-completion"
+	w001LifecycleReviewTag            = "mars3/w001-lifecycle-completion-v5"
+	w001LifecycleReviewTagMessage     = "MARS-3 W-001 lifecycle completion tree attestation v5"
+	w001DeliveryV4TagObject           = "98a3f34c24868e49ca4909c8b0303f34c25390f3"
+	w001LifecycleCorrectionPath       = ".harness/grants/W-001-lifecycle-correction-v6.yaml"
+	w001LifecycleCorrectionSignature  = ".harness/grants/W-001-lifecycle-correction-v6.yaml.sig"
+	w001LifecycleCorrectionNamespace  = "mars3-w001-lifecycle-correction-v6"
+	w001LifecycleCorrectionBase       = "523ead6f899c413cb0a388c60a30b33aed88b8b6"
+	w001LifecycleCorrectionBaseTree   = "aaff531b1b0fee9dfa907a5a52c0afd98abf050c"
+	w001LifecycleV5TagObject          = "15dbd1be9d1d098eb2f5da3dbafe824064dbff1f"
+	w001LifecycleCorrectionReviewTag  = "mars3/w001-lifecycle-completion-v6"
+	w001LifecycleCorrectionTagMessage = "MARS-3 W-001 lifecycle correction tree attestation v6"
+)
+
+const (
+	w001LifecycleCorrectionV7Path                = ".harness/grants/W-001-lifecycle-correction-v7.yaml"
+	w001LifecycleCorrectionV7Signature           = ".harness/grants/W-001-lifecycle-correction-v7.yaml.sig"
+	w001LifecycleCorrectionV7Namespace           = "mars3-w001-lifecycle-correction-v7"
+	w001LifecycleCorrectionV7Base                = "e0f27046ec28ab924eac910d40e244cb26b30323"
+	w001LifecycleCorrectionV7BaseTree            = "bbc1aa76b3965f0740e54f984ad713978a3be9f8"
+	w001LifecycleV6TagObject                     = "d8637c7443ab04e05892ecf5489f0b45fa41e43d"
+	w001LifecycleCorrectionV7ReviewTag           = "mars3/w001-lifecycle-completion-v7"
+	w001LifecycleCorrectionV7TagMessage          = "MARS-3 W-001 lifecycle correction tree attestation v7"
+	w001LifecycleCorrectionV7PatchPath           = "internal/authority/beads/beads-v1.2.2-lifecycle.patch"
+	w001LifecycleCorrectionV7PatchSHA            = "2db1615df7bc1c5b4bd0d2d17cecb22a43b2bf4be72a1ebcf750820170b5ff66"
+	w001LifecycleCorrectionV8Path                = ".harness/grants/W-001-lifecycle-correction-v8.yaml"
+	w001LifecycleCorrectionV8Signature           = ".harness/grants/W-001-lifecycle-correction-v8.yaml.sig"
+	w001LifecycleCorrectionV8Namespace           = "mars3-w001-lifecycle-correction-v8"
+	w001LifecycleCorrectionV8Base                = "36d8c981ebde65e694416caf16fc02d50aac2a67"
+	w001LifecycleCorrectionV8BaseTree            = "be55454779c2c0dd08adc08666c2b7ee3826448f"
+	w001LifecycleV7TagObject                     = "217585d45ec414f55e5d326419a4f79b96a48915"
+	w001LifecycleCorrectionV8ReviewTag           = "mars3/w001-lifecycle-completion-v8"
+	w001LifecycleCorrectionV8TagMessage          = "MARS-3 W-001 lifecycle correction tree attestation v8"
+	w001LifecycleCorrectionV8PatchSHA            = "116c3b59744f1d6c3065ef8baf89d2bfac372bab66282b8cd9443e0843fc65c5"
+	w001LifecycleCorrectionV9Path                = ".harness/grants/W-001-lifecycle-correction-v9.yaml"
+	w001LifecycleCorrectionV9Signature           = ".harness/grants/W-001-lifecycle-correction-v9.yaml.sig"
+	w001LifecycleCorrectionV9Namespace           = "mars3-w001-lifecycle-correction-v9"
+	w001LifecycleCorrectionV9Base                = "6d6b90ef495cd64286e755e90d199a3cb622cd54"
+	w001LifecycleCorrectionV9BaseTree            = "f596e2a148f055bcac90960419b2e22928bd471c"
+	w001LifecycleV8TagObject                     = "fb99ef24abb1176e7bcec01bddffe305979d8464"
+	w001LifecycleCorrectionV9ReviewTag           = "mars3/w001-lifecycle-completion-v9"
+	w001LifecycleCorrectionV9TagMessage          = "MARS-3 W-001 lifecycle correction tree attestation v9"
+	w001LifecycleCorrectionV9PatchSHA            = "6cca8ab8bd5bd0d5f179612ece7e68e002caa69c455c80cdb00335d5e75a31c4"
+	w001LifecycleStabilizationV10Path            = ".harness/grants/W-001-lifecycle-ci-stabilization-v10.yaml"
+	w001LifecycleStabilizationV10Signature       = ".harness/grants/W-001-lifecycle-ci-stabilization-v10.yaml.sig"
+	w001LifecycleStabilizationV10Namespace       = "mars3-w001-lifecycle-ci-stabilization-v10"
+	w001LifecycleStabilizationV10Base            = "ad845ff81f1e64b9e4110162a77a65a844891731"
+	w001LifecycleStabilizationV10BaseTree        = "e4a08e5a4b211003dc29609a0128856eec306061"
+	w001LifecycleV9TagObject                     = "47933c4957b9af2e8d7a38f971d7a20c5de8122f"
+	w001LifecycleStabilizationV10ReviewTag       = "mars3/w001-lifecycle-completion-v10"
+	w001LifecycleStabilizationV10TagMessage      = "MARS-3 W-001 lifecycle CI stabilization tree attestation v10"
+	w001LifecycleCIFencingV11Path                = ".harness/grants/W-001-lifecycle-ci-fencing-v11.yaml"
+	w001LifecycleCIFencingV11Signature           = ".harness/grants/W-001-lifecycle-ci-fencing-v11.yaml.sig"
+	w001LifecycleCIFencingV11Namespace           = "mars3-w001-lifecycle-ci-fencing-v11"
+	w001LifecycleCIFencingV11Base                = "47b19b2c89d72fbf9eb5356ceefe33783d691aa4"
+	w001LifecycleCIFencingV11BaseTree            = "0ebe496c48871b040a7fcd7a286073f2c1d40153"
+	w001LifecycleV10TagObject                    = "84672df5f046995bb7efd79cf8f9a333946aecfa"
+	w001LifecycleCIFencingV11ReviewTag           = "mars3/w001-lifecycle-completion-v11"
+	w001LifecycleCIFencingV11TagMessage          = "MARS-3 W-001 lifecycle CI Git fencing correction tree attestation v11"
+	w001LifecycleCIHardeningV12Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v12.yaml"
+	w001LifecycleCIHardeningV12Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v12.yaml.sig"
+	w001LifecycleCIHardeningV12Namespace         = "mars3-w001-lifecycle-ci-hardening-v12"
+	w001LifecycleCIHardeningV12Base              = "54f4593b1730ff9ae04a2e5cce0589c6baedfee6"
+	w001LifecycleCIHardeningV12BaseTree          = "44ba564be30e0db0aa735d76539c3604a5d79e3f"
+	w001LifecycleV11TagObject                    = "7313ee2e38dd1d4f4f5ca62237e0be89b0b4f13a"
+	w001LifecycleCIHardeningV12ReviewTag         = "mars3/w001-lifecycle-completion-v12"
+	w001LifecycleCIHardeningV12TagMessage        = "MARS-3 W-001 lifecycle CI hardening tree attestation v12"
+	w001LifecycleCIHardeningV13Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v13.yaml"
+	w001LifecycleCIHardeningV13Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v13.yaml.sig"
+	w001LifecycleCIHardeningV13Namespace         = "mars3-w001-lifecycle-ci-hardening-v13"
+	w001LifecycleCIHardeningV13Base              = "3c8d55aa39e4e099d8a922f8e13a71efcbe2c78b"
+	w001LifecycleCIHardeningV13BaseTree          = "c4bb80ab477b7fcbe73a7a237479e44703393952"
+	w001LifecycleV12TagObject                    = "d0176029978e0c49d795a02ad36f7f7992c3bdfa"
+	w001LifecycleCIHardeningV13ReviewTag         = "mars3/w001-lifecycle-completion-v13"
+	w001LifecycleCIHardeningV13TagMessage        = "MARS-3 W-001 lifecycle CI closed argv and process admission tree attestation v13"
+	w001LifecycleCIHardeningV14Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v14.yaml"
+	w001LifecycleCIHardeningV14Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v14.yaml.sig"
+	w001LifecycleCIHardeningV14Namespace         = "mars3-w001-lifecycle-ci-hardening-v14"
+	w001LifecycleCIHardeningV14Base              = "ce934054aed66c074e99a032191a6a51c620b947"
+	w001LifecycleCIHardeningV14BaseTree          = "73cab7fb7b1bd2fc1102dc4b16e9617fd7c26680"
+	w001LifecycleV13TagObject                    = "8d50fbb230503f4ad24cfc7301e4e4924be30ec0"
+	w001LifecycleCIHardeningV14ReviewTag         = "mars3/w001-lifecycle-completion-v14"
+	w001LifecycleCIHardeningV14TagMessage        = "MARS-3 W-001 lifecycle CI physical path and transitive process boundary tree attestation v14"
+	w001LifecycleCIHardeningV15Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v15.yaml"
+	w001LifecycleCIHardeningV15Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v15.yaml.sig"
+	w001LifecycleCIHardeningV15Namespace         = "mars3-w001-lifecycle-ci-hardening-v15"
+	w001LifecycleCIHardeningV15Base              = "d631bec4ed786116c13e36995722d91d48d64109"
+	w001LifecycleCIHardeningV15BaseTree          = "b9467f12b2031c5159ef749938bbd4f475eb6153"
+	w001LifecycleV14TagObject                    = "f97b9ebd0150ee4d75bf691c16c176b792d42461"
+	w001LifecycleCIHardeningV15ReviewTag         = "mars3/w001-lifecycle-completion-v15"
+	w001LifecycleCIHardeningV15TagMessage        = "MARS-3 W-001 lifecycle CI descriptor-bound Git and closed process import tree attestation v15"
+	w001LifecycleCIHardeningV16Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v16.yaml"
+	w001LifecycleCIHardeningV16Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v16.yaml.sig"
+	w001LifecycleCIHardeningV16Namespace         = "mars3-w001-lifecycle-ci-hardening-v16"
+	w001LifecycleCIHardeningV16Base              = "a46f16deff2fc06c5d0d21377a3bb2c65e873fc9"
+	w001LifecycleCIHardeningV16BaseTree          = "c2e482717f182040708cbf2551ee266de2485a30"
+	w001LifecycleV15TagObject                    = "71230aed1661a987dbd1b63b058180a6b33f7825"
+	w001LifecycleCIHardeningV16ReviewTag         = "mars3/w001-lifecycle-completion-v16"
+	w001LifecycleCIHardeningV16TagMessage        = "MARS-3 W-001 lifecycle CI closed descriptor launcher attestation v16"
+	w001LifecycleCIHardeningV17Path              = ".harness/grants/W-001-lifecycle-ci-hardening-v17.yaml"
+	w001LifecycleCIHardeningV17Signature         = ".harness/grants/W-001-lifecycle-ci-hardening-v17.yaml.sig"
+	w001LifecycleCIHardeningV17Namespace         = "mars3-w001-lifecycle-ci-hardening-v17"
+	w001LifecycleCIHardeningV17Base              = "25d2f14e20e74f1415caa4118a93c359f9370031"
+	w001LifecycleCIHardeningV17BaseTree          = "d9bf0e3f89807c12c5be5a58ea68fd04715aa740"
+	w001LifecycleV16TagObject                    = "125a596c00a5a00f40fbda002f38cc06e3f0b5cb"
+	w001LifecycleCIHardeningV17ReviewTag         = "mars3/w001-lifecycle-completion-v17"
+	w001LifecycleCIHardeningV17TagMessage        = "MARS-3 W-001 lifecycle CI descriptor-stream and closed executor attestation v17"
+	w001LifecycleTestHarnessRetirementPath       = ".harness/grants/W-001-lifecycle-test-harness-retirement-v1.yaml"
+	w001LifecycleTestHarnessRetirementSignature  = ".harness/grants/W-001-lifecycle-test-harness-retirement-v1.yaml.sig"
+	w001LifecycleTestHarnessRetirementNamespace  = "mars3-w001-lifecycle-test-harness-retirement-v1"
+	w001LifecycleTestHarnessRetirementBase       = "0ed9482fea1bd22bf4198ff9d9223e004853212a"
+	w001LifecycleTestHarnessRetirementBaseTree   = "e1c3179abf82bef70f56ee330735072b9ed8b510"
+	w001LifecycleV17TagObject                    = "3767eab4895d567ece26ab42eef006926fb8dddd"
+	w001LifecycleTestHarnessRetirementReviewTag  = "mars3/w001-lifecycle-test-harness-retirement-v1"
+	w001LifecycleTestHarnessRetirementTagMessage = "MARS-3 W-001 lifecycle test-harness retirement attestation v1"
+	w001LifecycleAuthorityRecoveryPath           = ".harness/grants/W-001-lifecycle-authority-recovery-v1.yaml"
+	w001LifecycleAuthorityRecoverySignature      = ".harness/grants/W-001-lifecycle-authority-recovery-v1.yaml.sig"
+	w001LifecycleAuthorityRecoveryNamespace      = "mars3-w001-lifecycle-authority-recovery-v1"
+	w001LifecycleAuthorityRecoveryBase           = "0b0195ba0953d1d6d387aad699605ff864cfac1d"
+	w001LifecycleAuthorityRecoveryBaseTree       = "f96506ca6b7b053d41d4067eb1c926b9d4b39b40"
+	w001LifecycleRetirementTagObject             = "60edcd3fd4603d66d7dd4feedbdae034fff13efa"
+	w001LifecycleAuthorityRecoveryReviewTag      = "mars3/w001-lifecycle-authority-recovery-v1"
+	w001LifecycleAuthorityRecoveryTagMessage     = "MARS-3 W-001 lifecycle prospective authority recovery attestation v1"
+	w001LifecycleEvidencePreservationPath        = ".harness/grants/W-001-lifecycle-evidence-preservation-v1.yaml"
+	w001LifecycleEvidencePreservationSignature   = ".harness/grants/W-001-lifecycle-evidence-preservation-v1.yaml.sig"
+	w001LifecycleEvidencePreservationNamespace   = "mars3-w001-lifecycle-evidence-preservation-v1"
+	w001LifecycleEvidencePreservationBase        = "5251ae37a2914e9f750d4c5900f46c7bb736b2d9"
+	w001LifecycleEvidencePreservationBaseTree    = "82a4a84cae31d0003aecddf654217cbfb2bd29a6"
+	w001LifecycleAuthorityRecoveryTagObject      = "f561cb14a471e0cc773ba6b4bd81308ee8f0d873"
+	w001LifecycleRejectedRetirementTagObject     = "e08beb772696b078783d0c75d23c1029581cdeb1"
+	w001LifecycleRejectedRetirementTagTarget     = "ce9d0e7e82a33350263acd6199219a5349ef9bce"
+	w001LifecycleRejectedRetirementTagTree       = "3d6a1c44fa076d4755ec96c5755b45deae7a1ee5"
+	w001LifecycleRejectedRetirementArchiveTag    = "mars3/w001-lifecycle-test-harness-retirement-rejected-v1"
+	w001LifecycleEvidencePreservationReviewTag   = "mars3/w001-lifecycle-evidence-preservation-v1"
+	w001LifecycleEvidencePreservationTagMessage  = "MARS-3 W-001 lifecycle rejected-evidence preservation attestation v1"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -2212,6 +2352,1735 @@ var w001DeliveryScannerFixSequences = map[string][]string{
 	"verification.order":          {"qa", "security-reviewer", "delivery-orchestrator"},
 }
 
+var w001LifecycleGrantScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCompletionGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-completion-v5"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T12:05:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T12:05:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleBase},
+	{path: "grant.baseTree", value: w001LifecycleBaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-delivery-scanner-correction-v4"},
+	{path: "grant.priorGrantSHA256", value: "acf7b9f534b33e5a9cc6d9b439ec1d0249b7cb5116577689e37728f8e745235a"},
+	{path: "grant.priorGrantSignatureSHA256", value: "afa502f4da77e04d84c531899d6324401ae32891c6ac3ca6c43130a1f9a6727b"},
+	{path: "grant.priorReviewTag", value: w001DeliveryScannerFixReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001DeliveryV4TagObject},
+	{path: "grant.priorReviewTagTarget", value: "cac4231ddcb69edd298766c5bbe3854c8269fb2a"},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleBaseTree},
+	{path: "grant.successorReviewTag", value: w001LifecycleReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleReviewTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "work-authority-engineer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "complete the governed W-001 lifecycle routes before any terminal disposition"},
+	{path: "grant.attemptId", value: "w001-lifecycle-completion-v5"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "true"},
+	{path: "finding.code", value: "completion.w001.lifecycle_routes_missing"},
+	{path: "finding.normalizedFingerprint", value: "completion-audit/governed-lifecycle-routes-missing"},
+	{path: "finding.currentMain", value: w001LifecycleBase},
+	{path: "finding.currentTree", value: w001LifecycleBaseTree},
+	{path: "finding.pullRequest", value: "9"},
+	{path: "finding.reviewedHead", value: "cac4231ddcb69edd298766c5bbe3854c8269fb2a"},
+	{path: "finding.reviewedTree", value: w001LifecycleBaseTree},
+	{path: "finding.protectedMainRun", value: "33069887434"},
+	{path: "finding.protectedMainJob", value: "98509103754"},
+	{path: "finding.qaDisposition", value: "accepted"},
+	{path: "finding.securityDisposition", value: "accepted"},
+	{path: "finding.missingRoutes", value: "handoff,review-verdict,run-disposition,reconciliation,terminal-transition"},
+	{path: "finding.commentSHA256", value: "d7ddb1c0d4ecb00b93fcbec4d56b740da581a725e91e6381601d2d295203c38d"},
+	{path: "finding.result", value: "changes-requested-same-ticket-remains-in-progress"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.assignee", value: "work-authority-engineer"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleGrantNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-completion-v5.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleGrantSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v2-v3-v4-tags-heads-trees-runs-and-review-dispositions",
+		"append-one-exact-public-safe-completion-audit-comment-to-M3-W001",
+		"update-the-active-plan-feature-spec-evidence-and-manifest-with-the-truthful-finding",
+		"implement-governed-handoff-review-run-reconciliation-and-terminal-route-contracts",
+		"extend-the-pinned-native-Beads-transaction-with-bounded-lifecycle-CAS",
+		"create-only-public-synthetic-development-test-leases-and-fixtures",
+		"create-signed-semantic-commits-and-one-signed-v5-release-manager-review-tag",
+		"push-one-review-branch-and-tag-and-open-one-ready-pull-request",
+		"obtain-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleGrantPath, w001LifecycleGrantSignature, ".harness/manifest.yaml",
+		canonicalActivePlan, "docs/features/F-002-work-authority.md", "docs/product-specs/work-authority.md",
+		"docs/evidence/W-001-validation.md", "api/authority/v1/types.go", "internal/authority/beads/**",
+		"internal/authority/gateway/**", "internal/authority/httpapi/**", "internal/authority/postgres/**",
+		"database/authority/**", "cmd/mars3-authority/**", "internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"lifecycle-handoff-review-run-reconciliation-and-terminal-effects-use-typed-gateway-routes",
+		"each-role-can-record-only-its-own-transition-against-one-immutable-commit",
+		"changes-requested-reopens-the-same-Bead-and-never-creates-duplicate-work",
+		"done-requires-QA-and-Security-acceptance-merged-SHA-completed-run-and-reconciliation",
+		"every-canonical-transition-uses-one-native-Beads-CAS-and-a-monotonic-WorkVersion",
+		"cross-store-handoff-and-reconciliation-unknown-outcomes-remain-recoverable-and-non-authorizing",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged-until-fresh-review-and-merge",
+		"public-evidence-contains-only-bounded-hashes-identifiers-and-outcomes",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths-before-final-reconciliation",
+		"mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history",
+		"issue-a-production-cross-ticket-or-persistent-canonical-lease",
+		"claim-create-close-supersede-or-reopen-any-canonical-Bead",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleCorrectionScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCorrectionGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-correction-v6"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T13:50:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T13:50:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCorrectionBase},
+	{path: "grant.baseTree", value: w001LifecycleCorrectionBaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-completion-v5"},
+	{path: "grant.priorGrantSHA256", value: "ee7e384447d567222975f065283d8914d4a4c1bba059888c076dbc6caac58d69"},
+	{path: "grant.priorGrantSignatureSHA256", value: "e6ed28780504b9e931c2e8785b4508524ee54798eb7b9401cb265e16624bc4dd"},
+	{path: "grant.priorReviewTag", value: w001LifecycleReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV5TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCorrectionBase},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCorrectionBaseTree},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.priorRun", value: "33077554760"},
+	{path: "grant.priorJob", value: "98535652734"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCorrectionReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCorrectionTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "work-authority-engineer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "close the exact v5 lifecycle authority and convergence findings without canonical mutation"},
+	{path: "grant.attemptId", value: "w001-lifecycle-correction-v6"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "true"},
+	{path: "findings.normalizedFingerprint", value: "pr10-v5/lifecycle-authority-convergence-correction"},
+	{path: "findings.reviewedHead", value: w001LifecycleCorrectionBase},
+	{path: "findings.reviewedTree", value: w001LifecycleCorrectionBaseTree},
+	{path: "findings.result", value: "changes-requested-same-ticket-remains-in-progress"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.assignee", value: "work-authority-engineer"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.nativeBeadsNoSkipRequired", value: "true"},
+	{path: "verification.postgresNoSkipRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCorrectionNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-correction-v6.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCorrectionSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v5-commits-tag-run-and-changes-requested-dispositions",
+		"require-exactly-one-complete-claim-binding-for-active-and-terminal-versioned-work",
+		"bind-handoff-and-replay-to-the-complete-normalized-authority-fence",
+		"repair-or-reconcile-a-missing-lifecycle-receipt-before-reporting-replay-success",
+		"add-truthful-blocked-and-nonterminal-disposition-details-and-append-only-recovery",
+		"preserve-an-exact-reproducible-patched-Beads-build-recipe-and-hash",
+		"execute-non-skipped-native-Beads-and-PostgreSQL-qualification",
+		"update-the-active-plan-feature-spec-evidence-and-manifest-with-the-truthful-correction",
+		"create-signed-semantic-commits-and-one-signed-v6-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-update-pull-request-10",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCorrectionPath, w001LifecycleCorrectionSignature, ".harness/manifest.yaml",
+		canonicalActivePlan, "docs/features/F-002-work-authority.md", "docs/product-specs/work-authority.md",
+		"docs/evidence/W-001-validation.md", "api/authority/v1/types.go", "internal/authority/beads/**",
+		"internal/authority/gateway/**", "internal/authority/httpapi/**", "internal/authority/postgres/**",
+		"database/authority/**", "cmd/mars3-authority/**", "internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"terminal-work-retains-exactly-one-complete-valid-claim-binding-and-detailed-evidence",
+		"current-and-archived-handoffs-retain-canonical-claim-and-full-fence-digest",
+		"replay-success-proves-or-repairs-the-durable-trace-receipt",
+		"blocked-review-and-every-declared-noncompleted-run-have-a-recoverable-append-only-route",
+		"blocker-fingerprint-next-action-and-attempt-state-remain-public-safe-and-durable",
+		"completed-run-reconciliation-and-terminal-still-require-QA-and-Security-acceptance",
+		"native-and-PostgreSQL-qualification-execute-without-skips-and-reproduce-bound-hashes",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged-until-fresh-review-and-merge",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths",
+		"mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"move-delete-or-reuse-the-v5-review-tag",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes": {
+		"lifecycle.terminal_claim_binding_fail_open",
+		"lifecycle.handoff_replay_fence_splice",
+		"lifecycle.missing_receipt_replay_success",
+		"lifecycle.nonterminal_convergence_deadlock",
+		"lifecycle.qualification_not_reproducible",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleCorrectionV7Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCorrectionGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-correction-v7"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T15:07:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T15:07:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCorrectionV7Base},
+	{path: "grant.baseTree", value: w001LifecycleCorrectionV7BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-correction-v6"},
+	{path: "grant.priorGrantSHA256", value: "0d5b8aa829d8eecd4755f6063512facdcd17c0312e45ec4ca2ff1295f73a462e"},
+	{path: "grant.priorGrantSignatureSHA256", value: "cae00cafd4007330beb5bac423300cee4b7dfc349d7e5385c57f62092a9a5a8d"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCorrectionReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV6TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCorrectionV7Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCorrectionV7BaseTree},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.priorRun", value: "33083662143"},
+	{path: "grant.priorJob", value: "98557343299"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCorrectionV7ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCorrectionV7TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "work-authority-engineer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "close the exact v6 claim-lineage convergence and reproducible-build findings without canonical mutation"},
+	{path: "grant.attemptId", value: "w001-lifecycle-correction-v7"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "true"},
+	{path: "findings.normalizedFingerprint", value: "pr10-v6/lifecycle-lineage-retry-build-correction"},
+	{path: "findings.reviewedHead", value: w001LifecycleCorrectionV7Base},
+	{path: "findings.reviewedTree", value: w001LifecycleCorrectionV7BaseTree},
+	{path: "findings.result", value: "changes-requested-same-ticket-remains-in-progress"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.assignee", value: "work-authority-engineer"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.nativeBeadsNoSkipRequired", value: "true"},
+	{path: "verification.postgresNoSkipRequired", value: "true"},
+	{path: "verification.independentColdBuildsRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCorrectionV7Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-correction-v7.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCorrectionV7Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v6-commits-tag-run-and-changes-requested-dispositions",
+		"join-every-current-and-archived-handoff-to-the-sole-complete-canonical-claim",
+		"reject-null-malformed-incomplete-or-type-confused-claim-shadows-and-contradictory-legacy-lifecycle-scalars",
+		"require-a-normalized-fingerprint-for-every-noncompleted-run",
+		"enforce-one-retry-per-fingerprint-and-durable-blocked-escalation-without-a-third-automatic-attempt",
+		"preserve-a-hermetic-independent-reproducible-patched-Beads-build-recipe-source-digest-and-binary-hash",
+		"execute-non-skipped-native-Beads-and-PostgreSQL-qualification",
+		"update-the-active-plan-feature-spec-evidence-and-manifest-with-the-truthful-v7-correction",
+		"create-signed-semantic-commits-and-one-signed-v7-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-update-pull-request-10",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCorrectionV7Path, w001LifecycleCorrectionV7Signature, ".harness/manifest.yaml",
+		canonicalActivePlan, "docs/features/F-002-work-authority.md", "docs/product-specs/work-authority.md",
+		"docs/evidence/W-001-validation.md", "api/authority/v1/types.go", "internal/authority/beads/**",
+		"internal/authority/gateway/**", "internal/authority/httpapi/**", "internal/authority/postgres/**",
+		"database/authority/**", "cmd/mars3-authority/**", "internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"every-current-and-archived-handoff-canonical-attempt-equals-the-sole-retained-claim-attempt",
+		"work-and-bootstrap-claims-have-distinct-complete-type-specific-contracts-and-raw-presence-is-fail-closed",
+		"legacy-lifecycle-scalars-are-absent-or-exactly-derived-from-detailed-records",
+		"every-noncompleted-run-retains-a-public-safe-normalized-fingerprint",
+		"first-failure-and-one-retry-use-monotonic-attempts-and-equivalent-recurrence-becomes-blocked",
+		"a-third-equivalent-automatic-attempt-is-denied-across-current-and-archived-cycles",
+		"independent-cold-builds-from-different-source-and-cache-paths-reproduce-the-bound-binary",
+		"native-and-PostgreSQL-qualification-execute-without-skips",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged-until-fresh-review-and-merge",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths",
+		"mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"move-delete-or-reuse-the-v6-review-tag",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes": {
+		"lifecycle.claim_lineage_not_joined",
+		"lifecycle.failure_fingerprint_retry_not_monotonic",
+		"lifecycle.qualification_not_independently_reproducible",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleCorrectionV8Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCorrectionGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-correction-v8"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T16:29:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T16:29:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCorrectionV8Base},
+	{path: "grant.baseTree", value: w001LifecycleCorrectionV8BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-correction-v7"},
+	{path: "grant.priorGrantSHA256", value: "ee5866add69534ff82dafba945d17959949584f91746551c67be3af70a9fbff2"},
+	{path: "grant.priorGrantSignatureSHA256", value: "33070c3d15d4e9b121c3812538a47510a8bd3b996ebb845c94ebb648e3148009"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCorrectionV7ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV7TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCorrectionV8Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCorrectionV8BaseTree},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.priorRun", value: "33091727157"},
+	{path: "grant.priorJob", value: "98586729802"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCorrectionV8ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCorrectionV8TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "work-authority-engineer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "close the exact v7 canonical-key legacy-scalar and dependency-readiness findings without canonical mutation"},
+	{path: "grant.attemptId", value: "w001-lifecycle-correction-v8"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "true"},
+	{path: "findings.normalizedFingerprint", value: "pr10-v7/canonical-key-legacy-dependency-correction"},
+	{path: "findings.reviewedHead", value: w001LifecycleCorrectionV8Base},
+	{path: "findings.reviewedTree", value: w001LifecycleCorrectionV8BaseTree},
+	{path: "findings.result", value: "changes-requested-same-ticket-remains-in-progress"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.assignee", value: "work-authority-engineer"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.nativeBeadsNoSkipRequired", value: "true"},
+	{path: "verification.postgresNoSkipRequired", value: "true"},
+	{path: "verification.independentColdBuildsRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCorrectionV8Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-correction-v8.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCorrectionV8Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v7-commits-tag-run-and-changes-requested-dispositions",
+		"reject-case-folded-or-other-noncanonical-authority-metadata-keys-before-typed-decoding",
+		"require-legacy-lifecycle-scalars-to-be-empty-when-detailed-evidence-is-absent",
+		"derive-dependency-readiness-from-consistent-detailed-evidence-or-reject-the-projection",
+		"mirror-the-corrections-in-the-pinned-native-Beads-transaction-path",
+		"execute-non-skipped-native-Beads-and-PostgreSQL-qualification",
+		"preserve-an-independent-reproducible-patched-Beads-source-digest-and-binary-hash",
+		"update-the-active-plan-feature-spec-evidence-and-manifest-with-the-truthful-v8-correction",
+		"create-signed-semantic-commits-and-one-signed-v8-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-update-pull-request-10",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCorrectionV8Path, w001LifecycleCorrectionV8Signature, ".harness/manifest.yaml",
+		canonicalActivePlan, "docs/features/F-002-work-authority.md", "docs/product-specs/work-authority.md",
+		"docs/evidence/W-001-validation.md", "internal/authority/beads/**",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"authority-metadata-object-keys-are-unique-and-canonical-under-case-folding-before-typed-decoding",
+		"active-records-without-detailed-evidence-cannot-claim-accepted-completed-reconciled-or-blocked-state",
+		"detailed-dependency-lifecycle-records-and-legacy-scalars-cannot-contradict-each-other",
+		"dependency-readiness-is-derived-from-valid-detailed-evidence-when-it-exists",
+		"project-adapter-and-native-transaction-enforce-the-same-fail-closed-contract",
+		"native-and-PostgreSQL-qualification-execute-without-skips",
+		"independent-cold-builds-reproduce-the-bound-patched-Beads-binary",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged-until-fresh-review-and-merge",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths",
+		"mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"move-delete-or-reuse-the-v7-review-tag",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes": {
+		"lifecycle.claim_key_alias_not_canonical",
+		"lifecycle.legacy_active_scalar_contradiction",
+		"lifecycle.dependency_detailed_state_ignored",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleCorrectionV9Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCorrectionGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-correction-v9"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T17:29:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T17:29:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCorrectionV9Base},
+	{path: "grant.baseTree", value: w001LifecycleCorrectionV9BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-correction-v8"},
+	{path: "grant.priorGrantSHA256", value: "bfd0f0e623d5640eeb1f1dce7d2d88fee5034052e73e446979ec7dfdd238a699"},
+	{path: "grant.priorGrantSignatureSHA256", value: "e55db7343aad3d2f81a4626e082501dbf9bc693056222b9514ea378456ec7296"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCorrectionV8ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV8TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCorrectionV9Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCorrectionV9BaseTree},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.priorRun", value: "33097381660"},
+	{path: "grant.priorJob", value: "98606506699"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCorrectionV9ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCorrectionV9TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "work-authority-engineer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "close the exact v8 recursive-native-key and dependency-lineage-stripping findings without canonical mutation"},
+	{path: "grant.attemptId", value: "w001-lifecycle-correction-v9"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "true"},
+	{path: "findings.normalizedFingerprint", value: "pr10-v8/native-recursive-key-dependency-lineage-correction"},
+	{path: "findings.reviewedHead", value: w001LifecycleCorrectionV9Base},
+	{path: "findings.reviewedTree", value: w001LifecycleCorrectionV9BaseTree},
+	{path: "findings.result", value: "changes-requested-same-ticket-remains-in-progress"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.assignee", value: "work-authority-engineer"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.nativeBeadsNoSkipRequired", value: "true"},
+	{path: "verification.postgresNoSkipRequired", value: "true"},
+	{path: "verification.independentColdBuildsRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCorrectionV9Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-correction-v9.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCorrectionV9Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v8-commits-tag-run-and-changes-requested-dispositions",
+		"enforce-recursive-exact-schema-keys-at-every-native-authority-metadata-object-boundary",
+		"deny-sparse-legacy-readiness-for-versioned-claim-bearing-or-detailed-key-bearing-dependencies",
+		"execute-the-full-recursive-native-key-and-dependency-lineage-stripping-regression-corpus",
+		"execute-non-skipped-native-Beads-and-PostgreSQL-qualification",
+		"preserve-an-independent-reproducible-patched-Beads-source-digest-and-binary-hash",
+		"update-the-active-plan-feature-spec-evidence-and-manifest-with-the-truthful-v9-correction",
+		"create-signed-semantic-commits-and-one-signed-v9-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-update-pull-request-10",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCorrectionV9Path, w001LifecycleCorrectionV9Signature, ".harness/manifest.yaml",
+		canonicalActivePlan, "docs/features/F-002-work-authority.md", "docs/product-specs/work-authority.md",
+		"docs/evidence/W-001-validation.md", "internal/authority/beads/**",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"native-authority-metadata-object-keys-are-unique-and-canonical-recursively-before-semantic-parsing",
+		"recursive-native-key-validation-covers-work-version-claims-handoffs-reviews-runs-failures-reconciliation-terminal-and-history",
+		"legacy-dependency-readiness-is-limited-to-an-explicitly-unversioned-unclaimed-and-detail-key-absent-shape",
+		"versioned-claim-bearing-or-detailed-key-bearing-dependencies-require-the-complete-valid-terminal-chain",
+		"project-adapter-and-native-transaction-enforce-the-same-fail-closed-contract",
+		"native-and-PostgreSQL-qualification-execute-without-skips",
+		"independent-cold-builds-reproduce-the-bound-patched-Beads-binary",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged-until-fresh-review-and-merge",
+	},
+	"grant.prohibitedEffects": {
+		"mutate-M3-W001-lifecycle-owner-dependencies-labels-metadata-or-exclusive-paths",
+		"mutate-any-other-Bead-Dolt-row-dependency-label-comment-or-history",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"move-delete-or-reuse-the-v8-review-tag",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes": {
+		"lifecycle.native_recursive_key_alias_not_canonical",
+		"lifecycle.dependency_lineage_stripping",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleStabilizationV10Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCIStabilizationGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-ci-stabilization-v10"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T18:43:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T18:43:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleStabilizationV10Base},
+	{path: "grant.baseTree", value: w001LifecycleStabilizationV10BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-correction-v9"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCorrectionV9ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV9TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleStabilizationV10Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleStabilizationV10BaseTree},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.failedRun", value: "33104553091"},
+	{path: "grant.failedAttemptOneJob", value: "98630789458"},
+	{path: "grant.failedAttemptTwoJob", value: "98631170195"},
+	{path: "grant.priorQADisposition", value: "not-requested-ci-blocked"},
+	{path: "grant.priorSecurityDisposition", value: "not-requested-ci-blocked"},
+	{path: "grant.successorReviewTag", value: w001LifecycleStabilizationV10ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleStabilizationV10TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "stabilize disposable doctrine Git fixtures after two bounded identical pack-cleanup races without changing authority behavior"},
+	{path: "grant.attemptId", value: "w001-lifecycle-ci-stabilization-v10"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "failure.normalizedFingerprint", value: "ci/doctrine-tempdir-git-pack-cleanup"},
+	{path: "failure.outcome", value: "exhausted-two-identical-retries"},
+	{path: "failure.attemptOneFinding", value: "TestW001LifecycleCorrectionV7GrantFailsClosed TempDir RemoveAll pack directory not empty"},
+	{path: "failure.attemptTwoFinding", value: "TestW001LifecycleCompletionGrantFailsClosed and TestW001LifecycleCorrectionGrantFailsClosed TempDir RemoveAll pack directory not empty"},
+	{path: "failure.nextAction", value: "prospective-test-fixture-stabilization"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleStabilizationV10Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-ci-stabilization-v10.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleStabilizationV10Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-commit-tree-tag-and-two-failed-CI-attempts",
+		"record-the-normalized-TempDir-Git-pack-cleanup-fingerprint-and-exhausted-retry",
+		"disable-auto-maintenance-auto-gc-and-detached-background-cleanup-on-every-disposable-test-Git-command",
+		"assert-the-test-only-Git-wrapper-applies-the-bounded-configuration",
+		"update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-stabilization",
+		"create-signed-semantic-commits-and-one-signed-v10-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-rerun-pull-request-10-once",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleStabilizationV10Path, w001LifecycleStabilizationV10Signature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-and-qualification-bytes-remain-unchanged",
+		"every-disposable-test-Git-command-disables-maintenance-auto-gc-auto-detach-and-maintenance-auto-detach",
+		"the-correction-mutates-no-user-global-system-or-production-Git-configuration",
+		"both-v9-CI-attempts-remain-preserved-as-foundation-owned-failures",
+		"the-next-public-run-uses-the-exact-signed-v10-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-or-API-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-the-failed-v9-commit-a-third-time",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"move-delete-or-reuse-the-v9-review-tag",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleCIFencingV11Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCIFencingCorrectionGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-ci-fencing-v11"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T19:05:55Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T19:05:55Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCIFencingV11Base},
+	{path: "grant.baseTree", value: w001LifecycleCIFencingV11BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-ci-stabilization-v10"},
+	{path: "grant.priorGrantSHA256", value: "b6f29734dabbeaff52f96c8d5e0a8910fadf81c841f4d9fd4a7cd799add586f9"},
+	{path: "grant.priorGrantSignatureSHA256", value: "9bc96e8c5a0f35fee3998066bd6fa00b45b671ee1b66debad4f6e21c7341ab32"},
+	{path: "grant.priorReviewTag", value: w001LifecycleStabilizationV10ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV10TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCIFencingV11Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCIFencingV11BaseTree},
+	{path: "grant.priorRun", value: "33105792480"},
+	{path: "grant.priorJob", value: "98635155160"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCIFencingV11ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCIFencingV11TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "route every disposable test Git operation through one sanitized command-local wrapper without persistent repository configuration"},
+	{path: "grant.attemptId", value: "w001-lifecycle-ci-fencing-v11"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.rawCloneFinding", value: "grant_test.go raw git clone bypassed the bounded wrapper and inherited global configuration"},
+	{path: "findings.persistedConfigFinding", value: "disposable fixtures wrote maintenance.auto and gc.auto into repository-local configuration"},
+	{path: "findings.nextAction", value: "prospective-command-local-test-Git-fencing-correction"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCIFencingV11Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-ci-fencing-v11.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCIFencingV11Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-runtime-qualification-and-v10-commit-tree-tag-run-and-dispositions",
+		"route-pre-repository-clone-and-every-other-disposable-test-Git-operation-through-the-bounded-wrapper",
+		"remove-disposable-repository-persistent-maintenance-and-gc-configuration",
+		"assert-effective-command-local-fences-and-absent-local-and-global-persistent-values",
+		"reject-any-raw-disposable-Git-command-outside-the-single-audited-wrapper",
+		"update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-correction",
+		"create-signed-semantic-commits-and-one-signed-v11-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCIFencingV11Path, w001LifecycleCIFencingV11Signature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged",
+		"every-disposable-test-Git-operation-including-pre-repository-clone-uses-the-sanitized-bounded-wrapper",
+		"effective-maintenance-auto-gc-auto-detach-and-maintenance-auto-detach-remain-command-local-and-disabled",
+		"no-disposable-repository-local-global-user-system-or-production-Git-configuration-is-mutated",
+		"v10-QA-and-Security-changes-requested-dispositions-remain-durable",
+		"the-next-public-run-uses-the-exact-signed-v11-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-or-move-any-v9-or-v10-commit-tag-or-run",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes":     {"ci.test_git_sanitization_incomplete", "ci.test_git_configuration_persisted"},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleCIHardeningV12Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCIHardeningGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-ci-hardening-v12"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T19:32:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T19:32:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCIHardeningV12Base},
+	{path: "grant.baseTree", value: w001LifecycleCIHardeningV12BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-ci-fencing-v11"},
+	{path: "grant.priorGrantSHA256", value: "6df1dc4978e6b3657986ef43a41aaa3437567772c95bec4f151d8abcf0e9396b"},
+	{path: "grant.priorGrantSignatureSHA256", value: "967efc83af964fc5abaf42f28cad1ad0231dc35524eecf5f9a05eae093d80b0e"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCIFencingV11ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV11TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCIHardeningV12Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCIHardeningV12BaseTree},
+	{path: "grant.priorRun", value: "33108126981"},
+	{path: "grant.priorJob", value: "98643418071"},
+	{path: "grant.priorQADisposition", value: "accepted"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCIHardeningV12ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCIHardeningV12TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "make disposable test Git execution non-overridable and close ambient process-execution paths"},
+	{path: "grant.attemptId", value: "w001-lifecycle-ci-hardening-v12"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.callerOverrideFinding", value: "later caller configuration could override every bounded maintenance fence"},
+	{path: "findings.environmentInjectionFinding", value: "inherited Git exec and template paths could run hostile upload-pack and hook executables"},
+	{path: "findings.guardFinding", value: "the literal one-file guard missed aliases concatenation CommandContext shells and alternate files"},
+	{path: "findings.nextAction", value: "prospective-test-process-and-Git-execution-hardening"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCIHardeningV12Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-ci-hardening-v12.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCIHardeningV12Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-runtime-qualification-and-v10-v11-immutable-history-runs-and-dispositions",
+		"pin-disposable-test-Git-execution-to-the-trusted-absolute-binary",
+		"strip-all-ambient-Git-environment-variables-before-reintroducing-the-exact-bounded-set",
+		"reject-protected-c-config-env-template-upload-pack-exec-path-and-persistent-config-mutations",
+		"replace-the-one-file-literal-guard-with-repository-wide-AST-process-invocation-admission",
+		"add-adversarial-caller-environment-alias-concatenation-command-context-shell-and-alternate-file-regressions",
+		"update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening",
+		"create-signed-semantic-commits-and-one-signed-v12-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCIHardeningV12Path, w001LifecycleCIHardeningV12Signature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged",
+		"caller-arguments-cannot-override-any-of-the-four-command-local-fences",
+		"inherited-Git-exec-template-hook-config-and-repository-redirection-state-is-unavailable",
+		"protected-local-global-system-configuration-mutations-and-hostile-clone-options-fail-before-Git-executes",
+		"every-test-process-invocation-is-AST-admitted-across-all-doctrine-test-files-and-aliases",
+		"only-two-exact-ssh-keygen-test-calls-and-the-one-trusted-Git-wrapper-call-are-admitted",
+		"v11-QA-accepted-and-Security-changes-requested-dispositions-remain-durable",
+		"the-next-public-run-uses-the-exact-signed-v12-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-or-move-any-v9-v10-or-v11-commit-tag-or-run",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes":     {"ci.test_git_fences_caller_overridable", "ci.test_git_environment_execution_injection", "ci.test_process_guard_fail_open"},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleCIHardeningV13Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCIHardeningGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-ci-hardening-v13"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T20:00:30Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T20:00:30Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCIHardeningV13Base},
+	{path: "grant.baseTree", value: w001LifecycleCIHardeningV13BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-ci-hardening-v12"},
+	{path: "grant.priorGrantSHA256", value: "9356f21a72ce652b6238be15f6393cf402c34408fe467526e43f2a53c7ca5ab1"},
+	{path: "grant.priorGrantSignatureSHA256", value: "733e67f5ec4807523ab56febc60c21aed3f4a2cfe58253febc58cef3b5d113d1"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCIHardeningV12ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV12TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCIHardeningV13Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCIHardeningV13BaseTree},
+	{path: "grant.priorRun", value: "33110339883"},
+	{path: "grant.priorJob", value: "98651204635"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCIHardeningV13ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCIHardeningV13TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "replace residual Git argument and process invocation denylists with closed admission"},
+	{path: "grant.attemptId", value: "w001-lifecycle-ci-hardening-v13"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.gitFinding", value: "abbreviated compact and config-producing Git arguments escaped the denylist"},
+	{path: "findings.processFinding", value: "direct exec Cmd indirect syscall function values and nested tests escaped process admission"},
+	{path: "findings.nextAction", value: "prospective-closed-argv-and-recursive-process-admission"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCIHardeningV13Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-ci-hardening-v13.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCIHardeningV13Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-runtime-qualification-and-v10-v12-immutable-history-runs-and-dispositions",
+		"replace-disposable-test-Git-option-denylists-with-exact-per-subcommand-argv-schemas",
+		"reject-long-option-abbreviations-compact-options-outside-root-metadata-and-config-producing-subcommands",
+		"recursively-enumerate-the-doctrine-test-tree-for-process-invocation-admission",
+		"reject-direct-exec-Cmd-construction-and-indirect-os-or-syscall-process-function-values",
+		"retain-and-extend-the-hostile-environment-alias-concatenation-command-context-shell-and-persistence-regressions",
+		"update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening",
+		"create-signed-semantic-commits-and-one-signed-v13-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCIHardeningV13Path, w001LifecycleCIHardeningV13Signature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged",
+		"every-disposable-test-Git-command-matches-one-exact-subcommand-and-argv-schema",
+		"Git-long-option-abbreviations-compact-upload-pack-and-outside-root-or-config-effects-are-unrepresentable",
+		"doctrine-test-process-enumeration-is-recursive-and-fails-closed-on-every-unreadable-or-unparseable-file",
+		"direct-exec-Cmd-and-indirect-os-or-syscall-process-construction-or-invocation-are-denied",
+		"only-two-exact-ssh-keygen-test-calls-and-the-one-trusted-Git-wrapper-call-are-admitted",
+		"v12-QA-and-Security-changes-requested-dispositions-remain-durable",
+		"the-next-public-run-uses-the-exact-signed-v13-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-or-move-any-v9-v10-v11-or-v12-commit-tag-or-run",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes":     {"ci.test_git_argv_schema_fail_open", "ci.test_process_guard_incomplete"},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleCIHardeningV14Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCIHardeningGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-ci-hardening-v14"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-27T21:00:28Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T21:00:28Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCIHardeningV14Base},
+	{path: "grant.baseTree", value: w001LifecycleCIHardeningV14BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-ci-hardening-v13"},
+	{path: "grant.priorGrantSHA256", value: "221545ade5766928436cf75c30250c32780305f5e7d12f8a60bb4d35659d109d"},
+	{path: "grant.priorGrantSignatureSHA256", value: "0984d7e54f0f93e3514c0ecb3cdd0cd5716d05a7b4571068648b47abcadf056f"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCIHardeningV13ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV13TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCIHardeningV14Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCIHardeningV14BaseTree},
+	{path: "grant.priorRun", value: "33112938711"},
+	{path: "grant.priorJob", value: "98660186954"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCIHardeningV14ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCIHardeningV14TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "close physical clone containment and test-to-production Git executor bypasses"},
+	{path: "grant.attemptId", value: "w001-lifecycle-ci-hardening-v14"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.cloneFinding", value: "lexical containment admitted a symlinked clone ancestor that redirected writes outside the disposable root"},
+	{path: "findings.processFinding", value: "doctrine tests called the production Git executor directly and bypassed test wrapper admission"},
+	{path: "findings.nextAction", value: "prospective-physical-clone-and-test-Git-executor-isolation"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCIHardeningV14Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-ci-hardening-v14.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCIHardeningV14Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-runtime-qualification-and-v10-v13-immutable-history-runs-and-dispositions",
+		"require-a-direct-canonical-disposable-root-and-reject-symlinked-clone-target-ancestors-or-existing-targets",
+		"resolve-the-existing-clone-parent-and-prove-physical-containment-before-command-construction",
+		"route-the-three-existing-test-read-calls-through-the-exact-test-Git-wrapper",
+		"extend-only-the-exact-read-only-cat-file-and-show-argv-schemas-needed-by-those-calls",
+		"reject-test-calls-to-the-production-planning-Grant-Git-executor-in-every-doctrine-test-file",
+		"retain-and-extend-the-recursive-process-and-physical-path-adversarial-regressions",
+		"update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening",
+		"create-signed-semantic-commits-and-one-signed-v14-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCIHardeningV14Path, w001LifecycleCIHardeningV14Signature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged",
+		"clone-target-admission-uses-canonical-physical-ancestry-and-rejects-symlinked-roots-ancestors-and-targets",
+		"every-admitted-clone-target-is-a-nonexistent-direct-child-of-the-canonical-disposable-root",
+		"all-test-authored-Git-processes-route-through-the-exact-test-wrapper-and-closed-argv-schemas",
+		"no-doctrine-test-file-calls-the-production-planning-Grant-Git-executor-directly",
+		"process-and-path-enumeration-fails-closed-on-unreadable-unparseable-or-symlinked-surfaces",
+		"v13-QA-and-Security-changes-requested-dispositions-remain-durable",
+		"the-next-public-run-uses-the-exact-signed-v14-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-or-move-any-v9-v10-v11-v12-or-v13-commit-tag-or-run",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes":     {"ci.test_git_clone_physical_escape", "ci.test_process_guard_transitive_bypass"},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleCIHardeningV15Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCIHardeningGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-ci-hardening-v15"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-28T08:32:45Z"},
+	{path: "grant.expiresAt", value: "2026-08-31T08:32:45Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCIHardeningV15Base},
+	{path: "grant.baseTree", value: w001LifecycleCIHardeningV15BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-ci-hardening-v14"},
+	{path: "grant.priorGrantSHA256", value: "a9dd38a11cf0f076b8af79618739a303e69a63b41caca1c2fb23f8ada87e3eac"},
+	{path: "grant.priorGrantSignatureSHA256", value: "98d439533d5754ea7e52c66de0ff3ffe3348daf1aa6754038f16c68f2493cded"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCIHardeningV14ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV14TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCIHardeningV15Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCIHardeningV15BaseTree},
+	{path: "grant.priorRun", value: "33123061855"},
+	{path: "grant.priorJob", value: "98694494697"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCIHardeningV15ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCIHardeningV15TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "close test Git physical binding races and dot-import process admission bypasses"},
+	{path: "grant.attemptId", value: "w001-lifecycle-ci-hardening-v15"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.pathFinding", value: "a real disposable root reached through a symlinked ancestor was admitted as canonical"},
+	{path: "findings.raceFinding", value: "clone target reservation was released before Git consumed the writable pathname"},
+	{path: "findings.processFinding", value: "dot-imported os and syscall process entrypoints escaped selector-only admission"},
+	{path: "findings.nextAction", value: "prospective-descriptor-bound-test-Git-and-closed-process-import-admission"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCIHardeningV15Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-ci-hardening-v15.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCIHardeningV15Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-runtime-qualification-and-v10-v14-immutable-history-runs-and-dispositions",
+		"remove-the-writable-Git-clone-subprocess-from-doctrine-test-fixtures-and-its-argv-schema",
+		"require-every-test-Git-root-to-be-one-direct-canonical-directory-without-symlinked-ancestry",
+		"bind-every-test-Git-process-to-the-verified-open-directory-descriptor-through-execution",
+		"initialize-fetch-and-checkout-only-through-the-existing-closed-test-Git-wrapper",
+		"reject-dot-or-blank-imports-of-os-os-exec-and-syscall-across-the-recursive-doctrine-test-surface",
+		"retain-and-extend-all-v10-v14-environment-argv-process-and-physical-path-regressions",
+		"update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening",
+		"reproduce-the-pinned-v9-native-Beads-artifact-and-non-skipped-conformance-without-changing-patch-bytes",
+		"create-signed-semantic-commits-and-one-signed-v15-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCIHardeningV15Path, w001LifecycleCIHardeningV15Signature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged",
+		"no-doctrine-test-Git-command-admits-or-executes-the-clone-subcommand",
+		"every-test-Git-root-is-lexically-and-physically-identical-and-held-open-through-child-execution",
+		"root-or-ancestor-replacement-cannot-redirect-any-admitted-test-Git-process",
+		"all-test-authored-Git-processes-route-through-the-exact-wrapper-and-closed-argv-schemas",
+		"dot-and-blank-os-os-exec-or-syscall-imports-fail-closed-before-process-call-analysis",
+		"process-and-path-enumeration-fails-closed-on-unreadable-unparseable-or-symlinked-surfaces",
+		"v14-QA-and-Security-changes-requested-dispositions-remain-durable",
+		"the-next-public-run-uses-the-exact-signed-v15-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-or-move-any-v9-v10-v11-v12-v13-or-v14-commit-tag-or-run",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes": {
+		"ci.test_git_root_ancestor_alias_admitted",
+		"ci.test_git_clone_reservation_toctou",
+		"ci.test_process_guard_dot_import_bypass",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleCIHardeningV16Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCIHardeningGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-ci-hardening-v16"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-28T11:11:48Z"},
+	{path: "grant.expiresAt", value: "2026-08-31T11:11:48Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCIHardeningV16Base},
+	{path: "grant.baseTree", value: w001LifecycleCIHardeningV16BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-ci-hardening-v15"},
+	{path: "grant.priorGrantSHA256", value: "b751be17403e0b41f75d853e0d8a4e6baa61101436a94bf61c47b42366ac409b"},
+	{path: "grant.priorGrantSignatureSHA256", value: "de2e0c92114e3aa4a4639206caa8a97d1ec39e8ab819989c7335c0df107e458e"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCIHardeningV15ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV15TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCIHardeningV16Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCIHardeningV16BaseTree},
+	{path: "grant.priorRun", value: "33165311496"},
+	{path: "grant.priorJob", value: "98829194619"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCIHardeningV16ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCIHardeningV16TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "close descriptor-helper provenance and executable-image substitution bypasses"},
+	{path: "grant.attemptId", value: "w001-lifecycle-ci-hardening-v16"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.provenanceFinding", value: "a same-package test could directly call the allowlisted helper with ambient environment and descriptor state"},
+	{path: "findings.imageFinding", value: "the mutable test-executable pathname was resolved before a deterministic substitution hook and executed without image binding"},
+	{path: "findings.nextAction", value: "prospective-fixed-descriptor-trampoline-and-closed-test-process-call-graph"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCIHardeningV16Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-ci-hardening-v16.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCIHardeningV16Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-runtime-qualification-and-v10-v15-immutable-history-runs-and-dispositions",
+		"remove-the-self-executable-descriptor-helper-TestMain-mode-and-environment-argument-channel",
+		"launch-only-the-exact-system-Perl-descriptor-trampoline-with-fixed-non-input-code",
+		"have-that-trampoline-fchdir-only-to-inherited-root-descriptor-three-and-exec-only-literal-usr-bin-git",
+		"reject-dynamic-test-process-executables-and-direct-or-transitive-calls-to-removed-helper-surfaces",
+		"restrict-test-Git-fetch-sources-to-canonical-local-directories-and-the-file-protocol",
+		"retain-and-extend-all-v10-v15-environment-argv-process-and-physical-path-regressions",
+		"update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening",
+		"reproduce-the-pinned-v9-native-Beads-artifact-and-non-skipped-conformance-without-changing-patch-bytes",
+		"create-signed-semantic-commits-and-one-signed-v16-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCIHardeningV16Path, w001LifecycleCIHardeningV16Signature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged",
+		"no-test-process-executes-the-Go-test-image-or-selects-helper-mode-from-the-environment",
+		"the-only-test-Git-process-constructor-uses-one-literal-system-executable-and-one-byte-exact-trampoline",
+		"the-trampoline-consumes-no-code-or-command-from-input-and-enters-only-inherited-root-descriptor-three",
+		"root-or-ancestor-replacement-cannot-redirect-any-admitted-test-Git-process",
+		"direct-helper-calls-dynamic-executables-and-unexpected-process-callers-fail-closed-under-recursive-admission",
+		"fetch-accepts-only-canonical-local-directories-with-network-protocols-disabled",
+		"process-and-path-enumeration-fails-closed-on-unreadable-unparseable-or-symlinked-surfaces",
+		"v15-QA-and-Security-changes-requested-dispositions-remain-durable",
+		"the-next-public-run-uses-the-exact-signed-v16-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-or-move-any-v9-v10-v11-v12-v13-v14-or-v15-commit-tag-or-run",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes": {
+		"ci.test_git_descriptor_helper_transitive_bypass",
+		"ci.test_git_helper_executable_path_toctou",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleCIHardeningV17Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleCIHardeningGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-ci-hardening-v17"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-28T20:33:09Z"},
+	{path: "grant.expiresAt", value: "2026-08-31T20:33:09Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleCIHardeningV17Base},
+	{path: "grant.baseTree", value: w001LifecycleCIHardeningV17BaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-ci-hardening-v16"},
+	{path: "grant.priorGrantSHA256", value: "95fa2caa2befd270ed15f9c317a37ceec442b70c0826a869323d34c3d612d835"},
+	{path: "grant.priorGrantSignatureSHA256", value: "26711612175f7969ec168159e535e7b6b7273641690ed4c486e609cddaa844e5"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCIHardeningV16ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV16TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleCIHardeningV17Base},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleCIHardeningV17BaseTree},
+	{path: "grant.priorRun", value: "33206197037"},
+	{path: "grant.priorJob", value: "98967743138"},
+	{path: "grant.priorQADisposition", value: "accepted"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleCIHardeningV17ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleCIHardeningV17TagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "close copied-invocation replay, fetch-source replacement, and ambient production-executor bypasses"},
+	{path: "grant.attemptId", value: "w001-lifecycle-ci-hardening-v17"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.oneShotFinding", value: "the captured executor field could be copied and invoked outside the wrapper mutex and nil transition"},
+	{path: "findings.sourceFinding", value: "the admitted local fetch source remained a pathname that could be replaced before Git consumed it"},
+	{path: "findings.processFinding", value: "same-package tests could call the ambient arbitrary-argv production gitOutput executor outside the test constructor inventory"},
+	{path: "findings.nextAction", value: "prospective-shared-one-shot-descriptor-stream-and-closed-production-executor-admission"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleCIHardeningV17Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-ci-hardening-v17.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleCIHardeningV17Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-runtime-qualification-and-v10-v16-immutable-history-runs-and-dispositions",
+		"move-the-one-shot-consumption-gate-inside-the-captured-executor-state-shared-by-all-copies",
+		"descriptor-bind-both-fetch-source-and-destination-at-command-admission",
+		"replace-fetch-path-consumption-with-fixed-source-pack-and-destination-index-transfer",
+		"pass-no-admitted-fetch-source-pathname-to-any-child-process",
+		"derive-the-complete-direct-production-process-entrypoint-inventory-from-non-test-source",
+		"deny-every-production-process-entrypoint-identifier-and-direct-executor-field-access-from-tests",
+		"retain-and-extend-all-v10-v16-environment-argv-process-and-physical-path-regressions",
+		"update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening",
+		"reproduce-the-pinned-v9-native-Beads-artifact-and-non-skipped-conformance-without-changing-patch-bytes",
+		"create-signed-semantic-commits-and-one-signed-v17-release-manager-review-tag",
+		"push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleCIHardeningV17Path, w001LifecycleCIHardeningV17Signature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged",
+		"copied-invocation-values-and-extracted-executor-fields-share-one-non-resettable-consumption-gate",
+		"fetch-source-and-destination-identities-are-descriptor-bound-before-the-invocation-is-returned",
+		"no-source-pathname-is-consumed-after-fetch-admission-and-replacement-cannot-redirect-the-transfer",
+		"every-transfer-process-uses-the-fixed-descriptor-trampoline-literal-system-executables-and-zero-ambient-environment",
+		"direct-production-process-entrypoints-are-derived-repository-wide-and-none-is-callable-from-tests",
+		"direct-executor-field-access-and-unexpected-process-callers-fail-closed-under-recursive-admission",
+		"process-and-path-enumeration-fails-closed-on-unreadable-unparseable-or-symlinked-surfaces",
+		"v16-QA-accepted-and-Security-changes-requested-dispositions-remain-durable",
+		"the-next-public-run-uses-the-exact-signed-v17-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-or-move-any-v9-v10-v11-v12-v13-v14-v15-or-v16-commit-tag-or-run",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes": {
+		"ci.test_git_invocation_one_shot_field_bypass",
+		"ci.test_git_fetch_source_toctou",
+		"ci.test_process_guard_refresh_executor_bypass",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleTestHarnessRetirementScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleTestHarnessRetirementGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-test-harness-retirement-v1"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-28T22:24:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-31T22:24:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleTestHarnessRetirementBase},
+	{path: "grant.baseTree", value: w001LifecycleTestHarnessRetirementBaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-ci-hardening-v17"},
+	{path: "grant.priorGrantSHA256", value: "8898b65846209758f892c1b965c2d69bb13a6c1a97714f953b3f8735d96a1f7d"},
+	{path: "grant.priorGrantSignatureSHA256", value: "f3c1fcc7ab46205f00d45029add526fa7b9df06b19aa7a65b7f08f12a7b87df6"},
+	{path: "grant.priorReviewTag", value: w001LifecycleCIHardeningV17ReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleV17TagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleTestHarnessRetirementBase},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleTestHarnessRetirementBaseTree},
+	{path: "grant.priorRun", value: "33213446709"},
+	{path: "grant.priorJob", value: "98991727867"},
+	{path: "grant.priorRunDisposition", value: "failed"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleTestHarnessRetirementReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleTestHarnessRetirementTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "retire the unprovable in-package Git test self-sandbox and restore a truthful deterministic fixture boundary"},
+	{path: "grant.attemptId", value: "w001-lifecycle-test-harness-retirement-v1"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "grant.ordinaryCorrectionLimit", value: "1"},
+	{path: "findings.portabilityFinding", value: "Git 2.55 refused update-ref FETCH_HEAD because FETCH_HEAD is a pseudoref written by fetch rather than a normal ref transaction"},
+	{path: "findings.gitdirFinding", value: "descriptor-binding only the outer directory could not bind Git's later mutable .git discovery"},
+	{path: "findings.processFinding", value: "same-package tests could reach ambient production process constructors transitively despite direct identifier admission"},
+	{path: "findings.configurationFinding", value: "repository-local Git configuration and attributes could still cause child processes outside the constructor inventory"},
+	{path: "findings.structuralFinding", value: "top-level function literals escaped the function-declaration-only executor-field scan"},
+	{path: "findings.architectureDecision", value: "retire the candidate-source self-sandbox and rely on the accepted isolated public workflow for candidate-code security"},
+	{path: "findings.nextAction", value: "prospective-whole-design-test-harness-retirement"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleTestHarnessRetirementNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-test-harness-retirement-v1.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleTestHarnessRetirementSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v9-runtime-qualification-and-v10-v17-immutable-history-runs-and-dispositions",
+		"retire-the-descriptor-perl-one-shot-fetch-stream-and-AST-process-self-sandbox-as-one-design",
+		"restore-one-transparent-test-Git-runner-with-exact-argv-zero-ambient-environment-and-canonical-local-source-admission",
+		"use-ordinary-Git-fetch-to-create-FETCH_HEAD-without-manually-updating-the-pseudoref",
+		"retain-no-maintenance-no-auto-GC-no-detach-and-disabled-hook-fixture-controls",
+		"define-CI-isolation-not-candidate-source-scanning-as-the-candidate-code-security-boundary",
+		"update-only-the-grant-manifest-plan-evidence-F001-ADR-validator-and-tests-for-this-retirement",
+		"reproduce-the-pinned-v9-native-Beads-artifact-and-non-skipped-conformance-without-changing-patch-bytes",
+		"create-signed-semantic-commits-and-one-signed-retirement-review-tag",
+		"push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+		"permit-one-bounded-same-design-correction-for-an-ordinary-format-portability-compile-test-or-CI-defect",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleTestHarnessRetirementPath, w001LifecycleTestHarnessRetirementSignature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"docs/features/F-001-doctrine-foundation.md", "docs/design-docs/ADR-004-pr-first-publication.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged",
+		"V17-commit-tree-tag-run-and-both-changes-requested-dispositions-remain-immutable",
+		"the-test-Git-runner-is-deterministic-fixture-infrastructure-and-never-described-as-a-security-sandbox",
+		"ordinary-fetch-not-update-ref-creates-FETCH_HEAD-portably",
+		"test-Git-network-sources-ambient-configuration-hooks-and-background-maintenance-remain-denied",
+		"no-descriptor-trampoline-one-shot-executor-fetch-stream-process-inventory-or-self-admission-marker-remains",
+		"the-accepted-read-only-no-credential-public-workflow-remains-byte-exact-and-is-the-candidate-execution-boundary",
+		"any-ordinary-correction-remains-inside-the-same-nine-paths-and-retirement-design",
+		"any-same-class-process-helper-or-path-provenance-finding-stops-and-escalates-without-an-incremental-patch",
+		"the-next-public-run-uses-the-exact-signed-retirement-tree-and-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"rerun-move-delete-or-rewrite-any-v9-v17-commit-tag-run-or-evidence",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-approval-policy-or-dependencies",
+		"start-P001-or-any-downstream-ticket",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration", "autonomous-mutation", "trust-escalation",
+	},
+	"findings.codes": {
+		"ci.public_gate_fetch_head_pseudoref_portability",
+		"ci.test_git_gitdir_rebinding_bypass",
+		"ci.test_process_guard_transitive_production_caller_bypass",
+		"ci.test_git_local_config_process_bypass",
+		"ci.test_process_guard_top_level_funclit_bypass",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleAuthorityRecoveryScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleAuthorityRecoveryGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-authority-recovery-v1"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-29T00:28:29Z"},
+	{path: "grant.expiresAt", value: "2026-09-01T00:28:29Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleAuthorityRecoveryBase},
+	{path: "grant.baseTree", value: w001LifecycleAuthorityRecoveryBaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-test-harness-retirement-v1"},
+	{path: "grant.priorGrantSHA256", value: "4d2cc1ba4f537715283631e2b2f57a6098b522bc0135e3dc8bff4254aa5e19b3"},
+	{path: "grant.priorGrantSignatureSHA256", value: "4e093b74ce43191da23d9e34d68c77bbe3428f38fee5c75612580e708ec06486"},
+	{path: "grant.priorReviewTag", value: w001LifecycleTestHarnessRetirementReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleRetirementTagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleAuthorityRecoveryBase},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleAuthorityRecoveryBaseTree},
+	{path: "grant.priorRun", value: "33222628400"},
+	{path: "grant.priorJob", value: "99019716295"},
+	{path: "grant.priorRunDisposition", value: "unaccepted-success"},
+	{path: "grant.priorQADisposition", value: "accepted"},
+	{path: "grant.priorSecurityDisposition", value: "changes-requested"},
+	{path: "grant.rejectedReviewTagObject", value: "e08beb772696b078783d0c75d23c1029581cdeb1"},
+	{path: "grant.rejectedRun", value: "33218389712"},
+	{path: "grant.rejectedJob", value: "99007023124"},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.successorReviewTag", value: w001LifecycleAuthorityRecoveryReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleAuthorityRecoveryTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "establish prospective signed authority without retroactively accepting the retirement attempt"},
+	{path: "grant.attemptId", value: "w001-lifecycle-authority-recovery-v1"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.chronologyFinding", value: "the retirement validator admitted one exact grant commit nineteen seconds before the signed issuedAt"},
+	{path: "findings.publicationFinding", value: "the retirement attempt consumed its correction allowance before replacing its tag and rerunning CI"},
+	{path: "findings.securityDesignDisposition", value: "accepted"},
+	{path: "findings.recoveryDecision", value: "preserve the retirement attempt as unaccepted evidence and establish a new prospective signed publication boundary"},
+	{path: "findings.nextAction", value: "prospective-authority-recovery-only"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleAuthorityRecoveryNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-authority-recovery-v1.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleAuthorityRecoverySequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-V17-and-the-entire-retirement-attempt-as-immutable-unaccepted-evidence",
+		"adopt-the-exact-unaccepted-head-and-tree-only-as-the-recovery-preimage",
+		"remove-the-commit-specific-retroactive-grant-timestamp-exception",
+		"require-every-recovery-commit-to-be-at-or-after-this-grant-issuedAt",
+		"stop-treating-the-retirement-commit-range-tag-or-runs-as-accepted-authority-evidence",
+		"retain-the-complete-test-harness-retirement-and-deterministic-fixture-design-byte-for-byte",
+		"update-only-the-new-grant-manifest-plan-evidence-validator-and-focused-regression",
+		"create-signed-semantic-commits-and-one-distinct-signed-authority-recovery-review-tag",
+		"push-the-existing-review-branch-and-new-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleAuthorityRecoveryPath, w001LifecycleAuthorityRecoverySignature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"the-current-base-tree-is-an-unaccepted-recovery-preimage-not-retroactive-acceptance",
+		"every-new-recovery-commit-is-signed-and-chronologically-prospective",
+		"the-retirement-grant-tags-runs-QA-and-Security-dispositions-remain-immutable-evidence",
+		"no-validator-exception-admits-a-commit-before-its-governing-grant-issuedAt",
+		"the-retired-self-sandbox-remains-absent-and-no-new-hardening-design-is-introduced",
+		"the-deterministic-Git-fixture-and-immutable-CI-security-boundary-remain-unchanged",
+		"runtime-database-native-patch-workflow-dependency-product-and-authority-bytes-remain-unchanged",
+		"the-next-public-run-uses-the-exact-signed-authority-recovery-tree-and-distinct-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"retroactively-authorize-or-accept-any-retirement-commit-tag-run-review-or-publication",
+		"modify-the-retired-test-harness-design-or-add-process-helper-path-provenance-hardening",
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"delete-move-or-rewrite-any-V17-or-retirement-commit-tag-run-review-or-evidence",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-approval-policy-or-dependencies",
+		"start-P001-or-any-downstream-ticket",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"findings.codes": {
+		"authority.retirement_grant_retroactive_admission",
+		"authority.retirement_publication_out_of_scope_retry",
+	},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
+var w001LifecycleEvidencePreservationScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleEvidencePreservationGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-evidence-preservation-v1"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-29T01:04:40Z"},
+	{path: "grant.expiresAt", value: "2026-09-01T01:04:40Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001LifecycleEvidencePreservationBase},
+	{path: "grant.baseTree", value: w001LifecycleEvidencePreservationBaseTree},
+	{path: "grant.workingBranch", value: w001LifecycleBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-authority-recovery-v1"},
+	{path: "grant.priorGrantSHA256", value: "68e8051b477eb9bd3c6846874794b9e83e5e4341f5784eb3569dc6c598c0150f"},
+	{path: "grant.priorGrantSignatureSHA256", value: "5eb415fbed952821daaebb10736b70a045ca6f1ee8e2e24834446436b81eea3b"},
+	{path: "grant.priorReviewTag", value: w001LifecycleAuthorityRecoveryReviewTag},
+	{path: "grant.priorReviewTagObject", value: w001LifecycleAuthorityRecoveryTagObject},
+	{path: "grant.priorReviewTagTarget", value: w001LifecycleEvidencePreservationBase},
+	{path: "grant.priorReviewTagTree", value: w001LifecycleEvidencePreservationBaseTree},
+	{path: "grant.priorRun", value: "33224636939"},
+	{path: "grant.priorJob", value: "99025722797"},
+	{path: "grant.priorRunDisposition", value: "success"},
+	{path: "grant.priorQADisposition", value: "changes-requested"},
+	{path: "grant.priorSecurityDisposition", value: "not-run"},
+	{path: "grant.qaFinding", value: "QA-W001-RECOVERY-001"},
+	{path: "grant.archivalObject", value: w001LifecycleRejectedRetirementTagObject},
+	{path: "grant.archivalObjectType", value: "tag"},
+	{path: "grant.archivalTarget", value: w001LifecycleRejectedRetirementTagTarget},
+	{path: "grant.archivalTargetTree", value: w001LifecycleRejectedRetirementTagTree},
+	{path: "grant.archivalOriginalTag", value: w001LifecycleTestHarnessRetirementReviewTag},
+	{path: "grant.archivalOriginalTagMessage", value: w001LifecycleTestHarnessRetirementTagMessage},
+	{path: "grant.archivalOriginalTagger", value: "MARS-3 Work Authority Engineer <engineer@example.com>"},
+	{path: "grant.archivalRef", value: "refs/tags/" + w001LifecycleRejectedRetirementArchiveTag},
+	{path: "grant.successorReviewTag", value: w001LifecycleEvidencePreservationReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001LifecycleEvidencePreservationTagMessage},
+	{path: "grant.pullRequest", value: "10"},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "foundation-maintainer"},
+	{path: "grant.failureOwnership", value: "foundation"},
+	{path: "grant.purpose", value: "preserve the exact rejected retirement tag object under a durable immutable ref without accepting or rewriting it"},
+	{path: "grant.attemptId", value: "w001-lifecycle-evidence-preservation-v1"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "findings.preservationFinding", value: "the rejected retirement tag object was unreachable from every durable remote ref and absent from a fresh clone"},
+	{path: "findings.recoveryDecision", value: "publish the existing object under one distinct immutable archival ref without recreating accepting or rewriting it"},
+	{path: "findings.nextAction", value: "prospective-rejected-evidence-preservation-only"},
+	{path: "canonicalPreimage.bead", value: "M3-W001"},
+	{path: "canonicalPreimage.nativeStatus", value: "in_progress"},
+	{path: "canonicalPreimage.lifecycleState", value: "in-progress"},
+	{path: "canonicalPreimage.workVersionGeneration", value: "6e79ff81-a007-42a5-a178-7ce58dbb718b"},
+	{path: "canonicalPreimage.workVersionIncarnation", value: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41"},
+	{path: "canonicalPreimage.issueMutationSequence", value: "1"},
+	{path: "canonicalPreimage.dependencyGraphRevision", value: "1"},
+	{path: "canonicalPreimage.liveLeaseState", value: "absent"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.externalBeadsReadbackRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001LifecycleEvidencePreservationNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-evidence-preservation-v1.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001LifecycleEvidencePreservationSequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-authority-recovery-head-tree-tag-run-and-QA-disposition-immutably",
+		"publish-the-existing-e08beb-tag-object-byte-for-byte-under-the-distinct-archival-ref",
+		"verify-the-archived-object-original-target-tree-tagger-message-and-pinned-key-signature",
+		"keep-the-archival-ref-separate-from-current-review-tags-and-mark-the-object-rejected-and-unaccepted",
+		"update-only-the-new-grant-manifest-plan-evidence-validator-and-focused-regression",
+		"create-signed-semantic-commits-and-one-distinct-signed-evidence-preservation-review-tag",
+		"push-the-existing-review-branch-archival-ref-and-new-review-tag-and-run-one-fresh-pull-request-10-gate",
+		"obtain-fresh-independent-QA-and-Security-review-before-merge",
+	},
+	"grant.authorizedPaths": {
+		w001LifecycleEvidencePreservationPath, w001LifecycleEvidencePreservationSignature,
+		".harness/manifest.yaml", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+	},
+	"grant.requiredProperties": {
+		"every-new-preservation-commit-is-signed-and-chronologically-prospective",
+		"the-e08beb-object-is-fetchable-from-a-fresh-clone-through-the-exact-distinct-archival-ref",
+		"the-archival-object-remains-byte-exact-with-its-original-tag-name-target-tree-tagger-message-and-signature",
+		"the-archival-ref-is-never-selected-as-a-current-review-tag-or-treated-as-acceptance-evidence",
+		"the-authority-recovery-candidate-tag-run-and-QA-changes-requested-disposition-remain-immutable",
+		"the-retirement-design-deterministic-Git-fixture-and-prospective-chronology-rule-remain-unchanged",
+		"runtime-database-native-patch-workflow-dependency-product-and-authority-bytes-remain-unchanged",
+		"the-next-public-run-uses-the-exact-signed-evidence-preservation-tree-and-distinct-review-tag",
+		"current-W001-lifecycle-and-live-lease-state-remain-unchanged",
+	},
+	"grant.prohibitedEffects": {
+		"recreate-resign-rewrite-delete-or-move-the-e08beb-object-or-any-existing-commit-tag-run-review-or-evidence",
+		"point-the-existing-retirement-or-authority-recovery-tag-at-a-different-object",
+		"authorize-or-accept-the-rejected-retirement-tag-or-the-unaccepted-retirement-or-recovery-attempts",
+		"modify-the-retired-test-harness-design-or-add-process-helper-path-provenance-hardening",
+		"modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract",
+		"mutate-M3-W001-or-any-other-Bead",
+		"issue-assert-renew-release-or-revoke-a-canonical-live-lease",
+		"merge-pull-request-10-before-fresh-QA-and-Security-acceptance",
+		"modify-workflow-scanner-ruleset-repository-settings-trust-roots-approval-policy-or-dependencies",
+		"start-P001-or-any-downstream-ticket",
+		"expose-authority-credentials-raw-payloads-private-data-or-provider-state",
+		"production-deployment-or-destructive-migration",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"findings.codes":     {"QA-W001-RECOVERY-001"},
+	"verification.order": {"qa", "security-reviewer", "delivery-orchestrator"},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -3418,7 +5287,9 @@ func checkW001DeliveryGrant(root string, findings *[]Finding) {
 	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
-	if evidenceErr != nil || !bytes.Contains(evidence, []byte("**Current disposition:** postclaim reconciliation accepted, merged, and completed")) ||
+	priorDispositionPresent := bytes.Contains(evidence, []byte("**Current disposition:** postclaim reconciliation accepted, merged, and completed")) ||
+		bytes.Contains(evidence, []byte("**Historical disposition:** postclaim reconciliation accepted, merged, and completed"))
+	if evidenceErr != nil || !priorDispositionPresent ||
 		!bytes.Contains(evidence, []byte("01a0408e-ca08-71f0-b1ac-0dec0039706a")) ||
 		!bytes.Contains(evidence, []byte(scalarValue(document, "reconciliation.commentSHA256"))) {
 		addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_delivery_evidence", "delivery evidence must bind the exact completed merge and Beads reconciliation receipt")
@@ -3427,9 +5298,15 @@ func checkW001DeliveryGrant(root string, findings *[]Finding) {
 		!bytes.Contains(plan, []byte("w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_delivery_plan", "active plan must select the exact signed delivery grant and attempt")
 	}
-	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-delivery-v2")) ||
+	lifecycleActive := false
+	if _, lifecycleErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleGrantPath))); lifecycleErr == nil {
+		lifecycleActive = true
+	} else if !os.IsNotExist(lifecycleErr) {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_state", "lifecycle-completion grant state cannot be established")
+	}
+	if !lifecycleActive && (manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-delivery-v2")) ||
 		!bytes.Contains(manifest, []byte("active_attempt: w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73")) ||
-		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		!bytes.Contains(manifest, []byte("live_lease_state: absent"))) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_delivery_manifest", "manifest must project the exact delivery grant, attempt, and absent initial lease")
 	}
 	if _, correctionErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001DeliveryCIFixPath))); correctionErr == nil {
@@ -3441,6 +5318,9 @@ func checkW001DeliveryGrant(root string, findings *[]Finding) {
 		checkW001DeliveryScannerFix(root, findings)
 	} else if !os.IsNotExist(scannerErr) {
 		addFinding(findings, w001DeliveryScannerFixPath, "public.w001_delivery_scanner_state", "delivery scanner-correction state cannot be established")
+	}
+	if lifecycleActive {
+		checkW001LifecycleCompletionGrant(root, findings)
 	}
 }
 
@@ -3590,6 +5470,1720 @@ func checkW001DeliveryScannerFix(root string, findings *[]Finding) {
 		!bytes.Contains(evidence, []byte("33066374068")) || !bytes.Contains(evidence, []byte("98497338894")) ||
 		!bytes.Contains(evidence, []byte("Adding a new committed\nsynthetic credential canary still produced one `github-pat` finding")) {
 		addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_delivery_scanner_evidence", "scanner evidence must preserve the exact history failure and new-canary proof")
+	}
+}
+
+func checkW001LifecycleCompletionGrant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001LifecycleGrantPath)
+	if err != nil {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_missing", "signed W-001 lifecycle-completion grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleGrantScalars, w001LifecycleGrantSequences,
+		[]string{"grant", "finding", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleGrantScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_value", "%s does not match the signed lifecycle-completion contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleGrantSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_sequence", "%s must equal the exact ordered lifecycle-completion contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "finding", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_expiry", "lifecycle-completion grant must use one RFC3339 interval no longer than 72 hours")
+	}
+
+	signature, signatureErr := readRepoFile(root, w001LifecycleGrantSignature)
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleGrantSignature, "public.w001_lifecycle_signature_missing", "detached lifecycle-completion signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_key", "lifecycle completion must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001LifecycleGrantNamespace); err != nil {
+			addFinding(findings, w001LifecycleGrantSignature, "public.w001_lifecycle_signature", "%v", err)
+		}
+	}
+
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001DeliveryScannerFixPath, scalarValue(document, "grant.priorGrantSHA256")},
+		{w001DeliveryScannerFixSignature, scalarValue(document, "grant.priorGrantSignatureSHA256")},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_prior_grant", "prior delivery correction must match its exact signed SHA-256")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleBase+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleBase || strings.TrimSpace(string(baseTree)) != w001LifecycleBaseTree {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_base", "lifecycle completion must descend from the exact accepted core squash and tree")
+	}
+	checkW001LifecyclePriorTag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if evidenceErr != nil || !bytes.Contains(evidence, []byte("completion-audit/governed-lifecycle-routes-missing")) ||
+		!bytes.Contains(evidence, []byte("33069887434/98509103754")) ||
+		!bytes.Contains(evidence, []byte("d7ddb1c0d4ecb00b93fcbec4d56b740da581a725e91e6381601d2d295203c38d")) {
+		addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_evidence", "lifecycle evidence must preserve the accepted core merge and exact completion finding")
+	}
+	correctionActive := false
+	if _, correctionErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionPath))); correctionErr == nil {
+		correctionActive = true
+	} else if !os.IsNotExist(correctionErr) {
+		addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_state", "lifecycle correction state cannot be established")
+	}
+	if planErr != nil || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) ||
+		(!correctionActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-completion-v5` correction"))) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_plan", "active plan must select the truthful lifecycle-completion correction")
+	}
+	if manifestErr != nil || (!correctionActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-completion-v5")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-completion-v5")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_manifest", "manifest must project the lifecycle-completion attempt and absent live lease")
+	}
+	if correctionActive {
+		checkW001LifecycleCorrectionGrant(root, findings)
+	}
+}
+
+func checkW001LifecycleCorrectionGrant(root string, findings *[]Finding) {
+	v7Active := false
+	if _, v7Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionV7Path))); v7Err == nil {
+		v7Active = true
+	} else if !os.IsNotExist(v7Err) {
+		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_state", "v7 lifecycle correction state cannot be established")
+	}
+	data, err := readRepoFile(root, w001LifecycleCorrectionPath)
+	if err != nil {
+		addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_missing", "signed W-001 lifecycle correction grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCorrectionScalars, w001LifecycleCorrectionSequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCorrectionScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_value", "%s does not match the signed lifecycle-correction contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCorrectionSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_sequence", "%s must equal the exact ordered lifecycle-correction contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_expiry", "lifecycle correction grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCorrectionSignature)
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCorrectionSignature, "public.w001_lifecycle_correction_signature_missing", "detached lifecycle correction signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_correction_key", "lifecycle correction must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001LifecycleCorrectionNamespace); err != nil {
+			addFinding(findings, w001LifecycleCorrectionSignature, "public.w001_lifecycle_correction_signature", "%v", err)
+		}
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleGrantPath, scalarValue(document, "grant.priorGrantSHA256")},
+		{w001LifecycleGrantSignature, scalarValue(document, "grant.priorGrantSignatureSHA256")},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_correction_prior_grant", "prior lifecycle material must match its exact signed SHA-256")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCorrectionBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCorrectionBase+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCorrectionBase || strings.TrimSpace(string(baseTree)) != w001LifecycleCorrectionBaseTree {
+		addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_base", "lifecycle correction must descend from the exact reviewed v5 head and tree")
+	}
+	checkW001LifecycleV5Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	for _, marker := range []string{
+		"lifecycle.terminal_claim_binding_fail_open",
+		"lifecycle.handoff_replay_fence_splice",
+		"lifecycle.missing_receipt_replay_success",
+		"lifecycle.nonterminal_convergence_deadlock",
+		"lifecycle.qualification_not_reproducible",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_correction_evidence", "lifecycle correction evidence must preserve all exact v5 findings")
+			break
+		}
+	}
+	if planErr != nil || (!v7Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-correction-v6`"))) ||
+		!bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_correction_plan", "active plan must select the truthful v6 lifecycle correction")
+	}
+	if manifestErr != nil || (!v7Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-correction-v6")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-correction-v6")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_correction_manifest", "manifest must project the v6 lifecycle correction and absent live lease")
+	}
+	if v7Active {
+		checkW001LifecycleCorrectionV7Grant(root, findings)
+	}
+}
+
+func checkW001LifecycleCorrectionV7Grant(root string, findings *[]Finding) {
+	v8Active := false
+	if _, v8Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionV8Path))); v8Err == nil {
+		v8Active = true
+	} else if !os.IsNotExist(v8Err) {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_state", "v8 lifecycle correction state cannot be established")
+	}
+	data, err := readRepoFile(root, w001LifecycleCorrectionV7Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_missing", "signed v7 lifecycle correction grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCorrectionV7Scalars, w001LifecycleCorrectionV7Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCorrectionV7Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_value", "%s does not match the signed v7 lifecycle-correction contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCorrectionV7Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_sequence", "%s must equal the exact ordered v7 lifecycle-correction contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_expiry", "v7 lifecycle correction grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCorrectionV7Signature)
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCorrectionV7Signature, "public.w001_lifecycle_correction_v7_signature_missing", "detached v7 lifecycle correction signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_correction_v7_key", "v7 lifecycle correction must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001LifecycleCorrectionV7Namespace); err != nil {
+			addFinding(findings, w001LifecycleCorrectionV7Signature, "public.w001_lifecycle_correction_v7_signature", "%v", err)
+		}
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCorrectionPath, scalarValue(document, "grant.priorGrantSHA256")},
+		{w001LifecycleCorrectionSignature, scalarValue(document, "grant.priorGrantSignatureSHA256")},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_correction_v7_prior_grant", "prior v6 lifecycle material must match its exact signed SHA-256")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCorrectionV7Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCorrectionV7Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCorrectionV7Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCorrectionV7BaseTree {
+		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_base", "v7 lifecycle correction must descend from the exact reviewed v6 head and tree")
+	}
+	checkW001LifecycleV6Tag(root, findings)
+	checkW001LifecycleCorrectionV7Evidence(root, findings)
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!v8Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-correction-v7`"))) ||
+		!bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_correction_v7_plan", "active plan must select the truthful v7 lifecycle correction")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!v8Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-correction-v7")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-correction-v7")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_correction_v7_manifest", "manifest must project the v7 lifecycle correction and absent live lease")
+	}
+	if v8Active {
+		checkW001LifecycleCorrectionV8Grant(root, findings)
+	}
+}
+
+func checkW001LifecycleCorrectionV7Evidence(root string, findings *[]Finding) {
+	evidencePath := "docs/evidence/W-001-validation.md"
+	evidence, evidenceErr := readRepoFile(root, evidencePath)
+	for _, marker := range []string{
+		"lifecycle.claim_lineage_not_joined",
+		"lifecycle.failure_fingerprint_retry_not_monotonic",
+		"lifecycle.qualification_not_independently_reproducible",
+		w001LifecycleCorrectionV7PatchSHA,
+		"70dfa9e28546dc0c6dbe8046f5960577514b0bc6793fda98b3383931a50a72d8",
+		"sha256:b1a0cc29a7e13e0595e21087eeb930dc494976b18ba68279bf52c665f3170aa0",
+		"bb8dd437802943670b4e882a3cdc30d5ea5a3b2035171fb765d7d82db7f624de",
+		"canonical-claim attempt on every current",
+		"third occurrence is rejected",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, evidencePath, "public.w001_lifecycle_correction_v7_evidence", "v7 lifecycle evidence must preserve the exact findings and qualification bindings")
+			break
+		}
+	}
+	patch, patchErr := readRepoFile(root, w001LifecycleCorrectionV7PatchPath)
+	if _, v8Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionV8Path))); v8Err == nil {
+		patch, patchErr = planningGrantGitOutput(root, "show", w001LifecycleCorrectionV8Base+":"+w001LifecycleCorrectionV7PatchPath)
+	}
+	if patchErr != nil || fileSHA256(patch) != w001LifecycleCorrectionV7PatchSHA {
+		addFinding(findings, w001LifecycleCorrectionV7PatchPath, "public.w001_lifecycle_correction_v7_patch", "v7 lifecycle patch must match its exact reviewed SHA-256")
+	}
+}
+
+func checkW001LifecycleCorrectionV8Grant(root string, findings *[]Finding) {
+	v9Active := false
+	if _, v9Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionV9Path))); v9Err == nil {
+		v9Active = true
+	} else if !os.IsNotExist(v9Err) {
+		addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_state", "v9 lifecycle correction state cannot be established")
+	}
+	data, err := readRepoFile(root, w001LifecycleCorrectionV8Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_missing", "signed v8 lifecycle correction grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCorrectionV8Scalars, w001LifecycleCorrectionV8Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCorrectionV8Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_value", "%s does not match the signed v8 lifecycle-correction contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCorrectionV8Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_sequence", "%s must equal the exact ordered v8 lifecycle-correction contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_expiry", "v8 lifecycle correction grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCorrectionV8Signature)
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCorrectionV8Signature, "public.w001_lifecycle_correction_v8_signature_missing", "detached v8 lifecycle correction signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_correction_v8_key", "v8 lifecycle correction must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001LifecycleCorrectionV8Namespace); err != nil {
+			addFinding(findings, w001LifecycleCorrectionV8Signature, "public.w001_lifecycle_correction_v8_signature", "%v", err)
+		}
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCorrectionV7Path, scalarValue(document, "grant.priorGrantSHA256")},
+		{w001LifecycleCorrectionV7Signature, scalarValue(document, "grant.priorGrantSignatureSHA256")},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_correction_v8_prior_grant", "prior v7 lifecycle material must match its exact signed SHA-256")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCorrectionV8Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCorrectionV8Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCorrectionV8Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCorrectionV8BaseTree {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_base", "v8 lifecycle correction must descend from the exact reviewed v7 head and tree")
+	}
+	checkW001LifecycleV7Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"lifecycle.claim_key_alias_not_canonical",
+		"lifecycle.legacy_active_scalar_contradiction",
+		"lifecycle.dependency_detailed_state_ignored",
+		w001LifecycleCorrectionV8Base,
+		w001LifecycleCorrectionV8BaseTree,
+		w001LifecycleCorrectionV8PatchSHA,
+		"5fb4120f30c9d54d4dd847755a8070d305c1a7a14b783e7ce33157b432b02665",
+		"a478f5090ca1b616e5aa8e5b74f4277814a8f0b1a88d990f9b7876761a3a7cc7",
+		"case-fold claim alias rejection",
+		"Dependency projections decode the full canonical metadata",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_correction_v8_evidence", "v8 lifecycle evidence must preserve the exact v7 findings")
+			break
+		}
+	}
+	patch, patchErr := readRepoFile(root, w001LifecycleCorrectionV7PatchPath)
+	if v9Active {
+		patch, patchErr = planningGrantGitOutput(root, "show", w001LifecycleCorrectionV9Base+":"+w001LifecycleCorrectionV7PatchPath)
+	}
+	if patchErr != nil || fileSHA256(patch) != w001LifecycleCorrectionV8PatchSHA {
+		addFinding(findings, w001LifecycleCorrectionV7PatchPath, "public.w001_lifecycle_correction_v8_patch", "v8 lifecycle patch must match its exact reviewed SHA-256")
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!v9Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-correction-v8`"))) ||
+		!bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_correction_v8_plan", "active plan must select the truthful v8 lifecycle correction")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!v9Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-correction-v8")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-correction-v8")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_correction_v8_manifest", "manifest must project the v8 lifecycle correction and absent live lease")
+	}
+	if v9Active {
+		checkW001LifecycleCorrectionV9Grant(root, findings)
+	}
+}
+
+func checkW001LifecycleCorrectionV9Grant(root string, findings *[]Finding) {
+	v10Active := false
+	if _, v10Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleStabilizationV10Path))); v10Err == nil {
+		v10Active = true
+	} else if !os.IsNotExist(v10Err) {
+		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_state", "v10 lifecycle CI stabilization state cannot be established")
+	}
+	data, err := readRepoFile(root, w001LifecycleCorrectionV9Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_missing", "signed v9 lifecycle correction grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCorrectionV9Scalars, w001LifecycleCorrectionV9Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCorrectionV9Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_value", "%s does not match the signed v9 lifecycle-correction contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCorrectionV9Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_sequence", "%s must equal the exact ordered v9 lifecycle-correction contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_expiry", "v9 lifecycle correction grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCorrectionV9Signature)
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCorrectionV9Signature, "public.w001_lifecycle_correction_v9_signature_missing", "detached v9 lifecycle correction signature is required")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_correction_v9_key", "v9 lifecycle correction must use the independently pinned genesis key")
+	} else if signatureErr == nil {
+		if err := verifySSHSig(data, signature, publicKey, w001LifecycleCorrectionV9Namespace); err != nil {
+			addFinding(findings, w001LifecycleCorrectionV9Signature, "public.w001_lifecycle_correction_v9_signature", "%v", err)
+		}
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCorrectionV8Path, scalarValue(document, "grant.priorGrantSHA256")},
+		{w001LifecycleCorrectionV8Signature, scalarValue(document, "grant.priorGrantSignatureSHA256")},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || !sha256Pattern.MatchString(binding.digest) || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_correction_v9_prior_grant", "prior v8 lifecycle material must match its exact signed SHA-256")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCorrectionV9Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCorrectionV9Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCorrectionV9Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCorrectionV9BaseTree {
+		addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_base", "v9 lifecycle correction must descend from the exact reviewed v8 head and tree")
+	}
+	checkW001LifecycleV8Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"lifecycle.native_recursive_key_alias_not_canonical",
+		"lifecycle.dependency_lineage_stripping",
+		w001LifecycleCorrectionV9Base,
+		w001LifecycleCorrectionV9BaseTree,
+		w001LifecycleCorrectionV9PatchSHA,
+		"91b3e8dd5c8c0c01b5953c4c38ca508a150b05cd719f4e80fec293365afddf7f",
+		"recursive canonical-key rejection",
+		"sparse legacy dependency compatibility",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_correction_v9_evidence", "v9 lifecycle evidence must preserve the exact v8 findings and correction materials")
+			break
+		}
+	}
+	patch, patchErr := readRepoFile(root, w001LifecycleCorrectionV7PatchPath)
+	if patchErr != nil || fileSHA256(patch) != w001LifecycleCorrectionV9PatchSHA {
+		addFinding(findings, w001LifecycleCorrectionV7PatchPath, "public.w001_lifecycle_correction_v9_patch", "v9 lifecycle patch must match its exact reviewed SHA-256")
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!v10Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-correction-v9`"))) ||
+		!bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_correction_v9_plan", "active plan must select the truthful v9 lifecycle correction")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!v10Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-correction-v9")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-correction-v9")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_correction_v9_manifest", "manifest must project the v9 lifecycle correction and absent live lease")
+	}
+	if v10Active {
+		checkW001LifecycleStabilizationV10Grant(root, findings)
+	}
+}
+
+func checkW001LifecycleStabilizationV10Grant(root string, findings *[]Finding) {
+	v11Active := false
+	if _, v11Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIFencingV11Path))); v11Err == nil {
+		v11Active = true
+	} else if !os.IsNotExist(v11Err) {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_state", "v11 lifecycle CI fencing state cannot be established")
+	}
+	if v11Active {
+		defer checkW001LifecycleStabilizationV10Successor(root, findings)
+	}
+	data, err := readRepoFile(root, w001LifecycleStabilizationV10Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_missing", "signed v10 lifecycle CI stabilization grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleStabilizationV10Scalars, w001LifecycleStabilizationV10Sequences,
+		[]string{"grant", "failure", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleStabilizationV10Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_value", "%s does not match the signed v10 lifecycle CI stabilization contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleStabilizationV10Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_sequence", "%s must equal the exact ordered v10 lifecycle CI stabilization contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "failure", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_expiry", "v10 lifecycle CI stabilization grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleStabilizationV10Signature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleStabilizationV10Signature, "public.w001_lifecycle_stabilization_v10_signature_missing", "detached v10 lifecycle CI stabilization signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_stabilization_v10_key", "v10 lifecycle CI stabilization must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleStabilizationV10Namespace); err != nil {
+		addFinding(findings, w001LifecycleStabilizationV10Signature, "public.w001_lifecycle_stabilization_v10_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCorrectionV9Path, "9e3d37216650b81f552862beff1224ada762cfbc177d5b043c9785f65579b984"},
+		{w001LifecycleCorrectionV9Signature, "4bb3a1cad372bc891e89a9df709f771c4f4ac3bbdf35a639a653f27d5b147a3d"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_stabilization_v10_prior_grant", "prior v9 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleStabilizationV10Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleStabilizationV10Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleStabilizationV10Base || strings.TrimSpace(string(baseTree)) != w001LifecycleStabilizationV10BaseTree {
+		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_base", "v10 lifecycle CI stabilization must descend from the exact immutable v9 head and tree")
+	}
+	checkW001LifecycleV9Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"ci/doctrine-tempdir-git-pack-cleanup", "33104553091", "98630789458", "98631170195",
+		w001LifecycleStabilizationV10Base, w001LifecycleStabilizationV10BaseTree,
+		"exhausted two identical retries", "no authority runtime bytes changed",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_stabilization_v10_evidence", "v10 evidence must preserve both v9 CI failures and the bounded stabilization")
+			break
+		}
+	}
+	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
+	for _, marker := range []string{"maintenance.auto=false", "gc.auto=0", "gc.autoDetach=false", "maintenance.autoDetach=false", "TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance"} {
+		if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
+			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_stabilization_v10_fixture", "every disposable Git command must carry the exact bounded maintenance configuration")
+			break
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!v11Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-stabilization-v10`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_stabilization_v10_plan", "active plan must select the truthful v10 CI stabilization")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!v11Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-stabilization-v10")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-stabilization-v10")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_stabilization_v10_manifest", "manifest must project the v10 CI stabilization and absent live lease")
+	}
+}
+
+func checkW001LifecycleStabilizationV10Successor(root string, findings *[]Finding) {
+	checkW001LifecycleCIFencingV11Grant(root, findings)
+}
+
+func checkW001LifecycleCIFencingV11Grant(root string, findings *[]Finding) {
+	v12Active := false
+	if _, v12Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV12Path))); v12Err == nil {
+		v12Active = true
+	} else if !os.IsNotExist(v12Err) {
+		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_state", "v12 lifecycle CI hardening state cannot be established")
+	}
+	if v12Active {
+		defer checkW001LifecycleCIHardeningV12Grant(root, findings)
+	}
+	data, err := readRepoFile(root, w001LifecycleCIFencingV11Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_missing", "signed v11 lifecycle CI fencing grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCIFencingV11Scalars, w001LifecycleCIFencingV11Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCIFencingV11Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_value", "%s does not match the signed v11 lifecycle CI fencing contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCIFencingV11Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_sequence", "%s must equal the exact ordered v11 lifecycle CI fencing contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_expiry", "v11 lifecycle CI fencing grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCIFencingV11Signature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCIFencingV11Signature, "public.w001_lifecycle_ci_fencing_v11_signature_missing", "detached v11 lifecycle CI fencing signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_ci_fencing_v11_key", "v11 lifecycle CI fencing must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleCIFencingV11Namespace); err != nil {
+		addFinding(findings, w001LifecycleCIFencingV11Signature, "public.w001_lifecycle_ci_fencing_v11_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleStabilizationV10Path, "b6f29734dabbeaff52f96c8d5e0a8910fadf81c841f4d9fd4a7cd799add586f9"},
+		{w001LifecycleStabilizationV10Signature, "9bc96e8c5a0f35fee3998066bd6fa00b45b671ee1b66debad4f6e21c7341ab32"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_ci_fencing_v11_prior_grant", "prior v10 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIFencingV11Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIFencingV11Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCIFencingV11Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCIFencingV11BaseTree {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_base", "v11 lifecycle CI fencing must descend from the exact immutable v10 head and tree")
+	}
+	checkW001LifecycleV10Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"ci.test_git_sanitization_incomplete", "ci.test_git_configuration_persisted", w001LifecycleCIFencingV11Base,
+		w001LifecycleCIFencingV11BaseTree, "33105792480", "98635155160", "command-local", "changes-requested",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_ci_fencing_v11_evidence", "v11 evidence must preserve the exact v10 findings and bounded correction")
+			break
+		}
+	}
+	if !v12Active {
+		tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
+		rawNeedle := []byte("exec.Command(" + "\"git\"")
+		if testsErr != nil || bytes.Count(tests, rawNeedle) != 1 || bytes.Contains(tests, []byte("disablePlanningGrantTestGitMaintenance")) {
+			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_fencing_v11_wrapper", "all disposable Git operations must use the single audited bounded wrapper without persistent fixture config")
+		}
+		for _, marker := range []string{"TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance", "TestPlanningGrantDisposableGitCallsUseOnlyBoundedWrapper", "TestPlanningGrantGitFixtureDoesNotPersistMaintenanceConfiguration", "--local", "--global"} {
+			if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
+				addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_fencing_v11_fixture", "v11 test fencing regressions are required")
+				break
+			}
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!v12Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-fencing-v11`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_fencing_v11_plan", "active plan must select the truthful v11 CI fencing correction")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!v12Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-fencing-v11")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-fencing-v11")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_ci_fencing_v11_manifest", "manifest must project the v11 CI fencing correction and absent live lease")
+	}
+}
+
+func checkW001LifecycleCIHardeningV12Grant(root string, findings *[]Finding) {
+	v13Active := false
+	if _, v13Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV13Path))); v13Err == nil {
+		v13Active = true
+	} else if !os.IsNotExist(v13Err) {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_state", "v13 lifecycle CI hardening state cannot be established")
+	}
+	if v13Active {
+		defer checkW001LifecycleCIHardeningV13Grant(root, findings)
+	}
+	data, err := readRepoFile(root, w001LifecycleCIHardeningV12Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_missing", "signed v12 lifecycle CI hardening grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCIHardeningV12Scalars, w001LifecycleCIHardeningV12Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCIHardeningV12Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_value", "%s does not match the signed v12 lifecycle CI hardening contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCIHardeningV12Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_sequence", "%s must equal the exact ordered v12 lifecycle CI hardening contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_expiry", "v12 lifecycle CI hardening grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCIHardeningV12Signature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCIHardeningV12Signature, "public.w001_lifecycle_ci_hardening_v12_signature_missing", "detached v12 lifecycle CI hardening signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_ci_hardening_v12_key", "v12 lifecycle CI hardening must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleCIHardeningV12Namespace); err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV12Signature, "public.w001_lifecycle_ci_hardening_v12_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCIFencingV11Path, "6df1dc4978e6b3657986ef43a41aaa3437567772c95bec4f151d8abcf0e9396b"},
+		{w001LifecycleCIFencingV11Signature, "967efc83af964fc5abaf42f28cad1ad0231dc35524eecf5f9a05eae093d80b0e"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_ci_hardening_v12_prior_grant", "prior v11 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV12Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV12Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCIHardeningV12Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCIHardeningV12BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_base", "v12 lifecycle CI hardening must descend from the exact immutable v11 head and tree")
+	}
+	checkW001LifecycleV11Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"ci.test_git_fences_caller_overridable", "ci.test_git_environment_execution_injection", "ci.test_process_guard_fail_open",
+		w001LifecycleCIHardeningV12Base, w001LifecycleCIHardeningV12BaseTree, "33108126981", "98643418071",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_ci_hardening_v12_evidence", "v12 evidence must preserve the exact v11 findings and bounded hardening")
+			break
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!v13Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v12`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v12_plan", "active plan must select the truthful v12 CI hardening")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!v13Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-hardening-v12")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-hardening-v12")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_ci_hardening_v12_manifest", "manifest must project the v12 CI hardening and absent live lease")
+	}
+}
+
+func checkW001LifecycleCIHardeningV13Grant(root string, findings *[]Finding) {
+	v14Active := false
+	if _, v14Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV14Path))); v14Err == nil {
+		v14Active = true
+	} else if !os.IsNotExist(v14Err) {
+		addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_state", "v14 lifecycle CI hardening state cannot be established")
+	}
+	if v14Active {
+		defer checkW001LifecycleCIHardeningV14Grant(root, findings)
+	}
+	data, err := readRepoFile(root, w001LifecycleCIHardeningV13Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_missing", "signed v13 lifecycle CI hardening grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCIHardeningV13Scalars, w001LifecycleCIHardeningV13Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCIHardeningV13Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_value", "%s does not match the signed v13 lifecycle CI hardening contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCIHardeningV13Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_sequence", "%s must equal the exact ordered v13 lifecycle CI hardening contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_expiry", "v13 lifecycle CI hardening grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCIHardeningV13Signature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCIHardeningV13Signature, "public.w001_lifecycle_ci_hardening_v13_signature_missing", "detached v13 lifecycle CI hardening signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_ci_hardening_v13_key", "v13 lifecycle CI hardening must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleCIHardeningV13Namespace); err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV13Signature, "public.w001_lifecycle_ci_hardening_v13_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCIHardeningV12Path, "9356f21a72ce652b6238be15f6393cf402c34408fe467526e43f2a53c7ca5ab1"},
+		{w001LifecycleCIHardeningV12Signature, "733e67f5ec4807523ab56febc60c21aed3f4a2cfe58253febc58cef3b5d113d1"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_ci_hardening_v13_prior_grant", "prior v12 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV13Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV13Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCIHardeningV13Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCIHardeningV13BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_base", "v13 lifecycle CI hardening must descend from the exact immutable v12 head and tree")
+	}
+	checkW001LifecycleV12Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"ci.test_git_argv_schema_fail_open", "ci.test_process_guard_incomplete",
+		w001LifecycleCIHardeningV13Base, w001LifecycleCIHardeningV13BaseTree, "33110339883", "98651204635",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_ci_hardening_v13_evidence", "v13 evidence must preserve the exact v12 findings and bounded hardening")
+			break
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!v14Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v13`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v13_plan", "active plan must select the truthful v13 CI hardening")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!v14Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-hardening-v13")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-hardening-v13")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_ci_hardening_v13_manifest", "manifest must project the v13 CI hardening and absent live lease")
+	}
+}
+
+func checkW001LifecycleCIHardeningV14Grant(root string, findings *[]Finding) {
+	v15Active := false
+	if _, v15Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV15Path))); v15Err == nil {
+		v15Active = true
+	} else if !os.IsNotExist(v15Err) {
+		addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_state", "v15 lifecycle CI hardening state cannot be established")
+	}
+	if v15Active {
+		defer checkW001LifecycleCIHardeningV15Grant(root, findings)
+	}
+	data, err := readRepoFile(root, w001LifecycleCIHardeningV14Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_missing", "signed v14 lifecycle CI hardening grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCIHardeningV14Scalars, w001LifecycleCIHardeningV14Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCIHardeningV14Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_value", "%s does not match the signed v14 lifecycle CI hardening contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCIHardeningV14Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_sequence", "%s must equal the exact ordered v14 lifecycle CI hardening contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_expiry", "v14 lifecycle CI hardening grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCIHardeningV14Signature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCIHardeningV14Signature, "public.w001_lifecycle_ci_hardening_v14_signature_missing", "detached v14 lifecycle CI hardening signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_ci_hardening_v14_key", "v14 lifecycle CI hardening must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleCIHardeningV14Namespace); err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV14Signature, "public.w001_lifecycle_ci_hardening_v14_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCIHardeningV13Path, "221545ade5766928436cf75c30250c32780305f5e7d12f8a60bb4d35659d109d"},
+		{w001LifecycleCIHardeningV13Signature, "0984d7e54f0f93e3514c0ecb3cdd0cd5716d05a7b4571068648b47abcadf056f"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_ci_hardening_v14_prior_grant", "prior v13 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV14Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV14Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCIHardeningV14Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCIHardeningV14BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_base", "v14 lifecycle CI hardening must descend from the exact immutable v13 head and tree")
+	}
+	checkW001LifecycleV13Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"ci.test_git_clone_physical_escape", "ci.test_process_guard_transitive_bypass",
+		w001LifecycleCIHardeningV14Base, w001LifecycleCIHardeningV14BaseTree, "33112938711", "98660186954",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_ci_hardening_v14_evidence", "v14 evidence must preserve the exact v13 findings and bounded correction")
+			break
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!v15Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v14`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v14_plan", "active plan must select the truthful v14 CI hardening")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!v15Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-hardening-v14")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-hardening-v14")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_ci_hardening_v14_manifest", "manifest must project the v14 CI hardening and absent live lease")
+	}
+}
+
+func checkW001LifecycleCIHardeningV15Grant(root string, findings *[]Finding) {
+	v16Active := false
+	if _, v16Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV16Path))); v16Err == nil {
+		v16Active = true
+	} else if !os.IsNotExist(v16Err) {
+		addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_state", "v16 lifecycle CI hardening state cannot be established")
+	}
+	if v16Active {
+		defer checkW001LifecycleCIHardeningV16Grant(root, findings)
+	}
+	data, err := readRepoFile(root, w001LifecycleCIHardeningV15Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_missing", "signed v15 lifecycle CI hardening grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCIHardeningV15Scalars, w001LifecycleCIHardeningV15Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCIHardeningV15Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_value", "%s does not match the signed v15 lifecycle CI hardening contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCIHardeningV15Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_sequence", "%s must equal the exact ordered v15 lifecycle CI hardening contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_expiry", "v15 lifecycle CI hardening grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCIHardeningV15Signature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCIHardeningV15Signature, "public.w001_lifecycle_ci_hardening_v15_signature_missing", "detached v15 lifecycle CI hardening signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_ci_hardening_v15_key", "v15 lifecycle CI hardening must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleCIHardeningV15Namespace); err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV15Signature, "public.w001_lifecycle_ci_hardening_v15_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCIHardeningV14Path, "a9dd38a11cf0f076b8af79618739a303e69a63b41caca1c2fb23f8ada87e3eac"},
+		{w001LifecycleCIHardeningV14Signature, "98d439533d5754ea7e52c66de0ff3ffe3348daf1aa6754038f16c68f2493cded"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_ci_hardening_v15_prior_grant", "prior v14 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV15Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV15Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCIHardeningV15Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCIHardeningV15BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_base", "v15 lifecycle CI hardening must descend from the exact immutable v14 head and tree")
+	}
+	checkW001LifecycleV14Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"ci.test_git_root_ancestor_alias_admitted", "ci.test_git_clone_reservation_toctou", "ci.test_process_guard_dot_import_bypass",
+		w001LifecycleCIHardeningV15Base, w001LifecycleCIHardeningV15BaseTree, "33123061855", "98694494697",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_ci_hardening_v15_evidence", "v15 evidence must preserve the exact v14 findings and bounded correction")
+			break
+		}
+	}
+	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
+	if testsErr == nil && (bytes.Contains(tests, []byte(`case "clone":`)) || bytes.Contains(tests, []byte(`runPlanningGrantTestGit(t, root, "clone"`))) {
+		addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_hardening_v15_clone", "v15 doctrine test Git wrapper must not admit or execute clone")
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!v16Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v15`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v15_plan", "active plan must select the truthful v15 CI hardening")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!v16Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-hardening-v15")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-hardening-v15")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_ci_hardening_v15_manifest", "manifest must project the v15 CI hardening and absent live lease")
+	}
+}
+
+func checkW001LifecycleCIHardeningV16Grant(root string, findings *[]Finding) {
+	v17Active := false
+	if _, v17Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV17Path))); v17Err == nil {
+		v17Active = true
+	} else if !os.IsNotExist(v17Err) {
+		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_state", "v17 lifecycle CI hardening state cannot be established")
+	}
+	if v17Active {
+		defer checkW001LifecycleCIHardeningV17Grant(root, findings)
+	}
+	data, err := readRepoFile(root, w001LifecycleCIHardeningV16Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_missing", "signed v16 lifecycle CI hardening grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCIHardeningV16Scalars, w001LifecycleCIHardeningV16Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCIHardeningV16Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_value", "%s does not match the signed v16 lifecycle CI hardening contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCIHardeningV16Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_sequence", "%s must equal the exact ordered v16 lifecycle CI hardening contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_expiry", "v16 lifecycle CI hardening grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCIHardeningV16Signature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCIHardeningV16Signature, "public.w001_lifecycle_ci_hardening_v16_signature_missing", "detached v16 lifecycle CI hardening signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_ci_hardening_v16_key", "v16 lifecycle CI hardening must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleCIHardeningV16Namespace); err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV16Signature, "public.w001_lifecycle_ci_hardening_v16_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCIHardeningV15Path, "b751be17403e0b41f75d853e0d8a4e6baa61101436a94bf61c47b42366ac409b"},
+		{w001LifecycleCIHardeningV15Signature, "de2e0c92114e3aa4a4639206caa8a97d1ec39e8ab819989c7335c0df107e458e"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_ci_hardening_v16_prior_grant", "prior v15 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV16Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV16Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCIHardeningV16Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCIHardeningV16BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_base", "v16 lifecycle CI hardening must descend from the exact immutable v15 head and tree")
+	}
+	checkW001LifecycleV15Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"ci.test_git_descriptor_helper_transitive_bypass", "ci.test_git_helper_executable_path_toctou",
+		w001LifecycleCIHardeningV16Base, w001LifecycleCIHardeningV16BaseTree, "33165311496", "98829194619",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_ci_hardening_v16_evidence", "v16 evidence must preserve the exact v15 findings and bounded correction")
+			break
+		}
+	}
+	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
+	for _, forbidden := range []string{
+		"func TestMain(", "func runPlanningGrantTestGitDescriptorHelper(", "os.Executable()", "os.Environ()", "command.Env = planningGrantGitEnvironment()",
+	} {
+		if testsErr == nil && bytes.Contains(tests, []byte(forbidden)) {
+			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_ci_hardening_v16_helper", "v16 must remove the self-executable helper and environment-selected TestMain mode")
+			break
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!v17Active && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v16`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v16_plan", "active plan must select the truthful v16 CI hardening")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!v17Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-hardening-v16")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-hardening-v16")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_ci_hardening_v16_manifest", "manifest must project the v16 CI hardening and absent live lease")
+	}
+}
+
+func checkW001LifecycleCIHardeningV17Grant(root string, findings *[]Finding) {
+	retirementActive := w001LifecycleTestHarnessRetirementActive(root)
+	if retirementActive {
+		defer checkW001LifecycleTestHarnessRetirementGrant(root, findings)
+	}
+	data, err := readRepoFile(root, w001LifecycleCIHardeningV17Path)
+	if err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_missing", "signed v17 lifecycle CI hardening grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleCIHardeningV17Scalars, w001LifecycleCIHardeningV17Sequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleCIHardeningV17Scalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_value", "%s does not match the signed v17 lifecycle CI hardening contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleCIHardeningV17Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_sequence", "%s must equal the exact ordered v17 lifecycle CI hardening contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_expiry", "v17 lifecycle CI hardening grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleCIHardeningV17Signature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleCIHardeningV17Signature, "public.w001_lifecycle_ci_hardening_v17_signature_missing", "detached v17 lifecycle CI hardening signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_ci_hardening_v17_key", "v17 lifecycle CI hardening must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleCIHardeningV17Namespace); err != nil {
+		addFinding(findings, w001LifecycleCIHardeningV17Signature, "public.w001_lifecycle_ci_hardening_v17_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCIHardeningV16Path, "95fa2caa2befd270ed15f9c317a37ceec442b70c0826a869323d34c3d612d835"},
+		{w001LifecycleCIHardeningV16Signature, "26711612175f7969ec168159e535e7b6b7273641690ed4c486e609cddaa844e5"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_ci_hardening_v17_prior_grant", "prior v16 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV17Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleCIHardeningV17Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleCIHardeningV17Base || strings.TrimSpace(string(baseTree)) != w001LifecycleCIHardeningV17BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_base", "v17 lifecycle CI hardening must descend from the exact immutable v16 head and tree")
+	}
+	checkW001LifecycleV16Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		"ci.test_git_invocation_one_shot_field_bypass", "ci.test_git_fetch_source_toctou", "ci.test_process_guard_refresh_executor_bypass",
+		w001LifecycleCIHardeningV17Base, w001LifecycleCIHardeningV17BaseTree, "33206197037", "98967743138",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_ci_hardening_v17_evidence", "v17 evidence must preserve the exact v16 review findings and bounded correction")
+			break
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!retirementActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-ci-hardening-v17`"))) || !bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_ci_hardening_v17_plan", "active plan must select the truthful v17 CI hardening")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!retirementActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-ci-hardening-v17")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-ci-hardening-v17")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_ci_hardening_v17_manifest", "manifest must project the v17 CI hardening and absent live lease")
+	}
+}
+
+func w001LifecycleTestHarnessRetirementActive(root string) bool {
+	_, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleTestHarnessRetirementPath)))
+	return err == nil
+}
+
+func checkW001LifecycleTestHarnessRetirementGrant(root string, findings *[]Finding) {
+	recoveryActive := w001LifecycleAuthorityRecoveryActive(root)
+	preservationActive := w001LifecycleEvidencePreservationActive(root)
+	if recoveryActive {
+		defer checkW001LifecycleAuthorityRecoveryGrant(root, findings)
+	}
+	data, err := readRepoFile(root, w001LifecycleTestHarnessRetirementPath)
+	if err != nil {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_missing", "signed lifecycle test-harness retirement grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleTestHarnessRetirementScalars, w001LifecycleTestHarnessRetirementSequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleTestHarnessRetirementScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_value", "%s does not match the signed retirement contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleTestHarnessRetirementSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_sequence", "%s must equal the exact ordered retirement contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_expiry", "retirement grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleTestHarnessRetirementSignature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleTestHarnessRetirementSignature, "public.w001_lifecycle_test_harness_retirement_signature_missing", "detached retirement signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_test_harness_retirement_key", "retirement must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleTestHarnessRetirementNamespace); err != nil {
+		addFinding(findings, w001LifecycleTestHarnessRetirementSignature, "public.w001_lifecycle_test_harness_retirement_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleCIHardeningV17Path, "8898b65846209758f892c1b965c2d69bb13a6c1a97714f953b3f8735d96a1f7d"},
+		{w001LifecycleCIHardeningV17Signature, "f3c1fcc7ab46205f00d45029add526fa7b9df06b19aa7a65b7f08f12a7b87df6"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_test_harness_retirement_prior_grant", "prior v17 lifecycle material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleTestHarnessRetirementBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleTestHarnessRetirementBase+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleTestHarnessRetirementBase || strings.TrimSpace(string(baseTree)) != w001LifecycleTestHarnessRetirementBaseTree {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_base", "retirement must descend from the exact immutable v17 head and tree")
+	}
+	checkW001LifecycleV17Tag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		w001LifecycleTestHarnessRetirementBase, w001LifecycleTestHarnessRetirementBaseTree,
+		"33213446709", "98991727867", "failed", "changes-requested",
+		"ci.public_gate_fetch_head_pseudoref_portability", "ci.test_git_gitdir_rebinding_bypass",
+		"ci.test_process_guard_transitive_production_caller_bypass", "ci.test_git_local_config_process_bypass",
+		"ci.test_process_guard_top_level_funclit_bypass", "W-001-lifecycle-test-harness-retirement-v1",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_test_harness_retirement_evidence", "retirement evidence must preserve V17 identity, failed run, review findings, and the successor grant")
+			break
+		}
+	}
+	tests, testsErr := readRepoFile(root, "internal/doctrine/grant_test.go")
+	for _, marker := range []string{
+		"exec.Command(\"/usr/bin/git\"", "validatePlanningGrantTestGitArguments", "validatePlanningGrantTestGitFetch",
+		"TestPlanningGrantTestGitFetchCreatesPortableFetchHead", "TestPlanningGrantTestGitCommandRequiresCanonicalLocalRoot",
+		"TestPlanningGrantTestGitCommandRejectsAmbientExecutionInjection", "GIT_ALLOW_PROTOCOL=file",
+		"maintenance.auto=false", "gc.auto=0", "gc.autoDetach=false", "maintenance.autoDetach=false",
+	} {
+		if testsErr != nil || !bytes.Contains(tests, []byte(marker)) {
+			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_test_harness_retirement_fixture", "retirement requires the transparent deterministic local-only Git fixture")
+			break
+		}
+	}
+	for _, forbidden := range []string{
+		"planningGrantTestGitDescriptorTrampoline", "/usr/bin/perl", "planningGrantTestBeforeGitProcess",
+		"planningGrantTestGitInvocation", "planningGrantTestGitFetchAdmission", "pack-objects", "index-pack",
+		"update-ref\", \"FETCH_HEAD", "checkPlanningGrantTestProcessInvocations", "planningGrantProductionProcessEntrypoints",
+		"TestPlanningGrantTestProcessInvocations", "writePlanningGrantProcessAttackFixture",
+	} {
+		if testsErr == nil && bytes.Contains(tests, []byte(forbidden)) {
+			addFinding(findings, "internal/doctrine/grant_test.go", "public.w001_lifecycle_test_harness_retirement_removed", "retired descriptor, stream, one-shot, and process self-admission mechanisms must be absent")
+			break
+		}
+	}
+	feature, featureErr := readRepoFile(root, "docs/features/F-001-doctrine-foundation.md")
+	if featureErr != nil || !bytes.Contains(feature, []byte("deterministic fixture infrastructure")) || !bytes.Contains(feature, []byte("CI isolation")) {
+		addFinding(findings, "docs/features/F-001-doctrine-foundation.md", "public.w001_lifecycle_test_harness_retirement_feature", "F-001 must define deterministic fixture infrastructure and CI isolation truthfully")
+	}
+	adr, adrErr := readRepoFile(root, "docs/design-docs/ADR-004-pr-first-publication.md")
+	if adrErr != nil || !bytes.Contains(adr, []byte("Candidate-code security boundary")) || !bytes.Contains(adr, []byte("test self-sandbox")) {
+		addFinding(findings, "docs/design-docs/ADR-004-pr-first-publication.md", "public.w001_lifecycle_test_harness_retirement_adr", "ADR-004 must record the candidate-code boundary and retirement decision")
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!recoveryActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-test-harness-retirement-v1`"))) ||
+		(recoveryActive && !preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-authority-recovery-v1`"))) ||
+		(preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`"))) ||
+		!bytes.Contains(plan, []byte("W-001 therefore remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_test_harness_retirement_plan", "active plan must select the truthful retirement attempt")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!recoveryActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-test-harness-retirement-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-test-harness-retirement-v1")))) ||
+		(recoveryActive && !preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-authority-recovery-v1")) ||
+			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-authority-recovery-v1")))) ||
+		(preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
+			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-evidence-preservation-v1")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_test_harness_retirement_manifest", "manifest must project the retirement attempt and absent live lease")
+	}
+}
+
+func w001LifecycleAuthorityRecoveryActive(root string) bool {
+	_, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleAuthorityRecoveryPath)))
+	return err == nil
+}
+
+func checkW001LifecycleAuthorityRecoveryGrant(root string, findings *[]Finding) {
+	preservationActive := w001LifecycleEvidencePreservationActive(root)
+	if preservationActive {
+		defer checkW001LifecycleEvidencePreservationGrant(root, findings)
+	}
+	data, err := readRepoFile(root, w001LifecycleAuthorityRecoveryPath)
+	if err != nil {
+		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_missing", "signed lifecycle authority-recovery grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleAuthorityRecoveryScalars, w001LifecycleAuthorityRecoverySequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleAuthorityRecoveryScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_value", "%s does not match the signed authority-recovery contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleAuthorityRecoverySequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_sequence", "%s must equal the exact ordered authority-recovery contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_expiry", "authority-recovery grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleAuthorityRecoverySignature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleAuthorityRecoverySignature, "public.w001_lifecycle_authority_recovery_signature_missing", "detached authority-recovery signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_authority_recovery_key", "authority recovery must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleAuthorityRecoveryNamespace); err != nil {
+		addFinding(findings, w001LifecycleAuthorityRecoverySignature, "public.w001_lifecycle_authority_recovery_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleTestHarnessRetirementPath, "4d2cc1ba4f537715283631e2b2f57a6098b522bc0135e3dc8bff4254aa5e19b3"},
+		{w001LifecycleTestHarnessRetirementSignature, "4e093b74ce43191da23d9e34d68c77bbe3428f38fee5c75612580e708ec06486"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_authority_recovery_prior_grant", "retirement grant material must remain byte-exact unaccepted evidence")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleAuthorityRecoveryBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleAuthorityRecoveryBase+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleAuthorityRecoveryBase || strings.TrimSpace(string(baseTree)) != w001LifecycleAuthorityRecoveryBaseTree {
+		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_base", "authority recovery must descend from the exact immutable unaccepted retirement head and tree")
+	}
+	checkW001LifecycleRetirementTag(root, findings)
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		w001LifecycleAuthorityRecoveryBase, w001LifecycleAuthorityRecoveryBaseTree,
+		"e08beb772696b078783d0c75d23c1029581cdeb1", w001LifecycleRetirementTagObject,
+		"33218389712", "99007023124", "33222628400", "99019716295",
+		"authority.retirement_grant_retroactive_admission", "authority.retirement_publication_out_of_scope_retry",
+		"Independent QA", "accepted", "Independent Security", "changes-requested", "unaccepted",
+		"W-001-lifecycle-authority-recovery-v1", "prospective",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_authority_recovery_evidence", "authority-recovery evidence must preserve both retirement publications, ordered reviews, findings, and unaccepted disposition")
+			break
+		}
+	}
+	validator, validatorErr := readRepoFile(root, "internal/doctrine/grant.go")
+	retrospectiveMarker := []byte("grantClock" + "SkewAccepted")
+	if validatorErr != nil || bytes.Contains(validator, retrospectiveMarker) {
+		addFinding(findings, "internal/doctrine/grant.go", "public.w001_lifecycle_authority_recovery_chronology", "commit-specific retrospective grant admission must be absent")
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || (!preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-authority-recovery-v1`"))) ||
+		(preservationActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`"))) ||
+		!bytes.Contains(plan, []byte("unaccepted recovery preimage")) ||
+		!bytes.Contains(plan, []byte("W-001 remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_authority_recovery_plan", "active plan must select prospective recovery while W-001 remains in-progress")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || (!preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-authority-recovery-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-authority-recovery-v1")))) ||
+		(preservationActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
+			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-evidence-preservation-v1")))) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_authority_recovery_manifest", "manifest must project prospective authority recovery and absent live lease")
+	}
+}
+
+func w001LifecycleEvidencePreservationActive(root string) bool {
+	_, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleEvidencePreservationPath)))
+	return err == nil
+}
+
+func checkW001LifecycleEvidencePreservationGrant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001LifecycleEvidencePreservationPath)
+	if err != nil {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_missing", "signed lifecycle evidence-preservation grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001LifecycleEvidencePreservationScalars, w001LifecycleEvidencePreservationSequences,
+		[]string{"grant", "findings", "canonicalPreimage", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_schema", "%s", message)
+	}
+	for _, expected := range w001LifecycleEvidencePreservationScalars {
+		values := document.scalars[expected.path]
+		switch {
+		case len(values) != 1:
+			addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_field", "%s must occur exactly once", expected.path)
+		case values[0] != expected.value:
+			addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_value", "%s does not match the signed evidence-preservation contract", expected.path)
+		}
+	}
+	for path, expected := range w001LifecycleEvidencePreservationSequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_sequence", "%s must equal the exact ordered evidence-preservation contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "canonicalPreimage", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 72*time.Hour {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_expiry", "evidence-preservation grant must use one RFC3339 interval no longer than 72 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001LifecycleEvidencePreservationSignature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if signatureErr != nil {
+		addFinding(findings, w001LifecycleEvidencePreservationSignature, "public.w001_lifecycle_evidence_preservation_signature_missing", "detached evidence-preservation signature is required")
+	} else if !keyValid {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_evidence_preservation_key", "evidence preservation must use the independently pinned genesis key")
+	} else if err := verifySSHSig(data, signature, publicKey, w001LifecycleEvidencePreservationNamespace); err != nil {
+		addFinding(findings, w001LifecycleEvidencePreservationSignature, "public.w001_lifecycle_evidence_preservation_signature", "%v", err)
+	}
+	for _, binding := range []struct {
+		path   string
+		digest string
+	}{
+		{w001LifecycleAuthorityRecoveryPath, "68e8051b477eb9bd3c6846874794b9e83e5e4341f5784eb3569dc6c598c0150f"},
+		{w001LifecycleAuthorityRecoverySignature, "5eb415fbed952821daaebb10736b70a045ca6f1ee8e2e24834446436b81eea3b"},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_lifecycle_evidence_preservation_prior_grant", "authority-recovery grant material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleEvidencePreservationBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleEvidencePreservationBase+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleEvidencePreservationBase || strings.TrimSpace(string(baseTree)) != w001LifecycleEvidencePreservationBaseTree {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_base", "evidence preservation must descend from the exact immutable authority-recovery head and tree")
+	}
+	checkW001LifecycleAuthorityRecoveryTag(root, findings)
+	checkW001LifecycleArchivedRejectedRetirementTag(root, findings)
+	if w001LifecycleRejectedRetirementArchiveTag == w001LifecycleEvidencePreservationReviewTag ||
+		w001LifecycleRejectedRetirementArchiveTag == w001LifecycleTestHarnessRetirementReviewTag ||
+		w001LifecycleRejectedRetirementArchiveTag == w001LifecycleAuthorityRecoveryReviewTag {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_ref", "archival ref must remain distinct from every current review tag")
+	}
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{
+		w001LifecycleEvidencePreservationBase, w001LifecycleEvidencePreservationBaseTree,
+		w001LifecycleAuthorityRecoveryTagObject, "33224636939", "99025722797",
+		"QA-W001-RECOVERY-001", "changes-requested", "Security", "not run",
+		w001LifecycleRejectedRetirementTagObject, w001LifecycleRejectedRetirementTagTarget,
+		w001LifecycleRejectedRetirementTagTree, w001LifecycleRejectedRetirementArchiveTag,
+		"rejected", "unaccepted", "W-001-lifecycle-evidence-preservation-v1", "prospective",
+	} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_lifecycle_evidence_preservation_evidence", "evidence must preserve the QA finding and bind the rejected tag object to its distinct archival ref")
+			break
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-evidence-preservation-v1`")) ||
+		!bytes.Contains(plan, []byte(w001LifecycleRejectedRetirementArchiveTag)) ||
+		!bytes.Contains(plan, []byte("W-001 remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_lifecycle_evidence_preservation_plan", "active plan must select rejected-evidence preservation while W-001 remains in-progress")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-evidence-preservation-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-evidence-preservation-v1")) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_lifecycle_evidence_preservation_manifest", "manifest must project evidence preservation and absent live lease")
 	}
 }
 
@@ -4535,7 +8129,866 @@ func w001PostclaimChronoFixPathSet() map[string]bool {
 	return authorized
 }
 
+func checkW001LifecycleCompletionGitDiff(root string, findings *[]Finding) {
+	topLevel, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
+	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(topLevel))) {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_git", "Git metadata must resolve to the audited repository root")
+		return
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001LifecycleBase+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001LifecycleBase || strings.TrimSpace(string(baseTree)) != w001LifecycleBaseTree {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_base", "exact lifecycle-completion base commit and tree must resolve locally")
+		return
+	}
+	if !checkW001LifecyclePriorTag(root, findings) {
+		return
+	}
+	correctionActive := false
+	v7Active := false
+	v8Active := false
+	v9Active := false
+	v10Active := false
+	v11Active := false
+	v12Active := false
+	v13Active := false
+	v14Active := false
+	v15Active := false
+	v16Active := false
+	v17Active := false
+	retirementActive := false
+	recoveryActive := false
+	preservationActive := false
+	if _, correctionErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionPath))); correctionErr == nil {
+		correctionActive = true
+		if !checkW001LifecycleV5Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(correctionErr) {
+		addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_state", "lifecycle correction Git state cannot be established")
+		return
+	}
+	if _, v7Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionV7Path))); v7Err == nil {
+		v7Active = true
+		if !checkW001LifecycleV6Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v7Err) {
+		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_state", "v7 lifecycle correction Git state cannot be established")
+		return
+	}
+	if _, v8Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionV8Path))); v8Err == nil {
+		v8Active = true
+		if !checkW001LifecycleV7Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v8Err) {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_state", "v8 lifecycle correction Git state cannot be established")
+		return
+	}
+	if _, v9Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCorrectionV9Path))); v9Err == nil {
+		v9Active = true
+		if !checkW001LifecycleV8Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v9Err) {
+		addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_state", "v9 lifecycle correction Git state cannot be established")
+		return
+	}
+	if _, v10Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleStabilizationV10Path))); v10Err == nil {
+		v10Active = true
+		if !checkW001LifecycleV9Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v10Err) {
+		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_state", "v10 lifecycle CI stabilization Git state cannot be established")
+		return
+	}
+	if _, v11Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIFencingV11Path))); v11Err == nil {
+		v11Active = true
+		if !checkW001LifecycleV10Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v11Err) {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_state", "v11 lifecycle CI fencing Git state cannot be established")
+		return
+	}
+	if _, v12Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV12Path))); v12Err == nil {
+		v12Active = true
+		if !checkW001LifecycleV11Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v12Err) {
+		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_state", "v12 lifecycle CI hardening Git state cannot be established")
+		return
+	}
+	if _, v13Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV13Path))); v13Err == nil {
+		v13Active = true
+		if !checkW001LifecycleV12Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v13Err) {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_state", "v13 lifecycle CI hardening Git state cannot be established")
+		return
+	}
+	if _, v14Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV14Path))); v14Err == nil {
+		v14Active = true
+		if !checkW001LifecycleV13Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v14Err) {
+		addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_state", "v14 lifecycle CI hardening Git state cannot be established")
+		return
+	}
+	if _, v15Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV15Path))); v15Err == nil {
+		v15Active = true
+		if !checkW001LifecycleV14Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v15Err) {
+		addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_state", "v15 lifecycle CI hardening Git state cannot be established")
+		return
+	}
+	if _, v16Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV16Path))); v16Err == nil {
+		v16Active = true
+		if !checkW001LifecycleV15Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v16Err) {
+		addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_state", "v16 lifecycle CI hardening Git state cannot be established")
+		return
+	}
+	if _, v17Err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleCIHardeningV17Path))); v17Err == nil {
+		v17Active = true
+		if !checkW001LifecycleV16Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(v17Err) {
+		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_state", "v17 lifecycle CI hardening Git state cannot be established")
+		return
+	}
+	if _, retirementErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleTestHarnessRetirementPath))); retirementErr == nil {
+		retirementActive = true
+		if !checkW001LifecycleV17Tag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(retirementErr) {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_state", "lifecycle test-harness retirement Git state cannot be established")
+		return
+	}
+	if _, recoveryErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleAuthorityRecoveryPath))); recoveryErr == nil {
+		recoveryActive = true
+		if !checkW001LifecycleRetirementTag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(recoveryErr) {
+		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_state", "lifecycle authority-recovery Git state cannot be established")
+		return
+	}
+	if _, preservationErr := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleEvidencePreservationPath))); preservationErr == nil {
+		preservationActive = true
+		if !checkW001LifecycleAuthorityRecoveryTag(root, findings) || !checkW001LifecycleArchivedRejectedRetirementTag(root, findings) {
+			return
+		}
+	} else if !os.IsNotExist(preservationErr) {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_state", "lifecycle evidence-preservation Git state cannot be established")
+		return
+	}
+	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
+	head := strings.TrimSpace(string(headOutput))
+	if err != nil || !sha1Pattern.MatchString(head) {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_git", "HEAD must resolve to one exact commit")
+		return
+	}
+	branchOutput, branchErr := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
+	branch := strings.TrimSpace(string(branchOutput))
+	featureHead := head
+	requireTag := false
+	mainTreeCheck := false
+	switch {
+	case branchErr == nil && branch == w001LifecycleBranch && os.Getenv("GITHUB_ACTIONS") != "true":
+		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleBase, head); err != nil {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_ancestry", "local lifecycle completion must descend from the exact accepted core squash")
+			return
+		}
+	case branchErr == nil && branch == "main" && os.Getenv("GITHUB_ACTIONS") != "true":
+		requireTag, mainTreeCheck = true, true
+	case os.Getenv("GITHUB_ACTIONS") == "true":
+		featureHead, requireTag, mainTreeCheck = w001LifecycleGitHubCheckout(root, head, branch, findings)
+		if featureHead == "" {
+			return
+		}
+	default:
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_branch", "lifecycle completion requires its signed branch or accepted main")
+		return
+	}
+	if requireTag {
+		expected := featureHead
+		if mainTreeCheck {
+			expected = ""
+		}
+		reviewTag, reviewMessage := w001LifecycleReviewTag, w001LifecycleReviewTagMessage
+		if correctionActive {
+			reviewTag, reviewMessage = w001LifecycleCorrectionReviewTag, w001LifecycleCorrectionTagMessage
+		}
+		if v7Active {
+			reviewTag, reviewMessage = w001LifecycleCorrectionV7ReviewTag, w001LifecycleCorrectionV7TagMessage
+		}
+		if v8Active {
+			reviewTag, reviewMessage = w001LifecycleCorrectionV8ReviewTag, w001LifecycleCorrectionV8TagMessage
+		}
+		if v9Active {
+			reviewTag, reviewMessage = w001LifecycleCorrectionV9ReviewTag, w001LifecycleCorrectionV9TagMessage
+		}
+		if v10Active {
+			reviewTag, reviewMessage = w001LifecycleStabilizationV10ReviewTag, w001LifecycleStabilizationV10TagMessage
+		}
+		if v11Active {
+			reviewTag, reviewMessage = w001LifecycleCIFencingV11ReviewTag, w001LifecycleCIFencingV11TagMessage
+		}
+		if v12Active {
+			reviewTag, reviewMessage = w001LifecycleCIHardeningV12ReviewTag, w001LifecycleCIHardeningV12TagMessage
+		}
+		if v13Active {
+			reviewTag, reviewMessage = w001LifecycleCIHardeningV13ReviewTag, w001LifecycleCIHardeningV13TagMessage
+		}
+		if v14Active {
+			reviewTag, reviewMessage = w001LifecycleCIHardeningV14ReviewTag, w001LifecycleCIHardeningV14TagMessage
+		}
+		if v15Active {
+			reviewTag, reviewMessage = w001LifecycleCIHardeningV15ReviewTag, w001LifecycleCIHardeningV15TagMessage
+		}
+		if v16Active {
+			reviewTag, reviewMessage = w001LifecycleCIHardeningV16ReviewTag, w001LifecycleCIHardeningV16TagMessage
+		}
+		if v17Active {
+			reviewTag, reviewMessage = w001LifecycleCIHardeningV17ReviewTag, w001LifecycleCIHardeningV17TagMessage
+		}
+		if retirementActive {
+			reviewTag, reviewMessage = w001LifecycleTestHarnessRetirementReviewTag, w001LifecycleTestHarnessRetirementTagMessage
+		}
+		if recoveryActive {
+			reviewTag, reviewMessage = w001LifecycleAuthorityRecoveryReviewTag, w001LifecycleAuthorityRecoveryTagMessage
+		}
+		if preservationActive {
+			reviewTag, reviewMessage = w001LifecycleEvidencePreservationReviewTag, w001LifecycleEvidencePreservationTagMessage
+		}
+		target, ok := checkW001DeliveryReviewTag(root, expected, reviewTag, reviewMessage, findings)
+		if !ok {
+			return
+		}
+		featureHead = target
+	}
+	if mainTreeCheck {
+		parents, err := planningGrantCommitParents(root, head)
+		if err != nil || len(parents) != 1 || parents[0] != w001LifecycleBase {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_main_topology", "accepted lifecycle completion must be one squash commit over the signed base")
+			return
+		}
+		mainTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", featureHead+"^{tree}")
+		if strings.TrimSpace(string(mainTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_main_tree", "accepted lifecycle completion tree must equal the signed reviewed feature tree")
+			return
+		}
+	}
+	if featureHead != w001LifecycleBase {
+		v5End := featureHead
+		v6End := featureHead
+		v7End := featureHead
+		v8End := featureHead
+		v9End := featureHead
+		v10End := featureHead
+		v11End := featureHead
+		v12End := featureHead
+		v13End := featureHead
+		v14End := featureHead
+		v15End := featureHead
+		v16End := featureHead
+		v17End := featureHead
+		recoveryEnd := featureHead
+		if correctionActive {
+			v5End = w001LifecycleCorrectionBase
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCorrectionBase, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_ancestry", "lifecycle correction must descend from the exact immutable v5 head")
+				return
+			}
+		}
+		if v7Active {
+			v6End = w001LifecycleCorrectionV7Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCorrectionV7Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_ancestry", "v7 lifecycle correction must descend from the exact immutable v6 head")
+				return
+			}
+		}
+		if v8Active {
+			v7End = w001LifecycleCorrectionV8Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCorrectionV8Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_ancestry", "v8 lifecycle correction must descend from the exact immutable v7 head")
+				return
+			}
+		}
+		if v9Active {
+			v8End = w001LifecycleCorrectionV9Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCorrectionV9Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_ancestry", "v9 lifecycle correction must descend from the exact immutable v8 head")
+				return
+			}
+		}
+		if v10Active {
+			v9End = w001LifecycleStabilizationV10Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleStabilizationV10Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_ancestry", "v10 lifecycle CI stabilization must descend from the exact immutable v9 head")
+				return
+			}
+		}
+		if v11Active {
+			v10End = w001LifecycleCIFencingV11Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCIFencingV11Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_ancestry", "v11 lifecycle CI fencing must descend from the exact immutable v10 head")
+				return
+			}
+		}
+		if v12Active {
+			v11End = w001LifecycleCIHardeningV12Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCIHardeningV12Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_ancestry", "v12 lifecycle CI hardening must descend from the exact immutable v11 head")
+				return
+			}
+		}
+		if v13Active {
+			v12End = w001LifecycleCIHardeningV13Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCIHardeningV13Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_ancestry", "v13 lifecycle CI hardening must descend from the exact immutable v12 head")
+				return
+			}
+		}
+		if v14Active {
+			v13End = w001LifecycleCIHardeningV14Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCIHardeningV14Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_ancestry", "v14 lifecycle CI hardening must descend from the exact immutable v13 head")
+				return
+			}
+		}
+		if v15Active {
+			v14End = w001LifecycleCIHardeningV15Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCIHardeningV15Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_ancestry", "v15 lifecycle CI hardening must descend from the exact immutable v14 head")
+				return
+			}
+		}
+		if v16Active {
+			v15End = w001LifecycleCIHardeningV16Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCIHardeningV16Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_ancestry", "v16 lifecycle CI hardening must descend from the exact immutable v15 head")
+				return
+			}
+		}
+		if v17Active {
+			v16End = w001LifecycleCIHardeningV17Base
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleCIHardeningV17Base, featureHead); err != nil {
+				addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_ancestry", "v17 lifecycle CI hardening must descend from the exact immutable v16 head")
+				return
+			}
+		}
+		if retirementActive {
+			v17End = w001LifecycleTestHarnessRetirementBase
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleTestHarnessRetirementBase, featureHead); err != nil {
+				addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_ancestry", "retirement must descend from the exact immutable v17 head")
+				return
+			}
+		}
+		if recoveryActive {
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleAuthorityRecoveryBase, featureHead); err != nil {
+				addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_ancestry", "authority recovery must descend from the exact immutable unaccepted retirement head")
+				return
+			}
+		}
+		if preservationActive {
+			recoveryEnd = w001LifecycleEvidencePreservationBase
+			if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001LifecycleEvidencePreservationBase, featureHead); err != nil {
+				addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_ancestry", "evidence preservation must descend from the exact immutable authority-recovery head")
+				return
+			}
+		}
+		if !checkW001LifecycleCommitRange(root, w001LifecycleBase, v5End, "2026-08-27T12:05:00Z", "v5", findings) {
+			return
+		}
+		if correctionActive && !checkW001LifecycleCommitRange(root, w001LifecycleCorrectionBase, v6End, "2026-08-27T13:50:00Z", "v6", findings) {
+			return
+		}
+		if v7Active && !checkW001LifecycleCommitRange(root, w001LifecycleCorrectionV7Base, v7End, "2026-08-27T15:07:00Z", "v7", findings) {
+			return
+		}
+		if v8Active && !checkW001LifecycleCommitRange(root, w001LifecycleCorrectionV8Base, v8End, "2026-08-27T16:29:00Z", "v8", findings) {
+			return
+		}
+		if v9Active && !checkW001LifecycleCommitRange(root, w001LifecycleCorrectionV9Base, v9End, "2026-08-27T17:29:00Z", "v9", findings) {
+			return
+		}
+		if v10Active && !checkW001LifecycleCommitRange(root, w001LifecycleStabilizationV10Base, v10End, "2026-08-27T18:43:00Z", "v10", findings) {
+			return
+		}
+		if v11Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIFencingV11Base, v11End, "2026-08-27T19:05:55Z", "v11", findings) {
+			return
+		}
+		if v12Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV12Base, v12End, "2026-08-27T19:32:00Z", "v12", findings) {
+			return
+		}
+		if v13Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV13Base, v13End, "2026-08-27T20:00:30Z", "v13", findings) {
+			return
+		}
+		if v14Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV14Base, v14End, "2026-08-27T21:00:28Z", "v14", findings) {
+			return
+		}
+		if v15Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV15Base, v15End, "2026-08-28T08:32:45Z", "v15", findings) {
+			return
+		}
+		if v16Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV16Base, v16End, "2026-08-28T11:11:48Z", "v16", findings) {
+			return
+		}
+		if v17Active && !checkW001LifecycleCommitRange(root, w001LifecycleCIHardeningV17Base, v17End, "2026-08-28T20:33:09Z", "v17", findings) {
+			return
+		}
+		if retirementActive && !recoveryActive && !checkW001LifecycleCommitRange(root, w001LifecycleTestHarnessRetirementBase, featureHead, "2026-08-28T22:24:00Z", "retirement", findings) {
+			return
+		}
+		if recoveryActive && !checkW001LifecycleCommitRange(root, w001LifecycleAuthorityRecoveryBase, recoveryEnd, "2026-08-29T00:28:29Z", "authority-recovery", findings) {
+			return
+		}
+		if preservationActive && !checkW001LifecycleCommitRange(root, w001LifecycleEvidencePreservationBase, featureHead, "2026-08-29T01:04:40Z", "evidence-preservation", findings) {
+			return
+		}
+	}
+	tracked, err := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
+	if err != nil {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_scope", "current tracked lifecycle-completion paths cannot be enumerated")
+		return
+	}
+	untracked, err := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
+	if err != nil {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_scope", "current untracked lifecycle-completion paths cannot be enumerated")
+		return
+	}
+	paths, err := normalizedPlanningGrantGitPaths(tracked, untracked)
+	allowed := w001LifecyclePathsAllowed(paths)
+	if correctionActive {
+		allowed = w001LifecycleCorrectionPathsAllowed(paths)
+	}
+	if v7Active {
+		allowed = w001LifecycleCorrectionV7PathsAllowed(paths)
+	}
+	if v8Active {
+		allowed = w001LifecycleCorrectionV8PathsAllowed(paths)
+	}
+	if v9Active {
+		allowed = w001LifecycleCorrectionV9PathsAllowed(paths)
+	}
+	if v10Active {
+		allowed = w001LifecycleStabilizationV10PathsAllowed(paths)
+	}
+	if v11Active {
+		allowed = w001LifecycleCIFencingV11PathsAllowed(paths)
+	}
+	if v12Active {
+		allowed = w001LifecycleCIHardeningV12PathsAllowed(paths)
+	}
+	if v13Active {
+		allowed = w001LifecycleCIHardeningV13PathsAllowed(paths)
+	}
+	if v14Active {
+		allowed = w001LifecycleCIHardeningV14PathsAllowed(paths)
+	}
+	if v15Active {
+		allowed = w001LifecycleCIHardeningV15PathsAllowed(paths)
+	}
+	if v16Active {
+		allowed = w001LifecycleCIHardeningV16PathsAllowed(paths)
+	}
+	if v17Active {
+		allowed = w001LifecycleCIHardeningV17PathsAllowed(paths)
+	}
+	if retirementActive {
+		allowed = w001LifecycleTestHarnessRetirementPathsAllowed(paths)
+	}
+	if recoveryActive {
+		allowed = w001LifecycleAuthorityRecoveryPathsAllowed(paths)
+	}
+	if preservationActive {
+		allowed = w001LifecycleEvidencePreservationPathsAllowed(paths)
+	}
+	if err != nil || !allowed {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_scope", "current changes include a path outside the signed lifecycle-completion scope")
+	}
+}
+
+func checkW001LifecycleCommitRange(root, base, head, issued, phase string, findings *[]Finding) bool {
+	if base == head {
+		return true
+	}
+	commits, err := planningGrantCommitRangeFrom(root, base, head)
+	if err != nil || len(commits) == 0 {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_history", "lifecycle history must be a nonempty linear chain")
+		return false
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_lifecycle_commit_signature", "lifecycle commits require the pinned genesis signer")
+		return false
+	}
+	issuedAt, parseErr := time.Parse(time.RFC3339, issued)
+	if parseErr != nil {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_commit_signature", "lifecycle grant issuance is invalid")
+		return false
+	}
+	previous := base
+	for _, commit := range commits {
+		if len(commit.parents) != 1 || commit.parents[0] != previous {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_topology", "lifecycle history must be one contiguous one-parent chain")
+			return false
+		}
+		paths, pathErr := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
+		normalized, normalizeErr := normalizedPlanningGrantGitPaths(paths)
+		allowed := w001LifecyclePathsAllowed(normalized)
+		if phase == "v6" {
+			allowed = w001LifecycleCorrectionPathsAllowed(normalized)
+		} else if phase == "v7" {
+			allowed = w001LifecycleCorrectionV7PathsAllowed(normalized)
+		} else if phase == "v8" {
+			allowed = w001LifecycleCorrectionV8PathsAllowed(normalized)
+		} else if phase == "v9" {
+			allowed = w001LifecycleCorrectionV9PathsAllowed(normalized)
+		} else if phase == "v10" {
+			allowed = w001LifecycleStabilizationV10PathsAllowed(normalized)
+		} else if phase == "v11" {
+			allowed = w001LifecycleCIFencingV11PathsAllowed(normalized)
+		} else if phase == "v12" {
+			allowed = w001LifecycleCIHardeningV12PathsAllowed(normalized)
+		} else if phase == "v13" {
+			allowed = w001LifecycleCIHardeningV13PathsAllowed(normalized)
+		} else if phase == "v14" {
+			allowed = w001LifecycleCIHardeningV14PathsAllowed(normalized)
+		} else if phase == "v15" {
+			allowed = w001LifecycleCIHardeningV15PathsAllowed(normalized)
+		} else if phase == "v16" {
+			allowed = w001LifecycleCIHardeningV16PathsAllowed(normalized)
+		} else if phase == "v17" {
+			allowed = w001LifecycleCIHardeningV17PathsAllowed(normalized)
+		} else if phase == "retirement" {
+			allowed = w001LifecycleTestHarnessRetirementPathsAllowed(normalized)
+		} else if phase == "authority-recovery" {
+			allowed = w001LifecycleAuthorityRecoveryPathsAllowed(normalized)
+		} else if phase == "evidence-preservation" {
+			allowed = w001LifecycleEvidencePreservationPathsAllowed(normalized)
+		}
+		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
+		if pathErr != nil || normalizeErr != nil || !allowed {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_scope", "a lifecycle commit includes a path outside its signed phase scope")
+			return false
+		}
+		if objectErr != nil || verifyPlanningGrantCommit(object, publicKey) != nil || timeErr != nil || !planningGrantCommitAtOrAfterGrant(committedAt, issuedAt) {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_commit_signature", "every lifecycle commit must carry the pinned SSH signature after phase-grant issuance")
+			return false
+		}
+		previous = commit.id
+	}
+	return true
+}
+
+func planningGrantCommitAtOrAfterGrant(committedAt, issuedAt time.Time) bool {
+	return !committedAt.Before(issuedAt)
+}
+
+func w001LifecyclePathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleGrantPath: true, w001LifecycleGrantSignature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/features/F-002-work-authority.md": true, "docs/product-specs/work-authority.md": true,
+		"docs/evidence/W-001-validation.md": true, "api/authority/v1/types.go": true,
+		"internal/doctrine/grant.go": true, "internal/doctrine/grant_test.go": true,
+	}
+	prefixes := []string{"internal/authority/beads/", "internal/authority/gateway/", "internal/authority/httpapi/", "internal/authority/postgres/", "database/authority/", "cmd/mars3-authority/"}
+	for _, path := range paths {
+		if exact[path] {
+			continue
+		}
+		allowed := false
+		for _, prefix := range prefixes {
+			if strings.HasPrefix(path, prefix) && len(path) > len(prefix) {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCorrectionPathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCorrectionPath: true, w001LifecycleCorrectionSignature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/features/F-002-work-authority.md": true, "docs/product-specs/work-authority.md": true,
+		"docs/evidence/W-001-validation.md": true, "api/authority/v1/types.go": true,
+		"internal/doctrine/grant.go": true, "internal/doctrine/grant_test.go": true,
+	}
+	prefixes := []string{"internal/authority/beads/", "internal/authority/gateway/", "internal/authority/httpapi/", "internal/authority/postgres/", "database/authority/", "cmd/mars3-authority/"}
+	for _, path := range paths {
+		if exact[path] {
+			continue
+		}
+		allowed := false
+		for _, prefix := range prefixes {
+			if strings.HasPrefix(path, prefix) && len(path) > len(prefix) {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCorrectionV7PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCorrectionV7Path: true, w001LifecycleCorrectionV7Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/features/F-002-work-authority.md": true, "docs/product-specs/work-authority.md": true,
+		"docs/evidence/W-001-validation.md": true, "api/authority/v1/types.go": true,
+		"internal/doctrine/grant.go": true, "internal/doctrine/grant_test.go": true,
+	}
+	prefixes := []string{"internal/authority/beads/", "internal/authority/gateway/", "internal/authority/httpapi/", "internal/authority/postgres/", "database/authority/", "cmd/mars3-authority/"}
+	for _, path := range paths {
+		if exact[path] {
+			continue
+		}
+		allowed := false
+		for _, prefix := range prefixes {
+			if strings.HasPrefix(path, prefix) && len(path) > len(prefix) {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCorrectionV8PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCorrectionV8Path: true, w001LifecycleCorrectionV8Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/features/F-002-work-authority.md": true, "docs/product-specs/work-authority.md": true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if exact[path] || strings.HasPrefix(path, "internal/authority/beads/") && len(path) > len("internal/authority/beads/") {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
+func w001LifecycleCorrectionV9PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCorrectionV9Path: true, w001LifecycleCorrectionV9Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/features/F-002-work-authority.md": true, "docs/product-specs/work-authority.md": true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if exact[path] || strings.HasPrefix(path, "internal/authority/beads/") && len(path) > len("internal/authority/beads/") {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
+func w001LifecycleStabilizationV10PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleStabilizationV10Path: true, w001LifecycleStabilizationV10Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCIFencingV11PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCIFencingV11Path: true, w001LifecycleCIFencingV11Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCIHardeningV12PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCIHardeningV12Path: true, w001LifecycleCIHardeningV12Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCIHardeningV13PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCIHardeningV13Path: true, w001LifecycleCIHardeningV13Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCIHardeningV14PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCIHardeningV14Path: true, w001LifecycleCIHardeningV14Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCIHardeningV15PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCIHardeningV15Path: true, w001LifecycleCIHardeningV15Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCIHardeningV16PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCIHardeningV16Path: true, w001LifecycleCIHardeningV16Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleCIHardeningV17PathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleCIHardeningV17Path: true, w001LifecycleCIHardeningV17Signature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleTestHarnessRetirementPathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleTestHarnessRetirementPath: true, w001LifecycleTestHarnessRetirementSignature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true, "docs/features/F-001-doctrine-foundation.md": true,
+		"docs/design-docs/ADR-004-pr-first-publication.md": true,
+		"internal/doctrine/grant.go":                       true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleAuthorityRecoveryPathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleAuthorityRecoveryPath: true, w001LifecycleAuthorityRecoverySignature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
+func w001LifecycleEvidencePreservationPathsAllowed(paths []string) bool {
+	exact := map[string]bool{
+		w001LifecycleEvidencePreservationPath: true, w001LifecycleEvidencePreservationSignature: true,
+		".harness/manifest.yaml": true, canonicalActivePlan: true,
+		"docs/evidence/W-001-validation.md": true,
+		"internal/doctrine/grant.go":        true, "internal/doctrine/grant_test.go": true,
+	}
+	for _, path := range paths {
+		if !exact[path] {
+			return false
+		}
+	}
+	return true
+}
+
 func checkW001DeliveryGrantGitDiff(root string, findings *[]Finding) {
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001LifecycleGrantPath))); err == nil {
+		checkW001LifecycleCompletionGitDiff(root, findings)
+		return
+	} else if !os.IsNotExist(err) {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_state", "lifecycle-completion Git state cannot be established")
+		return
+	}
 	topLevel, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
 	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(topLevel))) {
 		addFinding(findings, w001DeliveryGrantPath, "public.w001_delivery_git", "Git metadata must resolve to the audited repository root")
@@ -4821,6 +9274,448 @@ func checkW001DeliveryV3Tag(root string, findings *[]Finding) bool {
 	return true
 }
 
+func checkW001LifecyclePriorTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001DeliveryScannerFixReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001DeliveryV4TagObject {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_prior_tag", "v4 delivery tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001DeliveryV4TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_prior_tag", "v4 delivery tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001DeliveryScannerFixReviewTag, w001DeliveryScannerFixTagMessage)
+	if err != nil || target != "cac4231ddcb69edd298766c5bbe3854c8269fb2a" {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_prior_tag", "v4 delivery tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleBaseTree {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_prior_tag", "v4 delivery tag tree must equal the accepted core squash tree")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV5Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV5TagObject {
+		addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_prior_tag", "v5 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV5TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_prior_tag", "v5 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleReviewTag, w001LifecycleReviewTagMessage)
+	if err != nil || target != w001LifecycleCorrectionBase {
+		addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_prior_tag", "v5 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCorrectionBaseTree {
+		addFinding(findings, w001LifecycleCorrectionPath, "public.w001_lifecycle_correction_prior_tag", "v5 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV6Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCorrectionReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV6TagObject {
+		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_prior_tag", "v6 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV6TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_prior_tag", "v6 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCorrectionReviewTag, w001LifecycleCorrectionTagMessage)
+	if err != nil || target != w001LifecycleCorrectionV7Base {
+		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_prior_tag", "v6 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCorrectionV7BaseTree {
+		addFinding(findings, w001LifecycleCorrectionV7Path, "public.w001_lifecycle_correction_v7_prior_tag", "v6 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV7Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCorrectionV7ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV7TagObject {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_prior_tag", "v7 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV7TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_prior_tag", "v7 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCorrectionV7ReviewTag, w001LifecycleCorrectionV7TagMessage)
+	if err != nil || target != w001LifecycleCorrectionV8Base {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_prior_tag", "v7 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCorrectionV8BaseTree {
+		addFinding(findings, w001LifecycleCorrectionV8Path, "public.w001_lifecycle_correction_v8_prior_tag", "v7 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV8Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCorrectionV8ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV8TagObject {
+		addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_prior_tag", "v8 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV8TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_prior_tag", "v8 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCorrectionV8ReviewTag, w001LifecycleCorrectionV8TagMessage)
+	if err != nil || target != w001LifecycleCorrectionV9Base {
+		addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_prior_tag", "v8 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCorrectionV9BaseTree {
+		addFinding(findings, w001LifecycleCorrectionV9Path, "public.w001_lifecycle_correction_v9_prior_tag", "v8 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV9Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCorrectionV9ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV9TagObject {
+		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_prior_tag", "v9 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV9TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_prior_tag", "v9 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCorrectionV9ReviewTag, w001LifecycleCorrectionV9TagMessage)
+	if err != nil || target != w001LifecycleStabilizationV10Base {
+		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_prior_tag", "v9 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleStabilizationV10BaseTree {
+		addFinding(findings, w001LifecycleStabilizationV10Path, "public.w001_lifecycle_stabilization_v10_prior_tag", "v9 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV10Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleStabilizationV10ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV10TagObject {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_prior_tag", "v10 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV10TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_prior_tag", "v10 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleStabilizationV10ReviewTag, w001LifecycleStabilizationV10TagMessage)
+	if err != nil || target != w001LifecycleCIFencingV11Base {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_prior_tag", "v10 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCIFencingV11BaseTree {
+		addFinding(findings, w001LifecycleCIFencingV11Path, "public.w001_lifecycle_ci_fencing_v11_prior_tag", "v10 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV11Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCIFencingV11ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV11TagObject {
+		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_prior_tag", "v11 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV11TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_prior_tag", "v11 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCIFencingV11ReviewTag, w001LifecycleCIFencingV11TagMessage)
+	if err != nil || target != w001LifecycleCIHardeningV12Base {
+		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_prior_tag", "v11 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCIHardeningV12BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV12Path, "public.w001_lifecycle_ci_hardening_v12_prior_tag", "v11 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV12Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCIHardeningV12ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV12TagObject {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_prior_tag", "v12 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV12TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_prior_tag", "v12 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCIHardeningV12ReviewTag, w001LifecycleCIHardeningV12TagMessage)
+	if err != nil || target != w001LifecycleCIHardeningV13Base {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_prior_tag", "v12 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCIHardeningV13BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV13Path, "public.w001_lifecycle_ci_hardening_v13_prior_tag", "v12 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV13Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCIHardeningV13ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV13TagObject {
+		addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_prior_tag", "v13 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV13TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_prior_tag", "v13 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCIHardeningV13ReviewTag, w001LifecycleCIHardeningV13TagMessage)
+	if err != nil || target != w001LifecycleCIHardeningV14Base {
+		addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_prior_tag", "v13 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCIHardeningV14BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV14Path, "public.w001_lifecycle_ci_hardening_v14_prior_tag", "v13 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV14Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCIHardeningV14ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV14TagObject {
+		addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_prior_tag", "v14 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV14TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_prior_tag", "v14 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCIHardeningV14ReviewTag, w001LifecycleCIHardeningV14TagMessage)
+	if err != nil || target != w001LifecycleCIHardeningV15Base {
+		addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_prior_tag", "v14 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCIHardeningV15BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV15Path, "public.w001_lifecycle_ci_hardening_v15_prior_tag", "v14 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV15Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCIHardeningV15ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV15TagObject {
+		addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_prior_tag", "v15 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV15TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_prior_tag", "v15 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCIHardeningV15ReviewTag, w001LifecycleCIHardeningV15TagMessage)
+	if err != nil || target != w001LifecycleCIHardeningV16Base {
+		addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_prior_tag", "v15 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCIHardeningV16BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV16Path, "public.w001_lifecycle_ci_hardening_v16_prior_tag", "v15 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV16Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCIHardeningV16ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV16TagObject {
+		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_prior_tag", "v16 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV16TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_prior_tag", "v16 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCIHardeningV16ReviewTag, w001LifecycleCIHardeningV16TagMessage)
+	if err != nil || target != w001LifecycleCIHardeningV17Base {
+		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_prior_tag", "v16 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleCIHardeningV17BaseTree {
+		addFinding(findings, w001LifecycleCIHardeningV17Path, "public.w001_lifecycle_ci_hardening_v17_prior_tag", "v16 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleV17Tag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleCIHardeningV17ReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleV17TagObject {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_prior_tag", "v17 lifecycle tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleV17TagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_prior_tag", "v17 lifecycle tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleCIHardeningV17ReviewTag, w001LifecycleCIHardeningV17TagMessage)
+	if err != nil || target != w001LifecycleTestHarnessRetirementBase {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_prior_tag", "v17 lifecycle tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleTestHarnessRetirementBaseTree {
+		addFinding(findings, w001LifecycleTestHarnessRetirementPath, "public.w001_lifecycle_test_harness_retirement_prior_tag", "v17 lifecycle tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleRetirementTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleTestHarnessRetirementReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleRetirementTagObject {
+		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_prior_tag", "retirement tag object must remain exact immutable unaccepted evidence")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleRetirementTagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_prior_tag", "retirement tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleTestHarnessRetirementReviewTag, w001LifecycleTestHarnessRetirementTagMessage)
+	if err != nil || target != w001LifecycleAuthorityRecoveryBase {
+		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_prior_tag", "retirement tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleAuthorityRecoveryBaseTree {
+		addFinding(findings, w001LifecycleAuthorityRecoveryPath, "public.w001_lifecycle_authority_recovery_prior_tag", "retirement tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleAuthorityRecoveryTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleAuthorityRecoveryReviewTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleAuthorityRecoveryTagObject {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_prior_tag", "authority-recovery tag object must remain exact and immutable")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleAuthorityRecoveryTagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_prior_tag", "authority-recovery tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, w001LifecycleAuthorityRecoveryReviewTag, w001LifecycleAuthorityRecoveryTagMessage)
+	if err != nil || target != w001LifecycleEvidencePreservationBase {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_prior_tag", "authority-recovery tag identity, target, message, and signature must remain exact")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleEvidencePreservationBaseTree {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_prior_tag", "authority-recovery tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
+func checkW001LifecycleArchivedRejectedRetirementTag(root string, findings *[]Finding) bool {
+	ref := "refs/tags/" + w001LifecycleRejectedRetirementArchiveTag
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
+	if err != nil || strings.TrimSpace(string(objectID)) != w001LifecycleRejectedRetirementTagObject {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_archive", "archival ref must expose the exact rejected retirement tag object")
+		return false
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", w001LifecycleRejectedRetirementTagObject)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_archive", "archived rejected retirement tag cannot be verified with the pinned key")
+		return false
+	}
+	target, err := verifyPinnedPlanningGrantTagForIdentity(object, publicKey, w001LifecycleTestHarnessRetirementReviewTag, w001LifecycleTestHarnessRetirementTagMessage, "engineer@example.com")
+	if err != nil || target != w001LifecycleRejectedRetirementTagTarget {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_archive", "archived tag must retain its original rejected identity, target, message, and signature")
+		return false
+	}
+	tree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if treeErr != nil || strings.TrimSpace(string(tree)) != w001LifecycleRejectedRetirementTagTree {
+		addFinding(findings, w001LifecycleEvidencePreservationPath, "public.w001_lifecycle_evidence_preservation_archive", "archived rejected retirement tag tree must remain exact")
+		return false
+	}
+	return true
+}
+
 func checkW001DeliveryReviewTag(root, expectedFeatureHead, reviewTag, reviewTagMessage string, findings *[]Finding) (string, bool) {
 	ref := "refs/tags/" + reviewTag
 	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", ref+"^{tag}")
@@ -4913,6 +9808,73 @@ func w001DeliveryGitHubCheckout(root, head, branch string, findings *[]Finding) 
 		return head, true, true
 	default:
 		addFinding(findings, w001DeliveryGrantPath, "public.w001_delivery_event", "unsupported GitHub event for W-001 delivery")
+		return "", false, false
+	}
+}
+
+func w001LifecycleGitHubCheckout(root, head, branch string, findings *[]Finding) (string, bool, bool) {
+	if os.Getenv("CI") != "true" || os.Getenv("GITHUB_ACTIONS") != "true" || os.Getenv("RUNNER_ENVIRONMENT") != "github-hosted" ||
+		os.Getenv("GITHUB_REPOSITORY") != planningGrantRepository || os.Getenv("GITHUB_WORKFLOW") != planningGrantWorkflow ||
+		os.Getenv("GITHUB_JOB") != planningGrantWorkflowJob || os.Getenv("GITHUB_SHA") != head ||
+		!samePlanningGrantRepositoryRoot(root, os.Getenv("GITHUB_WORKSPACE")) {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_runner", "lifecycle-completion checkout lacks canonical runner identity")
+		return "", false, false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ID")); !ok {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_runner", "lifecycle-completion GitHub run ID is invalid")
+		return "", false, false
+	}
+	workflowRef := os.Getenv("GITHUB_WORKFLOW_REF")
+	workflowPrefix := planningGrantRepository + "/" + planningGrantWorkflowPath + "@"
+	workflow, err := readRepoFile(root, planningGrantWorkflowPath)
+	if err != nil || fileSHA256(workflow) != canonicalFoundationWorkflowSHA256 || !strings.HasPrefix(workflowRef, workflowPrefix) {
+		addFinding(findings, planningGrantWorkflowPath, "public.w001_lifecycle_workflow", "lifecycle-completion CI requires the pinned protected workflow")
+		return "", false, false
+	}
+	event, ok := readPlanningGrantGitHubEvent(os.Getenv("GITHUB_EVENT_PATH"))
+	if !ok || event.Repository.FullName != planningGrantRepository {
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_event", "lifecycle-completion CI event identity is invalid")
+		return "", false, false
+	}
+	switch os.Getenv("GITHUB_EVENT_NAME") {
+	case "pull_request":
+		ref := os.Getenv("GITHUB_REF")
+		if branch != "" || !validPlanningGrantPullRequestRef(ref) || os.Getenv("GITHUB_HEAD_REF") != w001LifecycleBranch ||
+			os.Getenv("GITHUB_BASE_REF") != "main" || event.Number <= 0 || event.PullRequest == nil ||
+			event.PullRequest.Head.Ref != w001LifecycleBranch || event.PullRequest.Base.Ref != "main" ||
+			event.PullRequest.Base.SHA != w001LifecycleBase || !sha1Pattern.MatchString(event.PullRequest.Head.SHA) ||
+			!validAdvisoryPullRequestMergeSHA(event.PullRequest.MergeCommitSHA) {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_event", "pull-request event does not bind the signed lifecycle branch and base")
+			return "", false, false
+		}
+		workflowSuffix := strings.TrimPrefix(workflowRef, workflowPrefix)
+		if workflowSuffix != ref && workflowSuffix != "refs/heads/main" {
+			addFinding(findings, planningGrantWorkflowPath, "public.w001_lifecycle_workflow", "pull-request workflow ref is not canonical")
+			return "", false, false
+		}
+		parents, err := planningGrantCommitParents(root, head)
+		if err != nil || len(parents) != 2 || parents[0] != w001LifecycleBase || parents[1] != event.PullRequest.Head.SHA {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_pr_topology", "pull-request checkout must be the exact two-parent synthetic merge")
+			return "", false, false
+		}
+		mergeTree, mergeErr := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, featureErr := planningGrantGitOutput(root, "rev-parse", "--verify", event.PullRequest.Head.SHA+"^{tree}")
+		if mergeErr != nil || featureErr != nil || strings.TrimSpace(string(mergeTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_pr_tree", "pull-request synthetic merge tree must equal the reviewed feature tree")
+			return "", false, false
+		}
+		return event.PullRequest.Head.SHA, true, false
+	case "push":
+		if branch != "" && branch != "main" || os.Getenv("GITHUB_REF") != "refs/heads/main" || os.Getenv("GITHUB_REF_PROTECTED") != "true" ||
+			os.Getenv("GITHUB_HEAD_REF") != "" || os.Getenv("GITHUB_BASE_REF") != "" || workflowRef != workflowPrefix+"refs/heads/main" ||
+			event.Ref != "refs/heads/main" || event.Before != w001LifecycleBase || event.After != head ||
+			event.HeadCommit == nil || event.HeadCommit.ID != head || event.PullRequest != nil {
+			addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_event", "protected-main event does not bind the signed lifecycle base and squash")
+			return "", false, false
+		}
+		return head, true, true
+	default:
+		addFinding(findings, w001LifecycleGrantPath, "public.w001_lifecycle_event", "unsupported GitHub event for W-001 lifecycle completion")
 		return "", false, false
 	}
 }
@@ -6397,7 +11359,7 @@ func verifyPlanningGrantCommit(object, publicKey []byte) error {
 
 func planningGrantGitOutput(root string, arguments ...string) ([]byte, error) {
 	prefix := []string{"-c", "core.fsmonitor=false", "-c", "diff.external=", "-C", root}
-	command := exec.Command("git", append(prefix, arguments...)...)
+	command := exec.Command("/usr/bin/git", append(prefix, arguments...)...)
 	command.Env = planningGrantGitEnvironment()
 	return command.Output()
 }
@@ -6409,8 +11371,7 @@ func planningGrantGitEnvironment() []string {
 		if separator := strings.IndexByte(entry, '='); separator >= 0 {
 			key = entry[:separator]
 		}
-		switch key {
-		case "GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_ATTR_NOSYSTEM", "GIT_COMMON_DIR", "GIT_CONFIG_COUNT", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM", "GIT_CONFIG_PARAMETERS", "GIT_DIR", "GIT_INDEX_FILE", "GIT_NO_REPLACE_OBJECTS", "GIT_OBJECT_DIRECTORY", "GIT_PREFIX", "GIT_SHALLOW_FILE", "GIT_WORK_TREE":
+		if strings.HasPrefix(key, "GIT_") {
 			continue
 		}
 		environment = append(environment, entry)

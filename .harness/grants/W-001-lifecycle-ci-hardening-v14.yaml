@@ -1,0 +1,113 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCIHardeningGrant
+
+grant:
+  id: W-001-lifecycle-ci-hardening-v14
+  classification: PUBLIC
+  issuedAt: 2026-08-27T21:00:28Z
+  expiresAt: 2026-08-30T21:00:28Z
+  repository: greaveselliott/MARS-3
+  baseCommit: ce934054aed66c074e99a032191a6a51c620b947
+  baseTree: 73cab7fb7b1bd2fc1102dc4b16e9617fd7c26680
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-ci-hardening-v13
+  priorGrantSHA256: 221545ade5766928436cf75c30250c32780305f5e7d12f8a60bb4d35659d109d
+  priorGrantSignatureSHA256: 0984d7e54f0f93e3514c0ecb3cdd0cd5716d05a7b4571068648b47abcadf056f
+  priorReviewTag: mars3/w001-lifecycle-completion-v13
+  priorReviewTagObject: 8d50fbb230503f4ad24cfc7301e4e4924be30ec0
+  priorReviewTagTarget: ce934054aed66c074e99a032191a6a51c620b947
+  priorReviewTagTree: 73cab7fb7b1bd2fc1102dc4b16e9617fd7c26680
+  priorRun: 33112938711
+  priorJob: 98660186954
+  priorQADisposition: changes-requested
+  priorSecurityDisposition: changes-requested
+  pullRequest: 10
+  successorReviewTag: mars3/w001-lifecycle-completion-v14
+  successorReviewTagMessage: MARS-3 W-001 lifecycle CI physical path and transitive process boundary tree attestation v14
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: foundation-maintainer
+  failureOwnership: foundation
+  purpose: close physical clone containment and test-to-production Git executor bypasses
+  attemptId: w001-lifecycle-ci-hardening-v14
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  allowedEffects:
+    - preserve-the-v9-runtime-qualification-and-v10-v13-immutable-history-runs-and-dispositions
+    - require-a-direct-canonical-disposable-root-and-reject-symlinked-clone-target-ancestors-or-existing-targets
+    - resolve-the-existing-clone-parent-and-prove-physical-containment-before-command-construction
+    - route-the-three-existing-test-read-calls-through-the-exact-test-Git-wrapper
+    - extend-only-the-exact-read-only-cat-file-and-show-argv-schemas-needed-by-those-calls
+    - reject-test-calls-to-the-production-planning-Grant-Git-executor-in-every-doctrine-test-file
+    - retain-and-extend-the-recursive-process-and-physical-path-adversarial-regressions
+    - update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening
+    - create-signed-semantic-commits-and-one-signed-v14-release-manager-review-tag
+    - push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-ci-hardening-v14.yaml
+    - .harness/grants/W-001-lifecycle-ci-hardening-v14.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged
+    - clone-target-admission-uses-canonical-physical-ancestry-and-rejects-symlinked-roots-ancestors-and-targets
+    - every-admitted-clone-target-is-a-nonexistent-direct-child-of-the-canonical-disposable-root
+    - all-test-authored-Git-processes-route-through-the-exact-test-wrapper-and-closed-argv-schemas
+    - no-doctrine-test-file-calls-the-production-planning-Grant-Git-executor-directly
+    - process-and-path-enumeration-fails-closed-on-unreadable-unparseable-or-symlinked-surfaces
+    - v13-QA-and-Security-changes-requested-dispositions-remain-durable
+    - the-next-public-run-uses-the-exact-signed-v14-tree-and-tag
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged
+  prohibitedEffects:
+    - modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract
+    - mutate-M3-W001-or-any-other-Bead
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - rerun-or-move-any-v9-v10-v11-v12-or-v13-commit-tag-or-run
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - ci.test_git_clone_physical_escape
+    - ci.test_process_guard_transitive_bypass
+  cloneFinding: lexical containment admitted a symlinked clone ancestor that redirected writes outside the disposable root
+  processFinding: doctrine tests called the production Git executor directly and bypassed test wrapper admission
+  nextAction: prospective-physical-clone-and-test-Git-executor-isolation
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-ci-hardening-v14
+  detachedSignature: W-001-lifecycle-ci-hardening-v14.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

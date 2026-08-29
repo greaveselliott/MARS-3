@@ -110,17 +110,48 @@ operation without echoing credentials or payloads.
   version-matched claim and a verified live implementation lease. The sole
   W-001 bootstrap claim is the declared exception below and grants no tool,
   path, or implementation capability.
-- `in-progress -> in-review` requires the owning attempt's public-safe evidence
-  reference and handoff. The implementation lease no longer authorizes writes
-  after handoff.
+- `in-progress -> in-review` requires the owning execution attempt's
+  public-safe evidence, the immutable canonical-claim attempt, and the exact
+  live fence. The gateway releases that lease before one native Beads CAS; a
+  lost receipt is reconciled by canonical readback and the released lease can
+  never authorize a later effect.
 - An ordered reviewer may record only its own verdict against the exact
-  immutable commit. `changes-requested` returns the same Bead to `in-progress`;
-  a fresh implementation lease receives a newer epoch.
+  immutable commit and only while no implementation lease is active.
+  `changes-requested` archives that review cycle and returns the same Bead to
+  `in-progress`; a fresh implementation lease receives a newer epoch. A
+  `blocked` verdict also reopens the same Bead, persists public-safe reason,
+  `blocked_by`, normalized fingerprint, attempt, and next action, and never
+  consumes the only recovery route.
+- A noncompleted run disposition is append-only recovery evidence, not terminal
+  completion. `blocked`, `failed`, `preempted`, `cancelled`, `no-work`, and
+  `changes-requested` persist their failure context and return the same Bead to
+  `in-progress`; `in-review` explicitly retains review state and may later be
+  superseded by `completed` after the accepted review chain. Rehandoff archives
+  the earlier cycle and preserves its run history. Every noncompleted run has
+  a normalized fingerprint. Its first occurrence is attempt 1; its sole
+  equivalent automatic retry is attempt 2 and must record `blocked`; a third
+  equivalent automatic attempt is denied across current and archived cycles.
 - `done` requires the accepted review chain, merged immutable Git evidence,
   `completed` run disposition, and a successful reconciliation receipt. Only
-  the Delivery Orchestrator can request that terminal transition.
-- A blocked attempt remains in its truthful lifecycle with `blocker`,
-  `blocked_by`, normalized failure fingerprint, and exact next action. It is not
+  the Delivery Orchestrator can request that terminal transition. Closure uses
+  one native transaction and retains the terminal evidence references plus the
+  original canonical claim binding. Every active or terminal versioned work
+  record contains exactly one type-specific WorkClaim or BootstrapClaim. Null,
+  malformed, incomplete, dual, and type-confused claims are invalid; every
+  current and archived handoff names that sole claim attempt; and legacy
+  lifecycle scalars are absent or exactly derived from detailed records.
+  Canonical JSON key spellings are enforced recursively before typed decoding,
+  so case-folded aliases cannot overwrite validated fields. Active records
+  without detailed evidence must have empty legacy terminal/blocker state.
+  Dependency readiness derives from valid detailed review, run, and
+  reconciliation evidence whenever the record is versioned, claim-bearing, or
+  contains any raw detailed-lifecycle key, including an empty or null key. The
+  sparse legacy scalar fallback is limited to explicitly unversioned,
+  unclaimed records with no detailed-lifecycle key. Stripping detailed proof
+  therefore fails closed, and conflicting legacy completion scalars are
+  rejected.
+- A blocked attempt remains truthful with `blocker`, `blocked_by`, normalized
+  failure fingerprint, bounded attempt count, and exact next action. It is not
   silently closed or duplicated.
 - `superseded` requires an authorized reason and successor; it never masquerades
   as delivered value.

@@ -37,6 +37,8 @@ const (
 	CapabilityWorkHandoff    Capability = "work.handoff"
 	CapabilityReviewRecord   Capability = "review.record"
 	CapabilityRunDisposition Capability = "run.disposition"
+	CapabilityWorkReconcile  Capability = "work.reconcile"
+	CapabilityWorkClose      Capability = "work.close"
 	CapabilityLeaseIssue     Capability = "lease.issue"
 	CapabilityLeaseRenew     Capability = "lease.renew"
 	CapabilityLeaseRelease   Capability = "lease.release"
@@ -101,29 +103,126 @@ type Dependency struct {
 	Reconciled     bool           `json:"reconciled"`
 }
 
+type ReviewVerdict string
+
+const (
+	ReviewAccepted         ReviewVerdict = "accepted"
+	ReviewChangesRequested ReviewVerdict = "changes-requested"
+	ReviewBlocked          ReviewVerdict = "blocked"
+)
+
+type RunDispositionStatus string
+
+const (
+	RunCompleted        RunDispositionStatus = "completed"
+	RunBlocked          RunDispositionStatus = "blocked"
+	RunInReview         RunDispositionStatus = "in-review"
+	RunChangesRequested RunDispositionStatus = "changes-requested"
+	RunNoWork           RunDispositionStatus = "no-work"
+	RunPreempted        RunDispositionStatus = "preempted"
+	RunCancelled        RunDispositionStatus = "cancelled"
+	RunFailed           RunDispositionStatus = "failed"
+)
+
+// HandoffRecord is canonical Beads metadata for one immutable implementation
+// handoff. It contains only public-safe identifiers and hashes.
+type HandoffRecord struct {
+	AttemptID               string   `json:"attempt_id"`
+	CanonicalClaimAttemptID string   `json:"canonical_claim_attempt_id"`
+	FenceDigest             string   `json:"fence_digest"`
+	HeadSHA                 string   `json:"head_sha"`
+	EvidenceRefs            []string `json:"evidence_refs"`
+	NextProfileID           string   `json:"next_profile_id"`
+	IdempotencyKey          string   `json:"idempotency_key"`
+}
+
+// FailureContext is the public-safe convergence record required for a blocked
+// review or non-completed run. It carries no raw output or private payload.
+type FailureContext struct {
+	Reason             string   `json:"reason"`
+	BlockedBy          []string `json:"blocked_by,omitempty"`
+	FailureFingerprint string   `json:"failure_fingerprint,omitempty"`
+	Attempt            uint32   `json:"attempt"`
+	NextAction         string   `json:"next_action"`
+}
+
+// ReviewRecord is appended in the Bead's declared verification order. A
+// reviewer can record only its own verdict against the handoff commit.
+type ReviewRecord struct {
+	ReviewerProfileID string          `json:"reviewer_profile_id"`
+	Verdict           ReviewVerdict   `json:"verdict"`
+	HeadSHA           string          `json:"head_sha"`
+	EvidenceRefs      []string        `json:"evidence_refs"`
+	IdempotencyKey    string          `json:"idempotency_key"`
+	Failure           *FailureContext `json:"failure,omitempty"`
+}
+
+// ReviewCycle preserves a prior handoff and its ordered review results when a
+// changes-requested verdict reopens the same Bead for another attempt.
+type ReviewCycle struct {
+	Handoff        HandoffRecord          `json:"handoff"`
+	Reviews        []ReviewRecord         `json:"reviews"`
+	RunHistory     []RunDispositionRecord `json:"run_history,omitempty"`
+	RunDisposition *RunDispositionRecord  `json:"run_disposition,omitempty"`
+}
+
+type RunDispositionRecord struct {
+	PrincipalProfileID string               `json:"principal_profile_id"`
+	Status             RunDispositionStatus `json:"status"`
+	HeadSHA            string               `json:"head_sha"`
+	EvidenceRefs       []string             `json:"evidence_refs"`
+	IdempotencyKey     string               `json:"idempotency_key"`
+	Failure            *FailureContext      `json:"failure,omitempty"`
+}
+
+type ReconciliationRecord struct {
+	PrincipalProfileID string   `json:"principal_profile_id"`
+	HeadSHA            string   `json:"head_sha"`
+	MergedSHA          string   `json:"merged_sha"`
+	MergedTree         string   `json:"merged_tree"`
+	PullRequestID      string   `json:"pull_request_id"`
+	ProtectedMainRunID string   `json:"protected_main_run_id"`
+	EvidenceRefs       []string `json:"evidence_refs"`
+	IdempotencyKey     string   `json:"idempotency_key"`
+}
+
+type TerminalRecord struct {
+	PrincipalProfileID string   `json:"principal_profile_id"`
+	HeadSHA            string   `json:"head_sha"`
+	EvidenceRefs       []string `json:"evidence_refs"`
+	IdempotencyKey     string   `json:"idempotency_key"`
+}
+
 // WorkItem is a bounded projection of canonical Beads/Dolt state. It does not
 // contain descriptions, comments, credentials, backend addresses, or private
 // source content.
 type WorkItem struct {
-	TenantID           string           `json:"tenant_id"`
-	ProjectID          string           `json:"project_id"`
-	BeadID             string           `json:"bead_id"`
-	DisplayID          string           `json:"display_id"`
-	NativeStatus       string           `json:"native_status"`
-	LifecycleState     LifecycleState   `json:"lifecycle_state"`
-	Assignee           string           `json:"assignee"`
-	ClaimAttemptID     string           `json:"claim_attempt_id,omitempty"`
-	GoalIDs            []string         `json:"goal_ids"`
-	ProductDecisionIDs []string         `json:"product_decision_ids"`
-	FeatureID          string           `json:"feature_id"`
-	ScenarioIDs        []string         `json:"scenario_ids"`
-	ExclusivePaths     []string         `json:"exclusive_paths"`
-	VerificationOrder  []string         `json:"verification_order"`
-	Blockers           []string         `json:"blockers"`
-	Dependencies       []Dependency     `json:"dependencies"`
-	Labels             []Label          `json:"labels"`
-	Version            WorkVersion      `json:"version"`
-	Integrity          IntegrityDigests `json:"integrity"`
+	TenantID           string                 `json:"tenant_id"`
+	ProjectID          string                 `json:"project_id"`
+	BeadID             string                 `json:"bead_id"`
+	DisplayID          string                 `json:"display_id"`
+	NativeStatus       string                 `json:"native_status"`
+	LifecycleState     LifecycleState         `json:"lifecycle_state"`
+	Assignee           string                 `json:"assignee"`
+	ClaimAttemptID     string                 `json:"claim_attempt_id,omitempty"`
+	GoalIDs            []string               `json:"goal_ids"`
+	ProductDecisionIDs []string               `json:"product_decision_ids"`
+	FeatureID          string                 `json:"feature_id"`
+	ScenarioIDs        []string               `json:"scenario_ids"`
+	ExclusivePaths     []string               `json:"exclusive_paths"`
+	VerificationOrder  []string               `json:"verification_order"`
+	Handoff            *HandoffRecord         `json:"handoff,omitempty"`
+	Reviews            []ReviewRecord         `json:"reviews,omitempty"`
+	ReviewHistory      []ReviewCycle          `json:"review_history,omitempty"`
+	RunHistory         []RunDispositionRecord `json:"run_history,omitempty"`
+	RunDisposition     *RunDispositionRecord  `json:"run_disposition,omitempty"`
+	Reconciliation     *ReconciliationRecord  `json:"reconciliation,omitempty"`
+	Terminal           *TerminalRecord        `json:"terminal,omitempty"`
+	Blockers           []string               `json:"blockers"`
+	Dependencies       []Dependency           `json:"dependencies"`
+	Labels             []Label                `json:"labels"`
+	Version            WorkVersion            `json:"version"`
+	Integrity          IntegrityDigests       `json:"integrity"`
 }
 
 type ReadyRequest struct {
@@ -191,6 +290,74 @@ type ClaimResponse struct {
 	Lease      CapabilityLease `json:"lease"`
 	Replayed   bool            `json:"replayed"`
 	ReceiptRef string          `json:"receipt_ref"`
+}
+
+// HandoffRequest atomically ends implementation authority and submits the
+// current attempt's immutable commit to the first declared reviewer.
+type HandoffRequest struct {
+	BeadID            string           `json:"bead_id"`
+	ExpectedVersion   WorkVersion      `json:"expected_version"`
+	ExpectedIntegrity IntegrityDigests `json:"expected_integrity"`
+	Fence             FencingTuple     `json:"fence"`
+	HeadSHA           string           `json:"head_sha"`
+	EvidenceRefs      []string         `json:"evidence_refs"`
+	NextProfileID     string           `json:"next_profile_id"`
+	IdempotencyKey    string           `json:"idempotency_key"`
+	TraceRef          string           `json:"trace_ref"`
+}
+
+type ReviewVerdictRequest struct {
+	BeadID            string           `json:"bead_id"`
+	ExpectedVersion   WorkVersion      `json:"expected_version"`
+	ExpectedIntegrity IntegrityDigests `json:"expected_integrity"`
+	HeadSHA           string           `json:"head_sha"`
+	Verdict           ReviewVerdict    `json:"verdict"`
+	EvidenceRefs      []string         `json:"evidence_refs"`
+	IdempotencyKey    string           `json:"idempotency_key"`
+	TraceRef          string           `json:"trace_ref"`
+	Failure           *FailureContext  `json:"failure,omitempty"`
+}
+
+type RunDispositionRequest struct {
+	BeadID            string               `json:"bead_id"`
+	ExpectedVersion   WorkVersion          `json:"expected_version"`
+	ExpectedIntegrity IntegrityDigests     `json:"expected_integrity"`
+	HeadSHA           string               `json:"head_sha"`
+	Status            RunDispositionStatus `json:"status"`
+	EvidenceRefs      []string             `json:"evidence_refs"`
+	IdempotencyKey    string               `json:"idempotency_key"`
+	TraceRef          string               `json:"trace_ref"`
+	Failure           *FailureContext      `json:"failure,omitempty"`
+}
+
+type ReconciliationRequest struct {
+	BeadID             string           `json:"bead_id"`
+	ExpectedVersion    WorkVersion      `json:"expected_version"`
+	ExpectedIntegrity  IntegrityDigests `json:"expected_integrity"`
+	HeadSHA            string           `json:"head_sha"`
+	MergedSHA          string           `json:"merged_sha"`
+	MergedTree         string           `json:"merged_tree"`
+	PullRequestID      string           `json:"pull_request_id"`
+	ProtectedMainRunID string           `json:"protected_main_run_id"`
+	EvidenceRefs       []string         `json:"evidence_refs"`
+	IdempotencyKey     string           `json:"idempotency_key"`
+	TraceRef           string           `json:"trace_ref"`
+}
+
+type TerminalTransitionRequest struct {
+	BeadID            string           `json:"bead_id"`
+	ExpectedVersion   WorkVersion      `json:"expected_version"`
+	ExpectedIntegrity IntegrityDigests `json:"expected_integrity"`
+	HeadSHA           string           `json:"head_sha"`
+	EvidenceRefs      []string         `json:"evidence_refs"`
+	IdempotencyKey    string           `json:"idempotency_key"`
+	TraceRef          string           `json:"trace_ref"`
+}
+
+type LifecycleMutationResponse struct {
+	Work       WorkItem `json:"work"`
+	Replayed   bool     `json:"replayed"`
+	ReceiptRef string   `json:"receipt_ref"`
 }
 
 // FencingTuple is revalidated immediately before every material write. It is

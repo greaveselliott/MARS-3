@@ -1,0 +1,119 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCIHardeningGrant
+
+grant:
+  id: W-001-lifecycle-ci-hardening-v17
+  classification: PUBLIC
+  issuedAt: 2026-08-28T20:33:09Z
+  expiresAt: 2026-08-31T20:33:09Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 25d2f14e20e74f1415caa4118a93c359f9370031
+  baseTree: d9bf0e3f89807c12c5be5a58ea68fd04715aa740
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-ci-hardening-v16
+  priorGrantSHA256: 95fa2caa2befd270ed15f9c317a37ceec442b70c0826a869323d34c3d612d835
+  priorGrantSignatureSHA256: 26711612175f7969ec168159e535e7b6b7273641690ed4c486e609cddaa844e5
+  priorReviewTag: mars3/w001-lifecycle-completion-v16
+  priorReviewTagObject: 125a596c00a5a00f40fbda002f38cc06e3f0b5cb
+  priorReviewTagTarget: 25d2f14e20e74f1415caa4118a93c359f9370031
+  priorReviewTagTree: d9bf0e3f89807c12c5be5a58ea68fd04715aa740
+  priorRun: 33206197037
+  priorJob: 98967743138
+  priorQADisposition: accepted
+  priorSecurityDisposition: changes-requested
+  pullRequest: 10
+  successorReviewTag: mars3/w001-lifecycle-completion-v17
+  successorReviewTagMessage: MARS-3 W-001 lifecycle CI descriptor-stream and closed executor attestation v17
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: foundation-maintainer
+  failureOwnership: foundation
+  purpose: close copied-invocation replay, fetch-source replacement, and ambient production-executor bypasses
+  attemptId: w001-lifecycle-ci-hardening-v17
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  allowedEffects:
+    - preserve-the-v9-runtime-qualification-and-v10-v16-immutable-history-runs-and-dispositions
+    - move-the-one-shot-consumption-gate-inside-the-captured-executor-state-shared-by-all-copies
+    - descriptor-bind-both-fetch-source-and-destination-at-command-admission
+    - replace-fetch-path-consumption-with-fixed-source-pack-and-destination-index-transfer
+    - pass-no-admitted-fetch-source-pathname-to-any-child-process
+    - derive-the-complete-direct-production-process-entrypoint-inventory-from-non-test-source
+    - deny-every-production-process-entrypoint-identifier-and-direct-executor-field-access-from-tests
+    - retain-and-extend-all-v10-v16-environment-argv-process-and-physical-path-regressions
+    - update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening
+    - reproduce-the-pinned-v9-native-Beads-artifact-and-non-skipped-conformance-without-changing-patch-bytes
+    - create-signed-semantic-commits-and-one-signed-v17-release-manager-review-tag
+    - push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-ci-hardening-v17.yaml
+    - .harness/grants/W-001-lifecycle-ci-hardening-v17.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged
+    - copied-invocation-values-and-extracted-executor-fields-share-one-non-resettable-consumption-gate
+    - fetch-source-and-destination-identities-are-descriptor-bound-before-the-invocation-is-returned
+    - no-source-pathname-is-consumed-after-fetch-admission-and-replacement-cannot-redirect-the-transfer
+    - every-transfer-process-uses-the-fixed-descriptor-trampoline-literal-system-executables-and-zero-ambient-environment
+    - direct-production-process-entrypoints-are-derived-repository-wide-and-none-is-callable-from-tests
+    - direct-executor-field-access-and-unexpected-process-callers-fail-closed-under-recursive-admission
+    - process-and-path-enumeration-fails-closed-on-unreadable-unparseable-or-symlinked-surfaces
+    - v16-QA-accepted-and-Security-changes-requested-dispositions-remain-durable
+    - the-next-public-run-uses-the-exact-signed-v17-tree-and-tag
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged
+  prohibitedEffects:
+    - modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract
+    - mutate-M3-W001-or-any-other-Bead
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - rerun-or-move-any-v9-v10-v11-v12-v13-v14-v15-or-v16-commit-tag-or-run
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - ci.test_git_invocation_one_shot_field_bypass
+    - ci.test_git_fetch_source_toctou
+    - ci.test_process_guard_refresh_executor_bypass
+  oneShotFinding: the captured executor field could be copied and invoked outside the wrapper mutex and nil transition
+  sourceFinding: the admitted local fetch source remained a pathname that could be replaced before Git consumed it
+  processFinding: same-package tests could call the ambient arbitrary-argv production gitOutput executor outside the test constructor inventory
+  nextAction: prospective-shared-one-shot-descriptor-stream-and-closed-production-executor-admission
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-ci-hardening-v17
+  detachedSignature: W-001-lifecycle-ci-hardening-v17.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

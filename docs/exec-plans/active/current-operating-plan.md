@@ -2,7 +2,7 @@
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
-**Updated:** 2026-08-26
+**Updated:** 2026-08-28
 **Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
@@ -16,9 +16,16 @@ canonical Bead as `in-progress`. This `delivery` projection records that
 durable fact. The accepted postclaim tree has been squash-merged with exact
 tree equality, protected-main CI passed, and the Orchestrator recorded the
 bounded reconciliation receipt in M3-W001. The separately signed
-`W-001-delivery-v2` grant now authorizes the Work Authority Engineer's bounded
-implementation; no live lease exists yet, and the first verified development
-lease remains W-001 acceptance evidence.
+`W-001-delivery-v2` grant authorized the merged core implementation. Exact-tree
+QA and Security review and protected-main run `33069887434` accepted that
+checkpoint. The completion audit then found that handoff, ordered review
+verdict, run disposition, reconciliation, and terminal lifecycle routes remain
+absent. W-001 therefore remains `in-progress`. Independent review of the
+immutable v5 candidate requested changes for terminal claim lineage,
+full-fence replay, missing-receipt recovery, truthful nonterminal convergence,
+and reproducible qualification. The separately signed
+`W-001-lifecycle-correction-v6` authorizes only those bounded corrections; no
+live lease exists.
 
 ## Durable lineage
 
@@ -75,9 +82,11 @@ heartbeat it, reject stale or mismatched writes, append a bounded event, and
 rebuild the read projection without giving Temporal or PostgreSQL ownership of
 the work graph. The current phase schedules delivery against the verified
 claim. The signed delivery grant is active for its exact attempt, base,
-principal, and paths; no lease exists yet. Its v2 publication route preserves
-the original delivery branch as public foundation-failure evidence and
-republishes from accepted `main` without a scanner exception or history rewrite.
+principal, and paths; no lease exists yet. Its v2 publication route preserved
+the original delivery branch as public foundation-failure evidence and the v4
+correction admitted exactly ten immutable synthetic scanner fingerprints. The
+current correction attempt closes the exact v5 findings without relabeling the
+accepted core checkpoint or the unaccepted v5 candidate as terminally complete.
 
 ## Scenario priority
 
@@ -92,8 +101,8 @@ The scenarios are ordered to establish read truth before mutation, then prove
 that losing authority blocks the W-001 synthetic effect boundary and defines
 the contract later real brokers must enforce. M3-W001 already
 declares this exact group and required evidence. The canonical claim itself
-grants neither a lease nor source-code authority; the separately signed
-delivery grant supplies the current bounded source authority.
+grants neither a lease nor source-code authority; the separately signed v6
+lifecycle-correction grant supplies the current bounded source authority.
 
 ## Delivery waves
 
@@ -147,11 +156,20 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: implement the S1 gateway-only walking skeleton,
-  then add atomic claim, durable fencing leases, pre-effect validation, direct
-  access denial, and ordered projection recovery in scenario order. The
-  gateway must issue and verify the first W-001 development lease before any
-  later effect may rely on it.
+- Required next transition: execute the prospective signed
+  `W-001-lifecycle-evidence-preservation-v1` grant from exact recovery head
+  `5251ae37a2914e9f750d4c5900f46c7bb736b2d9`, tree
+  `82a4a84cae31d0003aecddf654217cbfb2bd29a6`. Preserve the existing rejected
+  retirement tag object `e08beb772696b078783d0c75d23c1029581cdeb1`
+  byte-for-byte under distinct archival tag
+  `mars3/w001-lifecycle-test-harness-retirement-rejected-v1`; never select that
+  ref as a current review tag or acceptance signal. Retain the retirement and
+  recovery design bytes, publish one distinct signed preservation candidate,
+  verify it through one fresh exact-head public run, then route it through
+  independent QA followed by Security. No canonical handoff or later lifecycle
+  mutation may execute until both independent reviews accept, merge is
+  separately authorized, and a later reconciliation authority binds the
+  protected-main result.
 
 The W-001 bootstrap grant is deliberately not a live lease: it is
 human-directed, binds one base commit and attempt, permits only canonical W-001
@@ -160,6 +178,239 @@ self-host conformance. The first PostgreSQL epoch is W-001 acceptance evidence,
 not a prerequisite for building the epoch service. The authoritative Bead
 holds exclusive paths and mutable lifecycle; this plan does not copy lease
 values or represent a proposed owner as a current grant.
+
+## Lifecycle-correction and CI-stabilization candidate
+
+The v9 bounded candidate retains the typed handoff, ordered review, run,
+reconciliation, and terminal routes while closing the independent v5 findings.
+Terminal versioned work must retain exactly one complete WorkClaim or
+BootstrapClaim plus detailed lifecycle evidence. Every current or archived
+handoff binds the immutable canonical-claim attempt and a digest of the full
+normalized fence. A replay may report success only after verifying or
+repairing a durable reconciliation receipt. Blocked review and every declared
+noncompleted run retain public-safe reason, blocker, normalized fingerprint,
+attempt, and next action. The first equivalent failure is attempt 1, the sole
+retry is attempt 2 and becomes durably blocked, and a third automatic attempt
+is denied across current and archived cycles. Null, malformed, incomplete,
+dual, or type-confused claim objects fail closed; every handoff claim attempt
+equals the sole retained claim; and legacy lifecycle scalars cannot contradict
+detailed evidence. Completed closure still requires QA and Security acceptance,
+merged evidence, completed run, and reconciliation.
+
+Independent QA and Security changes-requested the signed v6 checkpoint. They
+confirmed the earlier full-fence replay, missing-receipt, recovery-route, native,
+and PostgreSQL corrections, but found that claim attempts were not joined across
+all handoff history, failure fingerprints were not monotonic across equivalent
+retries, and the published binary hash did not reproduce from independent cold
+builds. The signed `W-001-lifecycle-correction-v7` grant preserves v6 and permits
+only those additive corrections and their qualification.
+
+Independent QA and Security also changes-requested the immutable v7 checkpoint
+at head `36d8c981ebde65e694416caf16fc02d50aac2a67`, tree
+`be55454779c2c0dd08adc08666c2b7ee3826448f`. They confirmed the v6 corrections
+and reproducible builder, but found that case-folded JSON claim aliases could
+overwrite canonical fields, active legacy-only metadata could claim terminal
+state, and dependency readiness ignored contradictory detailed lifecycle
+records. The signed `W-001-lifecycle-correction-v8` grant permits only those
+three fail-closed corrections, native parity, qualification, and fresh review.
+
+Independent QA and Security changes-requested the immutable v8 checkpoint at
+head `6d6b90ef495cd64286e755e90d199a3cb622cd54`, tree
+`f596e2a148f055bcac90960419b2e22928bd471c`. They confirmed the project
+adapter's case-folded claim rejection, active legacy-scalar denial, and
+detailed-state contradiction handling, but found two remaining parity gaps:
+the patched native transaction validated canonical keys only at the top-level
+metadata object, and a versioned or claim-bearing dependency could strip its
+detailed lifecycle records and fall back to sparse legacy readiness. The
+signed `W-001-lifecycle-correction-v9` grant permits only recursive native
+canonical-key admission, strict sparse-legacy dependency compatibility, their
+qualification, public evidence, and fresh immutable review.
+
+V9 head `ad845ff81f1e64b9e4110162a77a65a844891731`, tree
+`e4a08e5a4b211003dc29609a0128856eec306061`, passed every local and
+no-skip qualification gate. Public run `33104553091` then exhausted its two
+allowed attempts on the same foundation-owned disposable Git-pack cleanup
+race, after authority packages had passed. The signed
+`W-001-lifecycle-ci-stabilization-v10` grant preserves the V9 runtime,
+contracts, qualification bytes, tag, and failed runs; it permits only applying
+bounded no-maintenance/no-auto-GC/no-detach configuration to every disposable
+test Git command, updating the validator and evidence, and fresh review.
+
+Independent QA and Security changes-requested the immutable V10 checkpoint at
+head `47b19b2c89d72fbf9eb5356ceefe33783d691aa4`, tree
+`0ebe496c48871b040a7fcd7a286073f2c1d40153`. They verified the V9 runtime and
+qualification remained byte-exact and public run `33105792480`, job
+`98635155160`, passed, but found two test-fixture fencing defects: one raw
+pre-repository clone bypassed the sanitized wrapper
+(`ci.test_git_sanitization_incomplete`), and disposable repositories retained
+local maintenance configuration despite the command-local-only contract
+(`ci.test_git_configuration_persisted`). The signed
+`W-001-lifecycle-ci-fencing-v11` grant permits only routing every disposable
+Git operation through the single bounded wrapper, removing persistent fixture
+configuration, adding fail-closed regressions, and fresh immutable review.
+
+Independent QA accepted the immutable V11 checkpoint at head
+`54f4593b1730ff9ae04a2e5cce0589c6baedfee6`, tree
+`44ba564be30e0db0aa735d76539c3604a5d79e3f`; Security changes-requested the
+same subject after public run `33108126981`, job `98643418071`, passed. The
+remaining findings were caller-overridable maintenance fences
+(`ci.test_git_fences_caller_overridable`), ambient Git exec/template execution
+(`ci.test_git_environment_execution_injection`), and a one-file literal source
+guard that missed equivalent process calls (`ci.test_process_guard_fail_open`).
+The signed `W-001-lifecycle-ci-hardening-v12` grant permits only absolute
+trusted-Git execution, fail-closed argument and environment admission, a
+repository-wide AST process allowlist, adversarial regressions, and fresh
+immutable review.
+
+Independent QA and Security changes-requested the immutable V12 checkpoint at
+head `3c8d55aa39e4e099d8a922f8e13a71efcbe2c78b`, tree
+`c4bb80ab477b7fcbe73a7a237479e44703393952`, after public run `33110339883`,
+job `98651204635`, passed. Exact Git long-option abbreviations, compact
+upload-pack syntax, outside-root Git-directory selection, and config-producing
+subcommands escaped the denylist (`ci.test_git_argv_schema_fail_open`). Direct
+`exec.Cmd` construction, indirect syscall function values, and nested test
+files escaped the nonrecursive process guard
+(`ci.test_process_guard_incomplete`). The signed
+`W-001-lifecycle-ci-hardening-v13` grant permits only exact per-subcommand Git
+argv schemas, recursive closed process admission, the matching adversarial
+regressions, and fresh immutable review. W-001 therefore remains
+`in-progress`; no merge, canonical lifecycle mutation, or live lease is
+authorized by this correction.
+
+Independent QA and Security changes-requested the immutable V13 checkpoint at
+head `ce934054aed66c074e99a032191a6a51c620b947`, tree
+`73cab7fb7b1bd2fc1102dc4b16e9617fd7c26680`, after public run `33112938711`,
+job `98660186954`, passed. A lexically contained clone destination could resolve
+through a symlinked ancestor and write outside the disposable root
+(`ci.test_git_clone_physical_escape`). Doctrine tests could also call the
+production `planningGrantGitOutput` executor directly and bypass the closed
+test wrapper (`ci.test_process_guard_transitive_bypass`). The prospective
+signed `W-001-lifecycle-ci-hardening-v14` grant permits only canonical physical
+clone containment, routing the three historical read-only calls through the
+bounded test wrapper, transitive production-executor denial, their adversarial
+regressions, and fresh immutable review. W-001 therefore remains
+`in-progress`; no merge, canonical lifecycle mutation, or live lease is
+authorized by this correction.
+
+Independent QA and Security changes-requested the immutable V14 checkpoint at
+head `d631bec4ed786116c13e36995722d91d48d64109`, tree
+`b9467f12b2031c5159ef749938bbd4f475eb6153`, after public run `33123061855`,
+job `98694494697`, passed. A real disposable root reached through a symlinked
+ancestor remained admitted (`ci.test_git_root_ancestor_alias_admitted`), clone
+target reservation was released before Git consumed the pathname
+(`ci.test_git_clone_reservation_toctou`), and dot-imported `os` or `syscall`
+process entrypoints escaped selector-only admission
+(`ci.test_process_guard_dot_import_bypass`). The signed
+`W-001-lifecycle-ci-hardening-v15` grant permits only removing the writable
+clone subprocess, descriptor-binding every remaining test Git process to the
+verified physical root, rejecting dot/blank guarded process imports, retaining
+the prior adversarial corpus, reproducing the pinned V9 native qualification,
+and fresh immutable review. W-001 therefore remains `in-progress`; no merge,
+canonical lifecycle mutation, or live lease is authorized by this correction.
+
+Independent QA and Security changes-requested the immutable V15 checkpoint at
+head `a46f16deff2fc06c5d0d21377a3bb2c65e873fc9`, tree
+`c2e482717f182040708cbf2551ee266de2485a30`, after public run `33165311496`,
+job `98829194619`, passed. The V14 findings were closed, but the new descriptor
+helper could be called directly outside its intended parent provenance
+(`ci.test_git_descriptor_helper_transitive_bypass`), and its mutable Go test
+executable pathname could be replaced between resolution and execution
+(`ci.test_git_helper_executable_path_toctou`). The prospective signed
+`W-001-lifecycle-ci-hardening-v16` grant permits only removing that self-exec
+helper surface, opening the root descriptor at command admission, using one
+fixed non-input descriptor trampoline and literal system executables, rejecting
+dynamic or transitive process bypasses, restricting fetch to canonical local
+sources, and fresh qualification and review. W-001 therefore remains
+`in-progress`; no merge, canonical lifecycle mutation, or live lease is
+authorized by this correction.
+
+Independent QA accepted and Security changes-requested the immutable V16
+checkpoint at head `25d2f14e20e74f1415caa4118a93c359f9370031`, tree
+`d9bf0e3f89807c12c5be5a58ea68fd04715aa740`, after public run
+`33206197037`, job `98967743138`, passed. A copied invocation or extracted
+executor field could bypass the wrapper-level one-shot transition
+(`ci.test_git_invocation_one_shot_field_bypass`), the canonical local fetch
+source remained replaceable before Git consumed its pathname
+(`ci.test_git_fetch_source_toctou`), and same-package tests could call the
+ambient arbitrary-argv production `gitOutput` executor outside the test
+constructor inventory (`ci.test_process_guard_refresh_executor_bypass`). The
+signed `W-001-lifecycle-ci-hardening-v17` grant permits only moving one-shot
+consumption into shared captured state, replacing path-based fetch with a
+source- and destination-descriptor-bound pack stream, deriving and denying the
+closed production process-entry inventory from tests, retaining the prior
+regression corpus, and fresh qualification and review. W-001 therefore remains
+`in-progress`; no merge, canonical lifecycle mutation, live lease, or
+production effect is authorized by this correction.
+
+Independent QA and Security changes-requested the immutable V17 checkpoint at
+head `0ed9482fea1bd22bf4198ff9d9223e004853212a`, tree
+`e1c3179abf82bef70f56ee330735072b9ed8b510`, signed annotated tag object
+`3767eab4895d567ece26ab42eef006926fb8dddd`. Exact-head public run
+`33213446709`, job `98991727867`, failed on Ubuntu Git 2.55 because the fixture
+attempted `update-ref FETCH_HEAD`, which Git correctly rejected as a pseudoref
+(`ci.public_gate_fetch_head_pseudoref_portability`). Security also found that
+outer directory descriptors did not bind later mutable `.git` discovery
+(`ci.test_git_gitdir_rebinding_bypass`), direct-name source scanning did not
+close transitive production process calls
+(`ci.test_process_guard_transitive_production_caller_bypass`), writable local
+Git configuration could still start filters
+(`ci.test_git_local_config_process_bypass`), and top-level function literals
+escaped a function-declaration-only scan
+(`ci.test_process_guard_top_level_funclit_bypass`).
+
+Those findings recur in the same attempted candidate-source self-sandbox
+class, so no V18 incremental fence is scheduled. The signed
+`W-001-lifecycle-test-harness-retirement-v1` grant instead authorizes one
+whole-design retirement across exactly nine paths. The test Git runner remains
+deterministic fixture infrastructure: literal system Git, exact admitted argv,
+zero ambient environment, canonical local-only fetch sources, disabled hooks,
+and disabled automatic maintenance. Ordinary `git fetch` creates `FETCH_HEAD`.
+The descriptor trampoline, captured one-shot executor, pack/index stream, and
+AST process inventory are removed rather than represented as a security
+sandbox. Candidate-code security is owned by the immutable, read-only,
+no-credential public workflow and independent review. W-001 therefore remains
+`in-progress`; no merge, canonical lifecycle mutation, live lease, downstream
+ticket, or production effect is authorized by this retirement.
+
+The completed retirement architecture is not accepted delivery authority.
+Its first signed tag object
+`e08beb772696b078783d0c75d23c1029581cdeb1` and failed public run
+`33218389712` / job `99007023124` are preserved alongside corrected signed tag
+object `60edcd3fd4603d66d7dd4feedbdae034fff13efa` and successful public run
+`33222628400` / job `99019716295`. Independent QA accepted exact head
+`0b0195ba0953d1d6d387aad699605ff864cfac1d`, tree
+`f96506ca6b7b053d41d4067eb1c926b9d4b39b40`; Security returned
+`changes-requested` with
+`authority.retirement_grant_retroactive_admission` and
+`authority.retirement_publication_out_of_scope_retry`. The signed
+`W-001-lifecycle-authority-recovery-v1` grant adopts that exact tree only as an
+unaccepted recovery preimage. It authorizes removal of the commit-specific
+timestamp exception and one new prospective signed publication boundary while
+keeping the retirement fixture bytes unchanged. The next evidence must be a
+distinct signed recovery tag, one fresh exact-head public run, and fresh QA
+then Security review. W-001 remains `in-progress`; merge, Beads/lease mutation,
+production change, and downstream work remain unauthorized.
+
+The prospective authority-recovery candidate reached signed head
+`5251ae37a2914e9f750d4c5900f46c7bb736b2d9`, tree
+`82a4a84cae31d0003aecddf654217cbfb2bd29a6`, signed tag object
+`f561cb14a471e0cc773ba6b4bd81308ee8f0d873`, and successful exact-head public
+run `33224636939` / job `99025722797`. Independent QA returned
+`changes-requested` with `QA-W001-RECOVERY-001`: the first rejected retirement
+tag object `e08beb772696b078783d0c75d23c1029581cdeb1` remained unreachable from
+every remote ref and absent from a fresh clone. Security was not run because QA
+did not accept. The signed `W-001-lifecycle-evidence-preservation-v1` grant
+authorizes only byte-exact publication of that existing object under
+`mars3/w001-lifecycle-test-harness-retirement-rejected-v1`, the seven-path
+validation/evidence projection, and one fresh signed candidate/run/review
+sequence. The archival ref remains rejected and unaccepted evidence. W-001
+remains `in-progress`; merge, Beads/lease mutation, production change, and
+downstream work remain unauthorized.
+
+This is candidate implementation evidence only. F-002 scenarios remain
+`failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation
+is authorized until a signed checkpoint receives independent QA and Security
+acceptance and protected-main reconciliation.
 
 ## Success evidence
 

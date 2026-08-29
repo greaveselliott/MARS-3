@@ -13,9 +13,12 @@ package doctrine
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -114,7 +117,7 @@ func TestW001ExecutionAuthorizationFailsClosedWithoutPinnedSignature(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(t.TempDir(), "execution.json")
+	path := filepath.Join(planningGrantCanonicalTempDir(t), "execution.json")
 	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -252,7 +255,7 @@ func TestW001PostclaimGrantFailsClosed(t *testing.T) {
 
 func writeW001PostclaimGrantFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001PostclaimGrantPath, grant)
 	writePlanningGrantTestFile(t, root, w001PostclaimGrantSignature, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -297,7 +300,7 @@ func TestW001PostclaimCIFixRejectsTampering(t *testing.T) {
 		{name: "scope", old: "    - internal/doctrine/grant_test.go", new: "    - internal/authority/escape.go"},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			writePlanningGrantTestFile(t, root, w001PostclaimCIFixPath, bytes.Replace(addendum, []byte(testCase.old), []byte(testCase.new), 1))
 			writePlanningGrantTestFile(t, root, w001PostclaimCIFixSignature, signature)
 			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -401,7 +404,7 @@ func TestW001PostclaimSecurityFixFailsClosed(t *testing.T) {
 
 func writeW001PostclaimSecurityFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001PostclaimSecurityFixPath, grant)
 	writePlanningGrantTestFile(t, root, w001PostclaimSecurityFixSig, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -514,7 +517,7 @@ func TestW001PostclaimHookFixFailsClosed(t *testing.T) {
 
 func writeW001PostclaimHookFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001PostclaimHookFixPath, grant)
 	writePlanningGrantTestFile(t, root, w001PostclaimHookFixSig, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -575,7 +578,7 @@ func TestW001PostclaimPRFixFailsClosed(t *testing.T) {
 	})
 
 	t.Run("pull request event number", func(t *testing.T) {
-		root := t.TempDir()
+		root := planningGrantCanonicalTempDir(t)
 		writePlanningGrantTestFile(t, root, w001PostclaimPRFixPath, grant)
 		if w001PostclaimPullRequestNumberAllowed(root, 7) || !w001PostclaimPullRequestNumberAllowed(root, 8) {
 			t.Fatal("signed active PR number was not enforced")
@@ -585,7 +588,7 @@ func TestW001PostclaimPRFixFailsClosed(t *testing.T) {
 
 func writeW001PostclaimPRFixFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001PostclaimPRFixPath, grant)
 	writePlanningGrantTestFile(t, root, w001PostclaimPRFixSig, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -663,7 +666,7 @@ func TestW001PostclaimChronoFixFailsClosed(t *testing.T) {
 
 func writeW001PostclaimChronoFixFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001PostclaimChronoFixPath, grant)
 	writePlanningGrantTestFile(t, root, w001PostclaimChronoFixSig, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -719,7 +722,7 @@ func TestW001DeliveryGrantFailsClosed(t *testing.T) {
 
 	t.Run("implementation authority tamper", func(t *testing.T) {
 		tampered := bytes.Replace(grant, []byte("implementationAllowed: true"), []byte("implementationAllowed: false"), 1)
-		root := t.TempDir()
+		root := planningGrantCanonicalTempDir(t)
 		writePlanningGrantTestFile(t, root, w001DeliveryGrantPath, tampered)
 		writePlanningGrantTestFile(t, root, w001DeliveryGrantSignature, signature)
 		writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -732,7 +735,7 @@ func TestW001DeliveryGrantFailsClosed(t *testing.T) {
 
 	t.Run("path scope tamper", func(t *testing.T) {
 		tampered := bytes.Replace(grant, []byte("    - internal/authority/**"), []byte("    - internal/runtime/**"), 1)
-		root := t.TempDir()
+		root := planningGrantCanonicalTempDir(t)
 		writePlanningGrantTestFile(t, root, w001DeliveryGrantPath, tampered)
 		writePlanningGrantTestFile(t, root, w001DeliveryGrantSignature, signature)
 		writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -766,7 +769,7 @@ func TestW001DeliveryCIFixFailsClosed(t *testing.T) {
 	grant := read(w001DeliveryCIFixPath)
 	signature := read(w001DeliveryCIFixSignature)
 	tampered := bytes.Replace(grant, []byte("requiredTagger: release-manager"), []byte("requiredTagger: work-authority-engineer"), 1)
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	source, err := filepath.Abs(repo)
 	if err != nil {
@@ -811,7 +814,7 @@ func TestW001DeliveryScannerFixGrantTamperFails(t *testing.T) {
 		return data
 	}
 	tampered := bytes.Replace(read(w001DeliveryScannerFixPath), []byte("historyFindings: 10"), []byte("historyFindings: 11"), 1)
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	source, err := filepath.Abs(repo)
 	if err != nil {
@@ -855,7 +858,7 @@ func TestW001DeliveryScannerIgnoreFailsClosed(t *testing.T) {
 		{name: "duplicate", body: exact + w001DeliveryScannerFingerprints[0] + "\n"},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			runPlanningGrantTestGit(t, root, "init", "--quiet")
 			runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001DeliveryV1PreservedHead)
 			writePlanningGrantTestFile(t, root, w001DeliveryScannerIgnorePath, []byte(testCase.body))
@@ -874,7 +877,7 @@ func TestW001DeliveryScannerFingerprintSourcesFailClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001DeliveryV1PreservedHead)
 
@@ -900,12 +903,1122 @@ func TestW001DeliveryScannerFingerprintSourcesFailClosed(t *testing.T) {
 	}
 }
 
-func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
+func TestW001LifecycleCompletionGrantAcceptsPinnedSignedContract(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
-	object, err := planningGrantGitOutput(repo, "cat-file", "tag", w001DeliveryV2TagObject)
+	var findings []Finding
+	checkW001LifecycleCompletionGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 lifecycle-completion grant was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCompletionGrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
 	if err != nil {
 		t.Fatal(err)
 	}
+	writeFixture := func(t *testing.T, grant []byte, evidence []byte) string {
+		t.Helper()
+		root := planningGrantCanonicalTempDir(t)
+		runPlanningGrantTestGit(t, root, "init", "--quiet")
+		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleBase)
+		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+			"refs/tags/"+w001DeliveryScannerFixReviewTag+":refs/tags/"+w001DeliveryScannerFixReviewTag)
+		for path, data := range map[string][]byte{
+			w001LifecycleGrantPath:              grant,
+			w001LifecycleGrantSignature:         read(w001LifecycleGrantSignature),
+			w001DeliveryScannerFixPath:          read(w001DeliveryScannerFixPath),
+			w001DeliveryScannerFixSignature:     read(w001DeliveryScannerFixSignature),
+			wave1PlanningGrantKey:               read(wave1PlanningGrantKey),
+			"docs/evidence/W-001-validation.md": evidence,
+			canonicalActivePlan:                 read(canonicalActivePlan),
+			".harness/manifest.yaml":            read(".harness/manifest.yaml"),
+		} {
+			writePlanningGrantTestFile(t, root, path, data)
+		}
+		return root
+	}
+
+	t.Run("authority tamper", func(t *testing.T) {
+		grant := bytes.Replace(read(w001LifecycleGrantPath), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+		root := writeFixture(t, grant, read("docs/evidence/W-001-validation.md"))
+		var findings []Finding
+		checkW001LifecycleCompletionGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_lifecycle_value") || !findingCodePresent(findings, "public.w001_lifecycle_signature") {
+			t.Fatalf("tampered lifecycle authority was accepted: %v", findings)
+		}
+	})
+
+	t.Run("evidence tamper", func(t *testing.T) {
+		evidence := bytes.Replace(read("docs/evidence/W-001-validation.md"), []byte("completion-audit/governed-lifecycle-routes-missing"), []byte("missing-completion-fingerprint"), 1)
+		root := writeFixture(t, read(w001LifecycleGrantPath), evidence)
+		var findings []Finding
+		checkW001LifecycleCompletionGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_lifecycle_evidence") {
+			t.Fatalf("tampered lifecycle evidence was accepted: %v", findings)
+		}
+	})
+}
+
+func TestW001LifecycleCompletionPathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleGrantPath,
+		"docs/features/F-002-work-authority.md",
+		"api/authority/v1/types.go",
+		"internal/authority/beads/mutator.go",
+		"internal/authority/gateway/lifecycle.go",
+		"internal/authority/httpapi/handler.go",
+		"internal/authority/postgres/lifecycle.go",
+		"database/authority/002_lifecycle.sql",
+	} {
+		if !w001LifecyclePathsAllowed([]string{path}) {
+			t.Fatalf("authorized lifecycle path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{".github/workflows/foundation-quality.yml", "internal/platform/runtime.go", "docs/features/F-003-local-substrate.md", "go.mod"} {
+		if w001LifecyclePathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope lifecycle path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCorrectionGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCorrectionGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 lifecycle correction was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCorrectionGrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeFixture := func(t *testing.T, grant, evidence []byte) string {
+		t.Helper()
+		root := planningGrantCanonicalTempDir(t)
+		runPlanningGrantTestGit(t, root, "init", "--quiet")
+		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCorrectionBase)
+		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+			"refs/tags/"+w001LifecycleReviewTag+":refs/tags/"+w001LifecycleReviewTag)
+		for path, data := range map[string][]byte{
+			w001LifecycleCorrectionPath:         grant,
+			w001LifecycleCorrectionSignature:    read(w001LifecycleCorrectionSignature),
+			w001LifecycleGrantPath:              read(w001LifecycleGrantPath),
+			w001LifecycleGrantSignature:         read(w001LifecycleGrantSignature),
+			wave1PlanningGrantKey:               read(wave1PlanningGrantKey),
+			"docs/evidence/W-001-validation.md": evidence,
+			canonicalActivePlan:                 read(canonicalActivePlan),
+			".harness/manifest.yaml":            read(".harness/manifest.yaml"),
+		} {
+			writePlanningGrantTestFile(t, root, path, data)
+		}
+		return root
+	}
+
+	t.Run("authority tamper", func(t *testing.T) {
+		grant := bytes.Replace(read(w001LifecycleCorrectionPath), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+		root := writeFixture(t, grant, read("docs/evidence/W-001-validation.md"))
+		var findings []Finding
+		checkW001LifecycleCorrectionGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_lifecycle_correction_value") || !findingCodePresent(findings, "public.w001_lifecycle_correction_signature") {
+			t.Fatalf("tampered lifecycle correction authority was accepted: %v", findings)
+		}
+	})
+
+	t.Run("evidence tamper", func(t *testing.T) {
+		evidence := bytes.Replace(read("docs/evidence/W-001-validation.md"), []byte("lifecycle.handoff_replay_fence_splice"), []byte("missing-fence-splice-finding"), 1)
+		root := writeFixture(t, read(w001LifecycleCorrectionPath), evidence)
+		var findings []Finding
+		checkW001LifecycleCorrectionGrant(root, &findings)
+		if !findingCodePresent(findings, "public.w001_lifecycle_correction_evidence") {
+			t.Fatalf("tampered lifecycle correction evidence was accepted: %v", findings)
+		}
+	})
+}
+
+func TestW001LifecycleCorrectionPathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCorrectionPath,
+		"docs/evidence/W-001-validation.md",
+		"api/authority/v1/types.go",
+		"internal/authority/beads/mutator.go",
+		"internal/authority/gateway/lifecycle.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCorrectionPathsAllowed([]string{path}) {
+			t.Fatalf("authorized lifecycle correction path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleGrantPath,
+		".github/workflows/foundation-quality.yml",
+		"internal/platform/runtime.go",
+		"go.mod",
+	} {
+		if w001LifecycleCorrectionPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope lifecycle correction path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCorrectionV7GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCorrectionV7Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v7 lifecycle correction was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCorrectionV7EvidenceBindingsFailClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCorrectionV7Evidence(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid v7 lifecycle evidence bindings were rejected: %v", findings)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	evidence, err := os.ReadFile(filepath.Join(repo, "docs", "evidence", "W-001-validation.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	tamperedEvidence := bytes.Replace(evidence, []byte("bb8dd437802943670b4e882a3cdc30d5ea5a3b2035171fb765d7d82db7f624de"), []byte(strings.Repeat("0", 64)), 1)
+	writePlanningGrantTestFile(t, root, "docs/evidence/W-001-validation.md", tamperedEvidence)
+	writePlanningGrantTestFile(t, root, w001LifecycleCorrectionV7PatchPath, []byte("not-the-reviewed-patch\n"))
+	findings = nil
+	checkW001LifecycleCorrectionV7Evidence(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_correction_v7_evidence") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_correction_v7_patch") {
+		t.Fatalf("tampered v7 evidence bindings were accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCorrectionV7GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCorrectionV7Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCorrectionReviewTag+":refs/tags/"+w001LifecycleCorrectionReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCorrectionV7Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCorrectionV7Path:       tampered,
+		w001LifecycleCorrectionV7Signature:  read(w001LifecycleCorrectionV7Signature),
+		w001LifecycleCorrectionPath:         read(w001LifecycleCorrectionPath),
+		w001LifecycleCorrectionSignature:    read(w001LifecycleCorrectionSignature),
+		wave1PlanningGrantKey:               read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md": read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                 read(canonicalActivePlan),
+		".harness/manifest.yaml":            read(".harness/manifest.yaml"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCorrectionV7Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_correction_v7_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_correction_v7_signature") {
+		t.Fatalf("tampered v7 lifecycle correction authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCorrectionV7PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCorrectionV7Path,
+		"docs/evidence/W-001-validation.md",
+		"api/authority/v1/types.go",
+		"internal/authority/beads/reproducible_build_test.go",
+		"internal/authority/gateway/lifecycle.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCorrectionV7PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v7 lifecycle correction path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCorrectionPath,
+		".github/workflows/foundation-quality.yml",
+		"internal/platform/runtime.go",
+		"go.mod",
+	} {
+		if w001LifecycleCorrectionV7PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v7 lifecycle correction path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCorrectionV8GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCorrectionV8Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v8 lifecycle correction was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCorrectionV8GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCorrectionV8Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCorrectionV7ReviewTag+":refs/tags/"+w001LifecycleCorrectionV7ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCorrectionV8Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCorrectionV8Path:       tampered,
+		w001LifecycleCorrectionV8Signature:  read(w001LifecycleCorrectionV8Signature),
+		w001LifecycleCorrectionV7Path:       read(w001LifecycleCorrectionV7Path),
+		w001LifecycleCorrectionV7Signature:  read(w001LifecycleCorrectionV7Signature),
+		wave1PlanningGrantKey:               read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md": read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                 read(canonicalActivePlan),
+		".harness/manifest.yaml":            read(".harness/manifest.yaml"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCorrectionV8Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_correction_v8_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_correction_v8_signature") {
+		t.Fatalf("tampered v8 lifecycle correction authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCorrectionV8PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCorrectionV8Path,
+		w001LifecycleCorrectionV8Signature,
+		"docs/evidence/W-001-validation.md",
+		"internal/authority/beads/store.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCorrectionV8PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v8 lifecycle correction path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCorrectionV7Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/gateway/lifecycle.go",
+		"go.mod",
+	} {
+		if w001LifecycleCorrectionV8PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v8 lifecycle correction path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCorrectionV9GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCorrectionV9Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v9 lifecycle correction was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCorrectionV9GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCorrectionV9Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCorrectionV8ReviewTag+":refs/tags/"+w001LifecycleCorrectionV8ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCorrectionV9Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCorrectionV9Path:       tampered,
+		w001LifecycleCorrectionV9Signature:  read(w001LifecycleCorrectionV9Signature),
+		w001LifecycleCorrectionV8Path:       read(w001LifecycleCorrectionV8Path),
+		w001LifecycleCorrectionV8Signature:  read(w001LifecycleCorrectionV8Signature),
+		w001LifecycleCorrectionV7PatchPath:  read(w001LifecycleCorrectionV7PatchPath),
+		wave1PlanningGrantKey:               read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md": read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                 read(canonicalActivePlan),
+		".harness/manifest.yaml":            read(".harness/manifest.yaml"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCorrectionV9Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_correction_v9_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_correction_v9_signature") {
+		t.Fatalf("tampered v9 lifecycle correction authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCorrectionV9PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCorrectionV9Path,
+		w001LifecycleCorrectionV9Signature,
+		"docs/evidence/W-001-validation.md",
+		"docs/product-specs/work-authority.md",
+		"internal/authority/beads/store.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCorrectionV9PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v9 lifecycle correction path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCorrectionV8Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/gateway/lifecycle.go",
+		"go.mod",
+	} {
+		if w001LifecycleCorrectionV9PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v9 lifecycle correction path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleStabilizationV10GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleStabilizationV10Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v10 lifecycle CI stabilization was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleStabilizationV10GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleStabilizationV10Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCorrectionV9ReviewTag+":refs/tags/"+w001LifecycleCorrectionV9ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleStabilizationV10Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleStabilizationV10Path:      tampered,
+		w001LifecycleStabilizationV10Signature: read(w001LifecycleStabilizationV10Signature),
+		w001LifecycleCorrectionV9Path:          read(w001LifecycleCorrectionV9Path),
+		w001LifecycleCorrectionV9Signature:     read(w001LifecycleCorrectionV9Signature),
+		wave1PlanningGrantKey:                  read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":    read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                    read(canonicalActivePlan),
+		".harness/manifest.yaml":               read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":      read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleStabilizationV10Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_stabilization_v10_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_stabilization_v10_signature") {
+		t.Fatalf("tampered v10 lifecycle CI stabilization authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleStabilizationV10PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleStabilizationV10Path,
+		w001LifecycleStabilizationV10Signature,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleStabilizationV10PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v10 lifecycle CI stabilization path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCorrectionV9Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleStabilizationV10PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v10 lifecycle CI stabilization path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCIFencingV11GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIFencingV11Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v11 lifecycle CI fencing correction was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIFencingV11GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIFencingV11Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleStabilizationV10ReviewTag+":refs/tags/"+w001LifecycleStabilizationV10ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIFencingV11Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIFencingV11Path:          tampered,
+		w001LifecycleCIFencingV11Signature:     read(w001LifecycleCIFencingV11Signature),
+		w001LifecycleStabilizationV10Path:      read(w001LifecycleStabilizationV10Path),
+		w001LifecycleStabilizationV10Signature: read(w001LifecycleStabilizationV10Signature),
+		wave1PlanningGrantKey:                  read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":    read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                    read(canonicalActivePlan),
+		".harness/manifest.yaml":               read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":      read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIFencingV11Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_fencing_v11_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_fencing_v11_signature") {
+		t.Fatalf("tampered v11 lifecycle CI fencing authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIFencingV11PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIFencingV11Path,
+		w001LifecycleCIFencingV11Signature,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIFencingV11PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v11 lifecycle CI fencing path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleStabilizationV10Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIFencingV11PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v11 lifecycle CI fencing path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCIHardeningV12GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIHardeningV12Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v12 lifecycle CI hardening was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV12GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV12Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCIFencingV11ReviewTag+":refs/tags/"+w001LifecycleCIFencingV11ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIHardeningV12Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIHardeningV12Path:      tampered,
+		w001LifecycleCIHardeningV12Signature: read(w001LifecycleCIHardeningV12Signature),
+		w001LifecycleCIFencingV11Path:        read(w001LifecycleCIFencingV11Path),
+		w001LifecycleCIFencingV11Signature:   read(w001LifecycleCIFencingV11Signature),
+		wave1PlanningGrantKey:                read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":  read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                  read(canonicalActivePlan),
+		".harness/manifest.yaml":             read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":    read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIHardeningV12Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v12_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v12_signature") {
+		t.Fatalf("tampered v12 lifecycle CI hardening authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV12PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIHardeningV12Path,
+		w001LifecycleCIHardeningV12Signature,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIHardeningV12PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v12 lifecycle CI hardening path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCIFencingV11Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIHardeningV12PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v12 lifecycle CI hardening path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCIHardeningV13GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIHardeningV13Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v13 lifecycle CI hardening was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV13GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV13Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCIHardeningV12ReviewTag+":refs/tags/"+w001LifecycleCIHardeningV12ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIHardeningV13Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIHardeningV13Path:      tampered,
+		w001LifecycleCIHardeningV13Signature: read(w001LifecycleCIHardeningV13Signature),
+		w001LifecycleCIHardeningV12Path:      read(w001LifecycleCIHardeningV12Path),
+		w001LifecycleCIHardeningV12Signature: read(w001LifecycleCIHardeningV12Signature),
+		wave1PlanningGrantKey:                read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":  read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                  read(canonicalActivePlan),
+		".harness/manifest.yaml":             read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":    read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIHardeningV13Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v13_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v13_signature") {
+		t.Fatalf("tampered v13 lifecycle CI hardening authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV13PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIHardeningV13Path,
+		w001LifecycleCIHardeningV13Signature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIHardeningV13PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v13 lifecycle CI hardening path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCIHardeningV12Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIHardeningV13PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v13 lifecycle CI hardening path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCIHardeningV14GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIHardeningV14Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v14 lifecycle CI hardening was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV14GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV14Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCIHardeningV13ReviewTag+":refs/tags/"+w001LifecycleCIHardeningV13ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIHardeningV14Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIHardeningV14Path:      tampered,
+		w001LifecycleCIHardeningV14Signature: read(w001LifecycleCIHardeningV14Signature),
+		w001LifecycleCIHardeningV13Path:      read(w001LifecycleCIHardeningV13Path),
+		w001LifecycleCIHardeningV13Signature: read(w001LifecycleCIHardeningV13Signature),
+		wave1PlanningGrantKey:                read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":  read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                  read(canonicalActivePlan),
+		".harness/manifest.yaml":             read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":    read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIHardeningV14Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v14_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v14_signature") {
+		t.Fatalf("tampered v14 lifecycle CI hardening authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV14PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIHardeningV14Path,
+		w001LifecycleCIHardeningV14Signature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIHardeningV14PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v14 lifecycle CI hardening path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCIHardeningV13Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIHardeningV14PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v14 lifecycle CI hardening path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCIHardeningV15GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIHardeningV15Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v15 lifecycle CI hardening was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV15GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV15Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCIHardeningV14ReviewTag+":refs/tags/"+w001LifecycleCIHardeningV14ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIHardeningV15Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIHardeningV15Path:      tampered,
+		w001LifecycleCIHardeningV15Signature: read(w001LifecycleCIHardeningV15Signature),
+		w001LifecycleCIHardeningV14Path:      read(w001LifecycleCIHardeningV14Path),
+		w001LifecycleCIHardeningV14Signature: read(w001LifecycleCIHardeningV14Signature),
+		wave1PlanningGrantKey:                read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":  read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                  read(canonicalActivePlan),
+		".harness/manifest.yaml":             read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":    read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIHardeningV15Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v15_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v15_signature") {
+		t.Fatalf("tampered v15 lifecycle CI hardening authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV15PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIHardeningV15Path,
+		w001LifecycleCIHardeningV15Signature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIHardeningV15PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v15 lifecycle CI hardening path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCIHardeningV14Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIHardeningV15PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v15 lifecycle CI hardening path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCIHardeningV16GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIHardeningV16Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v16 lifecycle CI hardening was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV16GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV16Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCIHardeningV15ReviewTag+":refs/tags/"+w001LifecycleCIHardeningV15ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIHardeningV16Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIHardeningV16Path:      tampered,
+		w001LifecycleCIHardeningV16Signature: read(w001LifecycleCIHardeningV16Signature),
+		w001LifecycleCIHardeningV15Path:      read(w001LifecycleCIHardeningV15Path),
+		w001LifecycleCIHardeningV15Signature: read(w001LifecycleCIHardeningV15Signature),
+		wave1PlanningGrantKey:                read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":  read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                  read(canonicalActivePlan),
+		".harness/manifest.yaml":             read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":    read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIHardeningV16Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v16_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v16_signature") {
+		t.Fatalf("tampered v16 lifecycle CI hardening authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV16PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIHardeningV16Path,
+		w001LifecycleCIHardeningV16Signature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIHardeningV16PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v16 lifecycle CI hardening path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCIHardeningV15Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIHardeningV16PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v16 lifecycle CI hardening path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleCIHardeningV17GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleCIHardeningV17Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 v17 lifecycle CI hardening was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV17GrantFailsClosed(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	read := func(path string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	source, err := filepath.Abs(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001LifecycleCIHardeningV17Base)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source,
+		"refs/tags/"+w001LifecycleCIHardeningV16ReviewTag+":refs/tags/"+w001LifecycleCIHardeningV16ReviewTag)
+	tampered := bytes.Replace(read(w001LifecycleCIHardeningV17Path), []byte("canonicalLifecycleMutationAllowed: false"), []byte("canonicalLifecycleMutationAllowed: true"), 1)
+	for path, data := range map[string][]byte{
+		w001LifecycleCIHardeningV17Path:      tampered,
+		w001LifecycleCIHardeningV17Signature: read(w001LifecycleCIHardeningV17Signature),
+		w001LifecycleCIHardeningV16Path:      read(w001LifecycleCIHardeningV16Path),
+		w001LifecycleCIHardeningV16Signature: read(w001LifecycleCIHardeningV16Signature),
+		wave1PlanningGrantKey:                read(wave1PlanningGrantKey),
+		"docs/evidence/W-001-validation.md":  read("docs/evidence/W-001-validation.md"),
+		canonicalActivePlan:                  read(canonicalActivePlan),
+		".harness/manifest.yaml":             read(".harness/manifest.yaml"),
+		"internal/doctrine/grant_test.go":    read("internal/doctrine/grant_test.go"),
+	} {
+		writePlanningGrantTestFile(t, root, path, data)
+	}
+	var findings []Finding
+	checkW001LifecycleCIHardeningV17Grant(root, &findings)
+	if !findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v17_value") ||
+		!findingCodePresent(findings, "public.w001_lifecycle_ci_hardening_v17_signature") {
+		t.Fatalf("tampered v17 lifecycle CI hardening authority was accepted: %v", findings)
+	}
+}
+
+func TestW001LifecycleCIHardeningV17PathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleCIHardeningV17Path,
+		w001LifecycleCIHardeningV17Signature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleCIHardeningV17PathsAllowed([]string{path}) {
+			t.Fatalf("authorized v17 lifecycle CI hardening path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleCIHardeningV16Path,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleCIHardeningV17PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope v17 lifecycle CI hardening path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleAuthorityRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleAuthorityRecoveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 lifecycle authority recovery was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleAuthorityRecoveryPathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleAuthorityRecoveryPath,
+		w001LifecycleAuthorityRecoverySignature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleAuthorityRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("authorized lifecycle authority-recovery path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleTestHarnessRetirementPath,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleAuthorityRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope lifecycle authority-recovery path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleEvidencePreservationGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001LifecycleEvidencePreservationGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 lifecycle evidence preservation was rejected: %v", findings)
+	}
+}
+
+func TestW001LifecycleEvidencePreservationPathScope(t *testing.T) {
+	for _, path := range []string{
+		w001LifecycleEvidencePreservationPath,
+		w001LifecycleEvidencePreservationSignature,
+		".harness/manifest.yaml",
+		canonicalActivePlan,
+		"docs/evidence/W-001-validation.md",
+		"internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go",
+	} {
+		if !w001LifecycleEvidencePreservationPathsAllowed([]string{path}) {
+			t.Fatalf("authorized lifecycle evidence-preservation path was rejected: %s", path)
+		}
+	}
+	for _, path := range []string{
+		w001LifecycleAuthorityRecoveryPath,
+		".github/workflows/foundation-quality.yml",
+		"internal/authority/beads/store.go",
+		"go.mod",
+	} {
+		if w001LifecycleEvidencePreservationPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope lifecycle evidence-preservation path was accepted: %s", path)
+		}
+	}
+}
+
+func TestW001LifecycleArchivedRejectedRetirementTagIsDurableAndUnaccepted(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	if !checkW001LifecycleArchivedRejectedRetirementTag(repo, &findings) || len(findings) != 0 {
+		t.Fatalf("exact rejected retirement tag was not preserved: %v", findings)
+	}
+	if w001LifecycleRejectedRetirementArchiveTag == w001LifecycleEvidencePreservationReviewTag ||
+		w001LifecycleRejectedRetirementArchiveTag == w001LifecycleTestHarnessRetirementReviewTag ||
+		w001LifecycleRejectedRetirementArchiveTag == w001LifecycleAuthorityRecoveryReviewTag {
+		t.Fatal("rejected evidence archival ref was selected as a review tag")
+	}
+	object := planningGrantTestGitOutput(t, repo, "rev-parse", "refs/tags/"+w001LifecycleRejectedRetirementArchiveTag+"^{tag}")
+	if object != w001LifecycleRejectedRetirementTagObject {
+		t.Fatalf("archival ref resolved to %s, want %s", object, w001LifecycleRejectedRetirementTagObject)
+	}
+}
+
+func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	object := planningGrantTestGitRawOutput(t, repo, "cat-file", "tag", w001DeliveryV2TagObject)
 	publicKey, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(wave1PlanningGrantKey)))
 	if err != nil {
 		t.Fatal(err)
@@ -920,12 +2033,13 @@ func TestW001DeliveryV2TagIdentityIsHistoricalOnly(t *testing.T) {
 }
 
 func TestW001DeliveryPullRequestCheckoutBindsEventHead(t *testing.T) {
-	repo := filepath.Clean(filepath.Join("..", ".."))
-	root := filepath.Join(t.TempDir(), "repo")
-	if output, err := exec.Command("git", "clone", "--quiet", "--no-local", repo, root).CombinedOutput(); err != nil {
-		t.Fatalf("clone delivery fixture: %v: %s", err, output)
+	repo, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
+	if err != nil {
+		t.Fatal(err)
 	}
-	feature := planningGrantTestGitOutput(t, root, "rev-parse", "HEAD^{commit}")
+	parent := planningGrantCanonicalTempDir(t)
+	root := filepath.Join(parent, "repo")
+	feature := initializePlanningGrantTestRepository(t, root, repo, "HEAD")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", repo, w001DeliveryBase)
 	tree := planningGrantTestGitOutput(t, root, "rev-parse", feature+"^{tree}")
 	merge := planningGrantTestGitOutput(t, root,
@@ -1290,9 +2404,8 @@ func writeW001PostclaimGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimCIFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+w001PostclaimReviewTag+":refs/tags/"+w001PostclaimReviewTag)
@@ -1313,9 +2426,8 @@ func writeW001PostclaimSecurityGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimSecurityFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
 	for _, tag := range []string{w001PostclaimReviewTag, w001PostclaimCIFixReviewTag} {
@@ -1338,9 +2450,8 @@ func writeW001PostclaimHookGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimHookFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
 	for _, tag := range []string{w001PostclaimReviewTag, w001PostclaimCIFixReviewTag, w001PostclaimSecurityFixTag} {
@@ -1363,9 +2474,8 @@ func writeW001PostclaimPRBindingGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimPRFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
 	for _, tag := range []string{w001PostclaimReviewTag, w001PostclaimCIFixReviewTag, w001PostclaimSecurityFixTag, w001PostclaimHookFixTag} {
@@ -1388,9 +2498,8 @@ func writeW001PostclaimChronologyGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001PostclaimChronoFixBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "-b", w001PostclaimBranch, "FETCH_HEAD")
 	for _, tag := range []string{w001PostclaimReviewTag, w001PostclaimCIFixReviewTag, w001PostclaimSecurityFixTag, w001PostclaimHookFixTag, w001PostclaimPRFixTag} {
@@ -1420,7 +2529,7 @@ func scalarPathFromGrant(t *testing.T, grant []byte, key string) string {
 
 func writeW001BootstrapGrantFixture(t *testing.T, grant, signature, publicKey []byte, materials map[string][]byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, w001BootstrapGrantPath, grant)
 	writePlanningGrantTestFile(t, root, w001BootstrapGrantSignature, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -1465,7 +2574,7 @@ func TestWave1DirectMainTransitionRejectsTampering(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			writePlanningGrantTestFile(t, root, wave1DirectMainGrantPath, tampered)
 			writePlanningGrantTestFile(t, root, wave1DirectMainGrantSignature, signature)
 			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -1527,7 +2636,7 @@ func TestWave1PRFallbackRejectsTampering(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			writePlanningGrantTestFile(t, root, wave1PRFallbackPath, tampered)
 			writePlanningGrantTestFile(t, root, wave1PRFallbackSignature, signature)
 			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -1574,7 +2683,7 @@ func TestWave1PRFallbackMainCIFixRejectsTampering(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			writePlanningGrantTestFile(t, root, wave1MainCIFixPath, tampered)
 			writePlanningGrantTestFile(t, root, wave1MainCIFixSignature, signature)
 			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -1621,7 +2730,7 @@ func TestWave1PRFallbackFixtureFixRejectsTampering(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			tampered := bytes.Replace(grant, []byte(testCase.old), []byte(testCase.new), 1)
-			root := t.TempDir()
+			root := planningGrantCanonicalTempDir(t)
 			writePlanningGrantTestFile(t, root, wave1CIFixtureFixPath, tampered)
 			writePlanningGrantTestFile(t, root, wave1CIFixtureFixSignature, signature)
 			writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -1947,7 +3056,7 @@ func TestWave1V3CIRecoveryAddendumBindsExactProspectiveCorrection(t *testing.T) 
 
 func TestWave1PlanningGrantIsRequired(t *testing.T) {
 	var findings []Finding
-	checkWave1PlanningGrant(t.TempDir(), &findings)
+	checkWave1PlanningGrant(planningGrantCanonicalTempDir(t), &findings)
 	if !findingCodePresent(findings, "public.planning_grant_missing") {
 		t.Fatalf("missing planning grant was accepted: %v", findings)
 	}
@@ -2257,7 +3366,7 @@ func TestWave1PRFallbackMainSquashRejectsWrongTreeParentAndTarget(t *testing.T) 
 }
 
 func TestVerifyPlanningGrantTagRequiresExactSignedTreeAttestation(t *testing.T) {
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	keyPath := filepath.Join(root, "synthetic-tag-key")
 	command := exec.Command("ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", keyPath)
 	if output, err := command.CombinedOutput(); err != nil {
@@ -2299,9 +3408,8 @@ func writeWave1TransitionSquashFixture(t *testing.T, parent string) (string, str
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1PublishedMain)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+wave1TransitionTag+":refs/tags/"+wave1TransitionTag)
 	publicKey, err := os.ReadFile(filepath.Join(source, filepath.FromSlash(wave1PlanningGrantKey)))
@@ -2328,14 +3436,13 @@ func writeWave1PRFallbackMainFixture(t *testing.T, reviewedTree bool) (string, s
 		t.Fatal(err)
 	}
 	sourceHead := planningGrantTestGitOutput(t, source, "rev-parse", "HEAD")
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	for _, revision := range []string{wave1PublishedMain, sourceHead} {
 		runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, revision)
 	}
 	for _, tag := range []string{wave1PriorPublicationTag, wave1V2PublicationTag, wave1PublicationTag, wave1TransitionTag, wave1SuccessorTransitionTag, wave1FinalTransitionTag} {
-		if _, err := planningGrantGitOutput(source, "rev-parse", "--verify", "refs/tags/"+tag+"^{tag}"); err == nil {
+		if _, err := planningGrantTestGitTryOutput(source, "rev-parse", "--verify", "refs/tags/"+tag+"^{tag}"); err == nil {
 			runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+tag+":refs/tags/"+tag)
 		}
 	}
@@ -2354,12 +3461,6 @@ func writeWave1PRFallbackMainFixture(t *testing.T, reviewedTree bool) (string, s
 	)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--force", "-B", "main", squash)
 	return root, squash
-}
-
-func disablePlanningGrantTestGitMaintenance(t *testing.T, root string) {
-	t.Helper()
-	runPlanningGrantTestGit(t, root, "config", "maintenance.auto", "false")
-	runPlanningGrantTestGit(t, root, "config", "gc.auto", "0")
 }
 
 func setWave1PRFallbackMainPushFacts(t *testing.T, root, head string) {
@@ -2430,7 +3531,7 @@ func loadPlanningGrantFixture(t *testing.T) ([]byte, []byte, []byte) {
 
 func writePlanningGrantFixture(t *testing.T, grant, signature, publicKey []byte) string {
 	t.Helper()
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantPath, grant)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantSignature, signature)
 	writePlanningGrantTestFile(t, root, wave1PlanningGrantKey, publicKey)
@@ -2444,9 +3545,8 @@ func writePlanningGrantGitFixture(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	runPlanningGrantTestGit(t, root, "init", "--quiet")
-	disablePlanningGrantTestGitMaintenance(t, root)
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, wave1V3AddendumBase)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--detach", "FETCH_HEAD")
 	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, "refs/tags/"+wave1PriorPublicationTag+":refs/tags/"+wave1PriorPublicationTag)
@@ -2457,13 +3557,11 @@ func writePlanningGrantGitFixture(t *testing.T) string {
 	return root
 }
 
-func TestPlanningGrantGitFixtureDisablesAutoMaintenance(t *testing.T) {
+func TestPlanningGrantGitFixtureDoesNotPersistMaintenanceConfiguration(t *testing.T) {
 	root := writePlanningGrantGitFixture(t)
-	if value := planningGrantTestGitOutput(t, root, "config", "--local", "--get", "maintenance.auto"); value != "false" {
-		t.Fatalf("disposable planning fixture enabled Git maintenance: %q", value)
-	}
-	if value := planningGrantTestGitOutput(t, root, "config", "--local", "--get", "gc.auto"); value != "0" {
-		t.Fatalf("disposable planning fixture enabled Git auto-GC: %q", value)
+	for _, key := range []string{"maintenance.auto", "gc.auto", "gc.autoDetach", "maintenance.autoDetach"} {
+		assertPlanningGrantTestGitConfigAbsent(t, root, "--local", key)
+		assertPlanningGrantTestGitConfigAbsent(t, root, "--global", key)
 	}
 }
 
@@ -2478,10 +3576,7 @@ func writePlanningGrantCurrentFiles(t *testing.T, root string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	plan, err := planningGrantGitOutput(source, "show", wave1V3AddendumBase+":"+canonicalActivePlan)
-	if err != nil {
-		t.Fatal(err)
-	}
+	plan := planningGrantTestGitRawOutput(t, source, "show", wave1V3AddendumBase+":"+canonicalActivePlan)
 	writePlanningGrantTestFile(t, root, canonicalActivePlan, plan)
 }
 
@@ -2606,7 +3701,7 @@ func writePlanningGrantGitHubEvent(t *testing.T, event map[string]any) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := t.TempDir()
+	root := planningGrantCanonicalTempDir(t)
 	const path = "event.json"
 	writePlanningGrantTestFile(t, root, path, data)
 	return filepath.Join(root, path)
@@ -2638,10 +3733,39 @@ func writePlanningGrantTestFile(t *testing.T, root, path string, data []byte) {
 	}
 }
 
+func planningGrantCanonicalTempDir(t *testing.T) string {
+	t.Helper()
+	lexical := t.TempDir()
+	physical, err := filepath.EvalSymlinks(lexical)
+	if err != nil {
+		t.Fatal(err)
+	}
+	physical, err = filepath.Abs(filepath.Clean(physical))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return physical
+}
+
+func initializePlanningGrantTestRepository(t *testing.T, root, source, revision string) string {
+	t.Helper()
+	if err := os.Mkdir(root, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	runPlanningGrantTestGit(t, root, "init", "--quiet")
+	if source == "" {
+		return ""
+	}
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, revision)
+	return planningGrantTestGitOutput(t, root, "rev-parse", "FETCH_HEAD^{commit}")
+}
+
 func runPlanningGrantTestGit(t *testing.T, root string, arguments ...string) {
 	t.Helper()
-	command := exec.Command("git", append([]string{"-C", root}, arguments...)...)
-	command.Env = planningGrantGitEnvironment()
+	command, commandErr := planningGrantTestGitCommand(root, arguments...)
+	if commandErr != nil {
+		t.Fatalf("unsafe git %v: %v", arguments, commandErr)
+	}
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("git %v failed: %v: %s", arguments, err, output)
 	}
@@ -2649,11 +3773,475 @@ func runPlanningGrantTestGit(t *testing.T, root string, arguments ...string) {
 
 func planningGrantTestGitOutput(t *testing.T, root string, arguments ...string) string {
 	t.Helper()
-	command := exec.Command("git", append([]string{"-C", root}, arguments...)...)
-	command.Env = planningGrantGitEnvironment()
+	command, commandErr := planningGrantTestGitCommand(root, arguments...)
+	if commandErr != nil {
+		t.Fatalf("unsafe git %v: %v", arguments, commandErr)
+	}
 	output, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("git %v failed: %v: %s", arguments, err, output)
 	}
 	return strings.TrimSpace(string(output))
+}
+
+func planningGrantTestGitRawOutput(t *testing.T, root string, arguments ...string) []byte {
+	t.Helper()
+	output, err := planningGrantTestGitTryOutput(root, arguments...)
+	if err != nil {
+		t.Fatalf("git %v failed: %v: %s", arguments, err, output)
+	}
+	return output
+}
+
+func planningGrantTestGitTryOutput(root string, arguments ...string) ([]byte, error) {
+	command, commandErr := planningGrantTestGitCommand(root, arguments...)
+	if commandErr != nil {
+		return nil, commandErr
+	}
+	return command.CombinedOutput()
+}
+
+func planningGrantTestGitCommand(root string, arguments ...string) (*exec.Cmd, error) {
+	if err := validatePlanningGrantTestGitArguments(arguments); err != nil {
+		return nil, err
+	}
+	canonicalRoot, err := canonicalPlanningGrantTestRoot(root)
+	if err != nil {
+		return nil, err
+	}
+	if err := validatePlanningGrantTestGitFetch(arguments); err != nil {
+		return nil, err
+	}
+	bounded := []string{
+		"-c", "core.hooksPath=/dev/null",
+		"-c", "maintenance.auto=false",
+		"-c", "gc.auto=0",
+		"-c", "gc.autoDetach=false",
+		"-c", "maintenance.autoDetach=false",
+		"-C", canonicalRoot,
+	}
+	command := exec.Command("/usr/bin/git", append(bounded, arguments...)...)
+	command.Env = planningGrantTestGitEnvironment()
+	return command, nil
+}
+
+func canonicalPlanningGrantTestRoot(root string) (string, error) {
+	cleanRoot, err := filepath.Abs(filepath.Clean(root))
+	if err != nil {
+		return "", fmt.Errorf("resolve disposable Git root: %w", err)
+	}
+	info, err := os.Lstat(cleanRoot)
+	if err != nil {
+		return "", fmt.Errorf("inspect disposable Git root: %w", err)
+	}
+	if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+		return "", errors.New("disposable Git root must be one direct directory")
+	}
+	resolved, err := filepath.EvalSymlinks(cleanRoot)
+	if err != nil {
+		return "", errors.New("disposable Git root must have canonical physical ancestry")
+	}
+	if filepath.Clean(resolved) != cleanRoot {
+		return "", errors.New("disposable Git root must equal its canonical physical path")
+	}
+	return cleanRoot, nil
+}
+
+func validatePlanningGrantTestGitFetch(arguments []string) error {
+	for index, argument := range arguments {
+		if argument != "fetch" {
+			continue
+		}
+		if index+4 >= len(arguments) {
+			return errors.New("bounded Git fetch source or revision is missing")
+		}
+		source := filepath.Clean(arguments[index+3])
+		canonicalSource, err := canonicalPlanningGrantTestRoot(source)
+		if err != nil || !filepath.IsAbs(source) || source != canonicalSource {
+			return errors.New("bounded Git fetch source must be one canonical local directory")
+		}
+		_, _, err = validatePlanningGrantTestGitFetchRefspec(arguments[index+4])
+		return err
+	}
+	return nil
+}
+
+func validatePlanningGrantTestGitFetchRefspec(value string) (string, string, error) {
+	if value == "HEAD" || len(value) == 40 && sha1Pattern.MatchString(value) {
+		return value, "", nil
+	}
+	parts := strings.Split(value, ":")
+	if len(parts) != 2 || parts[0] != parts[1] || !validPlanningGrantTestTagRef(parts[0]) {
+		return "", "", errors.New("bounded Git fetch revision must be HEAD, one SHA-1 object, or one identical tag refspec")
+	}
+	return parts[0], parts[1], nil
+}
+
+func validPlanningGrantTestTagRef(ref string) bool {
+	if !strings.HasPrefix(ref, "refs/tags/") {
+		return false
+	}
+	name := strings.TrimPrefix(ref, "refs/tags/")
+	if name == "" || strings.HasPrefix(name, ".") || strings.HasSuffix(name, ".") || strings.HasSuffix(name, ".lock") ||
+		strings.Contains(name, "..") || strings.Contains(name, "//") || strings.Contains(name, "@{") {
+		return false
+	}
+	for _, character := range name {
+		if character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z' ||
+			character >= '0' && character <= '9' || strings.ContainsRune("-_./", character) {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
+func planningGrantTestGitEnvironment() []string {
+	return []string{
+		"GIT_ALLOW_PROTOCOL=file",
+		"GIT_ATTR_NOSYSTEM=1",
+		"GIT_CONFIG_GLOBAL=" + os.DevNull,
+		"GIT_CONFIG_NOSYSTEM=1",
+		"GIT_NO_REPLACE_OBJECTS=1",
+		"GIT_OPTIONAL_LOCKS=0",
+		"GIT_PROTOCOL_FROM_USER=0",
+		"GIT_TERMINAL_PROMPT=0",
+		"HOME=/nonexistent",
+		"LC_ALL=C",
+		"PATH=/usr/bin:/bin",
+		"PERL5LIB=",
+		"PERL5OPT=",
+		"TMPDIR=/tmp",
+	}
+}
+
+func validatePlanningGrantTestGitArguments(arguments []string) error {
+	if len(arguments) == 0 {
+		return errors.New("Git subcommand is required")
+	}
+	allowedConfig := map[string]string{
+		"user.name=Synthetic Merge Bot":          "",
+		"user.name=Synthetic Release Manager":    "",
+		"user.name=Synthetic Engineer":           "",
+		"user.email=merge-bot@example.com":       "",
+		"user.email=release-manager@example.com": "",
+		"user.email=engineer@example.com":        "",
+		"commit.gpgsign=false":                   "",
+	}
+	subcommand := ""
+	subcommandIndex := -1
+	for index := 0; index < len(arguments); index++ {
+		argument := arguments[index]
+		if argument == "-c" {
+			if subcommand != "" {
+				return errors.New("Git subcommand-local configuration override is not admitted")
+			}
+			if index+1 >= len(arguments) {
+				return errors.New("Git -c requires one exact configuration assignment")
+			}
+			index++
+			if _, ok := allowedConfig[arguments[index]]; !ok {
+				return fmt.Errorf("Git configuration override %q is not admitted", arguments[index])
+			}
+			continue
+		}
+		if subcommand == "" && strings.HasPrefix(argument, "-") {
+			return fmt.Errorf("Git global option %q is not admitted", argument)
+		}
+		if subcommand == "" {
+			subcommand, subcommandIndex = argument, index
+		}
+	}
+	if subcommand == "" {
+		return errors.New("Git subcommand is required")
+	}
+	return validatePlanningGrantTestGitSubcommand(subcommand, arguments[subcommandIndex+1:])
+}
+
+func validatePlanningGrantTestGitSubcommand(subcommand string, arguments []string) error {
+	nonOption := func(value string) bool { return value != "" && !strings.HasPrefix(value, "-") }
+	exact := func(want ...string) bool {
+		return len(arguments) == len(want) && slices.Equal(arguments, want)
+	}
+	switch subcommand {
+	case "init":
+		if exact("--quiet") {
+			return nil
+		}
+	case "fetch":
+		if len(arguments) == 4 && arguments[0] == "--quiet" && arguments[1] == "--no-tags" && nonOption(arguments[2]) && nonOption(arguments[3]) {
+			return nil
+		}
+	case "rev-parse":
+		if len(arguments) == 1 && nonOption(arguments[0]) || len(arguments) == 2 && arguments[0] == "--verify" && nonOption(arguments[1]) {
+			return nil
+		}
+	case "cat-file":
+		if len(arguments) == 2 && arguments[0] == "tag" && nonOption(arguments[1]) {
+			return nil
+		}
+	case "show":
+		if len(arguments) == 1 && nonOption(arguments[0]) && strings.Contains(arguments[0], ":") {
+			return nil
+		}
+	case "commit-tree":
+		if len(arguments) >= 5 && nonOption(arguments[0]) {
+			index := 1
+			parents := 0
+			for index+1 < len(arguments) && arguments[index] == "-p" && nonOption(arguments[index+1]) {
+				parents++
+				index += 2
+			}
+			if parents > 0 && index+2 == len(arguments) && arguments[index] == "-m" && arguments[index+1] != "" {
+				return nil
+			}
+		}
+	case "checkout":
+		valid := len(arguments) == 2 && exact("--quiet", "--detach") ||
+			len(arguments) == 3 && arguments[0] == "--quiet" && arguments[1] == "--detach" && nonOption(arguments[2]) ||
+			len(arguments) == 3 && arguments[0] == "--quiet" && arguments[1] == "-b" && nonOption(arguments[2]) ||
+			len(arguments) == 4 && arguments[0] == "--quiet" && arguments[1] == "-b" && nonOption(arguments[2]) && nonOption(arguments[3]) ||
+			len(arguments) == 4 && arguments[0] == "--quiet" && arguments[1] == "--force" && arguments[2] == "--detach" && nonOption(arguments[3]) ||
+			len(arguments) == 5 && arguments[0] == "--quiet" && arguments[1] == "--force" && arguments[2] == "-B" && nonOption(arguments[3]) && nonOption(arguments[4])
+		if valid {
+			return nil
+		}
+	case "tag":
+		if len(arguments) == 2 && arguments[0] == "-d" && nonOption(arguments[1]) ||
+			len(arguments) == 5 && arguments[0] == "-a" && arguments[1] == "-m" && arguments[2] != "" && nonOption(arguments[3]) && nonOption(arguments[4]) {
+			return nil
+		}
+	case "branch":
+		if len(arguments) == 2 && arguments[0] == "-m" && nonOption(arguments[1]) {
+			return nil
+		}
+	case "add":
+		if len(arguments) >= 2 && arguments[0] == "--" {
+			for _, path := range arguments[1:] {
+				if !nonOption(path) {
+					return fmt.Errorf("Git add path %q is not admitted", path)
+				}
+			}
+			return nil
+		}
+	case "commit":
+		if len(arguments) == 4 && arguments[0] == "--quiet" && arguments[1] == "--no-gpg-sign" && arguments[2] == "-m" && arguments[3] != "" {
+			return nil
+		}
+	case "diff":
+		if len(arguments) == 3 && arguments[0] == "--name-only" && nonOption(arguments[1]) && arguments[2] == "--" {
+			return nil
+		}
+	case "config":
+		if len(arguments) == 2 && arguments[0] == "--get" && nonOption(arguments[1]) ||
+			len(arguments) == 3 && (arguments[0] == "--local" || arguments[0] == "--global") && arguments[1] == "--get" && nonOption(arguments[2]) {
+			return nil
+		}
+	}
+	return fmt.Errorf("Git argv is outside the exact %s fixture schema: %q", subcommand, arguments)
+}
+
+func TestPlanningGrantTestGitCommandDisablesBackgroundMaintenance(t *testing.T) {
+	parent := planningGrantCanonicalTempDir(t)
+	hostileGlobal := filepath.Join(parent, "hostile-global-config")
+	if err := os.WriteFile(hostileGlobal, []byte("[maintenance]\n\tauto = true\n[gc]\n\tauto = 999\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("GIT_CONFIG_GLOBAL", hostileGlobal)
+	root := filepath.Join(parent, "repo")
+	initializePlanningGrantTestRepository(t, root, "", "")
+	for key, want := range map[string]string{
+		"core.hooksPath":         os.DevNull,
+		"maintenance.auto":       "false",
+		"gc.auto":                "0",
+		"gc.autoDetach":          "false",
+		"maintenance.autoDetach": "false",
+	} {
+		if got := planningGrantTestGitOutput(t, root, "config", "--get", key); got != want {
+			t.Fatalf("bounded disposable Git config %s=%q, want %q", key, got, want)
+		}
+		assertPlanningGrantTestGitConfigAbsent(t, root, "--local", key)
+		assertPlanningGrantTestGitConfigAbsent(t, root, "--global", key)
+	}
+}
+
+func TestPlanningGrantTestGitCommandRejectsAmbientExecutionInjection(t *testing.T) {
+	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := planningGrantCanonicalTempDir(t)
+	execRoot := filepath.Join(root, "hostile-exec")
+	templateRoot := filepath.Join(root, "hostile-template")
+	if err := os.MkdirAll(filepath.Join(templateRoot, "hooks"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(execRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	execSentinel := filepath.Join(root, "exec-path-ran")
+	hookSentinel := filepath.Join(root, "template-hook-ran")
+	localHookSentinel := filepath.Join(root, "local-hook-ran")
+	uploadPack := []byte(fmt.Sprintf("#!/bin/sh\n: > %q\nexec /usr/bin/git-upload-pack \"$@\"\n", execSentinel))
+	postCheckout := []byte(fmt.Sprintf("#!/bin/sh\n: > %q\n", hookSentinel))
+	localPostCheckout := []byte(fmt.Sprintf("#!/bin/sh\n: > %q\n", localHookSentinel))
+	if err := os.WriteFile(filepath.Join(execRoot, "git-upload-pack"), uploadPack, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(templateRoot, "hooks", "post-checkout"), postCheckout, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("GIT_EXEC_PATH", execRoot)
+	t.Setenv("GIT_TEMPLATE_DIR", templateRoot)
+	t.Setenv("GIT_CONFIG_COUNT", "1")
+	t.Setenv("GIT_CONFIG_KEY_0", "maintenance.auto")
+	t.Setenv("GIT_CONFIG_VALUE_0", "true")
+	t.Setenv("GIT_ALLOW_PROTOCOL", "ext:ssh:http:https:file")
+	t.Setenv("PERL5LIB", execRoot)
+	t.Setenv("PERL5OPT", "-MDefinitelyMissingMars3TestModule")
+	t.Setenv("LD_PRELOAD", "/nonexistent/mars3-test-loader.so")
+	t.Setenv("DYLD_INSERT_LIBRARIES", "/nonexistent/mars3-test-loader.dylib")
+	t.Setenv("PATH", execRoot)
+	clone := filepath.Join(root, "repo")
+	initializePlanningGrantTestRepository(t, clone, source, "HEAD")
+	if err := os.WriteFile(filepath.Join(clone, ".git", "hooks", "post-checkout"), localPostCheckout, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	runPlanningGrantTestGit(t, clone, "checkout", "--quiet", "--force", "--detach", "FETCH_HEAD")
+	for _, sentinel := range []string{execSentinel, hookSentinel, localHookSentinel} {
+		if _, err := os.Lstat(sentinel); !os.IsNotExist(err) {
+			t.Fatalf("ambient Git execution injection ran: %s err=%v", sentinel, err)
+		}
+	}
+	if installed, err := os.ReadFile(filepath.Join(clone, ".git", "hooks", "post-checkout")); err != nil || !bytes.Equal(installed, localPostCheckout) {
+		t.Fatalf("ambient Git template replaced the local hook fixture: err=%v", err)
+	}
+}
+
+func TestPlanningGrantTestGitCommandRequiresCanonicalLocalRoot(t *testing.T) {
+	t.Run("symlinked root", func(t *testing.T) {
+		physicalRoot := planningGrantCanonicalTempDir(t)
+		rootLink := filepath.Join(planningGrantCanonicalTempDir(t), "root-link")
+		if err := os.Symlink(physicalRoot, rootLink); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := planningGrantTestGitCommand(rootLink, "init", "--quiet"); err == nil {
+			t.Fatal("symlinked disposable root was admitted")
+		}
+	})
+
+	t.Run("symlinked root ancestor", func(t *testing.T) {
+		physicalParent := planningGrantCanonicalTempDir(t)
+		physicalRoot := filepath.Join(physicalParent, "repo")
+		if err := os.Mkdir(physicalRoot, 0o700); err != nil {
+			t.Fatal(err)
+		}
+		aliasParent := filepath.Join(planningGrantCanonicalTempDir(t), "parent-alias")
+		if err := os.Symlink(physicalParent, aliasParent); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := planningGrantTestGitCommand(filepath.Join(aliasParent, "repo"), "init", "--quiet"); err == nil {
+			t.Fatal("disposable root below a symlinked ancestor was admitted")
+		}
+	})
+}
+
+func TestPlanningGrantTestGitFetchCreatesPortableFetchHead(t *testing.T) {
+	parent := planningGrantCanonicalTempDir(t)
+	source := filepath.Join(parent, "source")
+	target := filepath.Join(parent, "target")
+	initializePlanningGrantTestRepository(t, source, "", "")
+	writePlanningGrantTestFile(t, source, "identity.txt", []byte("portable fetch\n"))
+	commitPlanningGrantTestPaths(t, source, "portable fetch", "identity.txt")
+	expected := planningGrantTestGitOutput(t, source, "rev-parse", "HEAD^{commit}")
+	initializePlanningGrantTestRepository(t, target, "", "")
+	runPlanningGrantTestGit(t, target, "fetch", "--quiet", "--no-tags", source, "HEAD")
+	if got := planningGrantTestGitOutput(t, target, "rev-parse", "FETCH_HEAD^{commit}"); got != expected {
+		t.Fatalf("ordinary fetch wrote FETCH_HEAD=%s, want %s", got, expected)
+	}
+}
+
+func TestPlanningGrantTestGitArgumentsFailClosed(t *testing.T) {
+	for _, arguments := range [][]string{
+		{"-c", "maintenance.auto=true", "status"},
+		{"-cgc.auto=999", "status"},
+		{"status", "-c", "maintenance.auto=true"},
+		{"--config-env=maintenance.auto=HOSTILE", "status"},
+		{"-C", "/tmp/hostile", "status"},
+		{"--exec-path=/tmp/hostile", "status"},
+		{"clone", "--quiet", "--no-local", "/tmp/source", "/tmp/target"},
+		{"clone", "--template=/tmp/hostile", "source", "target"},
+		{"clone", "--templ=/tmp/hostile", "source", "target"},
+		{"clone", "--upload-p=/tmp/hostile-upload-pack", "source", "target"},
+		{"clone", "--conf=maintenance.auto=true", "source", "target"},
+		{"clone", "-u", "/tmp/hostile-upload-pack", "source", "target"},
+		{"clone", "-u/tmp/hostile-upload-pack", "source", "target"},
+		{"clone", "--separate-git-dir=/tmp/outside", "source", "target"},
+		{"clone", "--quiet", "--no-local", "/tmp/source", "/tmp/outside"},
+		{"fetch", "--quiet", "--no-tags", "https://example.com/repository.git", "HEAD"},
+		{"fetch", "--quiet", "--no-tags", "ssh://example.com/repository.git", "HEAD"},
+		{"remote", "add", "hostile", "/tmp/source"},
+		{"config", "--local", "maintenance.auto", "true"},
+		{"config", "--global", "gc.auto", "999"},
+	} {
+		if _, err := planningGrantTestGitCommand(planningGrantCanonicalTempDir(t), arguments...); err == nil {
+			t.Fatalf("unsafe disposable Git arguments were accepted: %v", arguments)
+		}
+	}
+	t.Run("symlinked fetch source", func(t *testing.T) {
+		root := planningGrantCanonicalTempDir(t)
+		source := planningGrantCanonicalTempDir(t)
+		alias := filepath.Join(planningGrantCanonicalTempDir(t), "source-alias")
+		if err := os.Symlink(source, alias); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := planningGrantTestGitCommand(root, "fetch", "--quiet", "--no-tags", alias, "HEAD"); err == nil {
+			t.Fatal("symlinked bounded Git fetch source was admitted")
+		}
+	})
+	t.Run("malformed fetch refspec", func(t *testing.T) {
+		root := planningGrantCanonicalTempDir(t)
+		source := planningGrantCanonicalTempDir(t)
+		for _, revision := range []string{
+			"HEAD\n--all",
+			"refs/tags/one:refs/tags/two",
+			"refs/tags/../escape:refs/tags/../escape",
+			"refs/tags/name.lock:refs/tags/name.lock",
+		} {
+			if _, err := planningGrantTestGitCommand(root, "fetch", "--quiet", "--no-tags", source, revision); err == nil {
+				t.Fatalf("malformed bounded Git fetch refspec was admitted: %q", revision)
+			}
+		}
+	})
+}
+
+func TestPlanningGrantCommitAuthorityIsProspective(t *testing.T) {
+	issuedAt := time.Date(2026, time.August, 29, 0, 28, 29, 0, time.UTC)
+	for _, test := range []struct {
+		name        string
+		committedAt time.Time
+		want        bool
+	}{
+		{name: "nineteen seconds before issuance", committedAt: issuedAt.Add(-19 * time.Second), want: false},
+		{name: "exactly at issuance", committedAt: issuedAt, want: true},
+		{name: "after issuance", committedAt: issuedAt.Add(time.Second), want: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := planningGrantCommitAtOrAfterGrant(test.committedAt, issuedAt); got != test.want {
+				t.Fatalf("planningGrantCommitAtOrAfterGrant(%s, %s) = %t, want %t", test.committedAt, issuedAt, got, test.want)
+			}
+		})
+	}
+}
+
+func assertPlanningGrantTestGitConfigAbsent(t *testing.T, root, scope, key string) {
+	t.Helper()
+	command, commandErr := planningGrantTestGitCommand(root, "config", scope, "--get", key)
+	if commandErr != nil {
+		t.Fatal(commandErr)
+	}
+	output, err := command.CombinedOutput()
+	if err == nil || len(bytes.TrimSpace(output)) != 0 {
+		t.Fatalf("disposable Git configuration persisted %s %s: output=%q err=%v", scope, key, output, err)
+	}
 }

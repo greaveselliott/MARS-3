@@ -32,9 +32,35 @@ func (auth fixtureAuth) Authenticate(*http.Request) (authorityv1.Principal, erro
 }
 
 type fixtureGateway struct {
-	principal authorityv1.Principal
-	claim     authorityv1.ClaimRequest
-	err       error
+	principal      authorityv1.Principal
+	claim          authorityv1.ClaimRequest
+	lifecycleRoute string
+	err            error
+}
+
+func (gateway *fixtureGateway) Handoff(_ context.Context, principal authorityv1.Principal, _ authorityv1.HandoffRequest) (authorityv1.LifecycleMutationResponse, error) {
+	gateway.principal, gateway.lifecycleRoute = principal, "handoff"
+	return authorityv1.LifecycleMutationResponse{}, gateway.err
+}
+
+func (gateway *fixtureGateway) RecordReviewVerdict(_ context.Context, principal authorityv1.Principal, _ authorityv1.ReviewVerdictRequest) (authorityv1.LifecycleMutationResponse, error) {
+	gateway.principal, gateway.lifecycleRoute = principal, "review-verdict"
+	return authorityv1.LifecycleMutationResponse{}, gateway.err
+}
+
+func (gateway *fixtureGateway) RecordRunDisposition(_ context.Context, principal authorityv1.Principal, _ authorityv1.RunDispositionRequest) (authorityv1.LifecycleMutationResponse, error) {
+	gateway.principal, gateway.lifecycleRoute = principal, "run-disposition"
+	return authorityv1.LifecycleMutationResponse{}, gateway.err
+}
+
+func (gateway *fixtureGateway) RecordReconciliation(_ context.Context, principal authorityv1.Principal, _ authorityv1.ReconciliationRequest) (authorityv1.LifecycleMutationResponse, error) {
+	gateway.principal, gateway.lifecycleRoute = principal, "reconciliation"
+	return authorityv1.LifecycleMutationResponse{}, gateway.err
+}
+
+func (gateway *fixtureGateway) CloseWork(_ context.Context, principal authorityv1.Principal, _ authorityv1.TerminalTransitionRequest) (authorityv1.LifecycleMutationResponse, error) {
+	gateway.principal, gateway.lifecycleRoute = principal, "terminal-transition"
+	return authorityv1.LifecycleMutationResponse{}, gateway.err
 }
 
 func (gateway *fixtureGateway) GetWork(_ context.Context, principal authorityv1.Principal, request authorityv1.GetWorkRequest) (authorityv1.WorkItem, error) {
@@ -132,6 +158,27 @@ func TestHandlerRequiresAuthenticationAndReadCapability(t *testing.T) {
 	response = serve(handler, http.MethodGet, "/v1/projects/project-fixture/journal", "")
 	if response.Code != http.StatusForbidden {
 		t.Fatalf("journal capability response=%d", response.Code)
+	}
+}
+
+func TestHandlerExposesOnlyTypedLifecycleRoutes(t *testing.T) {
+	for _, test := range []struct {
+		route, want string
+	}{
+		{"handoffs", "handoff"}, {"review-verdicts", "review-verdict"}, {"run-dispositions", "run-disposition"},
+		{"reconciliations", "reconciliation"}, {"terminal-transitions", "terminal-transition"},
+	} {
+		gateway := &fixtureGateway{}
+		handler := mustHandler(t, fixtureAuth{principal: principalFixture()}, gateway, &fixtureJournal{})
+		response := serve(handler, http.MethodPost, "/v1/projects/project-fixture/"+test.route, `{}`)
+		if response.Code != http.StatusOK || gateway.lifecycleRoute != test.want || gateway.principal.PrincipalID != "principal-fixture" {
+			t.Fatalf("route %s response=%d called=%s principal=%s", test.route, response.Code, gateway.lifecycleRoute, gateway.principal.PrincipalID)
+		}
+		gateway.lifecycleRoute = ""
+		response = serve(handler, http.MethodPost, "/v1/projects/project-fixture/"+test.route, `{"principal":{"profile_id":"forged"}}`)
+		if response.Code != http.StatusBadRequest || gateway.lifecycleRoute != "" {
+			t.Fatalf("route %s accepted forged principal: response=%d called=%s", test.route, response.Code, gateway.lifecycleRoute)
+		}
 	}
 }
 

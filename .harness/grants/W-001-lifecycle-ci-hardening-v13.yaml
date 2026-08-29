@@ -1,0 +1,112 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCIHardeningGrant
+
+grant:
+  id: W-001-lifecycle-ci-hardening-v13
+  classification: PUBLIC
+  issuedAt: 2026-08-27T20:00:30Z
+  expiresAt: 2026-08-30T20:00:30Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 3c8d55aa39e4e099d8a922f8e13a71efcbe2c78b
+  baseTree: c4bb80ab477b7fcbe73a7a237479e44703393952
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-ci-hardening-v12
+  priorGrantSHA256: 9356f21a72ce652b6238be15f6393cf402c34408fe467526e43f2a53c7ca5ab1
+  priorGrantSignatureSHA256: 733e67f5ec4807523ab56febc60c21aed3f4a2cfe58253febc58cef3b5d113d1
+  priorReviewTag: mars3/w001-lifecycle-completion-v12
+  priorReviewTagObject: d0176029978e0c49d795a02ad36f7f7992c3bdfa
+  priorReviewTagTarget: 3c8d55aa39e4e099d8a922f8e13a71efcbe2c78b
+  priorReviewTagTree: c4bb80ab477b7fcbe73a7a237479e44703393952
+  priorRun: 33110339883
+  priorJob: 98651204635
+  priorQADisposition: changes-requested
+  priorSecurityDisposition: changes-requested
+  pullRequest: 10
+  successorReviewTag: mars3/w001-lifecycle-completion-v13
+  successorReviewTagMessage: MARS-3 W-001 lifecycle CI closed argv and process admission tree attestation v13
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: foundation-maintainer
+  failureOwnership: foundation
+  purpose: replace residual Git argument and process invocation denylists with closed admission
+  attemptId: w001-lifecycle-ci-hardening-v13
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  allowedEffects:
+    - preserve-the-v9-runtime-qualification-and-v10-v12-immutable-history-runs-and-dispositions
+    - replace-disposable-test-Git-option-denylists-with-exact-per-subcommand-argv-schemas
+    - reject-long-option-abbreviations-compact-options-outside-root-metadata-and-config-producing-subcommands
+    - recursively-enumerate-the-doctrine-test-tree-for-process-invocation-admission
+    - reject-direct-exec-Cmd-construction-and-indirect-os-or-syscall-process-function-values
+    - retain-and-extend-the-hostile-environment-alias-concatenation-command-context-shell-and-persistence-regressions
+    - update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-hardening
+    - create-signed-semantic-commits-and-one-signed-v13-release-manager-review-tag
+    - push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-ci-hardening-v13.yaml
+    - .harness/grants/W-001-lifecycle-ci-hardening-v13.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged
+    - every-disposable-test-Git-command-matches-one-exact-subcommand-and-argv-schema
+    - Git-long-option-abbreviations-compact-upload-pack-and-outside-root-or-config-effects-are-unrepresentable
+    - doctrine-test-process-enumeration-is-recursive-and-fails-closed-on-every-unreadable-or-unparseable-file
+    - direct-exec-Cmd-and-indirect-os-or-syscall-process-construction-or-invocation-are-denied
+    - only-two-exact-ssh-keygen-test-calls-and-the-one-trusted-Git-wrapper-call-are-admitted
+    - v12-QA-and-Security-changes-requested-dispositions-remain-durable
+    - the-next-public-run-uses-the-exact-signed-v13-tree-and-tag
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged
+  prohibitedEffects:
+    - modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract
+    - mutate-M3-W001-or-any-other-Bead
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - rerun-or-move-any-v9-v10-v11-or-v12-commit-tag-or-run
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - ci.test_git_argv_schema_fail_open
+    - ci.test_process_guard_incomplete
+  gitFinding: abbreviated compact and config-producing Git arguments escaped the denylist
+  processFinding: direct exec Cmd indirect syscall function values and nested tests escaped process admission
+  nextAction: prospective-closed-argv-and-recursive-process-admission
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-ci-hardening-v13
+  detachedSignature: W-001-lifecycle-ci-hardening-v13.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

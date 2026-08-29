@@ -1,0 +1,109 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleCIFencingCorrectionGrant
+
+grant:
+  id: W-001-lifecycle-ci-fencing-v11
+  classification: PUBLIC
+  issuedAt: 2026-08-27T19:05:55Z
+  expiresAt: 2026-08-30T19:05:55Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 47b19b2c89d72fbf9eb5356ceefe33783d691aa4
+  baseTree: 0ebe496c48871b040a7fcd7a286073f2c1d40153
+  workingBranch: codex/w-001-lifecycle-completion
+  priorGrant: W-001-lifecycle-ci-stabilization-v10
+  priorGrantSHA256: b6f29734dabbeaff52f96c8d5e0a8910fadf81c841f4d9fd4a7cd799add586f9
+  priorGrantSignatureSHA256: 9bc96e8c5a0f35fee3998066bd6fa00b45b671ee1b66debad4f6e21c7341ab32
+  priorReviewTag: mars3/w001-lifecycle-completion-v10
+  priorReviewTagObject: 84672df5f046995bb7efd79cf8f9a333946aecfa
+  priorReviewTagTarget: 47b19b2c89d72fbf9eb5356ceefe33783d691aa4
+  priorReviewTagTree: 0ebe496c48871b040a7fcd7a286073f2c1d40153
+  priorRun: 33105792480
+  priorJob: 98635155160
+  priorQADisposition: changes-requested
+  priorSecurityDisposition: changes-requested
+  pullRequest: 10
+  successorReviewTag: mars3/w001-lifecycle-completion-v11
+  successorReviewTagMessage: MARS-3 W-001 lifecycle CI Git fencing correction tree attestation v11
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: foundation-maintainer
+  failureOwnership: foundation
+  purpose: route every disposable test Git operation through one sanitized command-local wrapper without persistent repository configuration
+  attemptId: w001-lifecycle-ci-fencing-v11
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  allowedEffects:
+    - preserve-the-v9-runtime-qualification-and-v10-commit-tree-tag-run-and-dispositions
+    - route-pre-repository-clone-and-every-other-disposable-test-Git-operation-through-the-bounded-wrapper
+    - remove-disposable-repository-persistent-maintenance-and-gc-configuration
+    - assert-effective-command-local-fences-and-absent-local-and-global-persistent-values
+    - reject-any-raw-disposable-Git-command-outside-the-single-audited-wrapper
+    - update-only-the-plan-manifest-public-evidence-and-offline-validator-for-this-correction
+    - create-signed-semantic-commits-and-one-signed-v11-release-manager-review-tag
+    - push-the-existing-review-branch-and-tag-and-run-one-fresh-pull-request-10-gate
+    - obtain-fresh-independent-QA-and-Security-review-before-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-ci-fencing-v11.yaml
+    - .harness/grants/W-001-lifecycle-ci-fencing-v11.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - v9-authority-runtime-contract-native-patches-product-contracts-and-qualification-bytes-remain-unchanged
+    - every-disposable-test-Git-operation-including-pre-repository-clone-uses-the-sanitized-bounded-wrapper
+    - effective-maintenance-auto-gc-auto-detach-and-maintenance-auto-detach-remain-command-local-and-disabled
+    - no-disposable-repository-local-global-user-system-or-production-Git-configuration-is-mutated
+    - v10-QA-and-Security-changes-requested-dispositions-remain-durable
+    - the-next-public-run-uses-the-exact-signed-v11-tree-and-tag
+    - current-W001-lifecycle-and-live-lease-state-remain-unchanged
+  prohibitedEffects:
+    - modify-authority-runtime-native-Beads-patches-database-schema-API-contract-or-product-contract
+    - mutate-M3-W001-or-any-other-Bead
+    - issue-assert-renew-release-or-revoke-a-canonical-live-lease
+    - rerun-or-move-any-v9-or-v10-commit-tag-or-run
+    - merge-pull-request-10-before-fresh-QA-and-Security-acceptance
+    - modify-workflow-scanner-ruleset-repository-settings-trust-roots-or-approval-policy
+    - expose-authority-credentials-raw-payloads-private-data-or-provider-state
+    - production-deployment-or-destructive-migration
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  codes:
+    - ci.test_git_sanitization_incomplete
+    - ci.test_git_configuration_persisted
+  rawCloneFinding: grant_test.go raw git clone bypassed the bounded wrapper and inherited global configuration
+  persistedConfigFinding: disposable fixtures wrote maintenance.auto and gc.auto into repository-local configuration
+  nextAction: prospective-command-local-test-Git-fencing-correction
+
+canonicalPreimage:
+  bead: M3-W001
+  nativeStatus: in_progress
+  lifecycleState: in-progress
+  workVersionGeneration: 6e79ff81-a007-42a5-a178-7ce58dbb718b
+  workVersionIncarnation: e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41
+  issueMutationSequence: 1
+  dependencyGraphRevision: 1
+  liveLeaseState: absent
+
+verification:
+  order:
+    - qa
+    - security-reviewer
+    - delivery-orchestrator
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  externalBeadsReadbackRequired: true
+  canonicalLifecycleMutationDeferred: true
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-ci-fencing-v11
+  detachedSignature: W-001-lifecycle-ci-fencing-v11.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
