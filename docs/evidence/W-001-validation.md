@@ -1869,3 +1869,24 @@ new feature head and must verify under the pinned key with tagger identity
 `MARS-3 Release Manager <release-manager@example.com>`. Fresh exact-head CI
 must precede independent QA and then independent Security. Any further failure
 stops the attempt. W-001 remains `in-progress`.
+
+Signed implementation commit
+`a34640a73b2113c738017a66734fb6ea96beb0b4`, tree
+`33b2cec58006b457553ee2a9afdc397bcb181af4`, changes the five remaining
+manifest, plan, evidence, terminal-validator, and focused-test paths. Together
+with grant-only commit `3a28830b64faf2d2d62e6ed5ede1b0a4a7a9434b`, the
+base-to-head diff is exactly the seven authorized paths. Both commits verify
+under the pinned ED25519 Git key.
+
+The focused terminal tag-identity, prior-recovery, path-scope, and scanner
+regressions passed ten consecutive runs and passed under the Go race detector.
+A fresh normal clone of the exact implementation commit passed doctrine, plan,
+DocSync, public-check, whitespace, and show-check. Unmodified
+`go test ./... -count=1` passed every package, with `internal/doctrine`
+completing in 147.025 seconds, and `go vet ./...` passed. The digest-pinned,
+network-disabled Gitleaks image
+`docker.io/zricethezav/gitleaks@sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba`
+found no leak in the exact worktree and no leak across all 119 commits of
+history. This remains local qualification only; the signed v3 review tag,
+exact-head public CI, independent QA, independent Security, and protected-main
+merge remain pending.
