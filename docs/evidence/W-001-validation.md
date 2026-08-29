@@ -1923,3 +1923,25 @@ database, gateway, canonical Beads/PostgreSQL, lease, production, product, and
 downstream bytes and effects remain prohibited. One distinct v4 tag, fresh
 exact-head CI, independent QA, and then independent Security are required.
 Any further failure stops the attempt. W-001 remains `in-progress`.
+
+Signed implementation commit
+`8df0fb62c4f2b0624b5891695d8f651e8a55b10a`, tree
+`3c4ef3998fc830fef8cce7749491ed3fe30c6d6b`, changes the five remaining
+manifest, plan, evidence, terminal-validator, and focused-test paths. Together
+with grant-only commit `d95d46a61aab9761cf502dc34c4ecd59df85dc74`,
+the base-to-head diff is exactly the seven authorized paths. Both commits
+verify under the pinned ED25519 Git key.
+
+The signed wrong-name/correct-email regression failed before the parser change
+and passed after exact name-plus-email enforcement. The focused exact-tagger,
+prior-recovery, and path-scope suite passed ten consecutive runs and passed
+under the Go race detector. A fresh normal clone of the exact implementation
+commit passed doctrine, plan, DocSync, public-check, whitespace, and show-check.
+Unmodified `go test ./... -count=1` passed every package, with
+`internal/doctrine` completing in 159.583 seconds, and `go vet ./...` passed.
+The digest-pinned, network-disabled Gitleaks image
+`docker.io/zricethezav/gitleaks@sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba`
+found no leak in the exact worktree and no leak across all 122 commits of
+history. This remains local qualification only; the signed v4 review tag,
+exact-head public CI, independent QA, independent Security, and protected-main
+merge remain pending.
