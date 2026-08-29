@@ -3,8 +3,10 @@ FactoryDocSync:
 docs:
 - docs/features/F-002-work-authority.md
 - docs/product-specs/work-authority.md
+- docs/design-docs/ADR-001-git-beads-authority.md
 - docs/exec-plans/active/current-operating-plan.md
 - docs/evidence/W-001-validation.md
+- docs/code-documentation-map.md
 */
 
 // Package closeout owns the single bounded W-001 terminal-reconciliation

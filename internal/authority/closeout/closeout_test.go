@@ -1,3 +1,11 @@
+/*
+FactoryDocSync:
+docs:
+- docs/features/F-002-work-authority.md
+- docs/design-docs/ADR-001-git-beads-authority.md
+- docs/code-documentation-map.md
+*/
+
 package closeout
 
 import (
