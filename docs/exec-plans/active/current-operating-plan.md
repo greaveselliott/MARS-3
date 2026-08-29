@@ -157,19 +157,22 @@ The Orchestrator may schedule it only through a later truthful plan transition.
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
 - Required next transition: execute the prospective signed
-  `W-001-lifecycle-terminal-reconciliation-v1` grant from protected-main commit
-  `f6073696fab0ecf9e80d34f5c199ca54f431b5f7`, tree
-  `1025c59672c70b8d14ad904315677ffac56b9b81`. Add one deep, gateway-only
-  closeout path, publish it through PR #11, and obtain exact-head CI plus
-  independent QA followed by Security. After an accepted exact-tree squash,
-  one fresh one-hour signed execution authorization may bind the reviewed
-  helper, protected-main run, canonical Beads workspace and binary, and
-  PostgreSQL fence generation. Only then may the helper issue one bounded
-  W-001 lease, release it during handoff, record the already-accepted QA and
-  Security evidence against candidate `56c2a8d95927bc552882aacc30aa886ea0be9ba5`,
-  record the completed run and PR #10 reconciliation, close W-001, and read
-  back terminal state. W-001 remains `in-progress` until that canonical
-  gateway sequence succeeds; P-001 and all production work remain excluded.
+  `W-001-lifecycle-terminal-ci-recovery-v1` grant from rejected candidate
+  `cff16fda43acd9d621f701064427b0d7fc3bf30d`, tree
+  `447cac655e6d4d34bce9a8f9641a677e3e7511cc`. Its signed v1 tag and failed
+  public run `33250298926` remain immutable. Replace only the public UUID test
+  literal that triggered the pinned scanner with a deterministic equivalent,
+  publish one distinct signed v2 tag on PR #11, and require fresh exact-head CI,
+  independent QA, then independent Security. No further correction is
+  authorized. After an accepted exact-tree squash, one fresh one-hour signed
+  execution authorization may bind the reviewed helper, protected-main run,
+  canonical Beads workspace and binary, and PostgreSQL fence generation. Only
+  then may the helper issue one bounded W-001 lease, release it during handoff,
+  record the already-accepted QA and Security evidence against candidate
+  `56c2a8d95927bc552882aacc30aa886ea0be9ba5`, record the completed run and PR
+  #10 reconciliation, close W-001, and read back terminal state. W-001 remains
+  `in-progress` until that canonical gateway sequence succeeds; P-001 and all
+  production work remain excluded.
 
 The W-001 bootstrap grant is deliberately not a live lease: it is
 human-directed, binds one base commit and attempt, permits only canonical W-001

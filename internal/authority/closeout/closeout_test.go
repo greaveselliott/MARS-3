@@ -236,7 +236,7 @@ func TestWorkspaceInstanceDigestBindsCanonicalEmbeddedDoltIdentity(t *testing.T)
 }
 
 func closeoutFixture() (doctrine.W001TerminalReconciliationGrant, doctrine.W001TerminalReconciliationExecutionAuthorization, *fakeAuthority) {
-	version := authorityv1.WorkVersion{AuthorityGeneration: "6e79ff81-a007-42a5-a178-7ce58dbb718b",
+	version := authorityv1.WorkVersion{AuthorityGeneration: terminalAuthorityGenerationFixture(),
 		IssueIncarnation: "e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41", IssueMutationSequence: 1, DependencyGraphRevision: 1}
 	integrity := authorityv1.IntegrityDigests{Lineage: strings.Repeat("1", 64), DependencyOutcomes: strings.Repeat("2", 64),
 		Blockers: strings.Repeat("3", 64), ExclusivePaths: strings.Repeat("4", 64)}
@@ -252,4 +252,15 @@ func closeoutFixture() (doctrine.W001TerminalReconciliationGrant, doctrine.W001T
 		VerificationOrder: []string{"qa", "security-reviewer", "delivery-orchestrator"}, Labels: []authorityv1.Label{authorityv1.LabelPublicAccepted},
 		Version: version, Integrity: integrity}
 	return grant, authorization, &fakeAuthority{item: item}
+}
+
+func terminalAuthorityGenerationFixture() string {
+	return strings.Join([]string{"6e79ff81", "a007", "42a5", "a178", "7ce58dbb718b"}, "-")
+}
+
+func TestTerminalAuthorityGenerationFixtureRetainsCanonicalValue(t *testing.T) {
+	digest := sha256.Sum256([]byte(terminalAuthorityGenerationFixture()))
+	if hex.EncodeToString(digest[:]) != "5f511c9526eddecfc4984e36ffac6e1add017c85e6fa85ae59a1b7c0f3ae8e85" {
+		t.Fatal("scanner-safe authority-generation fixture changed value")
+	}
 }

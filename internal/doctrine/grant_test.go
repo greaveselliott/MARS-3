@@ -2035,6 +2035,35 @@ func TestW001TerminalReconciliationPathScope(t *testing.T) {
 	}
 }
 
+func TestW001TerminalCIRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalCIRecoveryGrant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal CI recovery was rejected: %v", findings)
+	}
+	grant, err := LoadW001TerminalReconciliationGrant(repo, time.Date(2026, 8, 29, 12, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
+	}
+	if grant.ReviewTag != w001TerminalCIRecoveryReviewTag {
+		t.Fatalf("terminal recovery review tag=%q", grant.ReviewTag)
+	}
+}
+
+func TestW001TerminalCIRecoveryPathScope(t *testing.T) {
+	for _, path := range w001TerminalCIRecoverySequences["grant.authorizedPaths"] {
+		if !w001TerminalCIRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal CI-recovery path rejected: %s", path)
+		}
+	}
+	for _, path := range []string{"internal/authority/closeout/closeout.go", "cmd/mars3-authority/main.go", ".github/workflows/foundation-quality.yml", "go.mod"} {
+		if w001TerminalCIRecoveryPathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal CI-recovery path accepted: %s", path)
+		}
+	}
+}
+
 func TestW001TerminalExecutionAuthorizationRequiresCanonicalJSON(t *testing.T) {
 	authorization := W001TerminalReconciliationExecutionAuthorization{
 		SchemaVersion: 1, Kind: "MARS3W001TerminalReconciliationExecutionAuthorization", Classification: "PUBLIC",

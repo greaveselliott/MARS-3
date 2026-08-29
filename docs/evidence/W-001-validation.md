@@ -1753,3 +1753,38 @@ This remains qualified implementation evidence only: a final signed evidence
 checkpoint, signed annotated review tag, exact-head public CI, independent QA
 then Security, protected-main merge, fresh one-hour execution authorization,
 canonical dry-run/apply, and external readback are still required.
+
+### Rejected terminal v1 candidate and bounded CI recovery
+
+The first terminal-reconciliation candidate is immutably rejected at signed
+head `cff16fda43acd9d621f701064427b0d7fc3bf30d`, tree
+`447cac655e6d4d34bce9a8f9641a677e3e7511cc`, and signed annotated v1 tag
+object `06a9075aef9a3741eca7b5ea03f6d9aca0ab2dda`. PR #11 public run
+`33250298926`, job `99094724907`, passed doctrine, plan, DocSync, public
+validation, tests/vet, whitespace, commit/tag validation, and the synthetic
+scanner canary. Its worktree scan returned one `generic-api-key` finding at
+`internal/authority/closeout/closeout_test.go:239`. Read-only replay with the
+same pinned scanner identified the value as the public canonical
+authority-generation UUID used by `closeoutFixture`; it is not a credential.
+The v1 commit, tag, run, and failed disposition remain immutable and are not
+acceptance evidence.
+
+The prospective signed `W-001-lifecycle-terminal-ci-recovery-v1` grant binds
+that exact rejected head, tree, tag object, run, job, file, line, rule, and
+fingerprint. Its grant SHA-256 is
+`8380dfd8eba71c349f2fc2ac00265d59f43256d147db4be45ff07f2279f6558e`;
+its detached-signature SHA-256 is
+`196c0e472c0ac54942ccaa6e7c46380ade3bb042f44fbdc10a1fdc73f0dd3242`.
+The signature verifies under namespace
+`mars3-w001-lifecycle-terminal-ci-recovery-v1` with the pinned ED25519 key.
+Signed grant-only commit `411a864ee213019b3700c9668772a10df6263f54`,
+tree `808f0680497734b575a2c0de0ec333c512660f1f`, was committed at
+`2026-08-29T11:34:50Z`, after its `2026-08-29T11:33:56Z` issue time.
+
+Recovery may change only the scanner-triggering public test literal into a
+deterministic byte-identical value plus this signed grant, manifest, plan,
+evidence, and terminal validator/tests. Closeout runtime, command, API,
+database, gateway, Beads/PostgreSQL stores, workflow, dependencies, product,
+canonical state, and production remain unchanged. The recovery allows one
+distinct signed v2 review tag and fresh CI, QA, and Security on PR #11. Any
+further failure stops and escalates; no additional correction is authorized.

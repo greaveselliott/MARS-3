@@ -342,6 +342,16 @@ const (
 	w001TerminalReconciliationTagMessage         = "MARS-3 W-001 lifecycle terminal reconciliation attestation v1"
 	w001TerminalGrantSHA256                      = "835841a5cd5b1cbcb1debb4a6a98c4ce2eb83ccff396f84b4823444bb504eef5"
 	w001TerminalGrantSignatureSHA256             = "ca4e2376f65c6dc23e90a4e925330c1f5f3f84163148758c907f6b14234f2e9b"
+	w001TerminalCIRecoveryPath                   = ".harness/grants/W-001-lifecycle-terminal-ci-recovery-v1.yaml"
+	w001TerminalCIRecoverySignature              = ".harness/grants/W-001-lifecycle-terminal-ci-recovery-v1.yaml.sig"
+	w001TerminalCIRecoveryNamespace              = "mars3-w001-lifecycle-terminal-ci-recovery-v1"
+	w001TerminalCIRecoveryBase                   = "cff16fda43acd9d621f701064427b0d7fc3bf30d"
+	w001TerminalCIRecoveryBaseTree               = "447cac655e6d4d34bce9a8f9641a677e3e7511cc"
+	w001TerminalV1TagObject                      = "06a9075aef9a3741eca7b5ea03f6d9aca0ab2dda"
+	w001TerminalCIRecoveryReviewTag              = "mars3/w001-lifecycle-terminal-reconciliation-v2"
+	w001TerminalCIRecoveryTagMessage             = "MARS-3 W-001 lifecycle terminal reconciliation attestation v2"
+	w001TerminalCIRecoveryGrantSHA256            = "8380dfd8eba71c349f2fc2ac00265d59f43256d147db4be45ff07f2279f6558e"
+	w001TerminalCIRecoverySignatureSHA256        = "196c0e472c0ac54942ccaa6e7c46380ade3bb042f44fbdc10a1fdc73f0dd3242"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -4288,6 +4298,96 @@ var w001TerminalReconciliationSequences = map[string][]string{
 	},
 }
 
+var w001TerminalCIRecoveryScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleTerminalCIRecoveryGrant"},
+	{path: "grant.id", value: "W-001-lifecycle-terminal-ci-recovery-v1"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-29T11:33:56Z"},
+	{path: "grant.expiresAt", value: "2026-08-30T11:33:56Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001TerminalCIRecoveryBase},
+	{path: "grant.baseTree", value: w001TerminalCIRecoveryBaseTree},
+	{path: "grant.baseParent", value: "654d2b5271886e75b0426d7baaeedb839d2d5210"},
+	{path: "grant.workingBranch", value: w001TerminalReconciliationBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-terminal-reconciliation-v1"},
+	{path: "grant.priorGrantSHA256", value: w001TerminalGrantSHA256},
+	{path: "grant.priorGrantSignatureSHA256", value: w001TerminalGrantSignatureSHA256},
+	{path: "grant.rejectedCandidateHead", value: w001TerminalCIRecoveryBase},
+	{path: "grant.rejectedCandidateTree", value: w001TerminalCIRecoveryBaseTree},
+	{path: "grant.rejectedReviewTag", value: w001TerminalReconciliationReviewTag},
+	{path: "grant.rejectedReviewTagObject", value: w001TerminalV1TagObject},
+	{path: "grant.failedRun", value: "33250298926"},
+	{path: "grant.failedJob", value: "99094724907"},
+	{path: "grant.failureCode", value: "ci.worktree_secret_scan_public_uuid_fixture"},
+	{path: "grant.pullRequest", value: "11"},
+	{path: "grant.successorReviewTag", value: w001TerminalCIRecoveryReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001TerminalCIRecoveryTagMessage},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "work-authority-engineer"},
+	{path: "grant.purpose", value: "replace one public UUID test literal with a deterministic scanner-safe equivalent and republish the otherwise accepted terminal design"},
+	{path: "grant.attemptId", value: "w001-lifecycle-terminal-ci-recovery-v1"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "grant.ordinaryCorrectionLimit", value: "0"},
+	{path: "finding.file", value: "internal/authority/closeout/closeout_test.go"},
+	{path: "finding.lineAtBase", value: "239"},
+	{path: "finding.scannerRule", value: "generic-api-key"},
+	{path: "finding.fingerprint", value: "internal/authority/closeout/closeout_test.go:generic-api-key:239"},
+	{path: "finding.valueClassification", value: "public-noncredential-authority-generation-fixture"},
+	{path: "finding.requiredDisposition", value: "scanner-safe-equivalent-with-byte-identical-runtime-value"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "true"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001TerminalCIRecoveryNamespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-terminal-ci-recovery-v1.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001TerminalCIRecoverySequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-rejected-candidate-tag-and-failed-run-immutably",
+		"replace-only-the-public-authority-generation-test-literal-with-a-deterministic-scanner-safe-equivalent",
+		"update-only-this-grant-manifest-active-plan-evidence-terminal-validator-focused-tests-and-closeout-test",
+		"create-signed-semantic-commits-and-one-distinct-signed-v2-review-tag",
+		"push-the-existing-branch-and-v2-tag-rerun-exact-head-CI-and-obtain-independent-QA-then-Security-review",
+		"squash-merge-pull-request-11-only-after-QA-and-Security-accept-the-exact-v2-reviewed-tree",
+	},
+	"grant.authorizedPaths": {
+		w001TerminalCIRecoveryPath, w001TerminalCIRecoverySignature, ".harness/manifest.yaml", canonicalActivePlan,
+		"docs/evidence/W-001-validation.md", "internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+		"internal/authority/closeout/closeout_test.go",
+	},
+	"grant.requiredProperties": {
+		"every-new-commit-and-tag-is-signed-and-chronologically-prospective",
+		"the-v1-candidate-tag-run-and-finding-remain-immutable-and-rejected",
+		"the-replacement-fixture-evaluates-to-the-exact-same-public-authority-generation-value",
+		"terminal-runtime-command-store-gateway-database-workflow-dependency-and-product-bytes-remain-identical-to-v1",
+		"exact-head-CI-precedes-independent-QA-which-precedes-independent-Security",
+		"any-further-CI-review-authority-or-security-failure-stops-and-escalates-without-an-incremental-successor",
+	},
+	"grant.prohibitedEffects": {
+		"move-delete-rewrite-resign-or-accept-the-v1-candidate-tag-commit-or-run",
+		"modify-any-path-outside-the-exact-eight-path-scope",
+		"modify-closeout-runtime-command-API-database-gateway-Beads-store-PostgreSQL-store-workflow-dependencies-product-or-production",
+		"canonical-Beads-PostgreSQL-lifecycle-or-lease-mutation",
+		"create-any-additional-correction-attempt-or-review-tag",
+		"start-P001-production-or-any-downstream-ticket",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"verification.order": {
+		"signed-grant-only-commit", "exact-fixture-regression-and-pinned-scanner", "clean-normal-clone-full-gates",
+		"signed-evidence-checkpoint-and-v2-review-tag", "exact-head-public-CI", "qa", "security-reviewer", "protected-main-merge-and-CI",
+	},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -7412,6 +7512,10 @@ func w001TerminalReconciliationActive(root string) bool {
 }
 
 func checkW001TerminalReconciliationGrant(root string, findings *[]Finding) {
+	recoveryActive := w001TerminalCIRecoveryActive(root)
+	if recoveryActive {
+		defer checkW001TerminalCIRecoveryGrant(root, findings)
+	}
 	data, err := readRepoFile(root, w001TerminalReconciliationPath)
 	if err != nil {
 		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_grant_missing", "signed W-001 terminal-reconciliation grant is required")
@@ -7467,13 +7571,16 @@ func checkW001TerminalReconciliationGrant(root string, findings *[]Finding) {
 		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_prior_tag", "accepted W-001 candidate review tag must remain exact")
 	}
 	plan, planErr := readRepoFile(root, canonicalActivePlan)
-	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-terminal-reconciliation-v1`")) ||
-		!bytes.Contains(plan, []byte(w001TerminalReconciliationBase)) || !bytes.Contains(plan, []byte("W-001 remains `in-progress`")) {
+	if planErr != nil || !recoveryActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-terminal-reconciliation-v1`")) ||
+		recoveryActive && !bytes.Contains(plan, []byte("`W-001-lifecycle-terminal-ci-recovery-v1`")) ||
+		!recoveryActive && !bytes.Contains(plan, []byte(w001TerminalReconciliationBase)) || !bytes.Contains(plan, []byte("W-001 remains `in-progress`")) {
 		addFinding(findings, canonicalActivePlan, "public.w001_terminal_plan", "active plan must select the bounded terminal reconciliation while canonical W-001 remains in-progress")
 	}
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
-	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-reconciliation-v1")) ||
-		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-reconciliation-v1")) ||
+	if manifestErr != nil || !recoveryActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-reconciliation-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-reconciliation-v1"))) ||
+		recoveryActive && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-ci-recovery-v1")) ||
+			!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-ci-recovery-v1"))) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_terminal_manifest", "manifest must project terminal reconciliation and absent live lease before canonical apply")
 	}
@@ -7488,7 +7595,100 @@ func checkW001TerminalReconciliationGrant(root string, findings *[]Finding) {
 	}
 }
 
+func w001TerminalCIRecoveryActive(root string) bool {
+	_, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001TerminalCIRecoveryPath)))
+	return err == nil
+}
+
+func checkW001TerminalCIRecoveryGrant(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, w001TerminalCIRecoveryPath)
+	if err != nil {
+		addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_missing", "signed terminal CI-recovery grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001TerminalCIRecoveryScalars, w001TerminalCIRecoverySequences,
+		[]string{"grant", "finding", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_schema", "%s", message)
+	}
+	for _, expected := range w001TerminalCIRecoveryScalars {
+		values := document.scalars[expected.path]
+		if len(values) != 1 || values[0] != expected.value {
+			addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_value", "%s does not match the signed CI-recovery contract", expected.path)
+		}
+	}
+	for path, expected := range w001TerminalCIRecoverySequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_sequence", "%s must equal the exact ordered CI-recovery contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "finding", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 24*time.Hour {
+		addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_expiry", "terminal CI recovery must use one RFC3339 interval no longer than 24 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001TerminalCIRecoverySignature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if fileSHA256(data) != w001TerminalCIRecoveryGrantSHA256 || signatureErr != nil || fileSHA256(signature) != w001TerminalCIRecoverySignatureSHA256 ||
+		!keyValid || verifySSHSig(data, signature, publicKey, w001TerminalCIRecoveryNamespace) != nil {
+		addFinding(findings, w001TerminalCIRecoverySignature, "public.w001_terminal_ci_recovery_signature", "terminal CI-recovery grant and detached signature must remain byte-exact and verify with the pinned key")
+	}
+	for _, binding := range []struct{ path, digest string }{
+		{w001TerminalReconciliationPath, w001TerminalGrantSHA256},
+		{w001TerminalReconciliationSignature, w001TerminalGrantSignatureSHA256},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_terminal_ci_recovery_prior_grant", "prior terminal grant material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001TerminalCIRecoveryBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001TerminalCIRecoveryBase+"^{tree}")
+	parents, parentErr := planningGrantCommitParents(root, w001TerminalCIRecoveryBase)
+	if baseErr != nil || treeErr != nil || parentErr != nil || strings.TrimSpace(string(base)) != w001TerminalCIRecoveryBase ||
+		strings.TrimSpace(string(baseTree)) != w001TerminalCIRecoveryBaseTree || len(parents) != 1 || parents[0] != "654d2b5271886e75b0426d7baaeedb839d2d5210" {
+		addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_base", "terminal CI recovery must descend from the exact rejected v1 candidate")
+	}
+	tagObject, objectErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+w001TerminalReconciliationReviewTag+"^{tag}")
+	tagTarget, targetErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+w001TerminalReconciliationReviewTag+"^{}")
+	if objectErr != nil || targetErr != nil || strings.TrimSpace(string(tagObject)) != w001TerminalV1TagObject || strings.TrimSpace(string(tagTarget)) != w001TerminalCIRecoveryBase {
+		addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_prior_tag", "rejected v1 candidate tag must remain exact and immutable")
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-terminal-ci-recovery-v1`")) ||
+		!bytes.Contains(plan, []byte(w001TerminalCIRecoveryBase)) || !bytes.Contains(plan, []byte("W-001 remains `in-progress`")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_terminal_ci_recovery_plan", "active plan must select the bounded terminal CI recovery while W-001 remains in-progress")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-ci-recovery-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-ci-recovery-v1")) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_terminal_ci_recovery_manifest", "manifest must project terminal CI recovery and absent live lease")
+	}
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{w001TerminalCIRecoveryBase, w001TerminalCIRecoveryBaseTree, w001TerminalV1TagObject,
+		"33250298926", "99094724907", "generic-api-key", "W-001-lifecycle-terminal-ci-recovery-v1", "rejected"} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_terminal_ci_recovery_evidence", "terminal CI-recovery evidence must preserve the rejected v1 candidate, failed run, scanner finding, and bounded replacement")
+			break
+		}
+	}
+}
+
 func checkW001TerminalReconciliationGitDiff(root string, findings *[]Finding) {
+	if w001TerminalCIRecoveryActive(root) {
+		checkW001TerminalCIRecoveryGitDiff(root, findings)
+		return
+	}
 	top, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
 	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(top))) {
 		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_git", "Git metadata must resolve to the audited repository root")
@@ -7551,6 +7751,107 @@ func checkW001TerminalReconciliationGitDiff(root string, findings *[]Finding) {
 	if trackedErr != nil || untrackedErr != nil || normalizeErr != nil || !w001TerminalReconciliationPathsAllowed(paths) {
 		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_scope", "current changes include a path outside the signed terminal-reconciliation scope")
 	}
+}
+
+func checkW001TerminalCIRecoveryGitDiff(root string, findings *[]Finding) {
+	top, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
+	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(top))) {
+		addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_git", "Git metadata must resolve to the audited repository root")
+		return
+	}
+	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
+	head := strings.TrimSpace(string(headOutput))
+	if err != nil || !sha1Pattern.MatchString(head) {
+		addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_head", "terminal CI recovery HEAD must resolve to one exact commit")
+		return
+	}
+	branchOutput, branchErr := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
+	branch := strings.TrimSpace(string(branchOutput))
+	featureHead := head
+	requireTag, mainTreeCheck := false, false
+	switch {
+	case branchErr == nil && branch == w001TerminalReconciliationBranch && os.Getenv("GITHUB_ACTIONS") != "true":
+		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001TerminalCIRecoveryBase, head); err != nil {
+			addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_ancestry", "local CI recovery must descend from the exact rejected v1 candidate")
+			return
+		}
+	case branchErr == nil && branch == "main" && os.Getenv("GITHUB_ACTIONS") != "true":
+		requireTag, mainTreeCheck = true, true
+	case os.Getenv("GITHUB_ACTIONS") == "true":
+		checkout, ok := w001TerminalGitHubCheckout(root, head, branch, findings)
+		if !ok {
+			return
+		}
+		featureHead, requireTag, mainTreeCheck = checkout.expectedHead, true, checkout.kind == planningGrantMainSquash
+	default:
+		addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_branch", "terminal CI recovery requires its signed branch or accepted protected main")
+		return
+	}
+	if requireTag {
+		expected := featureHead
+		if mainTreeCheck {
+			expected = ""
+		}
+		target, ok := checkW001DeliveryReviewTag(root, expected, w001TerminalCIRecoveryReviewTag, w001TerminalCIRecoveryTagMessage, findings)
+		if !ok {
+			return
+		}
+		featureHead = target
+	}
+	if mainTreeCheck {
+		parents, err := planningGrantCommitParents(root, head)
+		mainTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", featureHead+"^{tree}")
+		if err != nil || len(parents) != 1 || parents[0] != w001TerminalReconciliationBase || strings.TrimSpace(string(mainTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_main", "accepted terminal CI recovery must be one exact-tree squash over the signed PR 11 base")
+			return
+		}
+	}
+	if !checkW001TerminalCIRecoveryCommitRange(root, featureHead, findings) {
+		return
+	}
+	tracked, trackedErr := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
+	untracked, untrackedErr := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
+	paths, normalizeErr := normalizedPlanningGrantGitPaths(tracked, untracked)
+	if trackedErr != nil || untrackedErr != nil || normalizeErr != nil || !w001TerminalCIRecoveryPathsAllowed(paths) {
+		addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_scope", "current changes include a path outside the signed terminal CI-recovery scope")
+	}
+}
+
+func checkW001TerminalCIRecoveryCommitRange(root, head string, findings *[]Finding) bool {
+	commits, err := planningGrantCommitRangeFrom(root, w001TerminalCIRecoveryBase, head)
+	if err != nil || len(commits) < 2 {
+		addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_history", "terminal CI recovery requires a signed grant commit and replacement history")
+		return false
+	}
+	publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_terminal_ci_recovery_signature", "terminal CI-recovery commits require the pinned genesis signer")
+		return false
+	}
+	issuedAt, _ := time.Parse(time.RFC3339, "2026-08-29T11:33:56Z")
+	previous := w001TerminalCIRecoveryBase
+	for _, commit := range commits {
+		paths, pathErr := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
+		normalized, normalizeErr := normalizedPlanningGrantGitPaths(paths)
+		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
+		if len(commit.parents) != 1 || commit.parents[0] != previous || pathErr != nil || normalizeErr != nil || !w001TerminalCIRecoveryPathsAllowed(normalized) ||
+			objectErr != nil || verifyPlanningGrantCommit(object, publicKey) != nil || timeErr != nil || committedAt.Before(issuedAt) {
+			addFinding(findings, w001TerminalCIRecoveryPath, "public.w001_terminal_ci_recovery_history", "every terminal CI-recovery commit must be a prospective signed one-parent scoped commit")
+			return false
+		}
+		previous = commit.id
+	}
+	return true
+}
+
+func w001TerminalCIRecoveryPathsAllowed(paths []string) bool {
+	authorized := make(map[string]bool, len(w001TerminalCIRecoverySequences["grant.authorizedPaths"]))
+	for _, path := range w001TerminalCIRecoverySequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return planningGrantPathsAllowed(paths, authorized)
 }
 
 func w001TerminalGitHubCheckout(root, head, branch string, findings *[]Finding) (planningGrantCheckout, bool) {
@@ -7967,12 +8268,16 @@ func LoadW001TerminalReconciliationGrant(repo string, now time.Time) (W001Termin
 	}
 	bootstrapDocument := parseStrictGrant(bootstrapData, w001BootstrapGrantScalars, w001BootstrapGrantSequences,
 		[]string{"grant", "expected", "postimage", "toolchain", "verification", "integrity"})
+	reviewTag := scalarValue(document, "grant.successorReviewTag")
+	if w001TerminalCIRecoveryActive(root) {
+		reviewTag = w001TerminalCIRecoveryReviewTag
+	}
 	return W001TerminalReconciliationGrant{
 		ID: scalarValue(document, "grant.id"), Repository: scalarValue(document, "grant.repository"),
 		Bead: scalarValue(document, "canonicalPreimage.bead"), Assignee: "work-authority-engineer",
 		AttemptID: scalarValue(document, "grant.attemptId"), CanonicalClaimAttemptID: scalarValue(bootstrapDocument, "grant.attemptId"),
 		BaseCommit: scalarValue(document, "grant.baseCommit"), BaseTree: scalarValue(document, "grant.baseTree"),
-		WorkingBranch: scalarValue(document, "grant.workingBranch"), ReviewTag: scalarValue(document, "grant.successorReviewTag"),
+		WorkingBranch: scalarValue(document, "grant.workingBranch"), ReviewTag: reviewTag,
 		AcceptedCandidateHead: scalarValue(document, "grant.acceptedCandidateHead"), AcceptedCandidateTree: scalarValue(document, "grant.acceptedCandidateTree"),
 		MergedCommit: scalarValue(document, "grant.mergedCommit"), MergedTree: scalarValue(document, "grant.mergedTree"),
 		MergedPullRequest: pullRequest, ProtectedMainRun: protectedRun,
