@@ -2298,3 +2298,22 @@ the gateway-only canonical boundary. Canonical W-001 is already `done`, so the
 binding authorizes no lifecycle or lease mutation. Production, destructive
 effects, another Bead, direct authority-store mutation, and downstream work
 remain outside scope.
+
+The W-001 ticket-lifetime activation branch begins at exact preserved V4 head
+`96ec3410b16d381b102e6c1c0bd36e5ea9a9e426`. Signed doctrine commit
+`2b8a5b9dda98a8b86aca5f65862cdb91e6a16b2d` introduced the machine policy,
+PD-004, ADR-007, manifest/plan/BDD projections, strict Git/CI topology, and
+focused regressions across the exact 15 authorized paths. Signed formatting
+commit `109691fa0637ffd3e5063bf82d8800b0773ec337` removed the policy's trailing
+blank line. The first full qualification found that the historical V4 checker
+still required V4 to be the active grant; signed correction commit
+`b76a27f8c0259687650b696ced78439684566cae` now accepts either the historical
+active-V4 projection or the exact preserved-V4 projection under the current
+ticket binding. The focused V4 preservation and ticket-authority tests passed.
+
+The one authorized full-suite retry then passed every package; the
+`internal/doctrine` package completed in 170.471 seconds. `go vet ./...`, the
+doctrine, active-plan, DocSync, immediate-public-disclosure, and whitespace
+gates also passed. These are local qualification results. A distinct signed
+ticket-lifetime review tag, exact-head public CI, independent QA, independent
+Security, accepted merge, and protected-main readback remain required.
