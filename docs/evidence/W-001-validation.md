@@ -2092,3 +2092,15 @@ event, or lease mutation remain prohibited. Canonical M3-W001 remains native
 `closed`, lifecycle `done`, and without a live lease. A distinct signed review
 tag, exact-head CI, independent QA, and then independent Security are required
 before PR #13 may merge.
+
+Signed validator/evidence implementation commit
+`e0ea17507d9b843a73023655aebd85ef0c8945fa`, tree
+`be6e5cba8004a7a0faaf34defc87a4cb3bac3144`, adds the exact PR #13 topology,
+preserved-PR rejection regression, signed-grant verifier, prospective linear
+commit check, exact seven-path allowlist, and protected-main squash check. The
+focused terminal-evidence and inherited exact-tagger suite passed. Doctrine,
+active-plan, DocSync, public-content, whitespace, and `go vet ./...` gates
+passed. Unmodified `go test ./... -count=1` passed every package, with
+`internal/doctrine` completing in 158.171 seconds. This is local qualification
+only; the distinct signed review tag, exact-head public CI, independent QA,
+independent Security, and accepted merge remain pending.
