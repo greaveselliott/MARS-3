@@ -19,14 +19,33 @@ signed execution authorization bound protected main
 and one new PostgreSQL fence generation. The gateway issued exactly lease
 epoch `1`, released it during handoff, recorded QA then Security acceptance,
 the completed run and PR #10 reconciliation, and the terminal transition.
-External Beads and PostgreSQL readback found no live lease. This Git projection
-is `in-review` only for the final public evidence handoff. Signed evidence
-commit `8648be7fd2f36f872b36f7764897343cb84135b2` and PR #12 are preserved
-unchanged after GitHub could not construct their merge topology from the
-pre-squash v4 parent. The prospective signed
-`W-001-lifecycle-terminal-evidence-publication-v1` grant admits only one
-seven-path successor from protected main for PR #13. The execution and
-correction grants are consumed, no further canonical mutation is pending, and
+External Beads and PostgreSQL readback found no live lease. Canonical M3-W001
+and its delivery row remain `done`; the separate terminal-evidence publication
+is `in-review` only for the final public handoff. Signed evidence
+commit `8648be7fd2f36f872b36f7764897343cb84135b2` and closed PR #12 are
+preserved unchanged after GitHub could not construct their merge topology from the
+pre-squash v4 parent. Publication v1 candidate
+`63eed57083e31a18b9ac2c3143802d021d37e4f0`, its signed tag object
+`91b2d9ffdc7d4d5a679678a6d30f0f52561c1c19`, passed run/job
+`33329491442`/`99305391610`, and QA `changes-requested` disposition are
+immutable. PR #13 prematurely squash-merged that rejected tree as protected
+main `4ec60790abdd34a12b209f70d631def0b44ab465`; run/job
+`33330996615`/`99309411316` passed but does not substitute for the missing QA
+and Security acceptance. The locally qualified v2 head
+`8d24e259d8d078d888c9c6d2060dc57b6eda1ee9` is preserved by signed archival
+tag object `2d36c895cfd9f47927f635b16bf911d3a070758e`. The prospective signed
+V3 grant produced rejected PR #14 head
+`0d193d29e9087a8a2022d70aa8bb9943f5e84a3d`, tree
+`6a8fce667d4b57134a902ed31a4843ada20f6948`, signed tag object
+`e708daafba37e4efe3096b64de30eb10033d2201`, and passing run/job
+`33333798814`/`99316989127`. Independent QA returned `changes-requested`
+because the validator admitted a tag timestamp equal to its target commit,
+despite the signed contract requiring a strictly later tag. The prospective
+signed `W-001-lifecycle-terminal-evidence-publication-v4` grant permits only a
+forward replay of the accepted V3 changes, strict tag-after-target enforcement,
+and this stale-version wording correction across nine paths on PR #15. The
+execution and earlier correction grants are consumed, no further canonical
+mutation is pending, and
 P-001 and every downstream ticket remain backlog and unclaimed.
 
 ## Durable lineage
@@ -86,10 +105,11 @@ the work graph. The delivery phase is now terminal. Its signed delivery and
 correction grants are consumed, and the sole lease was released at epoch `1`.
 The v2 publication route preserved the original delivery branch as public
 foundation-failure evidence and the v4 correction admitted exactly ten
-immutable synthetic scanner fingerprints. The current publication correction
-changes only the validator and durable evidence topology; it cannot execute
-the gateway or mutate Beads, PostgreSQL, a lease, a workflow, runtime, or
-product behavior.
+immutable synthetic scanner fingerprints. The current v4 publication recovery
+changes only the terminal-done plan projection, strict signed-tag chronology
+validator, focused regressions, and durable evidence topology; it cannot
+execute the gateway or mutate Beads, PostgreSQL, a lease, a workflow, runtime,
+or product behavior.
 
 ## Scenario priority
 
@@ -113,7 +133,7 @@ is limited to post-terminal evidence publication.
 | Wave | Bead | Owner | Depends on | State | Exit evidence |
 | --- | --- | --- | --- | --- | --- |
 | 0 | H-001 Doctrine foundation | Foundation Maintainer | signed genesis | done | QA/Security accepted E7, verified public merge, completed run, and reconciliation receipt |
-| 1 | W-001 Work Authority | Work Authority Engineer | H-001 | in-review | Terminal Beads state, released epoch-1 lease, ordered QA/Security, completed run, reconciliation, and four-store readback |
+| 1 | W-001 Work Authority | Work Authority Engineer | H-001 | done | Terminal Beads state, released epoch-1 lease, ordered QA/Security, completed run, reconciliation, and four-store readback |
 | 1 | P-001 Local substrate | Platform Engineer | H-001, W-001 | backlog | Lima/k3s, OIDC, RLS, Temporal, storage, and isolation evidence |
 | 2 | T-001 Trace spine | Trace Engineer | W-001, P-001 | backlog | audit ledger, OTel/Tempo, effect intents, receipts, and replay |
 | 3 | S-001 Rule-of-Two policy | Security Engineer | T-001 | backlog | labels, taint, tool contracts, and hard admission policy |
@@ -177,15 +197,22 @@ The Orchestrator may schedule it only through a later truthful plan transition.
   21-event journal at the same high watermark.
 - Publication correction: signed evidence commit
   `8648be7fd2f36f872b36f7764897343cb84135b2`, tree
-  `104a6bd0331d99a55ed09853e2256bc4a9379308`, and PR #12 remain immutable
-  `open-dirty-unmergeable` process evidence. The exact successor grant
-  `W-001-lifecycle-terminal-evidence-publication-v1` starts from protected main
-  `4cfa28b42679651d0f198418b54fb05fc3483c4d`, tree
-  `64697884630206f76004321fbca4b787bf1c427c`, and permits only its signed
-  grant/signature, manifest, this plan, W-001 evidence, and the terminal
-  validator/focused tests. PR #13 must pass exact-head CI, independent QA, and
-  independent Security before merge. It grants no runtime, gateway, store,
-  workflow, dependency, canonical-store, production, or downstream authority.
+  `104a6bd0331d99a55ed09853e2256bc4a9379308`, and closed PR #12 remain
+  immutable process evidence. The historical signed
+  `W-001-lifecycle-terminal-evidence-publication-v1` grant and rejected v1
+  tree remain reconstructible after the premature PR #13 squash at
+  `4ec60790abdd34a12b209f70d631def0b44ab465`. The unmerged v2 correction is
+  archived at signed tag object `2d36c895cfd9f47927f635b16bf911d3a070758e`.
+  V3 head `0d193d29e9087a8a2022d70aa8bb9943f5e84a3d`, signed tag object
+  `e708daafba37e4efe3096b64de30eb10033d2201`, passing run/job
+  `33333798814`/`99316989127`, PR #14, and its QA rejection remain immutable.
+  The exact forward-only grant
+  `W-001-lifecycle-terminal-evidence-publication-v4` starts from protected main
+  and permits only its signed grant/signature, manifest, this plan, W-001
+  evidence, and the terminal and plan validators/focused tests. PR #15 must
+  pass exact-head CI, independent QA, and independent Security before merge.
+  It grants no runtime, gateway, store, workflow, dependency, canonical-store,
+  production, or downstream authority.
 
 The consumed terminal lineage remains reconstructible. At each historical
 boundary the canonical record truthfully stated: W-001 remains `in-progress`.

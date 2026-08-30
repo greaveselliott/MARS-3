@@ -2104,3 +2104,150 @@ passed. Unmodified `go test ./... -count=1` passed every package, with
 `internal/doctrine` completing in 158.171 seconds. This is local qualification
 only; the distinct signed review tag, exact-head public CI, independent QA,
 independent Security, and accepted merge remain pending.
+
+### Publication v1 QA rejection and bounded v2 correction
+
+Publication v1 evidence remains immutable at candidate
+`63eed57083e31a18b9ac2c3143802d021d37e4f0`, tree
+`b16861c96a7553e1abe6c62b591710104e93287b`. Signed tag
+`mars3/w001-lifecycle-terminal-evidence-publication-v1` remains object
+`91b2d9ffdc7d4d5a679678a6d30f0f52561c1c19`, targets that exact candidate,
+and records tagger time `2026-08-30T18:52:46Z`. Exact-head CI run/job
+`33329491442`/`99305391610` passed. Independent QA reviewed synthetic PR #13
+merge `b3c176a6d5959d0706cbf5692000ca1dea697617` and returned
+`changes-requested` with two open findings:
+
+- `public.w001_terminal_evidence_state_reopened`: the Git projection reopened
+  canonical W-001 as `in-review` instead of keeping the Bead and delivery row
+  `done` with publication review represented separately.
+- `public.w001_terminal_evidence_tag_chronology_unbounded`: signed tag identity
+  and target were verified, but the signed tagger timestamp was not parsed and
+  bounded after grant issuance and target commit and before grant expiry.
+
+PR #12 remains preserved at signed head
+`8648be7fd2f36f872b36f7764897343cb84135b2`; it is not an acceptance route.
+After PR #13 receives accepted v2 QA and Security review, merges, and passes
+protected-main CI, PR #12 is to be commented on and closed as superseded
+without changing its head or branch and without merging or rebasing it.
+
+The prospective signed
+`W-001-lifecycle-terminal-evidence-publication-v2` grant is byte-exact at
+SHA-256 `5fd6504d2409b344dcc138358bc1146d85b3c84b738577bd987a6ad1884a918e`;
+its detached-signature SHA-256 is
+`e3f299188775875cbc267a160368c20f5dbaf6043652ecc906e26d2fb3a9cff9`.
+The signature verifies under namespace
+`mars3-w001-lifecycle-terminal-evidence-publication-v2` with the pinned
+ED25519 key. Signed grant-only commit
+`884213d1ae6521fe0b832d6dfe7589fb4c1addec`, tree
+`4b788cf81bcf1fb62d50ca8114a55209cf04ec66`, is prospective to the
+`2026-08-30T19:10:00Z` issue time.
+
+The v2 implementation is restricted to admitting exactly one current `done`
+W-001 row with zero active delivery rows, preserving the existing nonterminal
+delivery cardinality, and parsing the signed annotated-tag object so tagger
+time is on or after grant issuance and target commit time and strictly before
+grant expiry. Focused regressions cover terminal projection, parallel active
+work denial, backdating, pre-target timestamps, expiry, and malformed tagger
+time metadata. This is not canonical lifecycle work: the publication remains
+`in-review` while M3-W001 remains `done` and the live lease remains absent.
+
+### Premature PR #13 merge and forward-only v3 recovery
+
+PR #13 merged before the required v2 exact-head publication and ordered
+QA-to-Security review. GitHub readback binds the event to rejected v1 head
+`63eed57083e31a18b9ac2c3143802d021d37e4f0` and squash commit
+`4ec60790abdd34a12b209f70d631def0b44ab465`. The protected-main tree is
+`b16861c96a7553e1abe6c62b591710104e93287b`, exactly the rejected v1 tree.
+Protected-main run/job `33330996615`/`99309411316` passed, but green CI does
+not reclassify the immutable QA `changes-requested` disposition or supply the
+Security review that was correctly gated behind QA. The merge is retained as
+`unaccepted-process-evidence`; it is not reverted, amended, or rewritten.
+
+PR #12 is closed without merge and retains exact head
+`8648be7fd2f36f872b36f7764897343cb84135b2`. It remains process evidence and
+will not be reopened, rebased, or merged.
+
+The locally qualified but unpublished v2 attempt remains reachable at exact
+head `8d24e259d8d078d888c9c6d2060dc57b6eda1ee9`, tree
+`999ca4d942c41eab0e6568150276b81772e4965c`. Signed archival tag
+`mars3/w001-lifecycle-terminal-evidence-publication-v2-unmerged` is object
+`2d36c895cfd9f47927f635b16bf911d3a070758e`, targets that head, and uses the
+exact Release Manager identity. The archive preserves signed grant-only commit
+`884213d1ae6521fe0b832d6dfe7589fb4c1addec`, implementation commit
+`d5eff09fc6b11eb3f5898c5b1e05ca2c2f549450`, and focused-test commit
+`8d24e259d8d078d888c9c6d2060dc57b6eda1ee9` without presenting them as a
+reviewed or merged candidate.
+
+The forward-only signed
+`W-001-lifecycle-terminal-evidence-publication-v3` grant begins at protected
+main `4ec60790abdd34a12b209f70d631def0b44ab465`, tree
+`b16861c96a7553e1abe6c62b591710104e93287b`. Its SHA-256 is
+`eff2bd4a1e546dccf87a9d0ee072841974ec85ce9b99c2108da91302da08a4aa`;
+detached-signature SHA-256 is
+`d9bc55cddfe12fee99e7c8d7184f46fe764719126ce77c1554fda1256ce6a041`.
+The signature verifies under namespace
+`mars3-w001-lifecycle-terminal-evidence-publication-v3` with the pinned
+ED25519 key. Prospective signed grant-only commit
+`856434ebb798245b81aa46c779571b0669f1c038`, tree
+`690c9190b5244ecd3785f99c372c6168a11e4937`, precedes signed replay commits
+`1906539f063bbd85e4539bbacc963a2f69e14704` and
+`da327368a94032e918456a3f26a1b463e8d8faee`.
+
+V3 may reproduce only the already-qualified terminal `done` projection and
+signed tag chronology enforcement. PR #14 must carry a distinct signed v3
+review tag, pass exact-head public CI, and receive independent QA followed by
+independent Security acceptance before squash merge. Runtime, gateway, store,
+workflow, dependency, database design, API, Beads/lease, production, and
+downstream changes remain prohibited.
+
+Signed v3 implementation head
+`791132d6a7047f658bdb58db7313c1f53be9c1fa` was then qualified from a fresh
+canonical GitHub clone with the immutable branch head fetched by object ID.
+The exact nine-path base-to-head diff matched the v3 grant. Repository build,
+doctrine, active-plan, DocSync, public-content, whitespace, and `go vet ./...`
+gates passed. The focused terminal-publication race suite passed in 4.362
+seconds. Unmodified `go test ./... -count=1` passed every package, with
+`internal/doctrine` completing in 186.542 seconds. Those results were local
+qualification only. The subsequent distinct signed V3 review tag and exact-head
+CI passed, but the independent QA disposition below rejected the candidate
+before Security or merge.
+
+### Publication v3 QA rejection and strict v4 recovery
+
+PR #14 remains open at exact signed V3 head
+`0d193d29e9087a8a2022d70aa8bb9943f5e84a3d`, tree
+`6a8fce667d4b57134a902ed31a4843ada20f6948`. Signed tag
+`mars3/w001-lifecycle-terminal-evidence-publication-v3` remains object
+`e708daafba37e4efe3096b64de30eb10033d2201` and targets that head. Its tagger
+timestamp is `2026-08-30T20:28:53Z`, strictly after the target commit timestamp
+`2026-08-30T20:28:08Z`, using exact identity
+`MARS-3 Release Manager <release-manager@example.com>`. Exact-head CI run/job
+`33333798814`/`99316989127` passed.
+
+Independent QA returned `changes-requested` with finding
+`public.w001_terminal_evidence_tag_chronology_allows_target_equality`. The V3
+tag itself is correctly ordered, but the validator accepted a hypothetical tag
+whose timestamp equalled its target commit. Security did not run because QA
+acceptance is the required preceding gate. PR #14, its head and tree, the V3
+tag, CI, and QA disposition remain immutable rejected process evidence.
+
+The prospective signed
+`W-001-lifecycle-terminal-evidence-publication-v4` grant is byte-exact at
+SHA-256 `72875c2578d73c960319ee95bf8093ceb738b42d261f83bcc115bffd555a65ce`;
+its detached-signature SHA-256 is
+`e3b83fe3ee62d07a99df5c9037614d515b4997b7dfdd2a179714d7056be3a858`.
+The signature verifies under namespace
+`mars3-w001-lifecycle-terminal-evidence-publication-v4` with the pinned
+ED25519 key. Signed grant-only commit
+`24158593af20bada70956eb4c79c0e19451c577c` begins at exact protected main
+`4ec60790abdd34a12b209f70d631def0b44ab465`, tree
+`b16861c96a7553e1abe6c62b591710104e93287b`, and is prospective to the
+`2026-08-30T20:40:00Z` issue time.
+
+V4 replays the accepted V3 terminal `done` projection, changes tag chronology
+from “not before target” to “strictly after target,” adds the equality
+regression, and corrects the stale active-plan V2 wording to V4. PR #15 must
+carry a distinct signed V4 review tag, pass exact-head public CI, and receive
+independent QA followed by independent Security acceptance before squash
+merge. Runtime, gateway, store, workflow, dependency, database design, API,
+Beads/lease, production, and downstream changes remain prohibited.
