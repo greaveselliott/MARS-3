@@ -394,6 +394,16 @@ const (
 	w001TerminalEvidencePreservedTree            = "104a6bd0331d99a55ed09853e2256bc4a9379308"
 	w001TerminalV4TagObject                      = "c471bf1df39ca7035fb3e4a3cfc90a35eea2404e"
 	w001TerminalV4TagTarget                      = "327ce7fe81327517d8a00a5254f63ab3bfb4c7f5"
+	w001TerminalEvidencePublicationV2Path        = ".harness/grants/W-001-lifecycle-terminal-evidence-publication-v2.yaml"
+	w001TerminalEvidencePublicationV2Signature   = ".harness/grants/W-001-lifecycle-terminal-evidence-publication-v2.yaml.sig"
+	w001TerminalEvidencePublicationV2Namespace   = "mars3-w001-lifecycle-terminal-evidence-publication-v2"
+	w001TerminalEvidencePublicationV2Base        = "63eed57083e31a18b9ac2c3143802d021d37e4f0"
+	w001TerminalEvidencePublicationV2BaseTree    = "b16861c96a7553e1abe6c62b591710104e93287b"
+	w001TerminalEvidencePublicationV1TagObject   = "91b2d9ffdc7d4d5a679678a6d30f0f52561c1c19"
+	w001TerminalEvidencePublicationV2ReviewTag   = "mars3/w001-lifecycle-terminal-evidence-publication-v2"
+	w001TerminalEvidencePublicationV2TagMessage  = "MARS-3 W-001 terminal evidence publication attestation v2"
+	w001TerminalEvidencePublicationV2GrantSHA256 = "5fd6504d2409b344dcc138358bc1146d85b3c84b738577bd987a6ad1884a918e"
+	w001TerminalEvidencePublicationV2SigSHA256   = "e3f299188775875cbc267a160368c20f5dbaf6043652ecc906e26d2fb3a9cff9"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -4822,6 +4832,116 @@ var w001TerminalEvidencePublicationSequences = map[string][]string{
 	},
 }
 
+var w001TerminalEvidencePublicationV2Scalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3W001LifecycleTerminalEvidencePublicationV2Grant"},
+	{path: "grant.id", value: "W-001-lifecycle-terminal-evidence-publication-v2"},
+	{path: "grant.classification", value: "PUBLIC"},
+	{path: "grant.issuedAt", value: "2026-08-30T19:10:00Z"},
+	{path: "grant.expiresAt", value: "2026-08-31T19:10:00Z"},
+	{path: "grant.repository", value: planningGrantRepository},
+	{path: "grant.baseCommit", value: w001TerminalEvidencePublicationV2Base},
+	{path: "grant.baseTree", value: w001TerminalEvidencePublicationV2BaseTree},
+	{path: "grant.workingBranch", value: w001TerminalEvidencePublicationBranch},
+	{path: "grant.priorGrant", value: "W-001-lifecycle-terminal-evidence-publication-v1"},
+	{path: "grant.priorGrantSHA256", value: w001TerminalEvidencePublicationGrantSHA256},
+	{path: "grant.priorGrantSignatureSHA256", value: w001TerminalEvidencePublicationSigSHA256},
+	{path: "grant.rejectedReviewTag", value: w001TerminalEvidencePublicationReviewTag},
+	{path: "grant.rejectedReviewTagObject", value: w001TerminalEvidencePublicationV1TagObject},
+	{path: "grant.rejectedReviewTagTarget", value: w001TerminalEvidencePublicationV2Base},
+	{path: "grant.rejectedReviewTaggerTime", value: "2026-08-30T18:52:46Z"},
+	{path: "grant.rejectedRun", value: "33329491442"},
+	{path: "grant.rejectedJob", value: "99305391610"},
+	{path: "grant.rejectedQADisposition", value: "changes-requested"},
+	{path: "grant.rejectedQAMerge", value: "b3c176a6d5959d0706cbf5692000ca1dea697617"},
+	{path: "grant.preservedEvidenceCommit", value: w001TerminalEvidencePreservedCommit},
+	{path: "grant.preservedPullRequest", value: "12"},
+	{path: "grant.preservedPullRequestFinalDisposition", value: "close-superseded-after-PR13-protected-main-success"},
+	{path: "grant.successorPullRequest", value: "13"},
+	{path: "grant.successorReviewTag", value: w001TerminalEvidencePublicationV2ReviewTag},
+	{path: "grant.successorReviewTagMessage", value: w001TerminalEvidencePublicationV2TagMessage},
+	{path: "grant.requiredTaggerName", value: "MARS-3 Release Manager"},
+	{path: "grant.requiredTaggerEmail", value: "release-manager@example.com"},
+	{path: "grant.signerRole", value: "human-bootstrap-authority"},
+	{path: "grant.coordinator", value: "delivery-orchestrator"},
+	{path: "grant.principal", value: "release-manager"},
+	{path: "grant.purpose", value: "close the two independent QA findings without reopening canonical W-001 or expanding beyond terminal-evidence publication"},
+	{path: "grant.attemptId", value: "w001-lifecycle-terminal-evidence-publication-v2"},
+	{path: "grant.autonomousMutation", value: "false"},
+	{path: "grant.productionAllowed", value: "false"},
+	{path: "grant.implementationAllowed", value: "true"},
+	{path: "grant.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "grant.developmentLeaseAllowed", value: "false"},
+	{path: "grant.ordinaryCorrectionLimit", value: "0"},
+	{path: "findings.disposition", value: "changes-requested"},
+	{path: "findings.reviewer", value: "qa"},
+	{path: "findings.candidateHead", value: w001TerminalEvidencePublicationV2Base},
+	{path: "findings.candidateTree", value: w001TerminalEvidencePublicationV2BaseTree},
+	{path: "findings.reviewTagObject", value: w001TerminalEvidencePublicationV1TagObject},
+	{path: "findings.run", value: "33329491442"},
+	{path: "findings.job", value: "99305391610"},
+	{path: "findings.stateCode", value: "public.w001_terminal_evidence_state_reopened"},
+	{path: "findings.stateRequiredDisposition", value: "project-current-Bead-and-delivery-row-as-done-and-use-separate-publication-review-state"},
+	{path: "findings.chronologyCode", value: "public.w001_terminal_evidence_tag_chronology_unbounded"},
+	{path: "findings.chronologyRequiredDisposition", value: "parse-the-signed-tagger-time-and-require-issuance-and-target-not-after-tag-before-expiry"},
+	{path: "verification.publicCommitGateRequired", value: "true"},
+	{path: "verification.immutableCommitReviewRequired", value: "true"},
+	{path: "verification.protectedMainRequired", value: "true"},
+	{path: "verification.canonicalLifecycleMutationDeferred", value: "false"},
+	{path: "integrity.signatureFormat", value: "openssh"},
+	{path: "integrity.signatureNamespace", value: w001TerminalEvidencePublicationV2Namespace},
+	{path: "integrity.detachedSignature", value: "W-001-lifecycle-terminal-evidence-publication-v2.yaml.sig"},
+	{path: "integrity.publicKey", value: "../keys/genesis-signing-key.pub"},
+}
+
+var w001TerminalEvidencePublicationV2Sequences = map[string][]string{
+	"grant.allowedEffects": {
+		"preserve-the-v1-candidate-tag-run-QA-rejection-PR12-and-all-terminal-readback-immutably",
+		"extend-the-plan-validator-only-to-admit-one-current-done-Bead-with-zero-active-rows-during-terminal-delivery-projection",
+		"project-current-W001-and-its-delivery-row-as-done-while-publication-review-remains-separate",
+		"require-the-signed-publication-tag-time-to-be-after-grant-issuance-and-target-commit-and-before-grant-expiry",
+		"add-focused-terminal-done-projection-and-backdated-tag-regressions",
+		"update-only-this-grant-manifest-active-plan-evidence-terminal-and-plan-validators-and-focused-tests",
+		"create-signed-semantic-commits-and-one-distinct-signed-v2-review-tag",
+		"push-the-existing-PR13-branch-and-v2-tag-rerun-exact-head-CI-and-obtain-independent-QA-then-Security-review",
+		"squash-merge-pull-request-13-only-after-QA-and-Security-accept-the-exact-v2-reviewed-tree",
+		"after-PR13-protected-main-CI-passes-comment-on-and-close-PR12-as-superseded-without-changing-its-head-or-branch",
+	},
+	"grant.authorizedPaths": {
+		w001TerminalEvidencePublicationV2Path, w001TerminalEvidencePublicationV2Signature, ".harness/manifest.yaml",
+		canonicalActivePlan, "docs/evidence/W-001-validation.md", "internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+		"internal/doctrine/plan.go", "internal/doctrine/plan_test.go",
+	},
+	"grant.requiredProperties": {
+		"every-new-commit-and-tag-is-signed-and-chronologically-prospective",
+		"v1-tag-object-target-time-run-QA-disposition-and-PR13-subject-remain-immutable-and-rejected",
+		"canonical-W001-is-projected-as-done-and-publication-review-state-does-not-reopen-Bead-lifecycle",
+		"delivery-phase-terminal-projection-allows-exactly-one-current-done-Bead-and-zero-active-rows",
+		"nonterminal-delivery-still-requires-exactly-one-current-in-progress-or-in-review-row",
+		"the-v2-tag-is-distinct-targets-the-exact-current-feature-head-and-is-created-inside-the-signed-grant-window-after-its-target",
+		"PR12-head-branch-and-signed-evidence-commit-8648be7-remain-unchanged-and-unaccepted-even-when-the-PR-is-closed-as-superseded",
+		"exact-head-CI-precedes-independent-QA-which-precedes-independent-Security",
+	},
+	"grant.prohibitedEffects": {
+		"move-delete-rewrite-resign-or-accept-the-v1-candidate-tag-commit-run-QA-review-or-PR12-head",
+		"merge-or-rebase-PR12-or-recreate-its-signed-commit-on-protected-main",
+		"modify-any-path-outside-the-exact-nine-path-scope",
+		"broaden-plan-phases-states-or-active-cardinality-beyond-the-one-terminal-done-projection",
+		"modify-runtime-gateway-store-workflow-dependency-database-design-API-product-or-production",
+		"canonical-Beads-PostgreSQL-lifecycle-event-or-lease-mutation",
+		"start-P001-production-or-any-downstream-ticket",
+		"create-any-additional-correction-attempt-or-review-tag",
+		"autonomous-mutation",
+		"trust-escalation",
+	},
+	"verification.order": {
+		"signed-grant-only-commit", "failing-terminal-done-projection-and-backdated-tag-regressions",
+		"narrow-plan-terminal-state-and-tag-chronology-corrections", "clean-normal-clone-full-gates",
+		"signed-evidence-checkpoint-and-v2-review-tag", "exact-head-public-CI", "qa", "security-reviewer",
+		"protected-main-merge-and-CI",
+	},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -7951,7 +8071,10 @@ func checkW001TerminalReconciliationGrant(root string, findings *[]Finding) {
 	tagIdentityRecoveryActive := w001TerminalTagIdentityRecoveryActive(root)
 	exactTaggerRecoveryActive := w001TerminalExactTaggerRecoveryActive(root)
 	evidencePublicationActive := w001TerminalEvidencePublicationActive(root)
-	if evidencePublicationActive {
+	evidencePublicationV2Active := w001TerminalEvidencePublicationV2Active(root)
+	if evidencePublicationV2Active {
+		defer checkW001TerminalEvidencePublicationV2Grant(root, findings)
+	} else if evidencePublicationActive {
 		defer checkW001TerminalEvidencePublicationGrant(root, findings)
 	} else if exactTaggerRecoveryActive {
 		defer checkW001TerminalExactTaggerRecoveryGrant(root, findings)
@@ -8334,6 +8457,11 @@ func w001TerminalEvidencePublicationActive(root string) bool {
 	return err == nil
 }
 
+func w001TerminalEvidencePublicationV2Active(root string) bool {
+	_, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001TerminalEvidencePublicationV2Path)))
+	return err == nil
+}
+
 func checkW001TerminalExactTaggerRecoveryGrant(root string, findings *[]Finding) {
 	checkW001TerminalTagIdentityRecoveryGrant(root, findings)
 	data, err := readRepoFile(root, w001TerminalExactTaggerRecoveryPath)
@@ -8507,8 +8635,9 @@ func checkW001TerminalEvidencePublicationGrant(root string, findings *[]Finding)
 		addFinding(findings, canonicalActivePlan, "public.w001_terminal_evidence_publication_plan", "active plan must select the exact post-terminal evidence publication while canonical W-001 remains done")
 	}
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
-	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-evidence-publication-v1")) ||
-		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-evidence-publication-v1")) ||
+	evidencePublicationV2Active := w001TerminalEvidencePublicationV2Active(root)
+	if manifestErr != nil || (!evidencePublicationV2Active && (!bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-evidence-publication-v1")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-evidence-publication-v1")))) ||
 		!bytes.Contains(manifest, []byte("terminal_reconciliation_state: verified")) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
 		addFinding(findings, ".harness/manifest.yaml", "public.w001_terminal_evidence_publication_manifest", "manifest must project evidence publication over verified terminal state and no live lease")
@@ -8519,6 +8648,102 @@ func checkW001TerminalEvidencePublicationGrant(root string, findings *[]Finding)
 		"PR #12", "W-001-lifecycle-terminal-evidence-publication-v1", "public.w001_terminal_evidence_topology_unqualified"} {
 		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
 			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_terminal_evidence_publication_evidence", "evidence must preserve the terminal readback and bind the unmergeable PR 12 publication blocker to the successor")
+			break
+		}
+	}
+}
+
+func checkW001TerminalEvidencePublicationV2Grant(root string, findings *[]Finding) {
+	checkW001TerminalEvidencePublicationGrant(root, findings)
+	data, err := readRepoFile(root, w001TerminalEvidencePublicationV2Path)
+	if err != nil {
+		addFinding(findings, w001TerminalEvidencePublicationV2Path, "public.w001_terminal_evidence_publication_v2_missing", "signed terminal-evidence publication v2 grant is required")
+		return
+	}
+	document := parseStrictGrant(data, w001TerminalEvidencePublicationV2Scalars, w001TerminalEvidencePublicationV2Sequences,
+		[]string{"grant", "findings", "verification", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, w001TerminalEvidencePublicationV2Path, "public.w001_terminal_evidence_publication_v2_schema", "%s", message)
+	}
+	for _, expected := range w001TerminalEvidencePublicationV2Scalars {
+		values := document.scalars[expected.path]
+		if len(values) != 1 || values[0] != expected.value {
+			addFinding(findings, w001TerminalEvidencePublicationV2Path, "public.w001_terminal_evidence_publication_v2_value", "%s does not match the signed v2 evidence-publication contract", expected.path)
+		}
+	}
+	for path, expected := range w001TerminalEvidencePublicationV2Sequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, w001TerminalEvidencePublicationV2Path, "public.w001_terminal_evidence_publication_v2_sequence", "%s must equal the exact ordered v2 evidence-publication contract", path)
+		}
+	}
+	for _, section := range []string{"grant", "findings", "verification", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, w001TerminalEvidencePublicationV2Path, "public.w001_terminal_evidence_publication_v2_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+	issuedAt, issueErr := time.Parse(time.RFC3339, scalarValue(document, "grant.issuedAt"))
+	expiresAt, expiryErr := time.Parse(time.RFC3339, scalarValue(document, "grant.expiresAt"))
+	if issueErr != nil || expiryErr != nil || !expiresAt.After(issuedAt) || expiresAt.Sub(issuedAt) > 24*time.Hour {
+		addFinding(findings, w001TerminalEvidencePublicationV2Path, "public.w001_terminal_evidence_publication_v2_expiry", "terminal-evidence publication v2 must use one RFC3339 interval no longer than 24 hours")
+	}
+	signature, signatureErr := readRepoFile(root, w001TerminalEvidencePublicationV2Signature)
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	keyValid := keyErr == nil && fileSHA256(publicKey) == genesisVerificationMaterialDigest
+	if fingerprint, fingerprintErr := openSSHPublicKeyFingerprint(publicKey); fingerprintErr != nil || fingerprint != genesisSignerFingerprint {
+		keyValid = false
+	}
+	if fileSHA256(data) != w001TerminalEvidencePublicationV2GrantSHA256 || signatureErr != nil ||
+		fileSHA256(signature) != w001TerminalEvidencePublicationV2SigSHA256 || !keyValid ||
+		verifySSHSig(data, signature, publicKey, w001TerminalEvidencePublicationV2Namespace) != nil {
+		addFinding(findings, w001TerminalEvidencePublicationV2Signature, "public.w001_terminal_evidence_publication_v2_signature", "terminal-evidence publication v2 grant and detached signature must remain byte-exact and verify with the pinned key")
+	}
+	for _, binding := range []struct{ path, digest string }{
+		{w001TerminalEvidencePublicationPath, w001TerminalEvidencePublicationGrantSHA256},
+		{w001TerminalEvidencePublicationSignature, w001TerminalEvidencePublicationSigSHA256},
+	} {
+		content, readErr := readRepoFile(root, binding.path)
+		if readErr != nil || fileSHA256(content) != binding.digest {
+			addFinding(findings, binding.path, "public.w001_terminal_evidence_publication_v2_prior_grant", "rejected v1 publication grant material must remain byte-exact")
+		}
+	}
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001TerminalEvidencePublicationV2Base+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", w001TerminalEvidencePublicationV2Base+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != w001TerminalEvidencePublicationV2Base ||
+		strings.TrimSpace(string(baseTree)) != w001TerminalEvidencePublicationV2BaseTree ||
+		!checkW001TerminalEvidencePublicationCommitRange(root, w001TerminalEvidencePublicationV2Base, findings) {
+		addFinding(findings, w001TerminalEvidencePublicationV2Path, "public.w001_terminal_evidence_publication_v2_base", "v2 publication must descend from the exact signed QA-rejected v1 candidate and tree")
+	}
+	v1ObjectID, objectErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+w001TerminalEvidencePublicationReviewTag+"^{tag}")
+	v1Object, tagErr := planningGrantGitOutput(root, "cat-file", "tag", w001TerminalEvidencePublicationV1TagObject)
+	v1Target, identityErr := verifyPinnedPlanningGrantTag(v1Object, publicKey, w001TerminalEvidencePublicationReviewTag, w001TerminalEvidencePublicationTagMessage)
+	v1TargetTime, targetTimeErr := planningGrantCommitTime(root, w001TerminalEvidencePublicationV2Base)
+	v1IssuedAt, _ := time.Parse(time.RFC3339, "2026-08-30T18:37:30Z")
+	v1ExpiresAt, _ := time.Parse(time.RFC3339, "2026-08-31T18:37:30Z")
+	chronologyErr := validatePlanningGrantTagChronology(v1Object, v1IssuedAt, v1ExpiresAt, v1TargetTime)
+	if objectErr != nil || tagErr != nil || identityErr != nil || targetTimeErr != nil || chronologyErr != nil ||
+		strings.TrimSpace(string(v1ObjectID)) != w001TerminalEvidencePublicationV1TagObject || v1Target != w001TerminalEvidencePublicationV2Base {
+		addFinding(findings, w001TerminalEvidencePublicationV2Path, "public.w001_terminal_evidence_publication_v2_prior_tag", "rejected v1 tag object, target, identity, prospective time, and signature must remain exact")
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	if planErr != nil || !bytes.Contains(plan, []byte("`W-001-lifecycle-terminal-evidence-publication-v2`")) ||
+		!bytes.Contains(plan, []byte(w001TerminalEvidencePublicationV2Base)) || !bytes.Contains(plan, []byte("| 1 | W-001 Work Authority | Work Authority Engineer | H-001 | done |")) {
+		addFinding(findings, canonicalActivePlan, "public.w001_terminal_evidence_publication_v2_plan", "active plan must select v2 publication while projecting canonical W-001 as done")
+	}
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-evidence-publication-v2")) ||
+		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-evidence-publication-v2")) ||
+		!bytes.Contains(manifest, []byte("current_bead_state: done")) ||
+		!bytes.Contains(manifest, []byte("terminal_evidence_publication_state: in-review")) ||
+		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
+		addFinding(findings, ".harness/manifest.yaml", "public.w001_terminal_evidence_publication_v2_manifest", "manifest must separate in-review publication from canonical W-001 done state and absent live lease")
+	}
+	evidence, evidenceErr := readRepoFile(root, "docs/evidence/W-001-validation.md")
+	for _, marker := range []string{w001TerminalEvidencePublicationV2Base, w001TerminalEvidencePublicationV2BaseTree,
+		w001TerminalEvidencePublicationV1TagObject, "33329491442", "99305391610", "changes-requested",
+		"public.w001_terminal_evidence_state_reopened", "public.w001_terminal_evidence_tag_chronology_unbounded",
+		"W-001-lifecycle-terminal-evidence-publication-v2", w001TerminalEvidencePreservedCommit, "PR #12"} {
+		if evidenceErr != nil || !bytes.Contains(evidence, []byte(marker)) {
+			addFinding(findings, "docs/evidence/W-001-validation.md", "public.w001_terminal_evidence_publication_v2_evidence", "evidence must preserve the rejected v1 review and bind both bounded QA corrections")
 			break
 		}
 	}
@@ -8809,15 +9034,29 @@ func w001TerminalHistoryScanRecoveryPathsAllowed(paths []string) bool {
 }
 
 func checkW001TerminalEvidencePublicationGitDiff(root string, findings *[]Finding) {
+	grantPath := w001TerminalEvidencePublicationPath
+	lineageBase := w001TerminalEvidencePublicationBase
+	reviewTag := w001TerminalEvidencePublicationReviewTag
+	tagMessage := w001TerminalEvidencePublicationTagMessage
+	checkCommitRange := checkW001TerminalEvidencePublicationCommitRange
+	pathsAllowed := w001TerminalEvidencePublicationPathsAllowed
+	if w001TerminalEvidencePublicationV2Active(root) {
+		grantPath = w001TerminalEvidencePublicationV2Path
+		lineageBase = w001TerminalEvidencePublicationV2Base
+		reviewTag = w001TerminalEvidencePublicationV2ReviewTag
+		tagMessage = w001TerminalEvidencePublicationV2TagMessage
+		checkCommitRange = checkW001TerminalEvidencePublicationV2CommitRange
+		pathsAllowed = w001TerminalEvidencePublicationV2PathsAllowed
+	}
 	top, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
 	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(top))) {
-		addFinding(findings, w001TerminalEvidencePublicationPath, "public.w001_terminal_evidence_publication_git", "Git metadata must resolve to the audited repository root")
+		addFinding(findings, grantPath, "public.w001_terminal_evidence_publication_git", "Git metadata must resolve to the audited repository root")
 		return
 	}
 	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
 	head := strings.TrimSpace(string(headOutput))
 	if err != nil || !sha1Pattern.MatchString(head) {
-		addFinding(findings, w001TerminalEvidencePublicationPath, "public.w001_terminal_evidence_publication_head", "terminal-evidence publication HEAD must resolve to one exact commit")
+		addFinding(findings, grantPath, "public.w001_terminal_evidence_publication_head", "terminal-evidence publication HEAD must resolve to one exact commit")
 		return
 	}
 	branchOutput, branchErr := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
@@ -8826,8 +9065,8 @@ func checkW001TerminalEvidencePublicationGitDiff(root string, findings *[]Findin
 	requireTag, mainTreeCheck := false, false
 	switch {
 	case branchErr == nil && branch == w001TerminalEvidencePublicationBranch && os.Getenv("GITHUB_ACTIONS") != "true":
-		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", w001TerminalEvidencePublicationBase, head); err != nil {
-			addFinding(findings, w001TerminalEvidencePublicationPath, "public.w001_terminal_evidence_publication_ancestry", "local evidence publication must descend from exact accepted protected main")
+		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", lineageBase, head); err != nil {
+			addFinding(findings, grantPath, "public.w001_terminal_evidence_publication_ancestry", "local evidence publication must descend from its exact signed lineage base")
 			return
 		}
 	case branchErr == nil && branch == "main" && os.Getenv("GITHUB_ACTIONS") != "true":
@@ -8839,7 +9078,7 @@ func checkW001TerminalEvidencePublicationGitDiff(root string, findings *[]Findin
 		}
 		featureHead, requireTag, mainTreeCheck = checkout.expectedHead, true, checkout.kind == planningGrantMainSquash
 	default:
-		addFinding(findings, w001TerminalEvidencePublicationPath, "public.w001_terminal_evidence_publication_branch", "terminal-evidence publication requires its exact successor branch or accepted protected main")
+		addFinding(findings, grantPath, "public.w001_terminal_evidence_publication_branch", "terminal-evidence publication requires its exact successor branch or accepted protected main")
 		return
 	}
 	if requireTag {
@@ -8847,11 +9086,22 @@ func checkW001TerminalEvidencePublicationGitDiff(root string, findings *[]Findin
 		if mainTreeCheck {
 			expected = ""
 		}
-		target, ok := checkW001DeliveryReviewTag(root, expected, w001TerminalEvidencePublicationReviewTag, w001TerminalEvidencePublicationTagMessage, findings)
+		target, ok := checkW001DeliveryReviewTag(root, expected, reviewTag, tagMessage, findings)
 		if !ok {
 			return
 		}
 		featureHead = target
+		if w001TerminalEvidencePublicationV2Active(root) {
+			tagObjectID, objectErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+reviewTag+"^{tag}")
+			tagObject, tagErr := planningGrantGitOutput(root, "cat-file", "tag", strings.TrimSpace(string(tagObjectID)))
+			targetTime, timeErr := planningGrantCommitTime(root, target)
+			issuedAt, _ := time.Parse(time.RFC3339, "2026-08-30T19:10:00Z")
+			expiresAt, _ := time.Parse(time.RFC3339, "2026-08-31T19:10:00Z")
+			if objectErr != nil || tagErr != nil || timeErr != nil || validatePlanningGrantTagChronology(tagObject, issuedAt, expiresAt, targetTime) != nil {
+				addFinding(findings, grantPath, "public.w001_terminal_evidence_tag_chronology", "v2 review tag must be signed after grant issuance and its target commit and before grant expiry")
+				return
+			}
+		}
 	}
 	if mainTreeCheck {
 		parents, err := planningGrantCommitParents(root, head)
@@ -8859,18 +9109,18 @@ func checkW001TerminalEvidencePublicationGitDiff(root string, findings *[]Findin
 		featureTree, _ := planningGrantGitOutput(root, "rev-parse", "--verify", featureHead+"^{tree}")
 		if err != nil || len(parents) != 1 || parents[0] != w001TerminalEvidencePublicationBase ||
 			strings.TrimSpace(string(mainTree)) != strings.TrimSpace(string(featureTree)) {
-			addFinding(findings, w001TerminalEvidencePublicationPath, "public.w001_terminal_evidence_publication_main", "accepted evidence publication must be one exact-tree squash over the signed protected-main base")
+			addFinding(findings, grantPath, "public.w001_terminal_evidence_publication_main", "accepted evidence publication must be one exact-tree squash over the signed protected-main base")
 			return
 		}
 	}
-	if !checkW001TerminalEvidencePublicationCommitRange(root, featureHead, findings) {
+	if !checkCommitRange(root, featureHead, findings) {
 		return
 	}
 	tracked, trackedErr := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
 	untracked, untrackedErr := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
 	paths, normalizeErr := normalizedPlanningGrantGitPaths(tracked, untracked)
-	if trackedErr != nil || untrackedErr != nil || normalizeErr != nil || !w001TerminalEvidencePublicationPathsAllowed(paths) {
-		addFinding(findings, w001TerminalEvidencePublicationPath, "public.w001_terminal_evidence_publication_scope", "current changes include a path outside the exact signed seven-path publication scope")
+	if trackedErr != nil || untrackedErr != nil || normalizeErr != nil || !pathsAllowed(paths) {
+		addFinding(findings, grantPath, "public.w001_terminal_evidence_publication_scope", "current changes include a path outside the exact signed publication scope")
 	}
 }
 
@@ -8906,6 +9156,43 @@ func checkW001TerminalEvidencePublicationCommitRange(root, head string, findings
 func w001TerminalEvidencePublicationPathsAllowed(paths []string) bool {
 	authorized := make(map[string]bool, len(w001TerminalEvidencePublicationSequences["grant.authorizedPaths"]))
 	for _, path := range w001TerminalEvidencePublicationSequences["grant.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return planningGrantPathsAllowed(paths, authorized)
+}
+
+func checkW001TerminalEvidencePublicationV2CommitRange(root, head string, findings *[]Finding) bool {
+	commits, err := planningGrantCommitRangeFrom(root, w001TerminalEvidencePublicationV2Base, head)
+	if err != nil || len(commits) < 2 {
+		addFinding(findings, w001TerminalEvidencePublicationV2Path, "public.w001_terminal_evidence_publication_v2_history", "terminal-evidence publication v2 requires a signed grant commit and one validator/evidence commit")
+		return false
+	}
+	publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, wave1PlanningGrantKey, "public.w001_terminal_evidence_publication_v2_signature", "terminal-evidence publication v2 commits require the pinned genesis signer")
+		return false
+	}
+	issuedAt, _ := time.Parse(time.RFC3339, "2026-08-30T19:10:00Z")
+	previous := w001TerminalEvidencePublicationV2Base
+	for _, commit := range commits {
+		paths, pathErr := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
+		normalized, normalizeErr := normalizedPlanningGrantGitPaths(paths)
+		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
+		if len(commit.parents) != 1 || commit.parents[0] != previous || pathErr != nil || normalizeErr != nil ||
+			!w001TerminalEvidencePublicationV2PathsAllowed(normalized) || objectErr != nil || verifyPlanningGrantCommit(object, publicKey) != nil ||
+			timeErr != nil || committedAt.Before(issuedAt) {
+			addFinding(findings, w001TerminalEvidencePublicationV2Path, "public.w001_terminal_evidence_publication_v2_history", "every terminal-evidence publication v2 commit must be a prospective signed one-parent scoped commit")
+			return false
+		}
+		previous = commit.id
+	}
+	return true
+}
+
+func w001TerminalEvidencePublicationV2PathsAllowed(paths []string) bool {
+	authorized := make(map[string]bool, len(w001TerminalEvidencePublicationV2Sequences["grant.authorizedPaths"]))
+	for _, path := range w001TerminalEvidencePublicationV2Sequences["grant.authorizedPaths"] {
 		authorized[path] = true
 	}
 	return planningGrantPathsAllowed(paths, authorized)
@@ -9552,7 +9839,9 @@ func LoadW001TerminalReconciliationGrant(repo string, now time.Time) (W001Termin
 	bootstrapDocument := parseStrictGrant(bootstrapData, w001BootstrapGrantScalars, w001BootstrapGrantSequences,
 		[]string{"grant", "expected", "postimage", "toolchain", "verification", "integrity"})
 	reviewTag := scalarValue(document, "grant.successorReviewTag")
-	if w001TerminalEvidencePublicationActive(root) {
+	if w001TerminalEvidencePublicationV2Active(root) {
+		reviewTag = w001TerminalEvidencePublicationV2ReviewTag
+	} else if w001TerminalEvidencePublicationActive(root) {
 		reviewTag = w001TerminalEvidencePublicationReviewTag
 	} else if w001TerminalExactTaggerRecoveryActive(root) {
 		reviewTag = w001TerminalExactTaggerRecoveryReviewTag
@@ -13432,6 +13721,63 @@ func verifyPinnedPlanningGrantTagForIdentity(object, publicKey []byte, expectedT
 		return "", fmt.Errorf("tag message does not match the signed recovery disposition")
 	}
 	return target, nil
+}
+
+func validatePlanningGrantTagChronology(object []byte, issuedAt, expiresAt, targetTime time.Time) error {
+	const armor = "-----BEGIN SSH SIGNATURE-----"
+	signatureIndex := bytes.Index(object, []byte(armor))
+	if signatureIndex < 0 || bytes.Count(object, []byte(armor)) != 1 {
+		return errors.New("tag must contain exactly one SSH signature")
+	}
+	signed := object[:signatureIndex]
+	headerEnd := bytes.Index(signed, []byte("\n\n"))
+	if headerEnd < 0 {
+		return errors.New("tag object has no header boundary")
+	}
+	var taggerValue string
+	taggerCount := 0
+	for _, line := range strings.Split(string(signed[:headerEnd]), "\n") {
+		if strings.HasPrefix(line, "tagger ") {
+			taggerCount++
+			taggerValue = strings.TrimPrefix(line, "tagger ")
+		}
+	}
+	if taggerCount != 1 {
+		return errors.New("tag header must contain exactly one tagger")
+	}
+	fields := strings.Fields(taggerValue)
+	if len(fields) < 3 {
+		return errors.New("tagger timestamp is missing")
+	}
+	secondsText, zone := fields[len(fields)-2], fields[len(fields)-1]
+	seconds, err := strconv.ParseInt(secondsText, 10, 64)
+	if err != nil {
+		return errors.New("tagger timestamp is invalid")
+	}
+	if len(zone) != 5 || (zone[0] != '+' && zone[0] != '-') {
+		return errors.New("tagger timezone is invalid")
+	}
+	for _, digit := range zone[1:] {
+		if digit < '0' || digit > '9' {
+			return errors.New("tagger timezone is invalid")
+		}
+	}
+	hours, _ := strconv.Atoi(zone[1:3])
+	minutes, _ := strconv.Atoi(zone[3:5])
+	if hours > 14 || minutes > 59 || (hours == 14 && minutes != 0) {
+		return errors.New("tagger timezone is invalid")
+	}
+	tagTime := time.Unix(seconds, 0).UTC()
+	if tagTime.Before(issuedAt) {
+		return errors.New("tagger time precedes grant issuance")
+	}
+	if tagTime.Before(targetTime) {
+		return errors.New("tagger time precedes target commit")
+	}
+	if !tagTime.Before(expiresAt) {
+		return errors.New("tagger time is outside the grant window")
+	}
+	return nil
 }
 
 func planningGrantCommitRange(root, end string) ([]planningGrantCommit, error) {

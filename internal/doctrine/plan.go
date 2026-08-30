@@ -835,11 +835,17 @@ func checkDeliveryTable(content, path string, metadata activePlanMetadata, findi
 			addFinding(findings, path, "plan.current_state", "%s must remain backlog during %s; found %s", metadata.currentDisplay, planPhaseContractPublication, currentState)
 		}
 	case planPhaseDelivery:
-		if activeRows != 1 {
-			addFinding(findings, path, "plan.active_work_cardinality", "%s phase requires exactly one in-progress or in-review work item; found %d", planPhaseDelivery, activeRows)
-		}
-		if metadata.currentDisplay != "" && currentRows == 1 && currentState != "in-progress" && currentState != "in-review" {
-			addFinding(findings, path, "plan.current_state", "%s must be in-progress or in-review during %s; found %s", metadata.currentDisplay, planPhaseDelivery, currentState)
+		if currentState == "done" {
+			if activeRows != 0 {
+				addFinding(findings, path, "plan.active_work_cardinality", "%s terminal projection requires zero in-progress or in-review work items; found %d", planPhaseDelivery, activeRows)
+			}
+		} else {
+			if activeRows != 1 {
+				addFinding(findings, path, "plan.active_work_cardinality", "%s phase requires exactly one in-progress or in-review work item; found %d", planPhaseDelivery, activeRows)
+			}
+			if metadata.currentDisplay != "" && currentRows == 1 && currentState != "in-progress" && currentState != "in-review" {
+				addFinding(findings, path, "plan.current_state", "%s must be in-progress, in-review, or the sole terminal done projection during %s; found %s", metadata.currentDisplay, planPhaseDelivery, currentState)
+			}
 		}
 	}
 	return currentState

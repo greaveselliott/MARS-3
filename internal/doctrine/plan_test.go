@@ -42,6 +42,17 @@ func TestPlanRequiresClaimedCurrentBeadDuringDelivery(t *testing.T) {
 	}
 }
 
+func TestPlanAllowsTerminalDoneProjectionDuringDelivery(t *testing.T) {
+	repo := writePlanFixture(t, planPhaseDelivery, "done", "backlog")
+	findings, err := CheckPlan(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(findings) != 0 {
+		t.Fatalf("valid terminal delivery projection was rejected: %v", findings)
+	}
+}
+
 func TestPlanRejectsUnsafePhaseTransitions(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -54,6 +65,7 @@ func TestPlanRejectsUnsafePhaseTransitions(t *testing.T) {
 		{name: "contract publication activates other work", phase: planPhaseContractPublication, current: "backlog", parallel: "in-progress", findingCode: "plan.current_state"},
 		{name: "delivery leaves current work unclaimed", phase: planPhaseDelivery, current: "backlog", parallel: "backlog", findingCode: "plan.active_work_cardinality"},
 		{name: "delivery activates a different bead", phase: planPhaseDelivery, current: "backlog", parallel: "in-progress", findingCode: "plan.current_state"},
+		{name: "terminal delivery activates parallel work", phase: planPhaseDelivery, current: "done", parallel: "in-progress", findingCode: "plan.active_work_cardinality"},
 		{name: "unsupported phase", phase: "planning", current: "backlog", parallel: "backlog", findingCode: "plan.phase"},
 	}
 	for _, testCase := range tests {

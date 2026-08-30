@@ -2174,6 +2174,67 @@ func TestW001TerminalEvidencePublicationGrantAcceptsPinnedSignedContract(t *test
 	}
 }
 
+func TestW001TerminalEvidencePublicationV2GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalEvidencePublicationV2Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal-evidence publication v2 was rejected: %v", findings)
+	}
+}
+
+func TestW001TerminalEvidencePublicationV2PathScope(t *testing.T) {
+	var authorized []string
+	for _, path := range w001TerminalEvidencePublicationV2Sequences["grant.authorizedPaths"] {
+		if !w001TerminalEvidencePublicationV2PathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal-evidence publication v2 path rejected: %s", path)
+		}
+		authorized = append(authorized, path)
+	}
+	if len(authorized) != 9 || !w001TerminalEvidencePublicationV2PathsAllowed(authorized) {
+		t.Fatal("exact nine-path terminal-evidence publication v2 scope was rejected")
+	}
+	for _, path := range []string{
+		"internal/authority/closeout/closeout.go", "internal/authority/gateway/lifecycle.go",
+		"internal/authority/postgres/store.go", ".github/workflows/foundation-quality.yml", "go.mod",
+	} {
+		if w001TerminalEvidencePublicationV2PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal-evidence publication v2 path accepted: %s", path)
+		}
+	}
+}
+
+func TestPlanningGrantTagChronologyIsProspectiveAndBounded(t *testing.T) {
+	issuedAt := time.Date(2026, 8, 30, 19, 10, 0, 0, time.UTC)
+	targetTime := issuedAt.Add(10 * time.Minute)
+	expiresAt := issuedAt.Add(24 * time.Hour)
+	tagObject := func(tagTime time.Time, zone string) []byte {
+		return []byte(fmt.Sprintf("object %s\ntype commit\ntag test\ntagger MARS-3 Release Manager <release-manager@example.com> %d %s\n\nmessage\n-----BEGIN SSH SIGNATURE-----\nplaceholder\n", strings.Repeat("a", 40), tagTime.Unix(), zone))
+	}
+	for _, testCase := range []struct {
+		name    string
+		object  []byte
+		wantErr bool
+	}{
+		{name: "at target after issuance", object: tagObject(targetTime, "+0000")},
+		{name: "backdated before issuance", object: tagObject(issuedAt.Add(-time.Second), "+0000"), wantErr: true},
+		{name: "before target", object: tagObject(targetTime.Add(-time.Second), "+0000"), wantErr: true},
+		{name: "exactly at expiry", object: tagObject(expiresAt, "+0000"), wantErr: true},
+		{name: "invalid timezone", object: tagObject(targetTime, "+1460"), wantErr: true},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := validatePlanningGrantTagChronology(testCase.object, issuedAt, expiresAt, targetTime)
+			if (err != nil) != testCase.wantErr {
+				t.Fatalf("validatePlanningGrantTagChronology() err=%v wantErr=%t", err, testCase.wantErr)
+			}
+		})
+	}
+	malformedSeconds := []byte("object " + strings.Repeat("a", 40) + "\ntype commit\ntag test\ntagger MARS-3 Release Manager <release-manager@example.com> not-a-time +0000\n\nmessage\n-----BEGIN SSH SIGNATURE-----\nplaceholder\n")
+	if err := validatePlanningGrantTagChronology(malformedSeconds, issuedAt, expiresAt, targetTime); err == nil {
+		t.Fatal("malformed tagger timestamp was accepted")
+	}
+}
+
 func TestW001TerminalEvidencePublicationPathScope(t *testing.T) {
 	var authorized []string
 	for _, path := range w001TerminalEvidencePublicationSequences["grant.authorizedPaths"] {

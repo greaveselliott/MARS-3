@@ -2104,3 +2104,49 @@ passed. Unmodified `go test ./... -count=1` passed every package, with
 `internal/doctrine` completing in 158.171 seconds. This is local qualification
 only; the distinct signed review tag, exact-head public CI, independent QA,
 independent Security, and accepted merge remain pending.
+
+### Publication v1 QA rejection and bounded v2 correction
+
+Publication v1 evidence remains immutable at candidate
+`63eed57083e31a18b9ac2c3143802d021d37e4f0`, tree
+`b16861c96a7553e1abe6c62b591710104e93287b`. Signed tag
+`mars3/w001-lifecycle-terminal-evidence-publication-v1` remains object
+`91b2d9ffdc7d4d5a679678a6d30f0f52561c1c19`, targets that exact candidate,
+and records tagger time `2026-08-30T18:52:46Z`. Exact-head CI run/job
+`33329491442`/`99305391610` passed. Independent QA reviewed synthetic PR #13
+merge `b3c176a6d5959d0706cbf5692000ca1dea697617` and returned
+`changes-requested` with two open findings:
+
+- `public.w001_terminal_evidence_state_reopened`: the Git projection reopened
+  canonical W-001 as `in-review` instead of keeping the Bead and delivery row
+  `done` with publication review represented separately.
+- `public.w001_terminal_evidence_tag_chronology_unbounded`: signed tag identity
+  and target were verified, but the signed tagger timestamp was not parsed and
+  bounded after grant issuance and target commit and before grant expiry.
+
+PR #12 remains preserved at signed head
+`8648be7fd2f36f872b36f7764897343cb84135b2`; it is not an acceptance route.
+After PR #13 receives accepted v2 QA and Security review, merges, and passes
+protected-main CI, PR #12 is to be commented on and closed as superseded
+without changing its head or branch and without merging or rebasing it.
+
+The prospective signed
+`W-001-lifecycle-terminal-evidence-publication-v2` grant is byte-exact at
+SHA-256 `5fd6504d2409b344dcc138358bc1146d85b3c84b738577bd987a6ad1884a918e`;
+its detached-signature SHA-256 is
+`e3f299188775875cbc267a160368c20f5dbaf6043652ecc906e26d2fb3a9cff9`.
+The signature verifies under namespace
+`mars3-w001-lifecycle-terminal-evidence-publication-v2` with the pinned
+ED25519 key. Signed grant-only commit
+`884213d1ae6521fe0b832d6dfe7589fb4c1addec`, tree
+`4b788cf81bcf1fb62d50ca8114a55209cf04ec66`, is prospective to the
+`2026-08-30T19:10:00Z` issue time.
+
+The v2 implementation is restricted to admitting exactly one current `done`
+W-001 row with zero active delivery rows, preserving the existing nonterminal
+delivery cardinality, and parsing the signed annotated-tag object so tagger
+time is on or after grant issuance and target commit time and strictly before
+grant expiry. Focused regressions cover terminal projection, parallel active
+work denial, backdating, pre-target timestamps, expiry, and malformed tagger
+time metadata. This is not canonical lifecycle work: the publication remains
+`in-review` while M3-W001 remains `done` and the live lease remains absent.
