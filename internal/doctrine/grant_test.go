@@ -2128,7 +2128,7 @@ func TestW001TerminalV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	}
 }
 
-func TestW001TerminalExactTaggerRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+func TestW001TerminalExactTaggerRecoveryGrantRemainsValidUnderActivePublicationV2(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	var findings []Finding
 	checkW001TerminalExactTaggerRecoveryGrant(repo, &findings)
@@ -2139,7 +2139,7 @@ func TestW001TerminalExactTaggerRecoveryGrantAcceptsPinnedSignedContract(t *test
 	if err != nil {
 		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
 	}
-	if grant.ReviewTag != w001TerminalEvidencePublicationReviewTag {
+	if grant.ReviewTag != w001TerminalEvidencePublicationV2ReviewTag {
 		t.Fatalf("current terminal evidence publication review tag=%q", grant.ReviewTag)
 	}
 }
