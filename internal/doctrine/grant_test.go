@@ -4,6 +4,7 @@ docs:
 - docs/features/F-001-doctrine-foundation.md
 - docs/features/F-002-work-authority.md
 - docs/design-docs/ADR-001-git-beads-authority.md
+- docs/design-docs/ADR-007-standing-correction-authority.md
 - docs/design-docs/mars-provenance.md
 - docs/code-documentation-map.md
 */
@@ -2222,6 +2223,38 @@ func TestW001TerminalEvidencePublicationV4PathScope(t *testing.T) {
 		if w001TerminalEvidencePublicationV4PathsAllowed([]string{path}) {
 			t.Fatalf("out-of-scope terminal-evidence publication v4 path accepted: %s", path)
 		}
+	}
+}
+
+func TestTicketLifetimeCorrectionAuthorityAcceptsExactCurrentBinding(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkTicketLifetimeCorrectionAuthority(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid ticket-lifetime correction authority was rejected: %v", findings)
+	}
+}
+
+func TestTicketLifetimeCorrectionAuthorityRejectsBindingTampering(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(ticketLifetimeCorrectionAuthorityPath)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	tampered := bytes.Replace(data, []byte(ticketLifetimeCorrectionBase), []byte("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), 1)
+	document := parseStrictGrant(tampered, ticketLifetimeCorrectionAuthorityScalars, ticketLifetimeCorrectionAuthoritySequences,
+		[]string{"policy", "currentBinding", "convergence", "integrity"})
+	if scalarValue(document, "currentBinding.baseCommit") == ticketLifetimeCorrectionBase {
+		t.Fatal("tampered ticket binding retained the authorized base")
+	}
+}
+
+func TestTicketLifetimeCorrectionAuthorityPathScope(t *testing.T) {
+	if !ticketLifetimeCorrectionPathsAllowed([]string{"docs/design-docs/ADR-007-standing-correction-authority.md", "internal/doctrine/grant.go"}) {
+		t.Fatal("declared ticket-lifetime paths were rejected")
+	}
+	if ticketLifetimeCorrectionPathsAllowed([]string{"internal/runtime/escape.go"}) {
+		t.Fatal("path outside the current W-001 binding was accepted")
 	}
 }
 

@@ -9,15 +9,15 @@ future redaction step.
 1. Read `docs/goals/active.md`,
    `docs/exec-plans/active/current-operating-plan.md`, and the feature contract
    named by the current Bead.
-2. Read the current Bead through the authority gateway. Before W-001 is
-   accepted, only the exact signed bootstrap grant named by the active plan may
-   authorize a bounded human-directed transition with the pinned client.
-   Confirm the claim, dependency state, declared exclusive paths, base commit,
-   attempt, and expected evidence. After W-001, also confirm the
-   factory-issued live lease epoch.
-3. Work only inside the claimed paths or the exact paths in an active signed
-   transition grant. Make the smallest safe change that can satisfy the named
-   BDD scenario or bounded contract-publication purpose.
+2. Read the current Bead through the authority gateway. Confirm the claim,
+   dependency state, declared exclusive paths, base commit, attempt, and
+   expected evidence. After W-001, also confirm the factory-issued live lease
+   epoch. Historical bootstrap grants remain evidence, not the normal
+   correction route.
+3. Work only inside the claimed paths and owning Git contract, or the exact
+   paths in an exceptional signed transition grant. Ticket-lifetime correction
+   authority permits in-scope non-production recovery without another user
+   prompt; it never widens or transfers the current Bead.
 4. Attach reproducible, public-safe evidence before requesting independent
    review.
 
@@ -60,6 +60,12 @@ future redaction step.
 - Chat coordinates work. A material decision or completion claim is durable
   only after it reaches its owning Git artifact and, where applicable, the
   Bead through the authority gateway.
+- `ticket-lifetime-non-production-correction-v1` carries one explicit current-
+  Bead authorization through implementation corrections, signed publication,
+  exact-head CI, ordered QA-to-Security review, accepted merge, protected-main
+  readback, and gateway-only reconciliation. It exists so the initial build can
+  progress without repeated owner prompts for routine delivery mechanics. See
+  PD-004 and ADR-007.
 
 The delivery route is:
 
@@ -75,11 +81,12 @@ blocked run disposition, never `done`.
 
 Every principal starts with `effective_trust: observer`, independently of its
 `max_trust`. A claim and capability lease may grant bounded writes only after
-the policy gate approves the exact action. The only pre-gateway exceptions are
-the signed, path-bounded, non-autonomous transition grants above; they are not
-reusable trust or lease substitutes. Autonomous mutation is disabled.
-Production publication, destructive operations, and trust escalation always
-require explicit human approval.
+the policy gate approves the exact action. Autonomous mutation is disabled.
+Ticket-lifetime correction authority is reusable only inside its one current-
+Bead binding; it is not a trust or lease substitute. Production or release
+effects, destructive or irreversible operations, secrets/credentials/billing/
+private-data access, trust escalation, another Bead, scope expansion, and
+direct authority-store mutation always require explicit human approval.
 
 Model output is an untrusted typed proposal. A skill can guide procedure but
 cannot grant authority. Hosted agent loops implement `AgentRuntimeAdapter`;

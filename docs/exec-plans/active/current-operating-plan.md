@@ -2,7 +2,7 @@
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
-**Updated:** 2026-08-30
+**Updated:** 2026-08-31
 **Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
@@ -40,18 +40,43 @@ V3 grant produced rejected PR #14 head
 `e708daafba37e4efe3096b64de30eb10033d2201`, and passing run/job
 `33333798814`/`99316989127`. Independent QA returned `changes-requested`
 because the validator admitted a tag timestamp equal to its target commit,
-despite the signed contract requiring a strictly later tag. The prospective
-signed `W-001-lifecycle-terminal-evidence-publication-v4` grant permits only a
-forward replay of the accepted V3 changes, strict tag-after-target enforcement,
-and this stale-version wording correction across nine paths on PR #15. The
-execution and earlier correction grants are consumed, no further canonical
-mutation is pending, and
-P-001 and every downstream ticket remain backlog and unclaimed.
+despite the signed contract requiring a strictly later tag. V4 PR #15, head
+`96ec3410b16d381b102e6c1c0bd36e5ea9a9e426`, tree
+`417ec5233fe0f6ec438643837c2170774a700dd9`, signed tag object
+`78058a1083b841b54fc7a8d0a2be4a14d2890f00`, and passing run/job
+`33340046444`/`99333914035` are preserved after independent QA returned
+`changes-requested` for two stale current-state statements in this plan.
+PD-004 and ADR-007 now bind the W-001 correction through one accepted
+evidence-publication merge and protected-main readback without another
+per-correction grant. Canonical lifecycle and lease mutation remain prohibited.
+All earlier grants are consumed, no further canonical W-001 mutation is
+pending, and P-001 and every downstream ticket remain backlog and unclaimed.
+
+## Ticket-lifetime correction authority
+
+The owner has durably delegated
+`ticket-lifetime-non-production-correction-v1` for this exact W-001 publication
+from V4 head `96ec3410b16d381b102e6c1c0bd36e5ea9a9e426`. A CI, QA, or Security
+rejection may return to bounded correction without another user message while
+the purpose, paths, effects, and one-Bead binding do not expand. The route still
+requires signed commits and a distinct signed tag, exact-head CI, independent
+QA then independent Security, merge only after both accept the same tree, and
+protected-main readback. The binding then ends.
+
+This policy exists so the initial build can complete without constant owner
+involvement in routine delivery mechanics. It is not autonomous mutation.
+Production/release, destructive or irreversible effects, secrets/credentials/
+billing/private data, trust escalation, another Bead, path or effect expansion,
+direct authority-store mutation, and workflow/dependency/runtime/API/database-
+design changes stop for explicit owner approval. The second equivalent failure
+blocks and escalates the design; a repeated same-class Security finding stops
+incremental correction.
 
 ## Durable lineage
 
 - Goal: [G-001](../../goals/active.md)
-- Decision: [PD-002](../../product-decisions/PD-002-git-beads-authority.md)
+- Decisions: [PD-002](../../product-decisions/PD-002-git-beads-authority.md),
+  [PD-004](../../product-decisions/PD-004-standing-correction-authority.md)
 - Product promise: [work-authority specification](../../product-specs/work-authority.md)
 - Behavior contract: [F-002](../../features/F-002-work-authority.md)
 - Work authority: external Bead `M3-W001`; this Git plan selects it and mirrors
@@ -459,14 +484,13 @@ did not accept. The signed `W-001-lifecycle-evidence-preservation-v1` grant
 authorizes only byte-exact publication of that existing object under
 `mars3/w001-lifecycle-test-harness-retirement-rejected-v1`, the seven-path
 validation/evidence projection, and one fresh signed candidate/run/review
-sequence. The archival ref remains rejected and unaccepted evidence. W-001
-remains `in-progress`; merge, Beads/lease mutation, production change, and
-downstream work remain unauthorized.
+sequence. The archival ref remains rejected and unaccepted evidence. At that
+historical checkpoint W-001 remained `in-progress`; merge, Beads/lease
+mutation, production change, and downstream work were unauthorized.
 
-This is candidate implementation evidence only. F-002 scenarios remain
-`failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation
-is authorized until a signed checkpoint receives independent QA and Security
-acceptance and protected-main reconciliation.
+This is immutable historical candidate evidence. Canonical M3-W001 is now
+`done`, its only lease is released, and terminal-evidence/doctrine publication
+remains a separate Git review state that cannot reopen the Bead lifecycle.
 
 ## Success evidence
 
@@ -476,8 +500,9 @@ acceptance and protected-main reconciliation.
 - The plan checker accepts exactly one selected backlog Bead only during
   `contract-publication`, and rejects an active implementation row in that
   phase.
-- In `delivery`, the checker requires exactly one `in-progress` or `in-review`
-  row and requires it to match the current Bead.
+- In nonterminal `delivery`, the checker requires exactly one current
+  `in-progress` or `in-review` row. A terminal projection instead requires
+  exactly one current `done` row and zero active rows.
 - W-001 later proves CAS/version conflicts, dependency rejection, monotonic
   fencing, owner-only heartbeat, synthetic stale-effect denial, ordered event
   replay, coherent projection rebaseline, and denial of direct Beads/Dolt access.

@@ -2273,3 +2273,28 @@ passed, as did build, plan, DocSync, whitespace, `go vet ./...`, and unmodified
 seconds. These remain local qualification results. The distinct signed V4 tag,
 exact-head public CI, independent QA, independent Security, and accepted merge
 remain required.
+
+### V4 QA disposition and ticket-lifetime correction authority
+
+PR #15 preserves exact signed V4 head
+`96ec3410b16d381b102e6c1c0bd36e5ea9a9e426`, tree
+`417ec5233fe0f6ec438643837c2170774a700dd9`, and signed tag object
+`78058a1083b841b54fc7a8d0a2be4a14d2890f00`. Exact-head CI run/job
+`33340046444`/`99333914035` passed. Independent QA returned
+`changes-requested`: the active plan still called F-002 failing and M3-W001
+in-progress in an unqualified current statement, and still described delivery
+as always requiring one active row even though the validator correctly admits
+one terminal done row with zero active rows. Security did not run because QA
+acceptance is the preceding gate. PR #15, its tag, CI, and QA disposition are
+immutable rejected evidence.
+
+The repository owner then accepted PD-004 and ADR-007. Machine-readable policy
+`.harness/standing-correction-authority.yaml` binds this non-production W-001
+correction from exact V4 head through one accepted evidence-publication merge
+and protected-main readback. It replaces the per-correction V-number approval
+loop without enabling autonomous mutation, changing trust, widening scope, or
+weakening signed publication, exact-head CI, ordered QA-to-Security review, or
+the gateway-only canonical boundary. Canonical W-001 is already `done`, so the
+binding authorizes no lifecycle or lease mutation. Production, destructive
+effects, another Bead, direct authority-store mutation, and downstream work
+remain outside scope.

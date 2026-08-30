@@ -3,6 +3,7 @@ FactoryDocSync:
 docs:
 - docs/features/F-001-doctrine-foundation.md
 - docs/features/F-002-work-authority.md
+- docs/design-docs/ADR-007-standing-correction-authority.md
 - docs/design-docs/mars-provenance.md
 - docs/code-documentation-map.md
 */
@@ -174,7 +175,22 @@ func checkActivePlan(root, path string, findings *[]Finding) {
 	}
 	checkPlanLineage(root, path, content, metadata, linkedArtifacts, findings)
 	currentState := checkDeliveryTable(content, path, metadata, findings)
+	checkTerminalPlanNarrative(content, path, currentState, findings)
 	checkPlanManifestProjection(root, path, metadata, currentState, findings)
+}
+
+func checkTerminalPlanNarrative(content, path, currentState string, findings *[]Finding) {
+	if currentState != "done" {
+		return
+	}
+	for _, stale := range []string{
+		"This is candidate implementation evidence only. F-002 scenarios remain\n`failing`, M3-W001 remains `in-progress`",
+		"In `delivery`, the checker requires exactly one `in-progress` or `in-review`\n  row and requires it to match the current Bead.",
+	} {
+		if strings.Contains(content, stale) {
+			addFinding(findings, path, "plan.stale_terminal_narrative", "terminal done projection must not retain a current statement that describes W-001 or delivery as nonterminal")
+		}
+	}
 }
 
 func parseActivePlanMetadata(content, path string, findings *[]Finding) activePlanMetadata {

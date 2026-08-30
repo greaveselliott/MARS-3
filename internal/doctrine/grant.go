@@ -4,6 +4,7 @@ docs:
 - docs/features/F-001-doctrine-foundation.md
 - docs/features/F-002-work-authority.md
 - docs/design-docs/ADR-001-git-beads-authority.md
+- docs/design-docs/ADR-007-standing-correction-authority.md
 - docs/design-docs/mars-provenance.md
 - docs/code-documentation-map.md
 */
@@ -428,6 +429,13 @@ const (
 	w001TerminalEvidencePublicationV4TagMessage  = "MARS-3 W-001 terminal evidence publication attestation v4"
 	w001TerminalEvidencePublicationV4GrantSHA256 = "72875c2578d73c960319ee95bf8093ceb738b42d261f83bcc115bffd555a65ce"
 	w001TerminalEvidencePublicationV4SigSHA256   = "e3b83fe3ee62d07a99df5c9037614d515b4997b7dfdd2a179714d7056be3a858"
+	ticketLifetimeCorrectionAuthorityPath        = ".harness/standing-correction-authority.yaml"
+	ticketLifetimeCorrectionBase                 = "96ec3410b16d381b102e6c1c0bd36e5ea9a9e426"
+	ticketLifetimeCorrectionBaseTree             = "417ec5233fe0f6ec438643837c2170774a700dd9"
+	ticketLifetimeCorrectionBranch               = "codex/w-001-standing-correction-authority"
+	ticketLifetimeCorrectionReviewTag            = "mars3/w001-ticket-lifetime-correction-authority-v1"
+	ticketLifetimeCorrectionTagMessage           = "MARS-3 W-001 ticket-lifetime correction authority attestation v1"
+	ticketLifetimeCorrectionPriorTagObject       = "78058a1083b841b54fc7a8d0a2be4a14d2890f00"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -5086,6 +5094,83 @@ var w001TerminalEvidencePublicationV4Sequences = map[string][]string{
 	},
 }
 
+var ticketLifetimeCorrectionAuthorityScalars = []grantScalarExpectation{
+	{path: "schemaVersion", value: "1"},
+	{path: "kind", value: "MARS3TicketLifetimeCorrectionAuthority"},
+	{path: "policy.id", value: "ticket-lifetime-non-production-correction-v1"},
+	{path: "policy.status", value: "active"},
+	{path: "policy.classification", value: "PUBLIC"},
+	{path: "policy.ownerDirectiveDate", value: "2026-08-31"},
+	{path: "policy.repository", value: planningGrantRepository},
+	{path: "policy.productDecision", value: "PD-004"},
+	{path: "policy.architectureDecision", value: "ADR-007"},
+	{path: "policy.authorityModel", value: "one-explicitly-claimed-Bead-through-accepted-handoff"},
+	{path: "policy.autonomousMutation", value: "false"},
+	{path: "policy.equivalentFailureLimit", value: "2"},
+	{path: "currentBinding.bead", value: "M3-W001"},
+	{path: "currentBinding.displayId", value: "W-001"},
+	{path: "currentBinding.canonicalState", value: "done"},
+	{path: "currentBinding.purpose", value: "terminal-evidence-and-doctrine-publication"},
+	{path: "currentBinding.baseCommit", value: ticketLifetimeCorrectionBase},
+	{path: "currentBinding.baseTree", value: ticketLifetimeCorrectionBaseTree},
+	{path: "currentBinding.preservedReviewTag", value: w001TerminalEvidencePublicationV4ReviewTag},
+	{path: "currentBinding.preservedReviewTagObject", value: ticketLifetimeCorrectionPriorTagObject},
+	{path: "currentBinding.preservedRun", value: "33340046444"},
+	{path: "currentBinding.preservedJob", value: "99333914035"},
+	{path: "currentBinding.preservedQADisposition", value: "changes-requested"},
+	{path: "currentBinding.workingBranch", value: ticketLifetimeCorrectionBranch},
+	{path: "currentBinding.successorPullRequestLimit", value: "1"},
+	{path: "currentBinding.canonicalLifecycleMutationAllowed", value: "false"},
+	{path: "currentBinding.leaseMutationAllowed", value: "false"},
+	{path: "currentBinding.endsAt", value: "accepted-successor-merge-and-protected-main-readback"},
+	{path: "convergence.firstEquivalentFailure", value: "preserve-evidence-and-correct-within-the-current-binding"},
+	{path: "convergence.secondEquivalentFailure", value: "block-record-and-escalate-architecture"},
+	{path: "convergence.sameClassSecurityRecurrence", value: "stop-and-simplify-the-design"},
+	{path: "convergence.scopeConflict", value: "stop-and-request-owner-decision"},
+	{path: "integrity.gitCommitSignatureRequired", value: "true"},
+	{path: "integrity.reviewTagSignatureRequired", value: "true"},
+	{path: "integrity.exactHeadCIRequired", value: "true"},
+	{path: "integrity.independentReviewRequired", value: "true"},
+	{path: "integrity.perCorrectionGrantRequired", value: "false"},
+}
+
+var ticketLifetimeCorrectionAuthoritySequences = map[string][]string{
+	"policy.allowedEffects": {
+		"preserve-rejected-candidates-review-verdicts-runs-and-tags-immutably",
+		"correct-CI-QA-or-Security-findings-within-the-bound-current-Bead-scope",
+		"create-signed-commits-and-distinct-signed-annotated-review-tags",
+		"push-the-bound-branch-and-tags-open-one-successor-PR-and-run-exact-head-CI",
+		"obtain-independent-QA-then-independent-Security-review",
+		"merge-only-after-exact-head-CI-QA-and-Security-accept-the-same-tree",
+		"perform-protected-main-readback-and-gateway-only-current-Bead-reconciliation",
+	},
+	"policy.verificationOrder": {
+		"local-public-commit-gate", "signed-commit-and-review-tag", "exact-head-CI", "qa",
+		"security-reviewer", "merge", "protected-main-readback", "delivery-orchestrator-reconciliation",
+	},
+	"policy.retainedApprovalBoundaries": {
+		"production-effects-or-release", "destructive-or-irreversible-effects",
+		"credentials-secrets-billing-private-data-or-external-account-access", "trust-escalation",
+		"another-Bead-or-downstream-ticket", "goal-feature-declared-path-or-effect-class-expansion",
+		"direct-Beads-Dolt-PostgreSQL-or-other-authority-store-mutation",
+		"workflow-dependency-runtime-API-or-database-design-change",
+	},
+	"policy.prohibitedEffects": {
+		"infer-authority-for-an-unbound-or-future-Bead", "bypass-the-gateway-for-canonical-authority-state",
+		"weaken-required-CI-QA-Security-signature-or-protected-main-gates",
+		"reuse-move-delete-rewrite-or-resign-an-immutable-review-tag",
+		"continue-after-the-second-equivalent-failure",
+	},
+	"currentBinding.authorizedPaths": {
+		ticketLifetimeCorrectionAuthorityPath, ".harness/manifest.yaml", "AGENTS.md",
+		"docs/product-decisions/PD-004-standing-correction-authority.md", "docs/product-decisions/index.md",
+		"docs/design-docs/ADR-007-standing-correction-authority.md", "docs/design-docs/index.md",
+		"docs/features/F-002-work-authority.md", canonicalActivePlan, "docs/evidence/W-001-validation.md",
+		"internal/doctrine/doctrine.go", "internal/doctrine/doctrine_test.go", "internal/doctrine/grant.go",
+		"internal/doctrine/grant_test.go", "internal/doctrine/plan.go", "internal/doctrine/plan_test.go",
+	},
+}
+
 type strictPlanningGrant struct {
 	scalars          map[string][]string
 	sequences        map[string][]string
@@ -8210,6 +8295,7 @@ func w001TerminalReconciliationActive(root string) bool {
 }
 
 func checkW001TerminalReconciliationGrant(root string, findings *[]Finding) {
+	ticketLifetimeActive := ticketLifetimeCorrectionAuthorityActive(root)
 	recoveryActive := w001TerminalCIRecoveryActive(root)
 	historyScanRecoveryActive := w001TerminalHistoryScanRecoveryActive(root)
 	tagIdentityRecoveryActive := w001TerminalTagIdentityRecoveryActive(root)
@@ -8217,7 +8303,9 @@ func checkW001TerminalReconciliationGrant(root string, findings *[]Finding) {
 	evidencePublicationActive := w001TerminalEvidencePublicationActive(root)
 	evidencePublicationV2Active := w001TerminalEvidencePublicationV2Active(root)
 	evidencePublicationV4Active := w001TerminalEvidencePublicationV4Active(root)
-	if evidencePublicationV4Active {
+	if ticketLifetimeActive {
+		defer checkTicketLifetimeCorrectionAuthority(root, findings)
+	} else if evidencePublicationV4Active {
 		defer checkW001TerminalEvidencePublicationV4Grant(root, findings)
 	} else if evidencePublicationV2Active {
 		defer checkW001TerminalEvidencePublicationV2Grant(root, findings)
@@ -8612,6 +8700,90 @@ func w001TerminalEvidencePublicationV2Active(root string) bool {
 func w001TerminalEvidencePublicationV4Active(root string) bool {
 	_, err := os.Lstat(filepath.Join(root, filepath.FromSlash(w001TerminalEvidencePublicationV4Path)))
 	return err == nil
+}
+
+func ticketLifetimeCorrectionAuthorityActive(root string) bool {
+	info, err := os.Lstat(filepath.Join(root, filepath.FromSlash(ticketLifetimeCorrectionAuthorityPath)))
+	return err == nil && info.Mode().IsRegular() && info.Mode()&os.ModeSymlink == 0
+}
+
+func checkTicketLifetimeCorrectionAuthority(root string, findings *[]Finding) {
+	data, err := readRepoFile(root, ticketLifetimeCorrectionAuthorityPath)
+	if err != nil {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "doctrine.ticket_lifetime_authority_missing", "ticket-lifetime correction authority is required when projected active")
+		return
+	}
+	document := parseStrictGrant(data, ticketLifetimeCorrectionAuthorityScalars, ticketLifetimeCorrectionAuthoritySequences,
+		[]string{"policy", "currentBinding", "convergence", "integrity"})
+	for _, message := range document.structuralErrors {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "doctrine.ticket_lifetime_authority_schema", "%s", message)
+	}
+	for _, expected := range ticketLifetimeCorrectionAuthorityScalars {
+		values := document.scalars[expected.path]
+		if len(values) != 1 || values[0] != expected.value {
+			addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "doctrine.ticket_lifetime_authority_value", "%s does not match the exact current ticket binding", expected.path)
+		}
+	}
+	for path, expected := range ticketLifetimeCorrectionAuthoritySequences {
+		if document.sequenceHeaders[path] != 1 || !equalStringSequence(document.sequences[path], expected) {
+			addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "doctrine.ticket_lifetime_authority_sequence", "%s must equal the exact ordered ticket-lifetime contract", path)
+		}
+	}
+	for _, section := range []string{"policy", "currentBinding", "convergence", "integrity"} {
+		if document.sections[section] != 1 {
+			addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "doctrine.ticket_lifetime_authority_schema", "%s mapping must occur exactly once", section)
+		}
+	}
+
+	base, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", ticketLifetimeCorrectionBase+"^{commit}")
+	baseTree, treeErr := planningGrantGitOutput(root, "rev-parse", "--verify", ticketLifetimeCorrectionBase+"^{tree}")
+	if baseErr != nil || treeErr != nil || strings.TrimSpace(string(base)) != ticketLifetimeCorrectionBase ||
+		strings.TrimSpace(string(baseTree)) != ticketLifetimeCorrectionBaseTree {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "doctrine.ticket_lifetime_authority_base", "current binding must start at the exact preserved V4 head and tree")
+	}
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	objectID, objectErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+w001TerminalEvidencePublicationV4ReviewTag+"^{tag}")
+	object, tagErr := planningGrantGitOutput(root, "cat-file", "tag", strings.TrimSpace(string(objectID)))
+	target, identityErr := verifyPinnedPlanningGrantTag(object, publicKey, w001TerminalEvidencePublicationV4ReviewTag, w001TerminalEvidencePublicationV4TagMessage)
+	if keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest || objectErr != nil || tagErr != nil || identityErr != nil ||
+		strings.TrimSpace(string(objectID)) != ticketLifetimeCorrectionPriorTagObject || target != ticketLifetimeCorrectionBase {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "doctrine.ticket_lifetime_authority_prior_tag", "preserved V4 tag object, target, identity, message, and signature must remain exact")
+	}
+
+	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
+	for _, marker := range []string{
+		"active_delivery_grant: none-required-under-ticket-lifetime-authority",
+		"active_attempt: w001-ticket-lifetime-correction-authority-v1",
+		"ticket_lifetime_correction_authority: enabled",
+		"ticket_lifetime_correction_policy: " + ticketLifetimeCorrectionAuthorityPath,
+		"ticket_lifetime_gateway_scope: current-bead-only",
+		"ticket_lifetime_other_beads: prohibited",
+		"current_bead_state: done",
+		"live_lease_state: absent",
+	} {
+		if manifestErr != nil || !bytes.Contains(manifest, []byte(marker)) {
+			addFinding(findings, ".harness/manifest.yaml", "doctrine.ticket_lifetime_authority_manifest", "manifest must project the exact one-Bead ticket-lifetime authority and terminal W-001 state")
+			break
+		}
+	}
+	plan, planErr := readRepoFile(root, canonicalActivePlan)
+	for _, marker := range []string{
+		"## Ticket-lifetime correction authority", "PD-004", "ADR-007", ticketLifetimeCorrectionBase,
+		"Canonical M3-W001 is now", "`done`", "binding then ends", "another Bead",
+	} {
+		if planErr != nil || !bytes.Contains(plan, []byte(marker)) {
+			addFinding(findings, canonicalActivePlan, "doctrine.ticket_lifetime_authority_plan", "active plan must state the bounded W-001 authority, retained boundaries, and terminal end")
+			break
+		}
+	}
+	for _, path := range []string{
+		"docs/product-decisions/PD-004-standing-correction-authority.md",
+		"docs/design-docs/ADR-007-standing-correction-authority.md",
+	} {
+		if !repoFileExists(root, path) {
+			addFinding(findings, path, "doctrine.ticket_lifetime_authority_decision", "ticket-lifetime correction authority requires its accepted product and architecture decisions")
+		}
+	}
 }
 
 func checkW001TerminalExactTaggerRecoveryGrant(root string, findings *[]Finding) {
@@ -9044,6 +9216,10 @@ func checkW001TerminalEvidencePublicationV4Grant(root string, findings *[]Findin
 }
 
 func checkW001TerminalReconciliationGitDiff(root string, findings *[]Finding) {
+	if ticketLifetimeCorrectionAuthorityActive(root) {
+		checkTicketLifetimeCorrectionGitDiff(root, findings)
+		return
+	}
 	if w001TerminalEvidencePublicationActive(root) {
 		checkW001TerminalEvidencePublicationGitDiff(root, findings)
 		return
@@ -9121,6 +9297,177 @@ func checkW001TerminalReconciliationGitDiff(root string, findings *[]Finding) {
 	paths, normalizeErr := normalizedPlanningGrantGitPaths(tracked, untracked)
 	if trackedErr != nil || untrackedErr != nil || normalizeErr != nil || !w001TerminalReconciliationPathsAllowed(paths) {
 		addFinding(findings, w001TerminalReconciliationPath, "public.w001_terminal_scope", "current changes include a path outside the signed terminal-reconciliation scope")
+	}
+}
+
+func checkTicketLifetimeCorrectionGitDiff(root string, findings *[]Finding) {
+	top, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
+	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(top))) {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_git", "Git metadata must resolve to the audited repository root")
+		return
+	}
+	headOutput, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
+	head := strings.TrimSpace(string(headOutput))
+	if err != nil || !sha1Pattern.MatchString(head) {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_head", "ticket-lifetime correction HEAD must resolve to one exact commit")
+		return
+	}
+	branchOutput, branchErr := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
+	branch := strings.TrimSpace(string(branchOutput))
+	featureHead := head
+	requireTag, mainTreeCheck := false, false
+	switch {
+	case branchErr == nil && branch == ticketLifetimeCorrectionBranch && os.Getenv("GITHUB_ACTIONS") != "true":
+		if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", ticketLifetimeCorrectionBase, head); err != nil {
+			addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_ancestry", "local W-001 correction must descend from the exact preserved V4 head")
+			return
+		}
+	case branchErr == nil && branch == "main" && os.Getenv("GITHUB_ACTIONS") != "true":
+		requireTag, mainTreeCheck = true, true
+	case os.Getenv("GITHUB_ACTIONS") == "true":
+		checkout, ok := ticketLifetimeCorrectionGitHubCheckout(root, head, branch, findings)
+		if !ok {
+			return
+		}
+		featureHead, requireTag, mainTreeCheck = checkout.expectedHead, true, checkout.kind == planningGrantMainSquash
+	default:
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_branch", "W-001 ticket-lifetime correction requires its exact branch or accepted protected main")
+		return
+	}
+	if requireTag {
+		expected := featureHead
+		if mainTreeCheck {
+			expected = ""
+		}
+		target, ok := checkW001DeliveryReviewTag(root, expected, ticketLifetimeCorrectionReviewTag, ticketLifetimeCorrectionTagMessage, findings)
+		if !ok {
+			return
+		}
+		featureHead = target
+		commitTime, commitErr := planningGrantCommitTime(root, target)
+		tagTime, tagErr := planningGrantTagTime(root, ticketLifetimeCorrectionReviewTag)
+		if commitErr != nil || tagErr != nil || !tagTime.After(commitTime) {
+			addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_tag_chronology", "ticket-lifetime review tag must be created strictly after its target commit")
+			return
+		}
+	}
+	if mainTreeCheck {
+		parents, parentErr := planningGrantCommitParents(root, head)
+		mainTree, mainErr := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, featureErr := planningGrantGitOutput(root, "rev-parse", "--verify", featureHead+"^{tree}")
+		if parentErr != nil || mainErr != nil || featureErr != nil || len(parents) != 1 ||
+			parents[0] != w001TerminalEvidencePublicationV4Base ||
+			strings.TrimSpace(string(mainTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_main", "accepted W-001 correction must be one exact-tree squash over protected main")
+			return
+		}
+	}
+	if !checkTicketLifetimeCorrectionCommitRange(root, featureHead, findings) {
+		return
+	}
+	tracked, trackedErr := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
+	untracked, untrackedErr := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
+	paths, normalizeErr := normalizedPlanningGrantGitPaths(tracked, untracked)
+	if trackedErr != nil || untrackedErr != nil || normalizeErr != nil || !ticketLifetimeCorrectionPathsAllowed(paths) {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_scope", "current changes include a path outside the exact W-001 ticket binding")
+	}
+}
+
+func checkTicketLifetimeCorrectionCommitRange(root, head string, findings *[]Finding) bool {
+	commits, err := planningGrantCommitRangeFrom(root, ticketLifetimeCorrectionBase, head)
+	if err != nil || len(commits) < 1 {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_history", "ticket-lifetime correction requires at least one signed prospective commit")
+		return false
+	}
+	publicKey, err := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest {
+		addFinding(findings, wave1PlanningGrantKey, "public.ticket_lifetime_signature", "ticket-lifetime correction commits require the pinned genesis signer")
+		return false
+	}
+	previous := ticketLifetimeCorrectionBase
+	for _, commit := range commits {
+		paths, pathErr := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", commit.id+"^", commit.id)
+		normalized, normalizeErr := normalizedPlanningGrantGitPaths(paths)
+		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+		if len(commit.parents) != 1 || commit.parents[0] != previous || pathErr != nil || normalizeErr != nil ||
+			!ticketLifetimeCorrectionPathsAllowed(normalized) || objectErr != nil || verifyPlanningGrantCommit(object, publicKey) != nil {
+			addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_history", "every ticket-lifetime correction commit must be signed, one-parent, prospective, and in scope")
+			return false
+		}
+		previous = commit.id
+	}
+	return true
+}
+
+func ticketLifetimeCorrectionPathsAllowed(paths []string) bool {
+	authorized := make(map[string]bool, len(ticketLifetimeCorrectionAuthoritySequences["currentBinding.authorizedPaths"]))
+	for _, path := range ticketLifetimeCorrectionAuthoritySequences["currentBinding.authorizedPaths"] {
+		authorized[path] = true
+	}
+	return planningGrantPathsAllowed(paths, authorized)
+}
+
+func ticketLifetimeCorrectionGitHubCheckout(root, head, branch string, findings *[]Finding) (planningGrantCheckout, bool) {
+	if os.Getenv("CI") != "true" || os.Getenv("GITHUB_ACTIONS") != "true" || os.Getenv("RUNNER_ENVIRONMENT") != "github-hosted" ||
+		os.Getenv("GITHUB_REPOSITORY") != planningGrantRepository || os.Getenv("GITHUB_WORKFLOW") != planningGrantWorkflow ||
+		os.Getenv("GITHUB_JOB") != planningGrantWorkflowJob || os.Getenv("GITHUB_SHA") != head ||
+		!samePlanningGrantRepositoryRoot(root, os.Getenv("GITHUB_WORKSPACE")) {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_runner", "ticket-lifetime correction CI lacks canonical runner identity")
+		return planningGrantCheckout{}, false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ID")); !ok {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_runner", "ticket-lifetime correction GitHub run ID is invalid")
+		return planningGrantCheckout{}, false
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ATTEMPT")); !ok {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_runner", "ticket-lifetime correction GitHub run attempt is invalid")
+		return planningGrantCheckout{}, false
+	}
+	workflow, workflowErr := readRepoFile(root, planningGrantWorkflowPath)
+	if workflowErr != nil || fileSHA256(workflow) != canonicalFoundationWorkflowSHA256 {
+		addFinding(findings, planningGrantWorkflowPath, "public.ticket_lifetime_workflow", "ticket-lifetime correction workflow bytes do not match the pinned digest")
+		return planningGrantCheckout{}, false
+	}
+	event, ok := readPlanningGrantGitHubEvent(os.Getenv("GITHUB_EVENT_PATH"))
+	if !ok || event.Repository.FullName != planningGrantRepository {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_event", "ticket-lifetime correction GitHub event identity is invalid")
+		return planningGrantCheckout{}, false
+	}
+	workflowPrefix := planningGrantRepository + "/" + planningGrantWorkflowPath + "@"
+	switch os.Getenv("GITHUB_EVENT_NAME") {
+	case "pull_request":
+		ref := os.Getenv("GITHUB_REF")
+		workflowRef := os.Getenv("GITHUB_WORKFLOW_REF")
+		if branch != "" || ref != "refs/pull/16/merge" || event.Number != 16 || event.PullRequest == nil ||
+			os.Getenv("GITHUB_HEAD_REF") != ticketLifetimeCorrectionBranch || os.Getenv("GITHUB_BASE_REF") != "main" ||
+			event.PullRequest.Head.Ref != ticketLifetimeCorrectionBranch || event.PullRequest.Base.Ref != "main" ||
+			event.PullRequest.Base.SHA != w001TerminalEvidencePublicationV4Base || !sha1Pattern.MatchString(event.PullRequest.Head.SHA) ||
+			!validAdvisoryPullRequestMergeSHA(event.PullRequest.MergeCommitSHA) ||
+			workflowRef != workflowPrefix+ref && workflowRef != workflowPrefix+"refs/heads/main" {
+			addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_event", "pull-request event must bind PR 16, the exact W-001 branch, and protected-main base")
+			return planningGrantCheckout{}, false
+		}
+		parents, parentErr := planningGrantCommitParents(root, head)
+		mergeTree, mergeErr := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, featureErr := planningGrantGitOutput(root, "rev-parse", "--verify", event.PullRequest.Head.SHA+"^{tree}")
+		if parentErr != nil || len(parents) != 2 || parents[0] != w001TerminalEvidencePublicationV4Base || parents[1] != event.PullRequest.Head.SHA ||
+			mergeErr != nil || featureErr != nil || strings.TrimSpace(string(mergeTree)) != strings.TrimSpace(string(featureTree)) {
+			addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_pr_topology", "PR 16 checkout must be the exact-tree two-parent synthetic merge over protected main")
+			return planningGrantCheckout{}, false
+		}
+		return planningGrantCheckout{kind: planningGrantPullRequestMerge, expectedHead: event.PullRequest.Head.SHA}, true
+	case "push":
+		if branch != "" && branch != "main" || os.Getenv("GITHUB_REF") != "refs/heads/main" || os.Getenv("GITHUB_REF_PROTECTED") != "true" ||
+			os.Getenv("GITHUB_HEAD_REF") != "" || os.Getenv("GITHUB_BASE_REF") != "" || os.Getenv("GITHUB_WORKFLOW_REF") != workflowPrefix+"refs/heads/main" ||
+			event.Ref != "refs/heads/main" || event.Before != w001TerminalEvidencePublicationV4Base || event.After != head ||
+			event.HeadCommit == nil || event.HeadCommit.ID != head || event.PullRequest != nil {
+			addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_event", "protected-main event must bind the accepted PR 16 squash")
+			return planningGrantCheckout{}, false
+		}
+		return planningGrantCheckout{kind: planningGrantMainSquash, expectedHead: head}, true
+	default:
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_event", "unsupported GitHub event for ticket-lifetime correction")
+		return planningGrantCheckout{}, false
 	}
 }
 
