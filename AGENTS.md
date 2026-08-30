@@ -88,6 +88,13 @@ effects, destructive or irreversible operations, secrets/credentials/billing/
 private-data access, trust escalation, another Bead, scope expansion, and
 direct authority-store mutation always require explicit human approval.
 
+Keep at most one open delivery pull request for the bound Bead. An accepted PR
+must merge and pass protected-main readback before the plan advances. A
+rejected or superseded PR must retain its immutable head, tag, CI, and review
+disposition in durable evidence, receive a public disposition comment, and be
+closed before a successor PR opens. Never merge a rejected candidate merely to
+clear the queue.
+
 Model output is an untrusted typed proposal. A skill can guide procedure but
 cannot grant authority. Hosted agent loops implement `AgentRuntimeAdapter`;
 open models implement `ModelTransport` beneath the project-owned

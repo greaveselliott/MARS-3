@@ -433,14 +433,20 @@ const (
 	ticketLifetimeCorrectionBase                 = "96ec3410b16d381b102e6c1c0bd36e5ea9a9e426"
 	ticketLifetimeCorrectionBaseTree             = "417ec5233fe0f6ec438643837c2170774a700dd9"
 	ticketLifetimeCorrectionBranch               = "codex/w-001-standing-correction-authority"
-	ticketLifetimeCorrectionReviewTag            = "mars3/w001-ticket-lifetime-correction-authority-v2"
-	ticketLifetimeCorrectionTagMessage           = "MARS-3 W-001 ticket-lifetime correction authority attestation v2"
+	ticketLifetimeCorrectionReviewTag            = "none-pending-explicit-owner-exception"
+	ticketLifetimeCorrectionTagMessage           = ""
 	ticketLifetimeCorrectionPriorTagObject       = "78058a1083b841b54fc7a8d0a2be4a14d2890f00"
 	ticketLifetimeCorrectionRejectedTag          = "mars3/w001-ticket-lifetime-correction-authority-v1"
 	ticketLifetimeCorrectionRejectedTagMessage   = "MARS-3 W-001 ticket-lifetime correction authority attestation v1"
 	ticketLifetimeCorrectionRejectedTagObject    = "b3ce76cdfe0ca00c191b112bfbd20413769b19e2"
 	ticketLifetimeCorrectionRejectedTagTarget    = "1f409044abde0ee571e504e85313b111735526dd"
 	ticketLifetimeCorrectionRejectedTagArchive   = "mars3/w001-ticket-lifetime-correction-authority-v1-rejected"
+	ticketLifetimeCorrectionUnsignedTag          = "mars3/w001-ticket-lifetime-correction-authority-v2"
+	ticketLifetimeCorrectionUnsignedTagMessage   = "MARS-3 W-001 ticket-lifetime correction authority attestation v2"
+	ticketLifetimeCorrectionUnsignedTagObject    = "21918c2c021d2e3feb1483c926bb87c17c949570"
+	ticketLifetimeCorrectionUnsignedTagTarget    = "051cf3bd6506152f66d79cd16c7be04a3f4a163f"
+	ticketLifetimeCorrectionUnsignedTagArchive   = "mars3/w001-ticket-lifetime-correction-authority-v2-rejected"
+	ticketLifetimeCorrectionUnsignedTagger       = "MARS-3 Release Manager <release-manager@example.com> 1788133039 +0100"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -5112,9 +5118,13 @@ var ticketLifetimeCorrectionAuthorityScalars = []grantScalarExpectation{
 	{path: "policy.authorityModel", value: "one-explicitly-claimed-Bead-through-accepted-handoff"},
 	{path: "policy.autonomousMutation", value: "false"},
 	{path: "policy.equivalentFailureLimit", value: "2"},
+	{path: "policy.pullRequestPolicy", value: "one-open-delivery-PR-per-bound-Bead"},
+	{path: "policy.acceptedPullRequestDisposition", value: "merge-and-readback-before-advancing"},
+	{path: "policy.rejectedPullRequestDisposition", value: "preserve-comment-and-close-before-successor"},
 	{path: "currentBinding.bead", value: "M3-W001"},
 	{path: "currentBinding.displayId", value: "W-001"},
 	{path: "currentBinding.canonicalState", value: "done"},
+	{path: "currentBinding.correctionDisposition", value: "blocked"},
 	{path: "currentBinding.purpose", value: "terminal-evidence-and-doctrine-publication"},
 	{path: "currentBinding.baseCommit", value: ticketLifetimeCorrectionBase},
 	{path: "currentBinding.baseTree", value: ticketLifetimeCorrectionBaseTree},
@@ -5125,7 +5135,15 @@ var ticketLifetimeCorrectionAuthorityScalars = []grantScalarExpectation{
 	{path: "currentBinding.preservedQADisposition", value: "changes-requested"},
 	{path: "currentBinding.rejectedReviewTag", value: ticketLifetimeCorrectionRejectedTag},
 	{path: "currentBinding.rejectedReviewTagObject", value: ticketLifetimeCorrectionRejectedTagObject},
+	{path: "currentBinding.rejectedReviewTagTarget", value: ticketLifetimeCorrectionRejectedTagTarget},
 	{path: "currentBinding.rejectedReviewTagArchive", value: ticketLifetimeCorrectionRejectedTagArchive},
+	{path: "currentBinding.rejectedReviewTagFailureFingerprint", value: "review-tag/identity-mismatch"},
+	{path: "currentBinding.rejectedUnsignedReviewTag", value: ticketLifetimeCorrectionUnsignedTag},
+	{path: "currentBinding.rejectedUnsignedReviewTagObject", value: ticketLifetimeCorrectionUnsignedTagObject},
+	{path: "currentBinding.rejectedUnsignedReviewTagTarget", value: ticketLifetimeCorrectionUnsignedTagTarget},
+	{path: "currentBinding.rejectedUnsignedReviewTagArchive", value: ticketLifetimeCorrectionUnsignedTagArchive},
+	{path: "currentBinding.rejectedUnsignedReviewTagFailureFingerprint", value: "review-tag/signature-private-key-unavailable"},
+	{path: "currentBinding.failureEquivalenceDisposition", value: "blocked-conservative-shared-acceptance-code"},
 	{path: "currentBinding.successorReviewTag", value: ticketLifetimeCorrectionReviewTag},
 	{path: "currentBinding.workingBranch", value: ticketLifetimeCorrectionBranch},
 	{path: "currentBinding.successorPullRequestLimit", value: "1"},
@@ -5152,6 +5170,7 @@ var ticketLifetimeCorrectionAuthoritySequences = map[string][]string{
 		"obtain-independent-QA-then-independent-Security-review",
 		"merge-only-after-exact-head-CI-QA-and-Security-accept-the-same-tree",
 		"perform-protected-main-readback-and-gateway-only-current-Bead-reconciliation",
+		"close-a-rejected-or-superseded-bound-Bead-PR-after-preserving-its-immutable-evidence",
 	},
 	"policy.verificationOrder": {
 		"local-public-commit-gate", "signed-commit-and-review-tag", "exact-head-CI", "qa",
@@ -5169,6 +5188,7 @@ var ticketLifetimeCorrectionAuthoritySequences = map[string][]string{
 		"weaken-required-CI-QA-Security-signature-or-protected-main-gates",
 		"reuse-move-delete-rewrite-or-resign-an-immutable-review-tag",
 		"continue-after-the-second-equivalent-failure",
+		"open-a-successor-PR-while-an-earlier-bound-Bead-delivery-PR-remains-open",
 	},
 	"currentBinding.authorizedPaths": {
 		ticketLifetimeCorrectionAuthorityPath, ".harness/manifest.yaml", "AGENTS.md",
@@ -5177,6 +5197,10 @@ var ticketLifetimeCorrectionAuthoritySequences = map[string][]string{
 		"docs/features/F-002-work-authority.md", canonicalActivePlan, "docs/evidence/W-001-validation.md",
 		"internal/doctrine/doctrine.go", "internal/doctrine/doctrine_test.go", "internal/doctrine/grant.go",
 		"internal/doctrine/grant_test.go", "internal/doctrine/plan.go", "internal/doctrine/plan_test.go",
+	},
+	"currentBinding.resolvedPriorPullRequests": {
+		"14:closed:2026-08-30T23:45:11Z:0d193d29e9087a8a2022d70aa8bb9943f5e84a3d",
+		"15:closed:2026-08-30T23:45:26Z:96ec3410b16d381b102e6c1c0bd36e5ea9a9e426",
 	},
 }
 
@@ -8768,15 +8792,30 @@ func checkTicketLifetimeCorrectionAuthority(root string, findings *[]Finding) {
 		rejectedTarget != ticketLifetimeCorrectionRejectedTagTarget {
 		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "doctrine.ticket_lifetime_authority_rejected_tag", "rejected local V1 tag object, target, identity, message, signature, and archival ref must remain exact")
 	}
+	unsignedObjectID, unsignedObjectErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+ticketLifetimeCorrectionUnsignedTagArchive+"^{tag}")
+	unsignedObject, unsignedTagErr := planningGrantGitOutput(root, "cat-file", "tag", strings.TrimSpace(string(unsignedObjectID)))
+	expectedUnsignedObject := "object " + ticketLifetimeCorrectionUnsignedTagTarget + "\n" +
+		"type commit\n" +
+		"tag " + ticketLifetimeCorrectionUnsignedTag + "\n" +
+		"tagger " + ticketLifetimeCorrectionUnsignedTagger + "\n\n" +
+		ticketLifetimeCorrectionUnsignedTagMessage + "\n"
+	if unsignedObjectErr != nil || unsignedTagErr != nil ||
+		strings.TrimSpace(string(unsignedObjectID)) != ticketLifetimeCorrectionUnsignedTagObject ||
+		string(unsignedObject) != expectedUnsignedObject {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "doctrine.ticket_lifetime_authority_unsigned_tag", "rejected local V2 tag object, target, exact identity, message, absent signature, and archival ref must remain exact")
+	}
 
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
 	for _, marker := range []string{
 		"active_delivery_grant: none-required-under-ticket-lifetime-authority",
 		"active_attempt: w001-ticket-lifetime-correction-authority-v1",
+		"active_delivery_grant_state: blocked",
 		"ticket_lifetime_correction_authority: enabled",
 		"ticket_lifetime_correction_policy: " + ticketLifetimeCorrectionAuthorityPath,
 		"ticket_lifetime_gateway_scope: current-bead-only",
 		"ticket_lifetime_other_beads: prohibited",
+		"ticket_lifetime_pull_request_policy: one-open-delivery-PR-per-bound-Bead",
+		"prior_open_pull_requests: none",
 		"current_bead_state: done",
 		"live_lease_state: absent",
 	} {
@@ -8789,6 +8828,7 @@ func checkTicketLifetimeCorrectionAuthority(root string, findings *[]Finding) {
 	for _, marker := range []string{
 		"## Ticket-lifetime correction authority", "PD-004", "ADR-007", ticketLifetimeCorrectionBase,
 		"Canonical M3-W001 is now", "`done`", "binding then ends", "another Bead",
+		"one pull request at a time", "PRs #14 and #15", "closed",
 	} {
 		if planErr != nil || !bytes.Contains(plan, []byte(marker)) {
 			addFinding(findings, canonicalActivePlan, "doctrine.ticket_lifetime_authority_plan", "active plan must state the bounded W-001 authority, retained boundaries, and terminal end")
@@ -9361,6 +9401,10 @@ func checkTicketLifetimeCorrectionGitDiff(root string, findings *[]Finding) {
 		return
 	}
 	if requireTag {
+		if ticketLifetimeCorrectionReviewTag == "none-pending-explicit-owner-exception" {
+			addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_blocked", "ticket-lifetime correction is blocked pending an explicit owner exception after the second shared acceptance-code failure")
+			return
+		}
 		expected := featureHead
 		if mainTreeCheck {
 			expected = ""

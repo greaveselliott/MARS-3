@@ -2250,11 +2250,25 @@ func TestTicketLifetimeCorrectionAuthorityRejectsBindingTampering(t *testing.T) 
 }
 
 func TestTicketLifetimeCorrectionAuthorityPathScope(t *testing.T) {
+	authorized := ticketLifetimeCorrectionAuthoritySequences["currentBinding.authorizedPaths"]
+	if len(authorized) != 16 || !ticketLifetimeCorrectionPathsAllowed(authorized) {
+		t.Fatalf("exact 16-path ticket-lifetime scope was rejected: %v", authorized)
+	}
 	if !ticketLifetimeCorrectionPathsAllowed([]string{"docs/design-docs/ADR-007-standing-correction-authority.md", "internal/doctrine/grant.go"}) {
 		t.Fatal("declared ticket-lifetime paths were rejected")
 	}
 	if ticketLifetimeCorrectionPathsAllowed([]string{"internal/runtime/escape.go"}) {
 		t.Fatal("path outside the current W-001 binding was accepted")
+	}
+}
+
+func TestTicketLifetimeCorrectionAuthorityResolvesPriorPullRequestsBeforeSuccessor(t *testing.T) {
+	want := []string{
+		"14:closed:2026-08-30T23:45:11Z:0d193d29e9087a8a2022d70aa8bb9943f5e84a3d",
+		"15:closed:2026-08-30T23:45:26Z:96ec3410b16d381b102e6c1c0bd36e5ea9a9e426",
+	}
+	if got := ticketLifetimeCorrectionAuthoritySequences["currentBinding.resolvedPriorPullRequests"]; !equalStringSequence(got, want) {
+		t.Fatalf("prior pull-request convergence record mismatch: got %v want %v", got, want)
 	}
 }
 

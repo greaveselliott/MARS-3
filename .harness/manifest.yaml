@@ -15,13 +15,15 @@ authority:
   plan_phase: delivery
   active_delivery_grant: none-required-under-ticket-lifetime-authority
   active_attempt: w001-ticket-lifetime-correction-authority-v1
-  active_delivery_grant_state: ticket-lifetime
+  active_delivery_grant_state: blocked
   ticket_lifetime_correction_authority: enabled
   ticket_lifetime_correction_policy: .harness/standing-correction-authority.yaml
   ticket_lifetime_correction_decision: ADR-007
   ticket_lifetime_merge_after_acceptance: enabled
   ticket_lifetime_gateway_scope: current-bead-only
   ticket_lifetime_other_beads: prohibited
+  ticket_lifetime_pull_request_policy: one-open-delivery-PR-per-bound-Bead
+  prior_open_pull_requests: none
   prior_delivery_grant_state: consumed
   terminal_evidence_publication_state: in-review
   terminal_evidence_preserved_commit: 8648be7fd2f36f872b36f7764897343cb84135b2

@@ -2303,7 +2303,7 @@ The W-001 ticket-lifetime activation branch begins at exact preserved V4 head
 `96ec3410b16d381b102e6c1c0bd36e5ea9a9e426`. Signed doctrine commit
 `2b8a5b9dda98a8b86aca5f65862cdb91e6a16b2d` introduced the machine policy,
 PD-004, ADR-007, manifest/plan/BDD projections, strict Git/CI topology, and
-focused regressions across the exact 15 authorized paths. Signed formatting
+focused regressions across the exact 16 authorized paths. Signed formatting
 commit `109691fa0637ffd3e5063bf82d8800b0773ec337` removed the policy's trailing
 blank line. The first full qualification found that the historical V4 checker
 still required V4 to be the active grant; signed correction commit
@@ -2326,4 +2326,25 @@ Release Manager identity. It was not pushed as a review candidate, moved,
 deleted, rewritten, or re-signed. Archival ref
 `mars3/w001-ticket-lifetime-correction-authority-v1-rejected` exposes that
 original signed object. The distinct V2 review tag is the only acceptance
-candidate.
+candidate named by the pre-failure binding.
+
+The V2 operation targeted signed head
+`051cf3bd6506152f66d79cd16c7be04a3f4a163f` with exact tagger
+`MARS-3 Release Manager <release-manager@example.com>`, but signer access failed
+and left unsigned annotated object
+`21918c2c021d2e3feb1483c926bb87c17c949570`. Neither the original V2 ref nor its
+archival ref `mars3/w001-ticket-lifetime-correction-authority-v2-rejected` was
+moved, deleted, rewritten, accepted, or pushed. Its root-cause fingerprint is
+`review-tag/signature-private-key-unavailable`; V1 is
+`review-tag/identity-mismatch`. Because both surface through the same acceptance
+code, the binding conservatively records `blocked` and selects no successor
+without an explicit owner exception for a materially different signing route.
+
+PR #14 was closed as rejected at `2026-08-30T23:45:11Z` with exact head
+`0d193d29e9087a8a2022d70aa8bb9943f5e84a3d`; PR #15 was closed as rejected at
+`2026-08-30T23:45:26Z` with exact head
+`96ec3410b16d381b102e6c1c0bd36e5ea9a9e426`. Both received public disposition
+comments preserving their tag, CI, and QA evidence. Readback returned zero open
+pull requests. No successor PR may open until these prior vehicles are closed;
+an accepted successor must merge and pass protected-main readback before the
+plan advances.

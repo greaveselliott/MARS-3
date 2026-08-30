@@ -48,6 +48,13 @@ recorded as blocked and escalated as a design problem. Another same-class
 Security recurrence stops incremental patching and requires architectural
 simplification.
 
+Delivery also converges one pull request at a time for the bound Bead. An
+accepted PR is merged and read back before the plan advances. A rejected or
+superseded PR is not merged: its immutable head, tag, CI, and review disposition
+are preserved, a public disposition is attached, and the PR is closed before a
+successor opens. This prevents stale open PRs from accumulating while ensuring
+that closing a rejected vehicle cannot erase its evidence.
+
 ## Alternatives considered
 
 - Continue issuing a signed V-number grant for every finding. Rejected because

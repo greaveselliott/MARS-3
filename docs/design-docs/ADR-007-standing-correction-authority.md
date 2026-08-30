@@ -43,6 +43,12 @@ independent QA then independent Security review of the same tree, merge only
 after acceptance, protected-main readback, immutable rejected evidence, and no
 more than one equivalent retry.
 
+Exactly one delivery PR may remain open for the bound Bead. Acceptance requires
+merge and protected-main readback before any next correction or ticket. A
+rejected or superseded PR must first preserve its head, tag, CI, and review
+disposition, then receive a public disposition and close before a successor PR
+opens. Rejected work is never merged merely to empty the queue.
+
 The following always stop the route and require explicit owner approval:
 
 - production or release effects;
@@ -99,7 +105,19 @@ The first local ticket-authority review tag was signed with the Work Authority
 Engineer identity instead of the required Release Manager identity. Its signed
 object `b3ce76cdfe0ca00c191b112bfbd20413769b19e2` is preserved under archival ref
 `mars3/w001-ticket-lifetime-correction-authority-v1-rejected`; it is not the
-review candidate. The distinct V2 review tag is the only acceptance route.
+review candidate. The attempted V2 tag has the exact Release Manager identity
+but no SSH signature; unsigned object
+`21918c2c021d2e3feb1483c926bb87c17c949570` is preserved under archival ref
+`mars3/w001-ticket-lifetime-correction-authority-v2-rejected`. The root-cause
+fingerprints are `review-tag/identity-mismatch` and
+`review-tag/signature-private-key-unavailable`, but both map to the same
+acceptance code. The binding therefore takes the conservative `blocked`
+disposition and names no successor until the owner explicitly permits one
+materially different signing route.
+
+PRs #14 and #15 retained their rejected heads, tags, runs, and QA dispositions,
+received public disposition comments, and closed at `2026-08-30T23:45:11Z` and
+`2026-08-30T23:45:26Z` respectively. No earlier W-001 delivery PR remains open.
 
 ## Integrity and enforcement
 

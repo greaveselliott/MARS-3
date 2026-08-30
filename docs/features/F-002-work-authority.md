@@ -383,6 +383,12 @@ stable error class and corrective operation without reflecting sensitive input.
 One replay is permitted for the same normalized idempotent operation; an
 equivalent repeated failure is recorded and escalated rather than looped.
 
+One bound Bead has at most one open delivery pull request. An accepted PR is
+merged and read back from protected main before work advances. A rejected or
+superseded PR preserves its immutable head, signed tag when present, CI, and
+review disposition, receives a public disposition, and closes before a
+successor opens; rejection never authorizes merging an unaccepted tree.
+
 ## Required evidence
 
 ### Deterministic evidence

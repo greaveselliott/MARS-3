@@ -72,6 +72,20 @@ design changes stop for explicit owner approval. The second equivalent failure
 blocks and escalates the design; a repeated same-class Security finding stops
 incremental correction.
 
+Delivery converges one pull request at a time. PRs #14 and #15 preserved their
+rejected immutable heads, tags, CI, and QA dispositions and were closed with
+public dispositions. An accepted PR must merge and pass protected-main readback
+before this plan advances; a rejected PR is closed, not merged. No successor PR
+may open while an earlier delivery PR for the bound Bead remains open.
+
+The local V1 tag was signed under the wrong tagger identity. The V2 operation
+used the exact Release Manager identity but left unsigned object
+`21918c2c021d2e3feb1483c926bb87c17c949570` after signer access failed. Both
+objects are preserved. Although their root-cause fingerprints differ, both map
+to the same acceptance code, so the binding is conservatively `blocked` under
+the two-equivalent-failure rule. No successor tag or PR is selected pending an
+explicit owner exception for one materially different signer-access route.
+
 ## Durable lineage
 
 - Goal: [G-001](../../goals/active.md)
