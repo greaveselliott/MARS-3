@@ -9195,8 +9195,15 @@ func checkW001TerminalEvidencePublicationV4Grant(root string, findings *[]Findin
 		addFinding(findings, canonicalActivePlan, "public.w001_terminal_evidence_publication_v4_plan", "active plan must select v4 recovery while projecting canonical W-001 as done")
 	}
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")
-	if manifestErr != nil || !bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-evidence-publication-v4")) ||
-		!bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-evidence-publication-v4")) ||
+	activeV4Projection := bytes.Contains(manifest, []byte("active_delivery_grant: W-001-lifecycle-terminal-evidence-publication-v4")) &&
+		bytes.Contains(manifest, []byte("active_attempt: w001-lifecycle-terminal-evidence-publication-v4"))
+	preservedV4Projection := ticketLifetimeCorrectionAuthorityActive(root) &&
+		bytes.Contains(manifest, []byte("active_delivery_grant: none-required-under-ticket-lifetime-authority")) &&
+		bytes.Contains(manifest, []byte("terminal_evidence_v4_head: "+ticketLifetimeCorrectionBase)) &&
+		bytes.Contains(manifest, []byte("terminal_evidence_v4_tree: "+ticketLifetimeCorrectionBaseTree)) &&
+		bytes.Contains(manifest, []byte("terminal_evidence_v4_tag_object: "+ticketLifetimeCorrectionPriorTagObject)) &&
+		bytes.Contains(manifest, []byte("terminal_evidence_v4_qa: changes-requested"))
+	if manifestErr != nil || !activeV4Projection && !preservedV4Projection ||
 		!bytes.Contains(manifest, []byte("current_bead_state: done")) ||
 		!bytes.Contains(manifest, []byte("terminal_evidence_publication_state: in-review")) ||
 		!bytes.Contains(manifest, []byte("live_lease_state: absent")) {
