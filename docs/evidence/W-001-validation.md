@@ -2251,3 +2251,25 @@ carry a distinct signed V4 review tag, pass exact-head public CI, and receive
 independent QA followed by independent Security acceptance before squash
 merge. Runtime, gateway, store, workflow, dependency, database design, API,
 Beads/lease, production, and downstream changes remain prohibited.
+
+Signed V4 implementation head
+`59caf1f168421791e367f9292bcc7e84be08af5b`, tree
+`f924b59946cd47276ad824eec8f6a3175f5767c0`, changes exactly the nine
+grant-authorized paths from protected main. Both V4 commits verify with the
+pinned ED25519 key. Focused V4 grant, scope, strict-chronology, PR #15 topology,
+and inherited exact-tagger tests passed. The full doctrine package passed in
+179.167 seconds before the commit and 170.755 seconds at the signed head.
+Build, doctrine, active-plan, DocSync, public-content, whitespace, unmodified
+`go test ./... -count=1`, and `go vet ./...` gates passed at that head.
+
+The first clean normal clone failed closed because its default refspec did not
+make preserved delivery-v1 head
+`919f1189fb0703e42bcc11570a59527ad8e7a444` locally reachable for the existing
+scanner-source proof. No source was changed and the same recovery method was
+not repeated. The materially different bounded route fetched that immutable
+object by exact ID into the normal clone. Doctrine and public-content then
+passed, as did build, plan, DocSync, whitespace, `go vet ./...`, and unmodified
+`go test ./... -count=1`; clean-clone `internal/doctrine` completed in 174.418
+seconds. These remain local qualification results. The distinct signed V4 tag,
+exact-head public CI, independent QA, independent Security, and accepted merge
+remain required.
