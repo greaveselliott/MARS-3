@@ -13,9 +13,14 @@ authority:
   current_bead_state: in-review
   current_bead_claimed: true
   plan_phase: delivery
-  active_delivery_grant: W-001-lifecycle-terminal-exact-tagger-recovery-v1
-  active_attempt: w001-lifecycle-terminal-exact-tagger-recovery-v1
-  active_delivery_grant_state: consumed
+  active_delivery_grant: W-001-lifecycle-terminal-evidence-publication-v1
+  active_attempt: w001-lifecycle-terminal-evidence-publication-v1
+  active_delivery_grant_state: in-review
+  prior_delivery_grant_state: consumed
+  terminal_evidence_publication_state: in-review
+  terminal_evidence_preserved_commit: 8648be7fd2f36f872b36f7764897343cb84135b2
+  terminal_evidence_preserved_pull_request: 12
+  terminal_evidence_successor_pull_request: 13
   terminal_reconciliation_state: verified
   terminal_reconciliation_attempt: w001-lifecycle-terminal-reconciliation-v1
   terminal_reconciled_bead_state: done

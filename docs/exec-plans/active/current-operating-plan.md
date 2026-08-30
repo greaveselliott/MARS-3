@@ -20,8 +20,13 @@ and one new PostgreSQL fence generation. The gateway issued exactly lease
 epoch `1`, released it during handoff, recorded QA then Security acceptance,
 the completed run and PR #10 reconciliation, and the terminal transition.
 External Beads and PostgreSQL readback found no live lease. This Git projection
-is `in-review` only for the final public evidence handoff; the execution and
-correction grants are consumed, and no further canonical mutation is pending.
+is `in-review` only for the final public evidence handoff. Signed evidence
+commit `8648be7fd2f36f872b36f7764897343cb84135b2` and PR #12 are preserved
+unchanged after GitHub could not construct their merge topology from the
+pre-squash v4 parent. The prospective signed
+`W-001-lifecycle-terminal-evidence-publication-v1` grant admits only one
+seven-path successor from protected main for PR #13. The execution and
+correction grants are consumed, no further canonical mutation is pending, and
 P-001 and every downstream ticket remain backlog and unclaimed.
 
 ## Durable lineage
@@ -77,13 +82,14 @@ The walking skeleton is one synthetic public project and one W-001 attempt:
 read a ready Bead, compare-and-swap claim it, issue a scoped lease epoch,
 heartbeat it, reject stale or mismatched writes, append a bounded event, and
 rebuild the read projection without giving Temporal or PostgreSQL ownership of
-the work graph. The current phase schedules delivery against the verified
-claim. The signed delivery grant is active for its exact attempt, base,
-principal, and paths; no lease exists yet. Its v2 publication route preserved
-the original delivery branch as public foundation-failure evidence and the v4
-correction admitted exactly ten immutable synthetic scanner fingerprints. The
-current correction attempt closes the exact v5 findings without relabeling the
-accepted core checkpoint or the unaccepted v5 candidate as terminally complete.
+the work graph. The delivery phase is now terminal. Its signed delivery and
+correction grants are consumed, and the sole lease was released at epoch `1`.
+The v2 publication route preserved the original delivery branch as public
+foundation-failure evidence and the v4 correction admitted exactly ten
+immutable synthetic scanner fingerprints. The current publication correction
+changes only the validator and durable evidence topology; it cannot execute
+the gateway or mutate Beads, PostgreSQL, a lease, a workflow, runtime, or
+product behavior.
 
 ## Scenario priority
 
@@ -98,8 +104,9 @@ The scenarios are ordered to establish read truth before mutation, then prove
 that losing authority blocks the W-001 synthetic effect boundary and defines
 the contract later real brokers must enforce. M3-W001 already
 declares this exact group and required evidence. The canonical claim itself
-grants neither a lease nor source-code authority; the separately signed v6
-lifecycle-correction grant supplies the current bounded source authority.
+grants neither a lease nor source-code authority. The consumed v6 lifecycle
+correction supplied its historical bounded source authority; the current grant
+is limited to post-terminal evidence publication.
 
 ## Delivery waves
 
@@ -167,9 +174,18 @@ The Orchestrator may schedule it only through a later truthful plan transition.
   reviews, completed run, PR #10 reconciliation, native `closed`, lifecycle
   `done`, terminal record present, and live lease absent. PostgreSQL readback
   verified exactly one released epoch-1 lease, zero active leases, and a
-  21-event journal at the same high watermark. The only remaining W-001 action
-  is acceptance and merge of this three-file public evidence handoff; it grants
-  no source, canonical-store, production, or downstream authority.
+  21-event journal at the same high watermark.
+- Publication correction: signed evidence commit
+  `8648be7fd2f36f872b36f7764897343cb84135b2`, tree
+  `104a6bd0331d99a55ed09853e2256bc4a9379308`, and PR #12 remain immutable
+  `open-dirty-unmergeable` process evidence. The exact successor grant
+  `W-001-lifecycle-terminal-evidence-publication-v1` starts from protected main
+  `4cfa28b42679651d0f198418b54fb05fc3483c4d`, tree
+  `64697884630206f76004321fbca4b787bf1c427c`, and permits only its signed
+  grant/signature, manifest, this plan, W-001 evidence, and the terminal
+  validator/focused tests. PR #13 must pass exact-head CI, independent QA, and
+  independent Security before merge. It grants no runtime, gateway, store,
+  workflow, dependency, canonical-store, production, or downstream authority.
 
 The consumed terminal lineage remains reconstructible. At each historical
 boundary the canonical record truthfully stated: W-001 remains `in-progress`.

@@ -2048,3 +2048,47 @@ receive exact-head CI, independent QA, independent Security, and merge after
 acceptance. It authorizes no further source or store mutation, no new lease,
 no production effect, no P-001 or downstream work, and no change to workflows,
 dependencies, runtime, API, or database design.
+
+### PR #12 topology blocker and prospective publication correction
+
+Signed evidence commit
+`8648be7fd2f36f872b36f7764897343cb84135b2`, tree
+`104a6bd0331d99a55ed09853e2256bc4a9379308`, remains the immutable head of
+PR #12. Its sole parent is accepted v4 candidate
+`327ce7fe81327517d8a00a5254f63ab3bfb4c7f5`, not the exact-tree squash on
+protected main. GitHub therefore reports the PR `open` with merge state
+`dirty` and cannot construct a merge ref or exact-head run. The commit, branch,
+and PR remain unchanged as process evidence; they are not acceptance evidence
+and will not be closed, rewritten, recreated, or merged by this correction.
+
+Finding `public.w001_terminal_evidence_topology_unqualified` records that the
+terminal validator admits only PR #11 and the preterminal base. It consequently
+cannot qualify a post-terminal durable-evidence publication descended from
+protected main `4cfa28b42679651d0f198418b54fb05fc3483c4d`, tree
+`64697884630206f76004321fbca4b787bf1c427c`, despite the accepted v4 tag
+object `c471bf1df39ca7035fb3e4a3cfc90a35eea2404e` and successful protected-main
+run/job `33280991676`/`99176016186`.
+
+The prospective signed
+`W-001-lifecycle-terminal-evidence-publication-v1` grant is byte-exact at
+SHA-256 `2a1219e8859da812a773dabfe0e18ce2c5382299e7ebe485c6b9e2c296cae8d2`;
+its detached-signature SHA-256 is
+`1c9a8ea13381a162fbb8b01a85ee2498b6e0faed8f86456862409c3f00103145`.
+The signature verifies under namespace
+`mars3-w001-lifecycle-terminal-evidence-publication-v1` with the pinned
+ED25519 key. Signed grant-only commit
+`2eb932a2cf7210190da919da63690b512b0acefb` is prospective to the
+`2026-08-30T18:37:30Z` issue time. Signed evidence replay commit
+`a09cb3262f7a9132664f481386b643ed520b1e4a` reproduces only the original three-file
+terminal handoff from protected main; it does not modify the preserved commit
+or PR.
+
+The correction is limited to the grant/signature, manifest, active plan,
+W-001 evidence, terminal validator, and focused tests. It adds one exact PR #13
+two-parent synthetic-merge topology over protected main plus its exact-tree
+squash readback. Runtime, gateway, stores, workflows, dependencies, database
+design, API, production, downstream work, and every Beads/PostgreSQL lifecycle,
+event, or lease mutation remain prohibited. Canonical M3-W001 remains native
+`closed`, lifecycle `done`, and without a live lease. A distinct signed review
+tag, exact-head CI, independent QA, and then independent Security are required
+before PR #13 may merge.
