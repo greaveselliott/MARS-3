@@ -13,14 +13,18 @@ authority:
   current_bead_state: done
   current_bead_claimed: true
   plan_phase: delivery
-  active_delivery_grant: W-001-lifecycle-terminal-evidence-publication-v2
-  active_attempt: w001-lifecycle-terminal-evidence-publication-v2
+  active_delivery_grant: W-001-lifecycle-terminal-evidence-publication-v3
+  active_attempt: w001-lifecycle-terminal-evidence-publication-v3
   active_delivery_grant_state: in-review
   prior_delivery_grant_state: consumed
   terminal_evidence_publication_state: in-review
   terminal_evidence_preserved_commit: 8648be7fd2f36f872b36f7764897343cb84135b2
   terminal_evidence_preserved_pull_request: 12
-  terminal_evidence_successor_pull_request: 13
+  terminal_evidence_prior_successor_pull_request: 13
+  terminal_evidence_successor_pull_request: 14
+  terminal_evidence_premature_merge: 4ec60790abdd34a12b209f70d631def0b44ab465
+  terminal_evidence_premature_merge_run: 33330996615
+  terminal_evidence_v2_archive_object: 2d36c895cfd9f47927f635b16bf911d3a070758e
   terminal_reconciliation_state: verified
   terminal_reconciliation_attempt: w001-lifecycle-terminal-reconciliation-v1
   terminal_reconciled_bead_state: done

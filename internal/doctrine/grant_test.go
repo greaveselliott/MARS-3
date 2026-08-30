@@ -2128,7 +2128,7 @@ func TestW001TerminalV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	}
 }
 
-func TestW001TerminalExactTaggerRecoveryGrantRemainsValidUnderActivePublicationV2(t *testing.T) {
+func TestW001TerminalExactTaggerRecoveryGrantRemainsValidUnderActivePublicationV3(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	var findings []Finding
 	checkW001TerminalExactTaggerRecoveryGrant(repo, &findings)
@@ -2139,7 +2139,7 @@ func TestW001TerminalExactTaggerRecoveryGrantRemainsValidUnderActivePublicationV
 	if err != nil {
 		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
 	}
-	if grant.ReviewTag != w001TerminalEvidencePublicationV2ReviewTag {
+	if grant.ReviewTag != w001TerminalEvidencePublicationV3ReviewTag {
 		t.Fatalf("current terminal evidence publication review tag=%q", grant.ReviewTag)
 	}
 }
@@ -2174,12 +2174,12 @@ func TestW001TerminalEvidencePublicationGrantAcceptsPinnedSignedContract(t *test
 	}
 }
 
-func TestW001TerminalEvidencePublicationV2GrantAcceptsPinnedSignedContract(t *testing.T) {
+func TestW001TerminalEvidencePublicationV3GrantAcceptsPinnedSignedContract(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	var findings []Finding
-	checkW001TerminalEvidencePublicationV2Grant(repo, &findings)
+	checkW001TerminalEvidencePublicationV3Grant(repo, &findings)
 	if len(findings) != 0 {
-		t.Fatalf("valid signed W-001 terminal-evidence publication v2 was rejected: %v", findings)
+		t.Fatalf("valid signed W-001 terminal-evidence publication v3 was rejected: %v", findings)
 	}
 }
 
@@ -2200,6 +2200,27 @@ func TestW001TerminalEvidencePublicationV2PathScope(t *testing.T) {
 	} {
 		if w001TerminalEvidencePublicationV2PathsAllowed([]string{path}) {
 			t.Fatalf("out-of-scope terminal-evidence publication v2 path accepted: %s", path)
+		}
+	}
+}
+
+func TestW001TerminalEvidencePublicationV3PathScope(t *testing.T) {
+	var authorized []string
+	for _, path := range w001TerminalEvidencePublicationV3Sequences["grant.authorizedPaths"] {
+		if !w001TerminalEvidencePublicationV3PathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal-evidence publication v3 path rejected: %s", path)
+		}
+		authorized = append(authorized, path)
+	}
+	if len(authorized) != 9 || !w001TerminalEvidencePublicationV3PathsAllowed(authorized) {
+		t.Fatal("exact nine-path terminal-evidence publication v3 scope was rejected")
+	}
+	for _, path := range []string{
+		"internal/authority/closeout/closeout.go", "internal/authority/gateway/lifecycle.go",
+		"internal/authority/postgres/store.go", ".github/workflows/foundation-quality.yml", "go.mod",
+	} {
+		if w001TerminalEvidencePublicationV3PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal-evidence publication v3 path accepted: %s", path)
 		}
 	}
 }
@@ -2256,54 +2277,54 @@ func TestW001TerminalEvidencePublicationPathScope(t *testing.T) {
 	}
 }
 
-func TestW001TerminalEvidencePublicationPullRequestCheckoutBindsPR13Topology(t *testing.T) {
+func TestW001TerminalEvidencePublicationPullRequestCheckoutBindsPR14Topology(t *testing.T) {
 	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
 	if err != nil {
 		t.Fatal(err)
 	}
 	root := filepath.Join(planningGrantCanonicalTempDir(t), "repo")
 	feature := initializePlanningGrantTestRepository(t, root, source, "HEAD")
-	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001TerminalEvidencePublicationBase)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001TerminalEvidencePublicationV3Base)
 	tree := planningGrantTestGitOutput(t, root, "rev-parse", feature+"^{tree}")
 	merge := planningGrantTestGitOutput(t, root,
 		"-c", "user.name=Synthetic Merge Bot",
 		"-c", "user.email=merge-bot@example.com",
 		"-c", "commit.gpgsign=false",
 		"commit-tree", tree,
-		"-p", w001TerminalEvidencePublicationBase,
+		"-p", w001TerminalEvidencePublicationV3Base,
 		"-p", feature,
 		"-m", "synthetic W-001 terminal-evidence publication merge",
 	)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--force", "--detach", merge)
 	event := map[string]any{
-		"number":     13,
+		"number":     14,
 		"repository": map[string]any{"full_name": planningGrantRepository},
 		"pull_request": map[string]any{
-			"base":             map[string]any{"ref": "main", "sha": w001TerminalEvidencePublicationBase},
-			"head":             map[string]any{"ref": w001TerminalEvidencePublicationBranch, "sha": feature},
+			"base":             map[string]any{"ref": "main", "sha": w001TerminalEvidencePublicationV3Base},
+			"head":             map[string]any{"ref": w001TerminalEvidencePublicationV3Branch, "sha": feature},
 			"merge_commit_sha": merge,
 		},
 	}
 	eventPath := writePlanningGrantGitHubEvent(t, event)
 	setPlanningGrantCommonGitHubFacts(t, root, merge, eventPath)
 	t.Setenv("GITHUB_EVENT_NAME", "pull_request")
-	t.Setenv("GITHUB_REF", "refs/pull/13/merge")
-	t.Setenv("GITHUB_HEAD_REF", w001TerminalEvidencePublicationBranch)
+	t.Setenv("GITHUB_REF", "refs/pull/14/merge")
+	t.Setenv("GITHUB_HEAD_REF", w001TerminalEvidencePublicationV3Branch)
 	t.Setenv("GITHUB_BASE_REF", "main")
 	t.Setenv("GITHUB_REF_PROTECTED", "false")
-	t.Setenv("GITHUB_WORKFLOW_REF", planningGrantRepository+"/"+planningGrantWorkflowPath+"@refs/pull/13/merge")
+	t.Setenv("GITHUB_WORKFLOW_REF", planningGrantRepository+"/"+planningGrantWorkflowPath+"@refs/pull/14/merge")
 	var findings []Finding
 	checkout, ok := w001TerminalEvidencePublicationGitHubCheckout(root, merge, "", &findings)
 	if !ok || len(findings) != 0 || checkout.kind != planningGrantPullRequestMerge || checkout.expectedHead != feature {
-		t.Fatalf("canonical PR 13 topology was rejected: checkout=%+v findings=%v", checkout, findings)
+		t.Fatalf("canonical PR 14 topology was rejected: checkout=%+v findings=%v", checkout, findings)
 	}
 
-	t.Setenv("GITHUB_REF", "refs/pull/12/merge")
-	t.Setenv("GITHUB_WORKFLOW_REF", planningGrantRepository+"/"+planningGrantWorkflowPath+"@refs/pull/12/merge")
+	t.Setenv("GITHUB_REF", "refs/pull/13/merge")
+	t.Setenv("GITHUB_WORKFLOW_REF", planningGrantRepository+"/"+planningGrantWorkflowPath+"@refs/pull/13/merge")
 	findings = nil
 	if _, ok := w001TerminalEvidencePublicationGitHubCheckout(root, merge, "", &findings); ok ||
 		!findingCodePresent(findings, "public.w001_terminal_evidence_publication_event") {
-		t.Fatalf("preserved PR 12 was admitted as the successor publication route: %v", findings)
+		t.Fatalf("premature PR 13 was admitted as the v3 successor publication route: %v", findings)
 	}
 }
 

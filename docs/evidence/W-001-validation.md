@@ -2150,3 +2150,52 @@ grant expiry. Focused regressions cover terminal projection, parallel active
 work denial, backdating, pre-target timestamps, expiry, and malformed tagger
 time metadata. This is not canonical lifecycle work: the publication remains
 `in-review` while M3-W001 remains `done` and the live lease remains absent.
+
+### Premature PR #13 merge and forward-only v3 recovery
+
+PR #13 merged before the required v2 exact-head publication and ordered
+QA-to-Security review. GitHub readback binds the event to rejected v1 head
+`63eed57083e31a18b9ac2c3143802d021d37e4f0` and squash commit
+`4ec60790abdd34a12b209f70d631def0b44ab465`. The protected-main tree is
+`b16861c96a7553e1abe6c62b591710104e93287b`, exactly the rejected v1 tree.
+Protected-main run/job `33330996615`/`99309411316` passed, but green CI does
+not reclassify the immutable QA `changes-requested` disposition or supply the
+Security review that was correctly gated behind QA. The merge is retained as
+`unaccepted-process-evidence`; it is not reverted, amended, or rewritten.
+
+PR #12 is closed without merge and retains exact head
+`8648be7fd2f36f872b36f7764897343cb84135b2`. It remains process evidence and
+will not be reopened, rebased, or merged.
+
+The locally qualified but unpublished v2 attempt remains reachable at exact
+head `8d24e259d8d078d888c9c6d2060dc57b6eda1ee9`, tree
+`999ca4d942c41eab0e6568150276b81772e4965c`. Signed archival tag
+`mars3/w001-lifecycle-terminal-evidence-publication-v2-unmerged` is object
+`2d36c895cfd9f47927f635b16bf911d3a070758e`, targets that head, and uses the
+exact Release Manager identity. The archive preserves signed grant-only commit
+`884213d1ae6521fe0b832d6dfe7589fb4c1addec`, implementation commit
+`d5eff09fc6b11eb3f5898c5b1e05ca2c2f549450`, and focused-test commit
+`8d24e259d8d078d888c9c6d2060dc57b6eda1ee9` without presenting them as a
+reviewed or merged candidate.
+
+The forward-only signed
+`W-001-lifecycle-terminal-evidence-publication-v3` grant begins at protected
+main `4ec60790abdd34a12b209f70d631def0b44ab465`, tree
+`b16861c96a7553e1abe6c62b591710104e93287b`. Its SHA-256 is
+`eff2bd4a1e546dccf87a9d0ee072841974ec85ce9b99c2108da91302da08a4aa`;
+detached-signature SHA-256 is
+`d9bc55cddfe12fee99e7c8d7184f46fe764719126ce77c1554fda1256ce6a041`.
+The signature verifies under namespace
+`mars3-w001-lifecycle-terminal-evidence-publication-v3` with the pinned
+ED25519 key. Prospective signed grant-only commit
+`856434ebb798245b81aa46c779571b0669f1c038`, tree
+`690c9190b5244ecd3785f99c372c6168a11e4937`, precedes signed replay commits
+`1906539f063bbd85e4539bbacc963a2f69e14704` and
+`da327368a94032e918456a3f26a1b463e8d8faee`.
+
+V3 may reproduce only the already-qualified terminal `done` projection and
+signed tag chronology enforcement. PR #14 must carry a distinct signed v3
+review tag, pass exact-head public CI, and receive independent QA followed by
+independent Security acceptance before squash merge. Runtime, gateway, store,
+workflow, dependency, database design, API, Beads/lease, production, and
+downstream changes remain prohibited.
