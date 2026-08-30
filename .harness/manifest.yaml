@@ -10,11 +10,20 @@ authority:
   live_lease_system: postgresql-gateway
   execution_system: temporal-non-authoritative
   current_bead: M3-W001
-  current_bead_state: in-progress
+  current_bead_state: in-review
   current_bead_claimed: true
   plan_phase: delivery
   active_delivery_grant: W-001-lifecycle-terminal-exact-tagger-recovery-v1
   active_attempt: w001-lifecycle-terminal-exact-tagger-recovery-v1
+  active_delivery_grant_state: consumed
+  terminal_reconciliation_state: verified
+  terminal_reconciliation_attempt: w001-lifecycle-terminal-reconciliation-v1
+  terminal_reconciled_bead_state: done
+  terminal_reconciled_work_version_sequence: 7
+  terminal_protected_main: 4cfa28b42679651d0f198418b54fb05fc3483c4d
+  terminal_review_tag_object: c471bf1df39ca7035fb3e4a3cfc90a35eea2404e
+  terminal_protected_main_run: 33280991676
+  terminal_first_lease_epoch: 1
   live_lease_state: absent
   durable_product_system: git
   markdown_ticket_authority: prohibited

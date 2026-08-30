@@ -1945,3 +1945,106 @@ found no leak in the exact worktree and no leak across all 122 commits of
 history. This remains local qualification only; the signed v4 review tag,
 exact-head public CI, independent QA, independent Security, and protected-main
 merge remain pending.
+
+## Canonical terminal reconciliation and external readback
+
+**Disposition:** terminal reconciliation verified; public evidence handoff in
+review
+
+Protected main
+`4cfa28b42679651d0f198418b54fb05fc3483c4d`, tree
+`64697884630206f76004321fbca4b787bf1c427c`, remained byte-equal to the
+independently accepted v4 candidate tree. Remote readback retained signed v4
+tag object `c471bf1df39ca7035fb3e4a3cfc90a35eea2404e` targeting candidate
+`327ce7fe81327517d8a00a5254f63ab3bfb4c7f5`. Protected-main run/job
+`33280991676`/`99176016186` completed successfully against that exact main
+commit. The prior v1-v3 tags, failed runs, and review dispositions remain
+immutable.
+
+### External execution boundary
+
+The accepted patched Beads source remained pinned to upstream commit
+`6c124203e771433a3550c348771a5b5e27fd3c21` with the exact six-file patch
+digest `91b3e8dd5c8c01b5953c4c38ca508a150b05cd719f4e80fec293365afddf7f`.
+Two isolated, network-disabled Darwin arm64 builds were byte-identical at
+SHA-256 `4bce9c19511f9e718b3506d5c29a90a2eea7484f3b64b634d590aff8d3bcaec3`.
+The non-skipped `TestNativeMutatorIntegration` passed against that exact host
+binary. The canonical Beads workspace identity digest was
+`b38697aa895101ef72c47bb299f9f858054a3f2c31bf5a239a09620996fb3ae1`;
+its project ID remained `e9669a62-5be6-4b94-85f8-c502c29d394a`.
+
+The authorized local, non-production database `mars3_authority_w001` applied
+the checked-in migration unchanged at SHA-256
+`fb29d13c4038ee37c8d7fe50603596c53df810767558c1d7a4b120afcc74bcf9`.
+Its dedicated application role is non-superuser, the temporary connection URL
+file was mode `0600`, and typed `postgres.Store.ProvisionProject` anchored
+tenant `tenant-academy`, the canonical project ID, and fresh fence generation
+`a8995f20-846c-4ea1-8a22-215c518df50a`. No lifecycle, lease, event, or Bead
+row was written directly.
+
+The fresh external authorization was valid from `2026-08-30T00:36:29Z` to
+`2026-08-30T01:36:29Z`. Its canonical JSON SHA-256 was
+`82cbc3f93502dea081e0a857e8d81e22e8386d67bbfc7a74bdd1c2f9f18f1ff4`;
+detached-signature SHA-256 was
+`8679a30a9ed69a9e6079815a4b33076ff58be00886b47367f176024af3e7e433`.
+The signature verified with the pinned ED25519 genesis key under namespace
+`mars3-w001-lifecycle-terminal-reconciliation-execution-v1`. The public
+evidence records only hashes and non-secret identities; it excludes the
+authorization payload, private signing material, and database URL.
+
+The first dry-run failed closed before mutation because the delivery checkout
+was a linked worktree whose `.git` entry is a file; the reviewed closeout
+boundary accepts only a normal clone with a real `.git` directory. A fresh
+normal local clone at the same protected-main commit and tree, with the same
+immutable tags, was the materially different bounded route. Its canonical
+dry-run returned `ready-no-mutation` with native `in_progress`, lifecycle
+`in-progress`, WorkVersion sequence `1`, no live lease, no reviews, and no
+terminal record.
+
+### Gateway apply receipt
+
+The one authorized `terminal-reconcile --apply` invocation returned
+`terminal-close-verified` for M3-W001. The receipt recorded:
+
+- native status `closed` and lifecycle `done`;
+- WorkVersion authority generation
+  `6e79ff81-a007-42a5-a178-7ce58dbb718b`, issue incarnation
+  `e1e8d2d3f80871096a568fb489f49575a42abd37b269df9faf777a09cd689b41`,
+  mutation sequence `7`, and dependency revision `1`;
+- handoff head `56c2a8d95927bc552882aacc30aa886ea0be9ba5`;
+- exactly two ordered accepted reviews: QA then Security;
+- completed run disposition;
+- reconciliation to merged commit
+  `f6073696fab0ecf9e80d34f5c199ca54f431b5f7`, tree
+  `1025c59672c70b8d14ad904315677ffac56b9b81`, PR `pr-10`, and protected-main
+  run `run-33246178629`;
+- terminal record present; and
+- no live lease after handoff.
+
+The native Beads readback independently showed M3-W001 `closed`/`done`, labels
+including `done` and `public-first`, the original bootstrap claim, terminal
+WorkVersion sequence `7`, two ordered accepted review records, completed run
+record, PR #10 reconciliation record, and Delivery Orchestrator terminal
+record. No other Bead was selected for mutation.
+
+The least-privilege PostgreSQL readback independently showed exactly one lease,
+lease epoch `1`, state `released`, and zero active leases. The project journal
+high watermark and event count were both `21`, with chain hash
+`703b109123eebbf56ec295b70ff528a8c9fcfee9077d30e8ed3b4f8e0f1dece4`.
+Its ordered events were seven intent/policy/receipt triples for claim
+reconciliation, handoff, QA review, Security review, completed run,
+reconciliation, and terminal transition. PostgreSQL retained no canonical
+ticket definition or lifecycle projection.
+
+Remote Git readback still resolved protected main to
+`4cfa28b42679651d0f198418b54fb05fc3483c4d`, v4 tag object to
+`c471bf1df39ca7035fb3e4a3cfc90a35eea2404e`, and the tag target to
+`327ce7fe81327517d8a00a5254f63ab3bfb4c7f5`. GitHub readback reported
+protected-main run `33280991676` and public-commit job `99176016186` completed
+with conclusion `success`.
+
+Canonical W-001 execution authority is consumed. This three-file branch may
+receive exact-head CI, independent QA, independent Security, and merge after
+acceptance. It authorizes no further source or store mutation, no new lease,
+no production effect, no P-001 or downstream work, and no change to workflows,
+dependencies, runtime, API, or database design.
