@@ -2,7 +2,7 @@
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
-**Updated:** 2026-08-29
+**Updated:** 2026-08-30
 **Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
@@ -10,22 +10,24 @@
 **Authority:** Beads/Dolt for work state; Git for this durable plan
 
 This is the only active execution plan. It is a Git-owned ordering and evidence
-contract, not a second ticket database. The reviewed helper is accepted on
-`main`, and the signed W-001 bootstrap flow has compare-and-swap claimed the
-canonical Bead as `in-progress`. This `delivery` projection records that
-durable fact. The accepted postclaim tree has been squash-merged with exact
-tree equality, protected-main CI passed, and the Orchestrator recorded the
-bounded reconciliation receipt in M3-W001. The separately signed
-`W-001-delivery-v2` grant authorized the merged core implementation. Exact-tree
-QA and Security review and protected-main run `33069887434` accepted that
-checkpoint. The completion audit then found that handoff, ordered review
-verdict, run disposition, reconciliation, and terminal lifecycle routes remain
-absent. W-001 therefore remains `in-progress`. Independent review of the
-immutable v5 candidate requested changes for terminal claim lineage,
-full-fence replay, missing-receipt recovery, truthful nonterminal convergence,
-and reproducible qualification. The separately signed
-`W-001-lifecycle-correction-v6` authorizes only those bounded corrections; no
-live lease exists.
+contract, not a second ticket database. Canonical M3-W001 is now native
+`closed` and lifecycle `done` at WorkVersion mutation sequence `7`. One fresh
+signed execution authorization bound protected main
+`4cfa28b42679651d0f198418b54fb05fc3483c4d`, accepted v4 tag object
+`c471bf1df39ca7035fb3e4a3cfc90a35eea2404e`, protected-main run
+`33280991676`, the canonical Beads workspace, the reproducible native binary,
+and one new PostgreSQL fence generation. The gateway issued exactly lease
+epoch `1`, released it during handoff, recorded QA then Security acceptance,
+the completed run and PR #10 reconciliation, and the terminal transition.
+External Beads and PostgreSQL readback found no live lease. This Git projection
+is `in-review` only for the final public evidence handoff. Signed evidence
+commit `8648be7fd2f36f872b36f7764897343cb84135b2` and PR #12 are preserved
+unchanged after GitHub could not construct their merge topology from the
+pre-squash v4 parent. The prospective signed
+`W-001-lifecycle-terminal-evidence-publication-v1` grant admits only one
+seven-path successor from protected main for PR #13. The execution and
+correction grants are consumed, no further canonical mutation is pending, and
+P-001 and every downstream ticket remain backlog and unclaimed.
 
 ## Durable lineage
 
@@ -80,13 +82,14 @@ The walking skeleton is one synthetic public project and one W-001 attempt:
 read a ready Bead, compare-and-swap claim it, issue a scoped lease epoch,
 heartbeat it, reject stale or mismatched writes, append a bounded event, and
 rebuild the read projection without giving Temporal or PostgreSQL ownership of
-the work graph. The current phase schedules delivery against the verified
-claim. The signed delivery grant is active for its exact attempt, base,
-principal, and paths; no lease exists yet. Its v2 publication route preserved
-the original delivery branch as public foundation-failure evidence and the v4
-correction admitted exactly ten immutable synthetic scanner fingerprints. The
-current correction attempt closes the exact v5 findings without relabeling the
-accepted core checkpoint or the unaccepted v5 candidate as terminally complete.
+the work graph. The delivery phase is now terminal. Its signed delivery and
+correction grants are consumed, and the sole lease was released at epoch `1`.
+The v2 publication route preserved the original delivery branch as public
+foundation-failure evidence and the v4 correction admitted exactly ten
+immutable synthetic scanner fingerprints. The current publication correction
+changes only the validator and durable evidence topology; it cannot execute
+the gateway or mutate Beads, PostgreSQL, a lease, a workflow, runtime, or
+product behavior.
 
 ## Scenario priority
 
@@ -101,15 +104,16 @@ The scenarios are ordered to establish read truth before mutation, then prove
 that losing authority blocks the W-001 synthetic effect boundary and defines
 the contract later real brokers must enforce. M3-W001 already
 declares this exact group and required evidence. The canonical claim itself
-grants neither a lease nor source-code authority; the separately signed v6
-lifecycle-correction grant supplies the current bounded source authority.
+grants neither a lease nor source-code authority. The consumed v6 lifecycle
+correction supplied its historical bounded source authority; the current grant
+is limited to post-terminal evidence publication.
 
 ## Delivery waves
 
 | Wave | Bead | Owner | Depends on | State | Exit evidence |
 | --- | --- | --- | --- | --- | --- |
 | 0 | H-001 Doctrine foundation | Foundation Maintainer | signed genesis | done | QA/Security accepted E7, verified public merge, completed run, and reconciliation receipt |
-| 1 | W-001 Work Authority | Work Authority Engineer | H-001 | in-progress | Beads gateway, CAS claims, PostgreSQL lease epochs, stale-effect denial, and projection recovery |
+| 1 | W-001 Work Authority | Work Authority Engineer | H-001 | in-review | Terminal Beads state, released epoch-1 lease, ordered QA/Security, completed run, reconciliation, and four-store readback |
 | 1 | P-001 Local substrate | Platform Engineer | H-001, W-001 | backlog | Lima/k3s, OIDC, RLS, Temporal, storage, and isolation evidence |
 | 2 | T-001 Trace spine | Trace Engineer | W-001, P-001 | backlog | audit ledger, OTel/Tempo, effect intents, receipts, and replay |
 | 3 | S-001 Rule-of-Two policy | Security Engineer | T-001 | backlog | labels, taint, tool contracts, and hard admission policy |
@@ -132,7 +136,7 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 
 ## Current delivery transition
 
-- Canonical work: M3-W001, native `in_progress`, typed lifecycle `in-progress`.
+- Canonical work: M3-W001, native `closed`, typed lifecycle `done`.
 - Work type: enabler.
 - Intended owner/profile: Work Authority Engineer (`work-authority-engineer`).
 - Coordinator: Delivery Orchestrator.
@@ -143,10 +147,13 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Accepted helper commit: `663d19bf190f9e3bd27edc96ee08acaa6778c853`;
   squash-merged as `adfd64feb565fb703a3568122cc032d4d1a450f5` with
   reviewed tree equality.
-- Claim state: verified by Dolt commit
-  `67hmen0cmq0he08n7ujlqpcsmmi94fhb`, WorkVersion mutation sequence `1`,
-  dependency-graph revision `1`, and exact signed postimage digests.
-- Live lease: absent by design; the bootstrap claim grants none.
+- Claim and terminal state: the original Dolt claim commit
+  `67hmen0cmq0he08n7ujlqpcsmmi94fhb` remains the canonical lineage;
+  gateway-only terminal reconciliation advanced WorkVersion mutation sequence
+  to `7` with dependency-graph revision `1` unchanged.
+- Live lease: absent after gateway handoff released the sole PostgreSQL lease;
+  fence generation `a8995f20-846c-4ea1-8a22-215c518df50a` reached lease epoch
+  `1`, which is retained as non-reusable released evidence.
 - Postclaim reconciliation: QA and Security accepted v6 tree
   `7febda7ec2fec47b7d6bf11fdd5b24e605b9e2b2`; PR #8 squash-merged as
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`; protected-main run
@@ -156,38 +163,42 @@ The Orchestrator may schedule it only through a later truthful plan transition.
 - Delivery authority: signed grant `W-001-delivery-v2`, attempt
   `w001-delivery-87d9680d-ca5a-4f3d-9afc-741884232e73`, exact base
   `59f1fe24952b68bd3bbb6994bfee46c350b7c9cd`.
-- Required next transition: execute the prospective signed
-  `W-001-lifecycle-terminal-exact-tagger-recovery-v1` grant from exact
-  QA-rejected v3 head `70ed4a5c502ff3184479d08fd50a19e10cd4af0b`,
-  tree `39134c754f2263f2ec10d9bd4e42789ab86cf0fd`. Preserve signed v3 tag
-  object `5f621e96520d933b4ff5c751948d9dd4710a7f0c`, passed run/job
-  `33264433302`/`99131880421`, and QA finding
-  `public.w001_terminal_tag_identity_name_not_exact` immutably; Security did
-  not run. This grant supersedes the stop clause in the consumed
-  `W-001-lifecycle-terminal-tag-identity-recovery-v1` only for exact tagger
-  name-plus-email enforcement and a wrong-name/correct-email regression. That
-  consumed recovery from v2 head
-  `b80dfbb289f150cbe812dcb67a289227e20c9cea`, tree
-  `ea8739b1339ce20460ec665cd6082552079c2d83`, the prior signed v2 tag object
-  `7682185819444d1fc38c863aa9ed869827146eca`, and the earlier
-  `W-001-lifecycle-terminal-history-scan-recovery-v1` from head
-  `8dcb71192107589c4a5abe5e2d84ff8825c4d17f`, tree
-  `ad4a78f374e64c6f0e38e9a43cdec86eef03ab78`, and
-  `W-001-lifecycle-terminal-ci-recovery-v1` from rejected head
-  `cff16fda43acd9d621f701064427b0d7fc3bf30d` remain preserved. Publish one
-  distinct signed v4 tag on PR #11 using exact identity `MARS-3 Release
-  Manager <release-manager@example.com>`, then require fresh exact-head CI,
-  independent QA, and independent Security. Any further failure stops; no
-  additional correction is authorized. After an accepted exact-tree squash,
-  one fresh one-hour signed
-  execution authorization may bind the reviewed helper, protected-main run,
-  canonical Beads workspace and binary, and PostgreSQL fence generation. Only
-  then may the helper issue one bounded W-001 lease, release it during handoff,
-  record the already-accepted QA and Security evidence against candidate
-  `56c2a8d95927bc552882aacc30aa886ea0be9ba5`, record the completed run and PR
-  #10 reconciliation, close W-001, and read back terminal state. W-001 remains
-  `in-progress` until that canonical gateway sequence succeeds; P-001 and all
-  production work remain excluded.
+- Completed terminal transition: v4 candidate
+  `327ce7fe81327517d8a00a5254f63ab3bfb4c7f5`, tree
+  `64697884630206f76004321fbca4b787bf1c427c`, and signed tag object
+  `c471bf1df39ca7035fb3e4a3cfc90a35eea2404e` received independent QA and
+  Security acceptance. PR #11 squash-merged the exact tree as protected main
+  `4cfa28b42679651d0f198418b54fb05fc3483c4d`; run/job
+  `33280991676`/`99176016186` passed. The external authorization and gateway
+  then produced terminal receipt `terminal-close-verified`: two ordered
+  reviews, completed run, PR #10 reconciliation, native `closed`, lifecycle
+  `done`, terminal record present, and live lease absent. PostgreSQL readback
+  verified exactly one released epoch-1 lease, zero active leases, and a
+  21-event journal at the same high watermark.
+- Publication correction: signed evidence commit
+  `8648be7fd2f36f872b36f7764897343cb84135b2`, tree
+  `104a6bd0331d99a55ed09853e2256bc4a9379308`, and PR #12 remain immutable
+  `open-dirty-unmergeable` process evidence. The exact successor grant
+  `W-001-lifecycle-terminal-evidence-publication-v1` starts from protected main
+  `4cfa28b42679651d0f198418b54fb05fc3483c4d`, tree
+  `64697884630206f76004321fbca4b787bf1c427c`, and permits only its signed
+  grant/signature, manifest, this plan, W-001 evidence, and the terminal
+  validator/focused tests. PR #13 must pass exact-head CI, independent QA, and
+  independent Security before merge. It grants no runtime, gateway, store,
+  workflow, dependency, canonical-store, production, or downstream authority.
+
+The consumed terminal lineage remains reconstructible. At each historical
+boundary the canonical record truthfully stated: W-001 remains `in-progress`.
+`W-001-lifecycle-terminal-reconciliation-v1`;
+`W-001-lifecycle-terminal-ci-recovery-v1` from
+`cff16fda43acd9d621f701064427b0d7fc3bf30d`;
+`W-001-lifecycle-terminal-history-scan-recovery-v1` from
+`8dcb71192107589c4a5abe5e2d84ff8825c4d17f`;
+`W-001-lifecycle-terminal-tag-identity-recovery-v1` from
+`b80dfbb289f150cbe812dcb67a289227e20c9cea`; and
+`W-001-lifecycle-terminal-exact-tagger-recovery-v1` from
+`70ed4a5c502ff3184479d08fd50a19e10cd4af0b`. Those statements describe the
+immutable pre-terminal subjects, not the current canonical `done` readback.
 
 The W-001 bootstrap grant is deliberately not a live lease: it is
 human-directed, binds one base commit and attempt, permits only canonical W-001

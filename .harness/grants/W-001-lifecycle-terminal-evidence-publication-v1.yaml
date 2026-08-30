@@ -1,0 +1,104 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleTerminalEvidencePublicationGrant
+
+grant:
+  id: W-001-lifecycle-terminal-evidence-publication-v1
+  classification: PUBLIC
+  issuedAt: 2026-08-30T18:37:30Z
+  expiresAt: 2026-08-31T18:37:30Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 4cfa28b42679651d0f198418b54fb05fc3483c4d
+  baseTree: 64697884630206f76004321fbca4b787bf1c427c
+  workingBranch: codex/w-001-terminal-evidence-publication
+  priorGrant: W-001-lifecycle-terminal-exact-tagger-recovery-v1
+  priorGrantSHA256: c9ccb6480d9b96b31b45c131288256c04a3f30b868b2c527682d80b16f10a33c
+  priorGrantSignatureSHA256: e178e5f0e3fbb109dd9750740b2f71b394fc1adad510c4d115d76ae4e6c517a5
+  acceptedReviewTag: mars3/w001-lifecycle-terminal-reconciliation-v4
+  acceptedReviewTagObject: c471bf1df39ca7035fb3e4a3cfc90a35eea2404e
+  acceptedReviewTagTarget: 327ce7fe81327517d8a00a5254f63ab3bfb4c7f5
+  protectedMainRun: 33280991676
+  protectedMainJob: 99176016186
+  preservedEvidenceCommit: 8648be7fd2f36f872b36f7764897343cb84135b2
+  preservedEvidenceTree: 104a6bd0331d99a55ed09853e2256bc4a9379308
+  preservedPullRequest: 12
+  preservedPullRequestDisposition: open-dirty-unmergeable
+  successorPullRequest: 13
+  successorReviewTag: mars3/w001-lifecycle-terminal-evidence-publication-v1
+  successorReviewTagMessage: MARS-3 W-001 terminal evidence publication attestation v1
+  requiredTaggerName: MARS-3 Release Manager
+  requiredTaggerEmail: release-manager@example.com
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: release-manager
+  purpose: admit one post-terminal exact-tree evidence publication from protected main without reopening canonical W-001 state
+  attemptId: w001-lifecycle-terminal-evidence-publication-v1
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  ordinaryCorrectionLimit: 0
+  allowedEffects:
+    - preserve-the-accepted-v4-tag-protected-main-run-and-terminal-store-readback-immutably
+    - preserve-signed-evidence-commit-8648be7-and-pull-request-12-as-unmergeable-process-evidence
+    - add-only-post-terminal-evidence-publication-topology-validation-and-focused-regressions
+    - update-only-this-grant-manifest-active-plan-evidence-terminal-validator-and-focused-tests
+    - create-signed-semantic-commits-and-one-distinct-signed-evidence-publication-review-tag
+    - push-the-successor-branch-and-review-tag-run-exact-head-CI-and-obtain-independent-QA-then-Security-review
+    - squash-merge-pull-request-13-only-after-QA-and-Security-accept-the-exact-reviewed-tree
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-terminal-evidence-publication-v1.yaml
+    - .harness/grants/W-001-lifecycle-terminal-evidence-publication-v1.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+  requiredProperties:
+    - every-new-commit-and-tag-is-signed-and-chronologically-prospective
+    - protected-main-remains-the-exact-accepted-v4-tree-and-prior-tags-runs-reviews-and-store-readbacks-remain-immutable
+    - the-preserved-evidence-commit-and-pull-request-12-remain-unchanged-and-are-never-treated-as-acceptance-evidence
+    - the-successor-branch-descends-from-protected-main-and-contains-only-the-exact-seven-authorized-paths
+    - pull-request-CI-validates-an-exact-tree-two-parent-synthetic-merge-over-protected-main
+    - protected-main-CI-after-merge-validates-one-exact-tree-squash-over-the-signed-base
+    - exact-head-CI-precedes-independent-QA-which-precedes-independent-Security
+    - canonical-W001-remains-closed-done-with-zero-live-leases-and-no-store-mutation
+  prohibitedEffects:
+    - move-delete-rewrite-resign-close-or-merge-pull-request-12-or-its-signed-evidence-commit
+    - move-delete-rewrite-or-resign-any-prior-review-tag-commit-run-review-or-terminal-evidence
+    - modify-any-path-outside-the-exact-seven-path-scope
+    - modify-runtime-gateway-store-workflow-dependency-database-design-API-product-or-production
+    - canonical-Beads-PostgreSQL-lifecycle-event-or-lease-mutation
+    - start-P001-production-or-any-downstream-ticket
+    - autonomous-mutation
+    - trust-escalation
+
+finding:
+  disposition: changes-requested
+  source: pull-request-12
+  preservedEvidenceCommit: 8648be7fd2f36f872b36f7764897343cb84135b2
+  code: public.w001_terminal_evidence_topology_unqualified
+  observedWeakness: the-terminal-validator-admits-only-pull-request-11-and-the-preterminal-base-so-a-protected-main-evidence-publication-cannot-produce-a-qualifiable-merge-ref
+  requiredDisposition: add-one-exact-post-terminal-evidence-publication-topology-without-reopening-runtime-or-canonical-authority
+
+verification:
+  order:
+    - signed-grant-only-commit
+    - failing-post-terminal-pull-request-topology-regression
+    - narrow-publication-topology-validator-correction
+    - clean-normal-clone-full-gates
+    - signed-evidence-checkpoint-and-publication-review-tag
+    - exact-head-public-CI
+    - qa
+    - security-reviewer
+    - protected-main-merge-and-CI
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  canonicalLifecycleMutationDeferred: false
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-terminal-evidence-publication-v1
+  detachedSignature: W-001-lifecycle-terminal-evidence-publication-v1.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub
