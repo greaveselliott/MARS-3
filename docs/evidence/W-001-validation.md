@@ -2199,3 +2199,15 @@ review tag, pass exact-head public CI, and receive independent QA followed by
 independent Security acceptance before squash merge. Runtime, gateway, store,
 workflow, dependency, database design, API, Beads/lease, production, and
 downstream changes remain prohibited.
+
+Signed v3 implementation head
+`791132d6a7047f658bdb58db7313c1f53be9c1fa` was then qualified from a fresh
+canonical GitHub clone with the immutable branch head fetched by object ID.
+The exact nine-path base-to-head diff matched the v3 grant. Repository build,
+doctrine, active-plan, DocSync, public-content, whitespace, and `go vet ./...`
+gates passed. The focused terminal-publication race suite passed in 4.362
+seconds. Unmodified `go test ./... -count=1` passed every package, with
+`internal/doctrine` completing in 186.542 seconds. These results are local
+qualification only: the distinct signed v3 review tag, exact-head public CI,
+independent QA, independent Security, and accepted squash merge remain
+required.
