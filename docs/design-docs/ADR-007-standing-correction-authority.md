@@ -95,6 +95,12 @@ pull request, and ends after accepted merge plus protected-main readback.
 Canonical W-001 is already `done`, so this binding authorizes no lifecycle or
 lease mutation.
 
+The first local ticket-authority review tag was signed with the Work Authority
+Engineer identity instead of the required Release Manager identity. Its signed
+object `b3ce76cdfe0ca00c191b112bfbd20413769b19e2` is preserved under archival ref
+`mars3/w001-ticket-lifetime-correction-authority-v1-rejected`; it is not the
+review candidate. The distinct V2 review tag is the only acceptance route.
+
 ## Integrity and enforcement
 
 The machine-readable binding is strict YAML at

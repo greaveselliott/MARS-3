@@ -2317,3 +2317,13 @@ doctrine, active-plan, DocSync, immediate-public-disclosure, and whitespace
 gates also passed. These are local qualification results. A distinct signed
 ticket-lifetime review tag, exact-head public CI, independent QA, independent
 Security, accepted merge, and protected-main readback remain required.
+
+The first local review tag
+`mars3/w001-ticket-lifetime-correction-authority-v1` was signed as object
+`b3ce76cdfe0ca00c191b112bfbd20413769b19e2` but used tagger identity
+`MARS-3 Work Authority Engineer <engineer@example.com>` rather than the required
+Release Manager identity. It was not pushed as a review candidate, moved,
+deleted, rewritten, or re-signed. Archival ref
+`mars3/w001-ticket-lifetime-correction-authority-v1-rejected` exposes that
+original signed object. The distinct V2 review tag is the only acceptance
+candidate.

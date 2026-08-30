@@ -433,9 +433,14 @@ const (
 	ticketLifetimeCorrectionBase                 = "96ec3410b16d381b102e6c1c0bd36e5ea9a9e426"
 	ticketLifetimeCorrectionBaseTree             = "417ec5233fe0f6ec438643837c2170774a700dd9"
 	ticketLifetimeCorrectionBranch               = "codex/w-001-standing-correction-authority"
-	ticketLifetimeCorrectionReviewTag            = "mars3/w001-ticket-lifetime-correction-authority-v1"
-	ticketLifetimeCorrectionTagMessage           = "MARS-3 W-001 ticket-lifetime correction authority attestation v1"
+	ticketLifetimeCorrectionReviewTag            = "mars3/w001-ticket-lifetime-correction-authority-v2"
+	ticketLifetimeCorrectionTagMessage           = "MARS-3 W-001 ticket-lifetime correction authority attestation v2"
 	ticketLifetimeCorrectionPriorTagObject       = "78058a1083b841b54fc7a8d0a2be4a14d2890f00"
+	ticketLifetimeCorrectionRejectedTag          = "mars3/w001-ticket-lifetime-correction-authority-v1"
+	ticketLifetimeCorrectionRejectedTagMessage   = "MARS-3 W-001 ticket-lifetime correction authority attestation v1"
+	ticketLifetimeCorrectionRejectedTagObject    = "b3ce76cdfe0ca00c191b112bfbd20413769b19e2"
+	ticketLifetimeCorrectionRejectedTagTarget    = "1f409044abde0ee571e504e85313b111735526dd"
+	ticketLifetimeCorrectionRejectedTagArchive   = "mars3/w001-ticket-lifetime-correction-authority-v1-rejected"
 )
 
 // W001BootstrapGrant is the validated public projection consumed by the
@@ -5118,6 +5123,10 @@ var ticketLifetimeCorrectionAuthorityScalars = []grantScalarExpectation{
 	{path: "currentBinding.preservedRun", value: "33340046444"},
 	{path: "currentBinding.preservedJob", value: "99333914035"},
 	{path: "currentBinding.preservedQADisposition", value: "changes-requested"},
+	{path: "currentBinding.rejectedReviewTag", value: ticketLifetimeCorrectionRejectedTag},
+	{path: "currentBinding.rejectedReviewTagObject", value: ticketLifetimeCorrectionRejectedTagObject},
+	{path: "currentBinding.rejectedReviewTagArchive", value: ticketLifetimeCorrectionRejectedTagArchive},
+	{path: "currentBinding.successorReviewTag", value: ticketLifetimeCorrectionReviewTag},
 	{path: "currentBinding.workingBranch", value: ticketLifetimeCorrectionBranch},
 	{path: "currentBinding.successorPullRequestLimit", value: "1"},
 	{path: "currentBinding.canonicalLifecycleMutationAllowed", value: "false"},
@@ -8748,6 +8757,16 @@ func checkTicketLifetimeCorrectionAuthority(root string, findings *[]Finding) {
 	if keyErr != nil || fileSHA256(publicKey) != genesisVerificationMaterialDigest || objectErr != nil || tagErr != nil || identityErr != nil ||
 		strings.TrimSpace(string(objectID)) != ticketLifetimeCorrectionPriorTagObject || target != ticketLifetimeCorrectionBase {
 		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "doctrine.ticket_lifetime_authority_prior_tag", "preserved V4 tag object, target, identity, message, and signature must remain exact")
+	}
+	rejectedObjectID, rejectedObjectErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+ticketLifetimeCorrectionRejectedTagArchive+"^{tag}")
+	rejectedObject, rejectedTagErr := planningGrantGitOutput(root, "cat-file", "tag", strings.TrimSpace(string(rejectedObjectID)))
+	rejectedTarget, rejectedIdentityErr := verifyPinnedPlanningGrantTagForIdentity(rejectedObject, publicKey,
+		ticketLifetimeCorrectionRejectedTag, ticketLifetimeCorrectionRejectedTagMessage,
+		"MARS-3 Work Authority Engineer", "engineer@example.com")
+	if rejectedObjectErr != nil || rejectedTagErr != nil || rejectedIdentityErr != nil ||
+		strings.TrimSpace(string(rejectedObjectID)) != ticketLifetimeCorrectionRejectedTagObject ||
+		rejectedTarget != ticketLifetimeCorrectionRejectedTagTarget {
+		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "doctrine.ticket_lifetime_authority_rejected_tag", "rejected local V1 tag object, target, identity, message, signature, and archival ref must remain exact")
 	}
 
 	manifest, manifestErr := readRepoFile(root, ".harness/manifest.yaml")

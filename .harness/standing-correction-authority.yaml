@@ -55,6 +55,10 @@ currentBinding:
   preservedRun: 33340046444
   preservedJob: 99333914035
   preservedQADisposition: changes-requested
+  rejectedReviewTag: mars3/w001-ticket-lifetime-correction-authority-v1
+  rejectedReviewTagObject: b3ce76cdfe0ca00c191b112bfbd20413769b19e2
+  rejectedReviewTagArchive: mars3/w001-ticket-lifetime-correction-authority-v1-rejected
+  successorReviewTag: mars3/w001-ticket-lifetime-correction-authority-v2
   workingBranch: codex/w-001-standing-correction-authority
   successorPullRequestLimit: 1
   canonicalLifecycleMutationAllowed: false
