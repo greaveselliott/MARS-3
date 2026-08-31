@@ -4,6 +4,7 @@ docs:
 - docs/features/F-001-doctrine-foundation.md
 - docs/features/F-002-work-authority.md
 - docs/design-docs/ADR-001-git-beads-authority.md
+- docs/design-docs/ADR-007-standing-correction-authority.md
 - docs/design-docs/mars-provenance.md
 - docs/code-documentation-map.md
 */
@@ -2128,7 +2129,7 @@ func TestW001TerminalV2TagIdentityIsHistoricalOnly(t *testing.T) {
 	}
 }
 
-func TestW001TerminalExactTaggerRecoveryGrantAcceptsPinnedSignedContract(t *testing.T) {
+func TestW001TerminalExactTaggerRecoveryGrantRemainsValidUnderActivePublicationV4(t *testing.T) {
 	repo := filepath.Clean(filepath.Join("..", ".."))
 	var findings []Finding
 	checkW001TerminalExactTaggerRecoveryGrant(repo, &findings)
@@ -2139,7 +2140,7 @@ func TestW001TerminalExactTaggerRecoveryGrantAcceptsPinnedSignedContract(t *test
 	if err != nil {
 		t.Fatalf("LoadW001TerminalReconciliationGrant: %v", err)
 	}
-	if grant.ReviewTag != w001TerminalEvidencePublicationReviewTag {
+	if grant.ReviewTag != w001TerminalEvidencePublicationV4ReviewTag {
 		t.Fatalf("current terminal evidence publication review tag=%q", grant.ReviewTag)
 	}
 }
@@ -2174,6 +2175,139 @@ func TestW001TerminalEvidencePublicationGrantAcceptsPinnedSignedContract(t *test
 	}
 }
 
+func TestW001TerminalEvidencePublicationV4GrantAcceptsPinnedSignedContract(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkW001TerminalEvidencePublicationV4Grant(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid signed W-001 terminal-evidence publication v4 was rejected: %v", findings)
+	}
+}
+
+func TestW001TerminalEvidencePublicationV2PathScope(t *testing.T) {
+	var authorized []string
+	for _, path := range w001TerminalEvidencePublicationV2Sequences["grant.authorizedPaths"] {
+		if !w001TerminalEvidencePublicationV2PathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal-evidence publication v2 path rejected: %s", path)
+		}
+		authorized = append(authorized, path)
+	}
+	if len(authorized) != 9 || !w001TerminalEvidencePublicationV2PathsAllowed(authorized) {
+		t.Fatal("exact nine-path terminal-evidence publication v2 scope was rejected")
+	}
+	for _, path := range []string{
+		"internal/authority/closeout/closeout.go", "internal/authority/gateway/lifecycle.go",
+		"internal/authority/postgres/store.go", ".github/workflows/foundation-quality.yml", "go.mod",
+	} {
+		if w001TerminalEvidencePublicationV2PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal-evidence publication v2 path accepted: %s", path)
+		}
+	}
+}
+
+func TestW001TerminalEvidencePublicationV4PathScope(t *testing.T) {
+	var authorized []string
+	for _, path := range w001TerminalEvidencePublicationV4Sequences["grant.authorizedPaths"] {
+		if !w001TerminalEvidencePublicationV4PathsAllowed([]string{path}) {
+			t.Fatalf("authorized terminal-evidence publication v4 path rejected: %s", path)
+		}
+		authorized = append(authorized, path)
+	}
+	if len(authorized) != 9 || !w001TerminalEvidencePublicationV4PathsAllowed(authorized) {
+		t.Fatal("exact nine-path terminal-evidence publication v4 scope was rejected")
+	}
+	for _, path := range []string{
+		"internal/authority/closeout/closeout.go", "internal/authority/gateway/lifecycle.go",
+		"internal/authority/postgres/store.go", ".github/workflows/foundation-quality.yml", "go.mod",
+	} {
+		if w001TerminalEvidencePublicationV4PathsAllowed([]string{path}) {
+			t.Fatalf("out-of-scope terminal-evidence publication v4 path accepted: %s", path)
+		}
+	}
+}
+
+func TestTicketLifetimeCorrectionAuthorityAcceptsExactCurrentBinding(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	var findings []Finding
+	checkTicketLifetimeCorrectionAuthority(repo, &findings)
+	if len(findings) != 0 {
+		t.Fatalf("valid ticket-lifetime correction authority was rejected: %v", findings)
+	}
+}
+
+func TestTicketLifetimeCorrectionAuthorityRejectsBindingTampering(t *testing.T) {
+	repo := filepath.Clean(filepath.Join("..", ".."))
+	data, err := os.ReadFile(filepath.Join(repo, filepath.FromSlash(ticketLifetimeCorrectionAuthorityPath)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	tampered := bytes.Replace(data, []byte(ticketLifetimeCorrectionBase), []byte("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), 1)
+	document := parseStrictGrant(tampered, ticketLifetimeCorrectionAuthorityScalars, ticketLifetimeCorrectionAuthoritySequences,
+		[]string{"policy", "currentBinding", "convergence", "integrity"})
+	if scalarValue(document, "currentBinding.baseCommit") == ticketLifetimeCorrectionBase {
+		t.Fatal("tampered ticket binding retained the authorized base")
+	}
+}
+
+func TestTicketLifetimeCorrectionAuthorityPathScope(t *testing.T) {
+	authorized := ticketLifetimeCorrectionAuthoritySequences["currentBinding.authorizedPaths"]
+	if len(authorized) != 16 || !ticketLifetimeCorrectionPathsAllowed(authorized) {
+		t.Fatalf("exact 16-path ticket-lifetime scope was rejected: %v", authorized)
+	}
+	if !ticketLifetimeCorrectionPathsAllowed([]string{"docs/design-docs/ADR-007-standing-correction-authority.md", "internal/doctrine/grant.go"}) {
+		t.Fatal("declared ticket-lifetime paths were rejected")
+	}
+	if ticketLifetimeCorrectionPathsAllowed([]string{"internal/runtime/escape.go"}) {
+		t.Fatal("path outside the current W-001 binding was accepted")
+	}
+}
+
+func TestTicketLifetimeCorrectionAuthorityResolvesPriorPullRequestsBeforeSuccessor(t *testing.T) {
+	want := []string{
+		"14:closed:2026-08-30T23:45:11Z:0d193d29e9087a8a2022d70aa8bb9943f5e84a3d",
+		"15:closed:2026-08-30T23:45:26Z:96ec3410b16d381b102e6c1c0bd36e5ea9a9e426",
+	}
+	if got := ticketLifetimeCorrectionAuthoritySequences["currentBinding.resolvedPriorPullRequests"]; !equalStringSequence(got, want) {
+		t.Fatalf("prior pull-request convergence record mismatch: got %v want %v", got, want)
+	}
+	if ticketLifetimeCorrectionReviewTag != "mars3/w001-ticket-lifetime-correction-authority-v3" ||
+		ticketLifetimeCorrectionTagMessage != "MARS-3 W-001 ticket-lifetime correction authority attestation v3" {
+		t.Fatal("bounded V3 exception did not select the exact distinct review tag")
+	}
+}
+
+func TestPlanningGrantTagChronologyIsProspectiveAndBounded(t *testing.T) {
+	issuedAt := time.Date(2026, 8, 30, 19, 10, 0, 0, time.UTC)
+	targetTime := issuedAt.Add(10 * time.Minute)
+	expiresAt := issuedAt.Add(24 * time.Hour)
+	tagObject := func(tagTime time.Time, zone string) []byte {
+		return []byte(fmt.Sprintf("object %s\ntype commit\ntag test\ntagger MARS-3 Release Manager <release-manager@example.com> %d %s\n\nmessage\n-----BEGIN SSH SIGNATURE-----\nplaceholder\n", strings.Repeat("a", 40), tagTime.Unix(), zone))
+	}
+	for _, testCase := range []struct {
+		name    string
+		object  []byte
+		wantErr bool
+	}{
+		{name: "exactly at target", object: tagObject(targetTime, "+0000"), wantErr: true},
+		{name: "one second after target", object: tagObject(targetTime.Add(time.Second), "+0000")},
+		{name: "backdated before issuance", object: tagObject(issuedAt.Add(-time.Second), "+0000"), wantErr: true},
+		{name: "before target", object: tagObject(targetTime.Add(-time.Second), "+0000"), wantErr: true},
+		{name: "exactly at expiry", object: tagObject(expiresAt, "+0000"), wantErr: true},
+		{name: "invalid timezone", object: tagObject(targetTime, "+1460"), wantErr: true},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := validatePlanningGrantTagChronology(testCase.object, issuedAt, expiresAt, targetTime)
+			if (err != nil) != testCase.wantErr {
+				t.Fatalf("validatePlanningGrantTagChronology() err=%v wantErr=%t", err, testCase.wantErr)
+			}
+		})
+	}
+	malformedSeconds := []byte("object " + strings.Repeat("a", 40) + "\ntype commit\ntag test\ntagger MARS-3 Release Manager <release-manager@example.com> not-a-time +0000\n\nmessage\n-----BEGIN SSH SIGNATURE-----\nplaceholder\n")
+	if err := validatePlanningGrantTagChronology(malformedSeconds, issuedAt, expiresAt, targetTime); err == nil {
+		t.Fatal("malformed tagger timestamp was accepted")
+	}
+}
+
 func TestW001TerminalEvidencePublicationPathScope(t *testing.T) {
 	var authorized []string
 	for _, path := range w001TerminalEvidencePublicationSequences["grant.authorizedPaths"] {
@@ -2195,54 +2329,54 @@ func TestW001TerminalEvidencePublicationPathScope(t *testing.T) {
 	}
 }
 
-func TestW001TerminalEvidencePublicationPullRequestCheckoutBindsPR13Topology(t *testing.T) {
+func TestW001TerminalEvidencePublicationPullRequestCheckoutBindsPR15Topology(t *testing.T) {
 	source, err := filepath.Abs(filepath.Clean(filepath.Join("..", "..")))
 	if err != nil {
 		t.Fatal(err)
 	}
 	root := filepath.Join(planningGrantCanonicalTempDir(t), "repo")
 	feature := initializePlanningGrantTestRepository(t, root, source, "HEAD")
-	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001TerminalEvidencePublicationBase)
+	runPlanningGrantTestGit(t, root, "fetch", "--quiet", "--no-tags", source, w001TerminalEvidencePublicationV4Base)
 	tree := planningGrantTestGitOutput(t, root, "rev-parse", feature+"^{tree}")
 	merge := planningGrantTestGitOutput(t, root,
 		"-c", "user.name=Synthetic Merge Bot",
 		"-c", "user.email=merge-bot@example.com",
 		"-c", "commit.gpgsign=false",
 		"commit-tree", tree,
-		"-p", w001TerminalEvidencePublicationBase,
+		"-p", w001TerminalEvidencePublicationV4Base,
 		"-p", feature,
 		"-m", "synthetic W-001 terminal-evidence publication merge",
 	)
 	runPlanningGrantTestGit(t, root, "checkout", "--quiet", "--force", "--detach", merge)
 	event := map[string]any{
-		"number":     13,
+		"number":     15,
 		"repository": map[string]any{"full_name": planningGrantRepository},
 		"pull_request": map[string]any{
-			"base":             map[string]any{"ref": "main", "sha": w001TerminalEvidencePublicationBase},
-			"head":             map[string]any{"ref": w001TerminalEvidencePublicationBranch, "sha": feature},
+			"base":             map[string]any{"ref": "main", "sha": w001TerminalEvidencePublicationV4Base},
+			"head":             map[string]any{"ref": w001TerminalEvidencePublicationV4Branch, "sha": feature},
 			"merge_commit_sha": merge,
 		},
 	}
 	eventPath := writePlanningGrantGitHubEvent(t, event)
 	setPlanningGrantCommonGitHubFacts(t, root, merge, eventPath)
 	t.Setenv("GITHUB_EVENT_NAME", "pull_request")
-	t.Setenv("GITHUB_REF", "refs/pull/13/merge")
-	t.Setenv("GITHUB_HEAD_REF", w001TerminalEvidencePublicationBranch)
+	t.Setenv("GITHUB_REF", "refs/pull/15/merge")
+	t.Setenv("GITHUB_HEAD_REF", w001TerminalEvidencePublicationV4Branch)
 	t.Setenv("GITHUB_BASE_REF", "main")
 	t.Setenv("GITHUB_REF_PROTECTED", "false")
-	t.Setenv("GITHUB_WORKFLOW_REF", planningGrantRepository+"/"+planningGrantWorkflowPath+"@refs/pull/13/merge")
+	t.Setenv("GITHUB_WORKFLOW_REF", planningGrantRepository+"/"+planningGrantWorkflowPath+"@refs/pull/15/merge")
 	var findings []Finding
 	checkout, ok := w001TerminalEvidencePublicationGitHubCheckout(root, merge, "", &findings)
 	if !ok || len(findings) != 0 || checkout.kind != planningGrantPullRequestMerge || checkout.expectedHead != feature {
-		t.Fatalf("canonical PR 13 topology was rejected: checkout=%+v findings=%v", checkout, findings)
+		t.Fatalf("canonical PR 15 topology was rejected: checkout=%+v findings=%v", checkout, findings)
 	}
 
-	t.Setenv("GITHUB_REF", "refs/pull/12/merge")
-	t.Setenv("GITHUB_WORKFLOW_REF", planningGrantRepository+"/"+planningGrantWorkflowPath+"@refs/pull/12/merge")
+	t.Setenv("GITHUB_REF", "refs/pull/14/merge")
+	t.Setenv("GITHUB_WORKFLOW_REF", planningGrantRepository+"/"+planningGrantWorkflowPath+"@refs/pull/14/merge")
 	findings = nil
 	if _, ok := w001TerminalEvidencePublicationGitHubCheckout(root, merge, "", &findings); ok ||
 		!findingCodePresent(findings, "public.w001_terminal_evidence_publication_event") {
-		t.Fatalf("preserved PR 12 was admitted as the successor publication route: %v", findings)
+		t.Fatalf("rejected PR 14 was admitted as the v4 successor publication route: %v", findings)
 	}
 }
 

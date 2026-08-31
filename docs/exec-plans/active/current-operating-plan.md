@@ -2,7 +2,7 @@
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
-**Updated:** 2026-08-30
+**Updated:** 2026-08-31
 **Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
@@ -19,20 +19,84 @@ signed execution authorization bound protected main
 and one new PostgreSQL fence generation. The gateway issued exactly lease
 epoch `1`, released it during handoff, recorded QA then Security acceptance,
 the completed run and PR #10 reconciliation, and the terminal transition.
-External Beads and PostgreSQL readback found no live lease. This Git projection
-is `in-review` only for the final public evidence handoff. Signed evidence
-commit `8648be7fd2f36f872b36f7764897343cb84135b2` and PR #12 are preserved
-unchanged after GitHub could not construct their merge topology from the
-pre-squash v4 parent. The prospective signed
-`W-001-lifecycle-terminal-evidence-publication-v1` grant admits only one
-seven-path successor from protected main for PR #13. The execution and
-correction grants are consumed, no further canonical mutation is pending, and
-P-001 and every downstream ticket remain backlog and unclaimed.
+External Beads and PostgreSQL readback found no live lease. Canonical M3-W001
+and its delivery row remain `done`; the separate terminal-evidence publication
+is `in-review` only for the final public handoff. Signed evidence
+commit `8648be7fd2f36f872b36f7764897343cb84135b2` and closed PR #12 are
+preserved unchanged after GitHub could not construct their merge topology from the
+pre-squash v4 parent. Publication v1 candidate
+`63eed57083e31a18b9ac2c3143802d021d37e4f0`, its signed tag object
+`91b2d9ffdc7d4d5a679678a6d30f0f52561c1c19`, passed run/job
+`33329491442`/`99305391610`, and QA `changes-requested` disposition are
+immutable. PR #13 prematurely squash-merged that rejected tree as protected
+main `4ec60790abdd34a12b209f70d631def0b44ab465`; run/job
+`33330996615`/`99309411316` passed but does not substitute for the missing QA
+and Security acceptance. The locally qualified v2 head
+`8d24e259d8d078d888c9c6d2060dc57b6eda1ee9` is preserved by signed archival
+tag object `2d36c895cfd9f47927f635b16bf911d3a070758e`. The prospective signed
+V3 grant produced rejected PR #14 head
+`0d193d29e9087a8a2022d70aa8bb9943f5e84a3d`, tree
+`6a8fce667d4b57134a902ed31a4843ada20f6948`, signed tag object
+`e708daafba37e4efe3096b64de30eb10033d2201`, and passing run/job
+`33333798814`/`99316989127`. Independent QA returned `changes-requested`
+because the validator admitted a tag timestamp equal to its target commit,
+despite the signed contract requiring a strictly later tag. V4 PR #15, head
+`96ec3410b16d381b102e6c1c0bd36e5ea9a9e426`, tree
+`417ec5233fe0f6ec438643837c2170774a700dd9`, signed tag object
+`78058a1083b841b54fc7a8d0a2be4a14d2890f00`, and passing run/job
+`33340046444`/`99333914035` are preserved after independent QA returned
+`changes-requested` for two stale current-state statements in this plan.
+PD-004 and ADR-007 now bind the W-001 correction through one accepted
+evidence-publication merge and protected-main readback without another
+per-correction grant. Canonical lifecycle and lease mutation remain prohibited.
+All earlier grants are consumed, no further canonical W-001 mutation is
+pending, and P-001 and every downstream ticket remain backlog and unclaimed.
+
+## Ticket-lifetime correction authority
+
+The owner has durably delegated
+`ticket-lifetime-non-production-correction-v1` for this exact W-001 publication
+from V4 head `96ec3410b16d381b102e6c1c0bd36e5ea9a9e426`. A CI, QA, or Security
+rejection may return to bounded correction without another user message while
+the purpose, paths, effects, and one-Bead binding do not expand. The route still
+requires signed commits and a distinct signed tag, exact-head CI, independent
+QA then independent Security, merge only after both accept the same tree, and
+protected-main readback. The binding then ends.
+
+This policy exists so the initial build can complete without constant owner
+involvement in routine delivery mechanics. It is not autonomous mutation.
+Production/release, destructive or irreversible effects, secrets/credentials/
+billing/private data, trust escalation, another Bead, path or effect expansion,
+direct authority-store mutation, and workflow/dependency/runtime/API/database-
+design changes stop for explicit owner approval. The second equivalent failure
+blocks and escalates the design; a repeated same-class Security finding stops
+incremental correction.
+
+Delivery converges one pull request at a time. PRs #14 and #15 preserved their
+rejected immutable heads, tags, CI, and QA dispositions and were closed with
+public dispositions. An accepted PR must merge and pass protected-main readback
+before this plan advances; a rejected PR is closed, not merged. No successor PR
+may open while an earlier delivery PR for the bound Bead remains open.
+
+The local V1 tag was signed under the wrong tagger identity. The V2 operation
+used the exact Release Manager identity but left unsigned object
+`21918c2c021d2e3feb1483c926bb87c17c949570` after signer access failed. Both
+objects are preserved. Although their root-cause fingerprints differ, both map
+to the same acceptance code. The owner explicitly superseded only this current
+W-001 second-failure stop for one materially different V3 signer-access route
+from signed checkpoint `aa2b2bf802863c44a5cb4e28dfebfc3188fb39cc`.
+The exception permits exactly V3, PR #16, exact-head CI, QA then Security,
+accepted merge, and protected-main readback. The route is a no-ref,
+out-of-sandbox signer-agent preflight, the existing pinned key, exact
+`MARS-3 Release Manager <release-manager@example.com>` identity supplied only
+through the tagger environment, and one V3 tag-creation attempt. All other
+boundaries remain.
 
 ## Durable lineage
 
 - Goal: [G-001](../../goals/active.md)
-- Decision: [PD-002](../../product-decisions/PD-002-git-beads-authority.md)
+- Decisions: [PD-002](../../product-decisions/PD-002-git-beads-authority.md),
+  [PD-004](../../product-decisions/PD-004-standing-correction-authority.md)
 - Product promise: [work-authority specification](../../product-specs/work-authority.md)
 - Behavior contract: [F-002](../../features/F-002-work-authority.md)
 - Work authority: external Bead `M3-W001`; this Git plan selects it and mirrors
@@ -86,10 +150,11 @@ the work graph. The delivery phase is now terminal. Its signed delivery and
 correction grants are consumed, and the sole lease was released at epoch `1`.
 The v2 publication route preserved the original delivery branch as public
 foundation-failure evidence and the v4 correction admitted exactly ten
-immutable synthetic scanner fingerprints. The current publication correction
-changes only the validator and durable evidence topology; it cannot execute
-the gateway or mutate Beads, PostgreSQL, a lease, a workflow, runtime, or
-product behavior.
+immutable synthetic scanner fingerprints. The current v4 publication recovery
+changes only the terminal-done plan projection, strict signed-tag chronology
+validator, focused regressions, and durable evidence topology; it cannot
+execute the gateway or mutate Beads, PostgreSQL, a lease, a workflow, runtime,
+or product behavior.
 
 ## Scenario priority
 
@@ -113,7 +178,7 @@ is limited to post-terminal evidence publication.
 | Wave | Bead | Owner | Depends on | State | Exit evidence |
 | --- | --- | --- | --- | --- | --- |
 | 0 | H-001 Doctrine foundation | Foundation Maintainer | signed genesis | done | QA/Security accepted E7, verified public merge, completed run, and reconciliation receipt |
-| 1 | W-001 Work Authority | Work Authority Engineer | H-001 | in-review | Terminal Beads state, released epoch-1 lease, ordered QA/Security, completed run, reconciliation, and four-store readback |
+| 1 | W-001 Work Authority | Work Authority Engineer | H-001 | done | Terminal Beads state, released epoch-1 lease, ordered QA/Security, completed run, reconciliation, and four-store readback |
 | 1 | P-001 Local substrate | Platform Engineer | H-001, W-001 | backlog | Lima/k3s, OIDC, RLS, Temporal, storage, and isolation evidence |
 | 2 | T-001 Trace spine | Trace Engineer | W-001, P-001 | backlog | audit ledger, OTel/Tempo, effect intents, receipts, and replay |
 | 3 | S-001 Rule-of-Two policy | Security Engineer | T-001 | backlog | labels, taint, tool contracts, and hard admission policy |
@@ -177,15 +242,22 @@ The Orchestrator may schedule it only through a later truthful plan transition.
   21-event journal at the same high watermark.
 - Publication correction: signed evidence commit
   `8648be7fd2f36f872b36f7764897343cb84135b2`, tree
-  `104a6bd0331d99a55ed09853e2256bc4a9379308`, and PR #12 remain immutable
-  `open-dirty-unmergeable` process evidence. The exact successor grant
-  `W-001-lifecycle-terminal-evidence-publication-v1` starts from protected main
-  `4cfa28b42679651d0f198418b54fb05fc3483c4d`, tree
-  `64697884630206f76004321fbca4b787bf1c427c`, and permits only its signed
-  grant/signature, manifest, this plan, W-001 evidence, and the terminal
-  validator/focused tests. PR #13 must pass exact-head CI, independent QA, and
-  independent Security before merge. It grants no runtime, gateway, store,
-  workflow, dependency, canonical-store, production, or downstream authority.
+  `104a6bd0331d99a55ed09853e2256bc4a9379308`, and closed PR #12 remain
+  immutable process evidence. The historical signed
+  `W-001-lifecycle-terminal-evidence-publication-v1` grant and rejected v1
+  tree remain reconstructible after the premature PR #13 squash at
+  `4ec60790abdd34a12b209f70d631def0b44ab465`. The unmerged v2 correction is
+  archived at signed tag object `2d36c895cfd9f47927f635b16bf911d3a070758e`.
+  V3 head `0d193d29e9087a8a2022d70aa8bb9943f5e84a3d`, signed tag object
+  `e708daafba37e4efe3096b64de30eb10033d2201`, passing run/job
+  `33333798814`/`99316989127`, PR #14, and its QA rejection remain immutable.
+  The exact forward-only grant
+  `W-001-lifecycle-terminal-evidence-publication-v4` starts from protected main
+  and permits only its signed grant/signature, manifest, this plan, W-001
+  evidence, and the terminal and plan validators/focused tests. PR #15 must
+  pass exact-head CI, independent QA, and independent Security before merge.
+  It grants no runtime, gateway, store, workflow, dependency, canonical-store,
+  production, or downstream authority.
 
 The consumed terminal lineage remains reconstructible. At each historical
 boundary the canonical record truthfully stated: W-001 remains `in-progress`.
@@ -432,14 +504,13 @@ did not accept. The signed `W-001-lifecycle-evidence-preservation-v1` grant
 authorizes only byte-exact publication of that existing object under
 `mars3/w001-lifecycle-test-harness-retirement-rejected-v1`, the seven-path
 validation/evidence projection, and one fresh signed candidate/run/review
-sequence. The archival ref remains rejected and unaccepted evidence. W-001
-remains `in-progress`; merge, Beads/lease mutation, production change, and
-downstream work remain unauthorized.
+sequence. The archival ref remains rejected and unaccepted evidence. At that
+historical checkpoint W-001 remained `in-progress`; merge, Beads/lease
+mutation, production change, and downstream work were unauthorized.
 
-This is candidate implementation evidence only. F-002 scenarios remain
-`failing`, M3-W001 remains `in-progress`, and no canonical lifecycle mutation
-is authorized until a signed checkpoint receives independent QA and Security
-acceptance and protected-main reconciliation.
+This is immutable historical candidate evidence. Canonical M3-W001 is now
+`done`, its only lease is released, and terminal-evidence/doctrine publication
+remains a separate Git review state that cannot reopen the Bead lifecycle.
 
 ## Success evidence
 
@@ -449,8 +520,9 @@ acceptance and protected-main reconciliation.
 - The plan checker accepts exactly one selected backlog Bead only during
   `contract-publication`, and rejects an active implementation row in that
   phase.
-- In `delivery`, the checker requires exactly one `in-progress` or `in-review`
-  row and requires it to match the current Bead.
+- In nonterminal `delivery`, the checker requires exactly one current
+  `in-progress` or `in-review` row. A terminal projection instead requires
+  exactly one current `done` row and zero active rows.
 - W-001 later proves CAS/version conflicts, dependency rejection, monotonic
   fencing, owner-only heartbeat, synthetic stale-effect denial, ordered event
   replay, coherent projection rebaseline, and denial of direct Beads/Dolt access.

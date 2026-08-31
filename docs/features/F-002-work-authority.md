@@ -2,7 +2,7 @@
 
 **Status:** Active
 **Goal:** G-001
-**Product decision:** PD-002
+**Product decisions:** PD-002, PD-004
 **Product specification:** `docs/product-specs/work-authority.md`
 **Canonical Bead:** M3-W001 (display ID W-001)
 
@@ -44,6 +44,11 @@
 10. Missing receipts and cross-store partial outcomes are unknown or pending
     reconciliation, never inferred success. Retried normalized effects preserve
     idempotency.
+11. One explicit current-Bead authorization carries its non-production
+    correction loop through accepted handoff without another per-attempt grant,
+    but only inside its existing goal, feature, declared paths, effect class,
+    and owning Git contract. It does not grant another Bead, production
+    authority, trust, direct store access, or scope expansion.
 
 ## Step-by-step behavior
 
@@ -135,7 +140,8 @@ lineage, owner, declared paths, and verification order
 datastore credentials or network route to Beads, Dolt, or the PostgreSQL lease
 tables
 **When** an authenticated, policy-approved principal performs an allowed work
-transition through the typed authority gateway
+transition through the typed authority gateway, or continues an in-scope
+non-production correction under the current ticket-lifetime delegation
 **Then** the gateway compare-and-swap mutates only the concern owned by the
 appropriate authoritative store
 **And** it emits an intent, policy decision, verified receipt, and ordered
@@ -143,6 +149,8 @@ journal event with one trace identity
 **And** a model proposal, chat message, Temporal task, cache write, direct
 datastore request, wrong-role verdict, or invalid lifecycle transition cannot
 produce the canonical change
+**And** ticket-lifetime correction authority cannot select another Bead, widen
+declared paths or effects, bypass independent review, or authorize production
 **And** the denial states the bounded current state, required transition, and
 exact safe operation available next.
 
@@ -374,6 +382,12 @@ It returns a
 stable error class and corrective operation without reflecting sensitive input.
 One replay is permitted for the same normalized idempotent operation; an
 equivalent repeated failure is recorded and escalated rather than looped.
+
+One bound Bead has at most one open delivery pull request. An accepted PR is
+merged and read back from protected main before work advances. A rejected or
+superseded PR preserves its immutable head, signed tag when present, CI, and
+review disposition, receives a public disposition, and closes before a
+successor opens; rejection never authorizes merging an unaccepted tree.
 
 ## Required evidence
 

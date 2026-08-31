@@ -1,0 +1,128 @@
+schemaVersion: 1
+kind: MARS3W001LifecycleTerminalEvidencePublicationV4Grant
+
+grant:
+  id: W-001-lifecycle-terminal-evidence-publication-v4
+  classification: PUBLIC
+  issuedAt: 2026-08-30T20:40:00Z
+  expiresAt: 2026-08-31T20:40:00Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 4ec60790abdd34a12b209f70d631def0b44ab465
+  baseTree: b16861c96a7553e1abe6c62b591710104e93287b
+  workingBranch: codex/w-001-terminal-evidence-publication-v4
+  priorGrant: W-001-lifecycle-terminal-evidence-publication-v3
+  priorGrantCommit: 856434ebb798245b81aa46c779571b0669f1c038
+  priorImplementationHead: 0d193d29e9087a8a2022d70aa8bb9943f5e84a3d
+  priorImplementationTree: 6a8fce667d4b57134a902ed31a4843ada20f6948
+  priorReviewTag: mars3/w001-lifecycle-terminal-evidence-publication-v3
+  priorReviewTagObject: e708daafba37e4efe3096b64de30eb10033d2201
+  priorReviewTagTarget: 0d193d29e9087a8a2022d70aa8bb9943f5e84a3d
+  priorReviewTagMessage: MARS-3 W-001 terminal evidence publication attestation v3
+  priorPullRequest: 14
+  priorRun: 33333798814
+  priorJob: 99316989127
+  priorQADisposition: changes-requested
+  priorQAFinding: public.w001_terminal_evidence_tag_chronology_allows_target_equality
+  mergedPullRequest: 13
+  mergedCommit: 4ec60790abdd34a12b209f70d631def0b44ab465
+  mergedTree: b16861c96a7553e1abe6c62b591710104e93287b
+  protectedMainRun: 33330996615
+  protectedMainJob: 99309411316
+  rejectedReviewTag: mars3/w001-lifecycle-terminal-evidence-publication-v1
+  rejectedReviewTagObject: 91b2d9ffdc7d4d5a679678a6d30f0f52561c1c19
+  priorArchiveTag: mars3/w001-lifecycle-terminal-evidence-publication-v2-unmerged
+  priorArchiveTagObject: 2d36c895cfd9f47927f635b16bf911d3a070758e
+  closedPullRequest: 12
+  closedPullRequestHead: 8648be7fd2f36f872b36f7764897343cb84135b2
+  successorPullRequest: 15
+  successorReviewTag: mars3/w001-lifecycle-terminal-evidence-publication-v4
+  successorReviewTagMessage: MARS-3 W-001 terminal evidence publication attestation v4
+  requiredTaggerName: MARS-3 Release Manager
+  requiredTaggerEmail: release-manager@example.com
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: release-manager
+  purpose: preserve the rejected v3 candidate and enforce strict tag-after-target chronology without widening terminal publication behavior
+  attemptId: w001-lifecycle-terminal-evidence-publication-v4
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  ordinaryCorrectionLimit: 0
+  allowedEffects:
+    - preserve-PR14-v3-tag-exact-head-CI-and-QA-rejection-immutably
+    - preserve-PR13-PR12-v1-and-v2-evidence-immutably
+    - replay-the-v3-terminal-done-and-tag-chronology-corrections-from-protected-main
+    - reject-a-review-tag-timestamp-equal-to-its-target-commit-timestamp
+    - correct-the-active-plan-v2-wording-to-v4-forward-replay
+    - update-only-this-grant-manifest-active-plan-evidence-terminal-and-plan-validators-and-focused-tests
+    - create-signed-semantic-commits-and-one-distinct-signed-v4-review-tag
+    - create-and-push-the-v4-branch-and-open-PR15-against-exact-protected-main
+    - run-exact-head-CI-and-obtain-independent-QA-then-Security-review
+    - squash-merge-PR15-only-after-QA-and-Security-accept-the-exact-v4-reviewed-tree
+    - verify-protected-main-tree-equality-and-CI-after-the-accepted-merge
+  authorizedPaths:
+    - .harness/grants/W-001-lifecycle-terminal-evidence-publication-v4.yaml
+    - .harness/grants/W-001-lifecycle-terminal-evidence-publication-v4.yaml.sig
+    - .harness/manifest.yaml
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+    - internal/doctrine/plan.go
+    - internal/doctrine/plan_test.go
+  requiredProperties:
+    - rejected-v3-PR-tag-run-QA-and-tree-remain-exact-and-immutable
+    - canonical-W001-is-projected-as-done-and-publication-review-state-remains-separate
+    - delivery-phase-terminal-projection-allows-exactly-one-current-done-Bead-and-zero-active-rows
+    - nonterminal-delivery-still-requires-exactly-one-current-in-progress-or-in-review-row
+    - the-v4-tag-is-distinct-targets-the-exact-current-feature-head-and-has-a-timestamp-strictly-after-its-target
+    - exact-head-CI-precedes-independent-QA-which-precedes-independent-Security-and-merge
+    - the-accepted-PR15-squash-tree-equals-the-reviewed-v4-tag-target-tree
+  prohibitedEffects:
+    - move-delete-rewrite-or-resign-any-v1-v2-or-v3-tag
+    - reopen-merge-rebase-or-change-PR12-or-its-head
+    - merge-or-reclassify-PR14-or-its-QA-disposition
+    - modify-any-path-outside-the-exact-nine-path-scope
+    - broaden-plan-phases-states-or-active-cardinality-beyond-the-one-terminal-done-projection
+    - modify-runtime-gateway-store-workflow-dependency-database-design-API-product-or-production
+    - canonical-Beads-PostgreSQL-lifecycle-event-or-lease-mutation
+    - start-P001-production-or-any-downstream-ticket
+    - create-any-additional-correction-attempt-or-review-tag
+    - autonomous-mutation
+    - trust-escalation
+
+findings:
+  disposition: changes-requested
+  reviewer: qa
+  candidateHead: 0d193d29e9087a8a2022d70aa8bb9943f5e84a3d
+  candidateTree: 6a8fce667d4b57134a902ed31a4843ada20f6948
+  reviewTagObject: e708daafba37e4efe3096b64de30eb10033d2201
+  run: 33333798814
+  job: 99316989127
+  chronologyCode: public.w001_terminal_evidence_tag_chronology_allows_target_equality
+  actualTagChronology: valid-strictly-after-target
+  enforcementDisposition: weaker-than-signed-contract
+
+verification:
+  order:
+    - signed-grant-only-commit
+    - replay-v3-and-add-failing-equality-regression
+    - enforce-strict-tag-after-target-and-correct-plan-wording
+    - clean-normal-clone-full-gates
+    - signed-evidence-checkpoint-and-v4-review-tag
+    - exact-head-public-CI
+    - qa
+    - security-reviewer
+    - protected-main-merge-and-CI
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  canonicalLifecycleMutationDeferred: false
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-lifecycle-terminal-evidence-publication-v4
+  detachedSignature: W-001-lifecycle-terminal-evidence-publication-v4.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

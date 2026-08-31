@@ -4,6 +4,7 @@ docs:
 - docs/features/F-001-doctrine-foundation.md
 - docs/features/F-002-work-authority.md
 - docs/design-docs/ADR-001-git-beads-authority.md
+- docs/design-docs/ADR-007-standing-correction-authority.md
 - docs/design-docs/mars-provenance.md
 - docs/code-documentation-map.md
 */
@@ -82,6 +83,9 @@ func CheckDoctrine(repo string) ([]Finding, error) {
 	checkGenesisEffectChain(root, &findings)
 	checkBootstrapClaimAttestation(root, &findings)
 	checkWave1PlanningGrant(root, &findings)
+	if ticketLifetimeCorrectionAuthorityActive(root) {
+		checkTicketLifetimeCorrectionAuthority(root, &findings)
+	}
 	checkMARSProvenance(root, &findings)
 	checkRoleManifest(root, &findings)
 	checkClaimVerificationOrder(root, &findings)

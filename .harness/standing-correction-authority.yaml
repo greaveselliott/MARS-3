@@ -1,0 +1,114 @@
+schemaVersion: 1
+kind: MARS3TicketLifetimeCorrectionAuthority
+policy:
+  id: ticket-lifetime-non-production-correction-v1
+  status: active
+  classification: PUBLIC
+  ownerDirectiveDate: 2026-08-31
+  repository: greaveselliott/MARS-3
+  productDecision: PD-004
+  architectureDecision: ADR-007
+  authorityModel: one-explicitly-claimed-Bead-through-accepted-handoff
+  autonomousMutation: false
+  equivalentFailureLimit: 2
+  pullRequestPolicy: one-open-delivery-PR-per-bound-Bead
+  acceptedPullRequestDisposition: merge-and-readback-before-advancing
+  rejectedPullRequestDisposition: preserve-comment-and-close-before-successor
+  allowedEffects:
+    - preserve-rejected-candidates-review-verdicts-runs-and-tags-immutably
+    - correct-CI-QA-or-Security-findings-within-the-bound-current-Bead-scope
+    - create-signed-commits-and-distinct-signed-annotated-review-tags
+    - push-the-bound-branch-and-tags-open-one-successor-PR-and-run-exact-head-CI
+    - obtain-independent-QA-then-independent-Security-review
+    - merge-only-after-exact-head-CI-QA-and-Security-accept-the-same-tree
+    - perform-protected-main-readback-and-gateway-only-current-Bead-reconciliation
+    - close-a-rejected-or-superseded-bound-Bead-PR-after-preserving-its-immutable-evidence
+  verificationOrder:
+    - local-public-commit-gate
+    - signed-commit-and-review-tag
+    - exact-head-CI
+    - qa
+    - security-reviewer
+    - merge
+    - protected-main-readback
+    - delivery-orchestrator-reconciliation
+  retainedApprovalBoundaries:
+    - production-effects-or-release
+    - destructive-or-irreversible-effects
+    - credentials-secrets-billing-private-data-or-external-account-access
+    - trust-escalation
+    - another-Bead-or-downstream-ticket
+    - goal-feature-declared-path-or-effect-class-expansion
+    - direct-Beads-Dolt-PostgreSQL-or-other-authority-store-mutation
+    - workflow-dependency-runtime-API-or-database-design-change
+  prohibitedEffects:
+    - infer-authority-for-an-unbound-or-future-Bead
+    - bypass-the-gateway-for-canonical-authority-state
+    - weaken-required-CI-QA-Security-signature-or-protected-main-gates
+    - reuse-move-delete-rewrite-or-resign-an-immutable-review-tag
+    - continue-after-the-second-equivalent-failure-without-the-exact-owner-authorized-W001-v3-exception
+    - open-a-successor-PR-while-an-earlier-bound-Bead-delivery-PR-remains-open
+currentBinding:
+  bead: M3-W001
+  displayId: W-001
+  canonicalState: done
+  correctionDisposition: active-bounded-v3-exception
+  purpose: terminal-evidence-and-doctrine-publication
+  baseCommit: 96ec3410b16d381b102e6c1c0bd36e5ea9a9e426
+  baseTree: 417ec5233fe0f6ec438643837c2170774a700dd9
+  preservedReviewTag: mars3/w001-lifecycle-terminal-evidence-publication-v4
+  preservedReviewTagObject: 78058a1083b841b54fc7a8d0a2be4a14d2890f00
+  preservedRun: 33340046444
+  preservedJob: 99333914035
+  preservedQADisposition: changes-requested
+  rejectedReviewTag: mars3/w001-ticket-lifetime-correction-authority-v1
+  rejectedReviewTagObject: b3ce76cdfe0ca00c191b112bfbd20413769b19e2
+  rejectedReviewTagTarget: 1f409044abde0ee571e504e85313b111735526dd
+  rejectedReviewTagArchive: mars3/w001-ticket-lifetime-correction-authority-v1-rejected
+  rejectedReviewTagFailureFingerprint: review-tag/identity-mismatch
+  rejectedReviewTagFailureOccurrences: 1
+  rejectedUnsignedReviewTag: mars3/w001-ticket-lifetime-correction-authority-v2
+  rejectedUnsignedReviewTagObject: 21918c2c021d2e3feb1483c926bb87c17c949570
+  rejectedUnsignedReviewTagTarget: 051cf3bd6506152f66d79cd16c7be04a3f4a163f
+  rejectedUnsignedReviewTagArchive: mars3/w001-ticket-lifetime-correction-authority-v2-rejected
+  rejectedUnsignedReviewTagFailureFingerprint: review-tag/signature-private-key-unavailable
+  rejectedUnsignedReviewTagFailureOccurrences: 1
+  failureEquivalenceDisposition: explicit-owner-exception-for-one-materially-different-v3
+  secondFailureStopOverride: authorized-for-current-W001-v3-only
+  successorReviewTag: mars3/w001-ticket-lifetime-correction-authority-v3
+  workingBranch: codex/w-001-standing-correction-authority
+  successorPullRequestLimit: 1
+  canonicalLifecycleMutationAllowed: false
+  leaseMutationAllowed: false
+  endsAt: accepted-successor-merge-and-protected-main-readback
+  authorizedPaths:
+    - .harness/standing-correction-authority.yaml
+    - .harness/manifest.yaml
+    - AGENTS.md
+    - docs/product-decisions/PD-004-standing-correction-authority.md
+    - docs/product-decisions/index.md
+    - docs/design-docs/ADR-007-standing-correction-authority.md
+    - docs/design-docs/index.md
+    - docs/features/F-002-work-authority.md
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-validation.md
+    - internal/doctrine/doctrine.go
+    - internal/doctrine/doctrine_test.go
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+    - internal/doctrine/plan.go
+    - internal/doctrine/plan_test.go
+  resolvedPriorPullRequests:
+    - 14:closed:2026-08-30T23:45:11Z:0d193d29e9087a8a2022d70aa8bb9943f5e84a3d
+    - 15:closed:2026-08-30T23:45:26Z:96ec3410b16d381b102e6c1c0bd36e5ea9a9e426
+convergence:
+  firstEquivalentFailure: preserve-evidence-and-correct-within-the-current-binding
+  secondEquivalentFailure: block-record-and-escalate-architecture
+  sameClassSecurityRecurrence: stop-and-simplify-the-design
+  scopeConflict: stop-and-request-owner-decision
+integrity:
+  gitCommitSignatureRequired: true
+  reviewTagSignatureRequired: true
+  exactHeadCIRequired: true
+  independentReviewRequired: true
+  perCorrectionGrantRequired: false

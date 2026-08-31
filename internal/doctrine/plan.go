@@ -3,6 +3,7 @@ FactoryDocSync:
 docs:
 - docs/features/F-001-doctrine-foundation.md
 - docs/features/F-002-work-authority.md
+- docs/design-docs/ADR-007-standing-correction-authority.md
 - docs/design-docs/mars-provenance.md
 - docs/code-documentation-map.md
 */
@@ -174,7 +175,22 @@ func checkActivePlan(root, path string, findings *[]Finding) {
 	}
 	checkPlanLineage(root, path, content, metadata, linkedArtifacts, findings)
 	currentState := checkDeliveryTable(content, path, metadata, findings)
+	checkTerminalPlanNarrative(content, path, currentState, findings)
 	checkPlanManifestProjection(root, path, metadata, currentState, findings)
+}
+
+func checkTerminalPlanNarrative(content, path, currentState string, findings *[]Finding) {
+	if currentState != "done" {
+		return
+	}
+	for _, stale := range []string{
+		"This is candidate implementation evidence only. F-002 scenarios remain\n`failing`, M3-W001 remains `in-progress`",
+		"In `delivery`, the checker requires exactly one `in-progress` or `in-review`\n  row and requires it to match the current Bead.",
+	} {
+		if strings.Contains(content, stale) {
+			addFinding(findings, path, "plan.stale_terminal_narrative", "terminal done projection must not retain a current statement that describes W-001 or delivery as nonterminal")
+		}
+	}
 }
 
 func parseActivePlanMetadata(content, path string, findings *[]Finding) activePlanMetadata {
@@ -835,11 +851,17 @@ func checkDeliveryTable(content, path string, metadata activePlanMetadata, findi
 			addFinding(findings, path, "plan.current_state", "%s must remain backlog during %s; found %s", metadata.currentDisplay, planPhaseContractPublication, currentState)
 		}
 	case planPhaseDelivery:
-		if activeRows != 1 {
-			addFinding(findings, path, "plan.active_work_cardinality", "%s phase requires exactly one in-progress or in-review work item; found %d", planPhaseDelivery, activeRows)
-		}
-		if metadata.currentDisplay != "" && currentRows == 1 && currentState != "in-progress" && currentState != "in-review" {
-			addFinding(findings, path, "plan.current_state", "%s must be in-progress or in-review during %s; found %s", metadata.currentDisplay, planPhaseDelivery, currentState)
+		if currentState == "done" {
+			if activeRows != 0 {
+				addFinding(findings, path, "plan.active_work_cardinality", "%s terminal projection requires zero in-progress or in-review work items; found %d", planPhaseDelivery, activeRows)
+			}
+		} else {
+			if activeRows != 1 {
+				addFinding(findings, path, "plan.active_work_cardinality", "%s phase requires exactly one in-progress or in-review work item; found %d", planPhaseDelivery, activeRows)
+			}
+			if metadata.currentDisplay != "" && currentRows == 1 && currentState != "in-progress" && currentState != "in-review" {
+				addFinding(findings, path, "plan.current_state", "%s must be in-progress, in-review, or the sole terminal done projection during %s; found %s", metadata.currentDisplay, planPhaseDelivery, currentState)
+			}
 		}
 	}
 	return currentState

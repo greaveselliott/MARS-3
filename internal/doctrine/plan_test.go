@@ -3,6 +3,7 @@ FactoryDocSync:
 docs:
 - docs/features/F-001-doctrine-foundation.md
 - docs/features/F-002-work-authority.md
+- docs/design-docs/ADR-007-standing-correction-authority.md
 - docs/design-docs/mars-provenance.md
 - docs/code-documentation-map.md
 */
@@ -42,6 +43,41 @@ func TestPlanRequiresClaimedCurrentBeadDuringDelivery(t *testing.T) {
 	}
 }
 
+func TestPlanAllowsTerminalDoneProjectionDuringDelivery(t *testing.T) {
+	repo := writePlanFixture(t, planPhaseDelivery, "done", "backlog")
+	findings, err := CheckPlan(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(findings) != 0 {
+		t.Fatalf("valid terminal delivery projection was rejected: %v", findings)
+	}
+}
+
+func TestPlanRejectsStaleTerminalNarrative(t *testing.T) {
+	for _, stale := range []string{
+		"\nThis is candidate implementation evidence only. F-002 scenarios remain\n`failing`, M3-W001 remains `in-progress`\n",
+		"\n- In `delivery`, the checker requires exactly one `in-progress` or `in-review`\n  row and requires it to match the current Bead.\n",
+	} {
+		repo := writePlanFixture(t, planPhaseDelivery, "done", "backlog")
+		planPath := filepath.Join(repo, filepath.FromSlash(canonicalActivePlan))
+		data, err := os.ReadFile(planPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(planPath, append(data, []byte(stale)...), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		findings, err := CheckPlan(repo)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !findingCodePresent(findings, "plan.stale_terminal_narrative") {
+			t.Fatalf("stale terminal narrative was accepted: %v", findings)
+		}
+	}
+}
+
 func TestPlanRejectsUnsafePhaseTransitions(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -54,6 +90,7 @@ func TestPlanRejectsUnsafePhaseTransitions(t *testing.T) {
 		{name: "contract publication activates other work", phase: planPhaseContractPublication, current: "backlog", parallel: "in-progress", findingCode: "plan.current_state"},
 		{name: "delivery leaves current work unclaimed", phase: planPhaseDelivery, current: "backlog", parallel: "backlog", findingCode: "plan.active_work_cardinality"},
 		{name: "delivery activates a different bead", phase: planPhaseDelivery, current: "backlog", parallel: "in-progress", findingCode: "plan.current_state"},
+		{name: "terminal delivery activates parallel work", phase: planPhaseDelivery, current: "done", parallel: "in-progress", findingCode: "plan.active_work_cardinality"},
 		{name: "unsupported phase", phase: "planning", current: "backlog", parallel: "backlog", findingCode: "plan.phase"},
 	}
 	for _, testCase := range tests {
