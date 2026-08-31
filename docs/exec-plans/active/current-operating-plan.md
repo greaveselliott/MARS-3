@@ -82,9 +82,15 @@ The local V1 tag was signed under the wrong tagger identity. The V2 operation
 used the exact Release Manager identity but left unsigned object
 `21918c2c021d2e3feb1483c926bb87c17c949570` after signer access failed. Both
 objects are preserved. Although their root-cause fingerprints differ, both map
-to the same acceptance code, so the binding is conservatively `blocked` under
-the two-equivalent-failure rule. No successor tag or PR is selected pending an
-explicit owner exception for one materially different signer-access route.
+to the same acceptance code. The owner explicitly superseded only this current
+W-001 second-failure stop for one materially different V3 signer-access route
+from signed checkpoint `aa2b2bf802863c44a5cb4e28dfebfc3188fb39cc`.
+The exception permits exactly V3, PR #16, exact-head CI, QA then Security,
+accepted merge, and protected-main readback. The route is a no-ref,
+out-of-sandbox signer-agent preflight, the existing pinned key, exact
+`MARS-3 Release Manager <release-manager@example.com>` identity supplied only
+through the tagger environment, and one V3 tag-creation attempt. All other
+boundaries remain.
 
 ## Durable lineage
 

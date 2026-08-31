@@ -2270,6 +2270,10 @@ func TestTicketLifetimeCorrectionAuthorityResolvesPriorPullRequestsBeforeSuccess
 	if got := ticketLifetimeCorrectionAuthoritySequences["currentBinding.resolvedPriorPullRequests"]; !equalStringSequence(got, want) {
 		t.Fatalf("prior pull-request convergence record mismatch: got %v want %v", got, want)
 	}
+	if ticketLifetimeCorrectionReviewTag != "mars3/w001-ticket-lifetime-correction-authority-v3" ||
+		ticketLifetimeCorrectionTagMessage != "MARS-3 W-001 ticket-lifetime correction authority attestation v3" {
+		t.Fatal("bounded V3 exception did not select the exact distinct review tag")
+	}
 }
 
 func TestPlanningGrantTagChronologyIsProspectiveAndBounded(t *testing.T) {

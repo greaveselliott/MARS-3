@@ -15,7 +15,7 @@ authority:
   plan_phase: delivery
   active_delivery_grant: none-required-under-ticket-lifetime-authority
   active_attempt: w001-ticket-lifetime-correction-authority-v1
-  active_delivery_grant_state: blocked
+  active_delivery_grant_state: ticket-lifetime-v3-exception
   ticket_lifetime_correction_authority: enabled
   ticket_lifetime_correction_policy: .harness/standing-correction-authority.yaml
   ticket_lifetime_correction_decision: ADR-007

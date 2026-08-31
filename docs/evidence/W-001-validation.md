@@ -2332,13 +2332,21 @@ The V2 operation targeted signed head
 `051cf3bd6506152f66d79cd16c7be04a3f4a163f` with exact tagger
 `MARS-3 Release Manager <release-manager@example.com>`, but signer access failed
 and left unsigned annotated object
-`21918c2c021d2e3feb1483c926bb87c17c949570`. Neither the original V2 ref nor its
-archival ref `mars3/w001-ticket-lifetime-correction-authority-v2-rejected` was
-moved, deleted, rewritten, accepted, or pushed. Its root-cause fingerprint is
+`21918c2c021d2e3feb1483c926bb87c17c949570`. The original V2 ref was not moved,
+deleted, rewritten, accepted, or pushed. Archival ref
+`mars3/w001-ticket-lifetime-correction-authority-v2-rejected` exposes that exact
+object remotely without changing it. Its root-cause fingerprint is
 `review-tag/signature-private-key-unavailable`; V1 is
-`review-tag/identity-mismatch`. Because both surface through the same acceptance
-code, the binding conservatively records `blocked` and selects no successor
-without an explicit owner exception for a materially different signing route.
+`review-tag/identity-mismatch`. Both surface through the same acceptance code.
+The owner explicitly superseded only the current W-001 second-failure stop for
+one materially different V3 signer-access route from signed checkpoint
+`aa2b2bf802863c44a5cb4e28dfebfc3188fb39cc`, followed by PR #16,
+exact-head CI, QA then Security, accepted merge, and protected-main readback.
+The materially different route is a no-ref, out-of-sandbox signer-agent
+preflight followed by one tag attempt using the existing pinned key and exact
+`MARS-3 Release Manager <release-manager@example.com>` identity supplied only
+through the tagger environment. V1/V2 preservation and every existing scope
+exclusion remain mandatory.
 
 PR #14 was closed as rejected at `2026-08-30T23:45:11Z` with exact head
 `0d193d29e9087a8a2022d70aa8bb9943f5e84a3d`; PR #15 was closed as rejected at

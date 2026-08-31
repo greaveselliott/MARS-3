@@ -46,13 +46,13 @@ policy:
     - bypass-the-gateway-for-canonical-authority-state
     - weaken-required-CI-QA-Security-signature-or-protected-main-gates
     - reuse-move-delete-rewrite-or-resign-an-immutable-review-tag
-    - continue-after-the-second-equivalent-failure
+    - continue-after-the-second-equivalent-failure-without-the-exact-owner-authorized-W001-v3-exception
     - open-a-successor-PR-while-an-earlier-bound-Bead-delivery-PR-remains-open
 currentBinding:
   bead: M3-W001
   displayId: W-001
   canonicalState: done
-  correctionDisposition: blocked
+  correctionDisposition: active-bounded-v3-exception
   purpose: terminal-evidence-and-doctrine-publication
   baseCommit: 96ec3410b16d381b102e6c1c0bd36e5ea9a9e426
   baseTree: 417ec5233fe0f6ec438643837c2170774a700dd9
@@ -66,13 +66,16 @@ currentBinding:
   rejectedReviewTagTarget: 1f409044abde0ee571e504e85313b111735526dd
   rejectedReviewTagArchive: mars3/w001-ticket-lifetime-correction-authority-v1-rejected
   rejectedReviewTagFailureFingerprint: review-tag/identity-mismatch
+  rejectedReviewTagFailureOccurrences: 1
   rejectedUnsignedReviewTag: mars3/w001-ticket-lifetime-correction-authority-v2
   rejectedUnsignedReviewTagObject: 21918c2c021d2e3feb1483c926bb87c17c949570
   rejectedUnsignedReviewTagTarget: 051cf3bd6506152f66d79cd16c7be04a3f4a163f
   rejectedUnsignedReviewTagArchive: mars3/w001-ticket-lifetime-correction-authority-v2-rejected
   rejectedUnsignedReviewTagFailureFingerprint: review-tag/signature-private-key-unavailable
-  failureEquivalenceDisposition: blocked-conservative-shared-acceptance-code
-  successorReviewTag: none-pending-explicit-owner-exception
+  rejectedUnsignedReviewTagFailureOccurrences: 1
+  failureEquivalenceDisposition: explicit-owner-exception-for-one-materially-different-v3
+  secondFailureStopOverride: authorized-for-current-W001-v3-only
+  successorReviewTag: mars3/w001-ticket-lifetime-correction-authority-v3
   workingBranch: codex/w-001-standing-correction-authority
   successorPullRequestLimit: 1
   canonicalLifecycleMutationAllowed: false

@@ -111,9 +111,14 @@ but no SSH signature; unsigned object
 `mars3/w001-ticket-lifetime-correction-authority-v2-rejected`. The root-cause
 fingerprints are `review-tag/identity-mismatch` and
 `review-tag/signature-private-key-unavailable`, but both map to the same
-acceptance code. The binding therefore takes the conservative `blocked`
-disposition and names no successor until the owner explicitly permits one
-materially different signing route.
+acceptance code. The owner explicitly superseded only the current W-001
+second-failure stop for one materially different V3 signer-access route from
+signed checkpoint `aa2b2bf802863c44a5cb4e28dfebfc3188fb39cc`. This exception
+does not weaken the failure rule generally, authorize another successor, or
+expand paths, effects, lifecycle, lease, production, or downstream scope. The
+route first performs a no-ref, out-of-sandbox signer-agent preflight, retains
+the pinned key, sets the exact Release Manager identity only through the tagger
+environment, and permits one V3 tag-creation attempt.
 
 PRs #14 and #15 retained their rejected heads, tags, runs, and QA dispositions,
 received public disposition comments, and closed at `2026-08-30T23:45:11Z` and
