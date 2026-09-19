@@ -65,6 +65,12 @@ Compact JSON comment:
 
 ## Enforcement
 
+The initial `internal/authority/operator/` read-admission slice is governed by
+F-002's operator recovery contract and ADR-001's operator boundary. Its tests
+cover signed-request admission semantics, fail-closed ordering, and the local
+replay adapter's independent-handle/reopen behavior. They do not establish
+power-loss durability, accepted publication, or canonical runtime qualification.
+
 `mars3 docsync audit --repo .` is non-mutating and fails for a missing marker,
 malformed metadata, nonexistent document, path outside the repository, or an
 incomplete prefix requirement. The pre-commit, publication, and disposition

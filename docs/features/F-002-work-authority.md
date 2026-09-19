@@ -8,6 +8,72 @@
 
 ## Business logic
 
+### Operator recovery admission slice
+
+The source-only `W-001-operator-recovery-v1` exception does not authorize
+canonical execution. The initial operator implementation admits only
+`work.get` and `work.ready` behind a separate pinned-key signature under
+`mars3-operator-execution-v1`. The compact canonical JSON authorization binds
+one request digest, operation, identity, tenant/project, accepted base/tree,
+opaque workspace digest, native binary digest, and fence generation. Its
+validity window is at most one hour. The request cannot supply a principal,
+capability, or label. Admission supplies only `work.read` and conservative
+external-untrusted/external-effect labels; it grants no private-data access.
+
+Given a missing, forged, expired, premature, ambiguous, wrong-scope, or reused
+authorization, admission denies before the gateway is called. Given an
+otherwise valid authorization, a trusted replay store must durably consume its
+tenant/project-scoped identity before dispatch. Consumption failure denies;
+expiry is rechecked after consumption. A failed gateway attempt consumes the
+authorization too. Existing gateway policy and bounded read-audit events still
+apply. Raw backend diagnostics never escape the operator boundary.
+
+The local replay adapter opens a pre-existing private operator-owned directory,
+pins a root handle, and reserves a digest-only filename with exclusive create.
+It synchronizes the file and directory before permitting gateway dispatch.
+Existing entries, symlinks, unsafe keys, permission drift, cancellation, and
+uncertain persistence fail closed; uncertain entries are never removed. Its
+synthetic tests exercise independent handles and reopen behavior, not power-loss
+or distributed-filesystem qualification.
+
+The `mars3-authority operator` command accepts only protected profile,
+authorization, and request file paths. A separately signed private profile
+binds launcher/native-client digests, workspace filesystem identity, tenant,
+project, accepted base/tree, fence generation, replay directory, and sealed
+connection-file digest. Execution authorization also binds the complete profile
+digest. Profile signatures use `mars3-operator-profile-v1`, not the execution or
+source namespace. Profile validity is at most seven days; request validity
+remains at most one hour. Canonical connections are opened lazily, only after
+authorization and durable replay reservation. Ambient PostgreSQL configuration,
+implicit password files, remote endpoints, and datastore provisioning are denied.
+
+Mutation mode requires a distinct `MARS3OperatorMutationAuthorization` document
+and an exact one-of typed request for `work.claim`, `lease.renew`,
+`lease.release`, or `effect.validate`. Admission derives only that operation's
+capability, reserves the same durable one-attempt identity, and delegates to
+the existing claim/lease-fenced gateway. Renew provides the owning lease's
+heartbeat behavior; effect validation does not execute a real external effect.
+Read authorizations, ambiguous payloads, unsupported lifecycle operations, and
+failed-attempt replay are denied. The normal gateway remains responsible for
+canonical versions, dependencies, owner checks, epochs, paths, and idempotency.
+
+This slice still has no canonical execution evidence.
+The in-memory fixture replay store proves ordering, not persistence; the local
+adapter provides filesystem-backed exclusion. Acceptance still requires the remaining launcher components,
+focused and complete public gates, and independent QA then Security review.
+
+### Existing gateway invariants
+
+Recovery publication admission preserves all earlier historical checks and
+adds exact source-grant bytes, pinned signature, sixteen-path scope, and signed
+linear commits within the approved window. A hosted PR run must attest the
+exact branch/base/head and two-parent merge tree. The distinct recovery review
+tag must sign that head and postdate its target strictly within the grant
+window. Protected-main readback must prove a single-parent squash over the
+signed base with tree equality to the tag. CI and main checkouts must be clean;
+an expired local grant cannot authorize new work. Successful historical main
+auditing is not renewed source authority.
+
 1. Beads/Dolt is the sole authority for work definition, dependency DAG,
    lifecycle, owner, claim, handoff, review verdict, run disposition, blockers,
    retry fingerprints, and declared exclusive paths.

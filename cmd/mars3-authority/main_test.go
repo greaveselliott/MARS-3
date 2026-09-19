@@ -19,6 +19,14 @@ func TestRunRejectsUnknownAuthorityCommand(t *testing.T) {
 	}
 }
 
+func TestOperatorRequiresProtectedSignedInputs(t *testing.T) {
+	for _, args := range [][]string{{"operator"}, {"operator", "unexpected"}, {"operator", "--connection", "forbidden"}} {
+		if err := run(args); err == nil || strings.Contains(err.Error(), "unknown authority command") {
+			t.Fatalf("operator did not fail closed at its own admission boundary: %v", err)
+		}
+	}
+}
+
 func TestTerminalReconcileRequiresCompleteBoundedInputs(t *testing.T) {
 	if err := run([]string{"terminal-reconcile"}); err == nil {
 		t.Fatal("terminal reconciliation accepted missing canonical handles")
