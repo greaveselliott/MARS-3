@@ -25,6 +25,49 @@ The gateway preserves the split established by PD-002:
 
 ## Governed operations
 
+### Local operator recovery
+
+The bounded recovery launcher exposes work inspection/readiness through:
+
+```text
+mars3-authority operator --profile <protected-profile-file> --authorization <protected-authorization-file> --request <protected-request-file>
+```
+
+Profile and authorization each require a detached `.sig` beside the document,
+using the pinned human key and distinct `mars3-operator-profile-v1` and
+`mars3-operator-execution-v1` namespaces. JSON must use the exact compact Go
+encoding of the operator types, without a trailing newline. Files must be
+regular, operator-owned, and inaccessible to group/other; the replay directory
+must already exist with private permissions. Raw credentials, principal flags,
+automatic setup, listeners, and source-grant-as-execution shortcuts are absent.
+
+The trusted profile issuer binds the accepted launcher binary and base/tree,
+native-client digest, current workspace identity, tenant/project and anchored
+fence generation, and sealed connection-file bytes. The connection URI must
+explicitly select a loopback address or Unix socket, user, database, port, and
+`sslmode=disable` for this local non-production route. Ambient `PG*` settings
+are rejected, and implicit password-file loading is suppressed. This route does
+not authorize remote or production PostgreSQL access.
+
+Each authorization binds the whole private profile digest and one exact read
+request. Its identity is consumed durably before the gateway opens the stores;
+any uncertain or failed attempt requires a fresh authorization. Read responses
+remain gateway projections with normal audit events, not direct store access.
+`--mode mutation` additionally requires a separately typed
+`MARS3OperatorMutationAuthorization` and an exact one-of `MutationRequest` for
+`work.claim`, `lease.renew`, `lease.release`, or `effect.validate`. A read
+authorization cannot authorize mutation. These routes invoke unchanged normal
+gateway policy, canonical CAS, and live lease fencing; the source exception
+never creates an unfenced claim. Renewal supplies heartbeat behavior and effect
+validation grants no reusable execution capability. Other lifecycle operations
+are absent. A failed or uncertain attempt burns its operator authorization;
+reconciliation precedes any separately authorized gateway retry.
+
+Accepted canonical runtime evidence and publication remain pending; command
+availability does not complete operator recovery or authorize P-001 execution.
+
+### Gateway contract
+
 The product contract exposes typed operations rather than datastore access:
 
 - Read a tenant/project-scoped work item, ready set, dependency explanation,

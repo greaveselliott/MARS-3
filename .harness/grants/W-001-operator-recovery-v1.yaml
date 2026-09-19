@@ -1,0 +1,122 @@
+schemaVersion: 1
+kind: MARS3W001OperatorRecoveryV1Grant
+
+grant:
+  id: W-001-operator-recovery-v1
+  classification: PUBLIC
+  issuedAt: 2026-09-19T14:03:20Z
+  expiresAt: 2026-09-26T14:03:20Z
+  repository: greaveselliott/MARS-3
+  baseCommit: ee0ef97e1a3c246e342ef3f467c3b95947a327b5
+  baseTree: 8fd175afaf40335d8c8148dc5407c1047ee60cbf
+  workingBranch: codex/w-001-operator-recovery
+  beadContext: M3-W001
+  canonicalLifecycleExpected: done
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: work-authority-engineer
+  purpose: restore a durable local operator entry point over the accepted authority gateway
+  attemptId: w001-operator-recovery-v1
+  authorityClass: prospective-exceptional-signed-transition-grant
+  approvalBasis: owner-approved-exact-sixteen-path-recovery-scope
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  currentClaimAsserted: false
+  currentLeaseAsserted: false
+  equivalentFailureLimit: 2
+  consumedOn: first-accepted-merge-and-protected-main-readback
+  reviewTag: mars3/w001-operator-recovery-v1
+  reviewTagMessage: MARS-3 W-001 operator recovery attestation v1
+  requiredTaggerName: MARS-3 Release Manager
+  requiredTaggerEmail: release-manager@example.com
+  authorizedPaths:
+    - .harness/grants/W-001-operator-recovery-v1.yaml
+    - .harness/grants/W-001-operator-recovery-v1.yaml.sig
+    - .harness/manifest.yaml
+    - .harness/standing-correction-authority.yaml
+    - cmd/mars3-authority/main.go
+    - cmd/mars3-authority/main_test.go
+    - internal/authority/operator/operator.go
+    - internal/authority/operator/operator_test.go
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+    - docs/features/F-002-work-authority.md
+    - docs/product-specs/work-authority.md
+    - docs/design-docs/ADR-001-git-beads-authority.md
+    - docs/code-documentation-map.md
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-operator-recovery.md
+  allowedEffects:
+    - implement-and-test-only-the-exact-listed-source-and-documentation-paths
+    - compose-existing-gateway-and-stores-behind-a-local-operator-CLI
+    - resolve-principals-from-trusted-signed-operator-authorization-outside-caller-input
+    - implement-bounded-gateway-work-inspection-and-readiness
+    - expose-existing-typed-claim-heartbeat-pre-effect-validation-and-release-behind-normal-capability-and-lease-checks
+    - qualify-and-retain-the-rebuilt-native-client-at-a-durable-hash-addressed-operator-location
+    - restore-existing-least-privilege-local-connection-handle-through-a-trusted-operator-compartment
+    - create-signed-commits-and-a-distinct-immutable-review-tag-using-the-pinned-signer
+    - publish-one-delivery-branch-and-one-PR-with-exact-head-CI
+    - obtain-independent-QA-then-independent-Security-acceptance-of-the-same-immutable-tree
+    - merge-only-after-acceptance-and-verify-protected-main-tree-and-CI
+    - perform-bounded-gateway-inspection-of-W001-and-P001-only-under-separate-fresh-read-authorization
+    - permit-only-normal-bounded-gateway-audit-events-during-authorized-canonical-inspection
+  prohibitedEffects:
+    - replay-or-extend-a-consumed-historical-grant
+    - create-a-claim-or-lease-through-this-source-recovery-exception
+    - mutate-or-reopen-canonical-W001
+    - implement-P001-or-downstream-features-before-normal-claim-and-live-lease
+    - direct-Beads-Dolt-PostgreSQL-authority-row-lease-row-or-event-row-mutation
+    - recreate-existing-authority-database-or-reset-fence-generation
+    - change-datastore-schema-public-authority-API-types-or-core-gateway-policy-semantics
+    - weaken-CI-scanner-signature-review-claim-fencing-or-protected-main-checks
+    - expose-secrets-private-signing-material-or-private-local-configuration-to-model-context-or-public-artifacts
+    - production-release-destructive-effects-account-billing-changes-or-trust-escalation
+    - move-delete-rewrite-or-reuse-any-historical-review-tag
+    - modify-paths-outside-the-exact-sixteen-path-scope
+    - treat-this-source-grant-as-canonical-execution-authorization
+
+nativeClient:
+  upstreamCommit: 6c124203e771433a3550c348771a5b5e27fd3c21
+  patchedFullIndexDiffSHA256: 8e601dddcddca43bc1865d9026fdf58b3be92c9d8c3984e8410daef944b8a4b3
+  goModSHA256: 82794b69209f2d2e8ad23fccc94a84d07ac46fc99040964a89ff5566e42c8044
+  goSumSHA256: ad753874d566d22c81da097ed3d8d59f2f17ff6e69a437aca914ad178a488efb
+  candidateSHA256: 7325651446eb58de6e80c11e00647286de04da0940e590debb90eaa8704eb0f0
+  qualificationStatus: local-only-pending-independent-review
+  acceptanceGrantedByThisDocument: false
+
+verification:
+  order:
+    - pinned-signature-and-exact-base-admission
+    - bounded-implementation-and-synthetic-tests
+    - complete-public-commit-gate
+    - signed-evidence-checkpoint-and-distinct-review-tag
+    - exact-head-public-CI
+    - qa
+    - security-reviewer
+    - accepted-protected-main-merge-and-readback
+  requiredProperties:
+    - stable-full-index-patched-source-identity
+    - unchanged-upstream-module-manifests-and-verified-module-cache
+    - two-separate-checkout-and-separate-build-cache-builds-with-equal-binary-SHA256
+    - preserved-Mach-O-UUID-and-valid-ad-hoc-code-signature
+    - non-skipped-native-gateway-integration-on-disposable-fixtures
+    - reject-absent-expired-forged-wrong-scope-and-replayed-operator-authorizations
+    - reject-caller-constructed-principals-and-unauthorized-operations
+    - no-canonical-work-or-lease-mutation-during-inspection
+    - secret-free-output-and-errors-and-protected-persistent-file-handles-outside-Git
+    - full-public-gate-independent-ordered-reviews-and-protected-main-readback
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  canonicalExecutionRequiresSeparateAuthorization: true
+  p001ClaimRequiresNormalGatewayPolicyAdmission: true
+  readAuthorizationGrantedByThisDocument: false
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-operator-recovery-v1
+  detachedSignature: W-001-operator-recovery-v1.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

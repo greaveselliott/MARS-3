@@ -13,6 +13,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/greaveselliott/MARS-3/internal/authority/operator"
 	"os"
 
 	"github.com/greaveselliott/MARS-3/internal/authority/bootstrap"
@@ -31,6 +32,9 @@ func main() {
 }
 
 func run(args []string) error {
+	if len(args) > 0 && args[0] == "operator" {
+		return operator.RunCLI(args[1:], os.Stdout)
+	}
 	if len(args) == 0 {
 		fmt.Fprintln(os.Stderr, usage)
 		return errors.New("authority command is required")

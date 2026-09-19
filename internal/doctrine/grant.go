@@ -9370,6 +9370,13 @@ func checkW001TerminalReconciliationGitDiff(root string, findings *[]Finding) {
 }
 
 func checkTicketLifetimeCorrectionGitDiff(root string, findings *[]Finding) {
+	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(operatorRecoveryGrantPath))); err == nil {
+		checkOperatorRecoveryGitDiff(root, findings)
+		return
+	} else if !errors.Is(err, os.ErrNotExist) {
+		addFinding(findings, operatorRecoveryGrantPath, "public.operator_recovery.unavailable", "recovery grant presence cannot be determined safely")
+		return
+	}
 	top, err := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
 	if err != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(top))) {
 		addFinding(findings, ticketLifetimeCorrectionAuthorityPath, "public.ticket_lifetime_git", "Git metadata must resolve to the audited repository root")
@@ -14917,4 +14924,291 @@ func equalStringSequence(actual, expected []string) bool {
 		}
 	}
 	return true
+}
+
+// VerifyOperatorExecutionSignature verifies a separate, bounded operator
+// execution document with the pinned human key. A source-recovery grant uses a
+// different namespace and cannot authorize runtime execution through this API.
+func VerifyOperatorExecutionSignature(document, signature []byte) error {
+	if len(document) == 0 || len(document) > 16384 || len(signature) == 0 || len(signature) > 4096 {
+		return errors.New("operator execution signature denied")
+	}
+	publicKey := []byte("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGEG9tVIYixGqx/Kl4Ag53SbGWnIMj7HIrHs0+0EYaMl")
+	if err := verifySSHSig(document, signature, publicKey, "mars3-operator-execution-v1"); err != nil {
+		return errors.New("operator execution signature denied")
+	}
+	return nil
+}
+
+// VerifyOperatorProfileSignature admits only private operator profiles signed
+// in their own namespace. Execution and source-grant signatures cannot replay.
+func VerifyOperatorProfileSignature(document, signature []byte) error {
+	if len(document) == 0 || len(document) > 16384 || len(signature) == 0 || len(signature) > 4096 {
+		return errors.New("operator profile signature denied")
+	}
+	publicKey := []byte("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGEG9tVIYixGqx/Kl4Ag53SbGWnIMj7HIrHs0+0EYaMl")
+	if verifySSHSig(document, signature, publicKey, "mars3-operator-profile-v1") != nil {
+		return errors.New("operator profile signature denied")
+	}
+	return nil
+}
+
+const (
+	operatorRecoveryGrantPath   = ".harness/grants/W-001-operator-recovery-v1.yaml"
+	operatorRecoveryGrantDigest = "66a877cd6de70fabc6f7677a74d38e39a67bf046db9bbedc6795780a1c9f0f1c"
+	operatorRecoveryNamespace   = "mars3-w001-operator-recovery-v1"
+	operatorRecoveryBase        = "ee0ef97e1a3c246e342ef3f467c3b95947a327b5"
+	operatorRecoveryBaseTree    = "8fd175afaf40335d8c8148dc5407c1047ee60cbf"
+	operatorRecoveryBranch      = "codex/w-001-operator-recovery"
+)
+
+var operatorRecoveryPaths = []string{
+	".harness/grants/W-001-operator-recovery-v1.yaml",
+	".harness/grants/W-001-operator-recovery-v1.yaml.sig",
+	".harness/manifest.yaml",
+	".harness/standing-correction-authority.yaml",
+	"cmd/mars3-authority/main.go",
+	"cmd/mars3-authority/main_test.go",
+	"internal/authority/operator/operator.go",
+	"internal/authority/operator/operator_test.go",
+	"internal/doctrine/grant.go",
+	"internal/doctrine/grant_test.go",
+	"docs/features/F-002-work-authority.md",
+	"docs/product-specs/work-authority.md",
+	"docs/design-docs/ADR-001-git-beads-authority.md",
+	"docs/code-documentation-map.md",
+	"docs/exec-plans/active/current-operating-plan.md",
+	"docs/evidence/W-001-operator-recovery.md",
+}
+
+// This is an exact prospective exception, not a parser that can be persuaded
+// to widen its own scope. Pinning all approved bytes also rejects duplicate,
+// unknown, aliased, or reordered fields and unapproved renewals. Historical
+// grants and their signature/chronology checks remain independently enforced.
+func operatorRecoveryDocumentValid(document, signature, publicKey []byte) bool {
+	return fileSHA256(document) == operatorRecoveryGrantDigest &&
+		fileSHA256(publicKey) == genesisVerificationMaterialDigest &&
+		verifySSHSig(document, signature, publicKey, operatorRecoveryNamespace) == nil
+}
+
+func operatorRecoveryWindowValid(now time.Time) bool {
+	issued := time.Date(2026, 9, 19, 14, 3, 20, 0, time.UTC)
+	expires := time.Date(2026, 9, 26, 14, 3, 20, 0, time.UTC)
+	return !now.Before(issued) && now.Before(expires)
+}
+
+func operatorRecoveryPathsAllowed(paths []string) bool {
+	allowed := make(map[string]bool, len(operatorRecoveryPaths))
+	for _, path := range operatorRecoveryPaths {
+		allowed[path] = true
+	}
+	return planningGrantPathsAllowed(paths, allowed)
+}
+
+func checkOperatorRecoveryGitDiff(root string, findings *[]Finding) {
+	fail := func(code, message string) {
+		addFinding(findings, operatorRecoveryGrantPath, "public.operator_recovery."+code, "%s", message)
+	}
+	document, documentErr := readRepoFile(root, operatorRecoveryGrantPath)
+	signature, signatureErr := readRepoFile(root, operatorRecoveryGrantPath+".sig")
+	publicKey, keyErr := readRepoFile(root, wave1PlanningGrantKey)
+	if documentErr != nil || signatureErr != nil || keyErr != nil || !operatorRecoveryDocumentValid(document, signature, publicKey) {
+		fail("signature", "recovery requires the exact approved document and pinned detached signature")
+		return
+	}
+	top, topErr := planningGrantGitOutput(root, "rev-parse", "--show-toplevel")
+	branch, branchErr := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
+	headBytes, headErr := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
+	baseTree, baseErr := planningGrantGitOutput(root, "rev-parse", "--verify", operatorRecoveryBase+"^{tree}")
+	head := strings.TrimSpace(string(headBytes))
+	if topErr != nil || !samePlanningGrantRepositoryRoot(root, strings.TrimSpace(string(top))) ||
+		headErr != nil ||
+		!sha1Pattern.MatchString(head) || baseErr != nil || strings.TrimSpace(string(baseTree)) != operatorRecoveryBaseTree {
+		fail("checkout", "recovery requires its exact branch, repository root, and signed base tree")
+		return
+	}
+	branchName := strings.TrimSpace(string(branch))
+	featureHead, requireTag, mainCheckout := head, false, false
+	switch {
+	case os.Getenv("GITHUB_ACTIONS") == "true":
+		checkout, ok := operatorRecoveryGitHubCheckout(root, head, branchName, findings)
+		if !ok {
+			return
+		}
+		featureHead, requireTag, mainCheckout = checkout.expectedHead, true, checkout.kind == planningGrantMainSquash
+	case os.Getenv("CI") == "true":
+		fail("runner", "unrecognized CI cannot use local recovery admission")
+		return
+	case branchErr == nil && branchName == operatorRecoveryBranch:
+	case branchErr == nil && branchName == "main":
+		requireTag, mainCheckout = true, true
+	default:
+		fail("checkout", "recovery requires its exact local branch or validated publication checkout")
+		return
+	}
+	if !mainCheckout && !operatorRecoveryWindowValid(time.Now()) {
+		fail("expired", "unmerged recovery source work requires the current seven-day grant window")
+		return
+	}
+	if requireTag {
+		target, err := operatorRecoveryReviewTarget(root, publicKey)
+		if err != nil || !mainCheckout && target != featureHead {
+			fail("review_tag", "recovery requires its exact-head signed tag with strictly prospective chronology")
+			return
+		}
+		featureHead = target
+	}
+	if mainCheckout {
+		parents, parentErr := planningGrantCommitParents(root, head)
+		mainTree, mainErr := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, featureErr := planningGrantGitOutput(root, "rev-parse", "--verify", featureHead+"^{tree}")
+		mergedAt, timeErr := planningGrantCommitTime(root, head)
+		if parentErr != nil || mainErr != nil || featureErr != nil || timeErr != nil || !operatorRecoveryWindowValid(mergedAt) ||
+			!operatorRecoveryMainTopology(parents, strings.TrimSpace(string(mainTree)), strings.TrimSpace(string(featureTree))) {
+			fail("main_tree", "protected main must be an in-window single-parent squash of the exact signed recovery tree")
+			return
+		}
+	}
+	if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", operatorRecoveryBase, featureHead); err != nil {
+		fail("ancestry", "recovery must descend from the exact accepted PR 16 base")
+		return
+	}
+	priorObject, priorErr := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+ticketLifetimeCorrectionReviewTag+"^{tag}")
+	if priorErr != nil || strings.TrimSpace(string(priorObject)) != "a081e5105405d2dafcd7f0402926e8b8204b3e6d" {
+		fail("prior_tag", "accepted PR 16 review tag must remain exact and immutable")
+		return
+	}
+	prior, priorReadErr := planningGrantGitOutput(root, "cat-file", "tag", strings.TrimSpace(string(priorObject)))
+	target, priorSignatureErr := verifyPinnedPlanningGrantTag(prior, publicKey, ticketLifetimeCorrectionReviewTag, ticketLifetimeCorrectionTagMessage)
+	priorTree, priorTreeErr := planningGrantGitOutput(root, "rev-parse", "--verify", target+"^{tree}")
+	if priorReadErr != nil || priorSignatureErr != nil || target != "dd660fac263c7bc656e4d10c1bf9a538a510259f" ||
+		priorTreeErr != nil || strings.TrimSpace(string(priorTree)) != operatorRecoveryBaseTree {
+		fail("prior_tree", "accepted PR 16 signature, target, and tree must equal the recovery base")
+		return
+	}
+	commits, rangeErr := planningGrantCommitRangeFrom(root, operatorRecoveryBase, featureHead)
+	if rangeErr != nil || requireTag && len(commits) == 0 {
+		fail("history", "recovery commit history is unavailable")
+		return
+	}
+	previous := operatorRecoveryBase
+	for _, commit := range commits {
+		changed, diffErr := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", previous, commit.id)
+		paths, pathsErr := normalizedPlanningGrantGitPaths(changed)
+		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
+		retainedGrant, retainedErr := planningGrantGitOutput(root, "show", commit.id+":"+operatorRecoveryGrantPath)
+		retainedSignature, retainedSignatureErr := planningGrantGitOutput(root, "show", commit.id+":"+operatorRecoveryGrantPath+".sig")
+		if len(commit.parents) != 1 || commit.parents[0] != previous || diffErr != nil || pathsErr != nil ||
+			!operatorRecoveryPathsAllowed(paths) || objectErr != nil || verifyPlanningGrantCommit(object, publicKey) != nil ||
+			timeErr != nil || !operatorRecoveryWindowValid(committedAt) || retainedErr != nil || retainedSignatureErr != nil ||
+			!operatorRecoveryDocumentValid(retainedGrant, retainedSignature, publicKey) {
+			fail("history", "each recovery commit must be signed, prospective, linear, in scope, and retain the exact grant")
+			return
+		}
+		previous = commit.id
+	}
+	tracked, trackedErr := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
+	untracked, untrackedErr := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
+	paths, normalizeErr := normalizedPlanningGrantGitPaths(tracked, untracked)
+	if trackedErr != nil || untrackedErr != nil || normalizeErr != nil || !operatorRecoveryPathsAllowed(paths) || requireTag && len(paths) != 0 {
+		fail("scope", "current changes must stay inside the sixteen exact signed paths")
+	}
+}
+
+const operatorRecoveryReviewTag = "mars3/w001-operator-recovery-v1"
+const operatorRecoveryReviewMessage = "MARS-3 W-001 operator recovery attestation v1"
+
+func operatorRecoveryReviewTarget(root string, publicKey []byte) (string, error) {
+	objectID, err := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+operatorRecoveryReviewTag+"^{tag}")
+	if err != nil {
+		return "", errors.New("recovery review tag unavailable")
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "tag", strings.TrimSpace(string(objectID)))
+	if err != nil {
+		return "", errors.New("recovery review tag unavailable")
+	}
+	target, err := verifyPinnedPlanningGrantTag(object, publicKey, operatorRecoveryReviewTag, operatorRecoveryReviewMessage)
+	if err != nil {
+		return "", errors.New("recovery review signature invalid")
+	}
+	committedAt, err := planningGrantCommitTime(root, target)
+	if err != nil {
+		return "", errors.New("recovery review target unavailable")
+	}
+	issued := time.Date(2026, 9, 19, 14, 3, 20, 0, time.UTC)
+	expires := issued.Add(7 * 24 * time.Hour)
+	if validatePlanningGrantTagChronology(object, issued, expires, committedAt) != nil {
+		return "", errors.New("recovery review chronology invalid")
+	}
+	return target, nil
+}
+
+func operatorRecoveryPRTopology(parents []string, featureHead, mergeTree, featureTree string) bool {
+	return len(parents) == 2 && parents[0] == operatorRecoveryBase && parents[1] == featureHead &&
+		sha1Pattern.MatchString(featureHead) && sha1Pattern.MatchString(mergeTree) && mergeTree == featureTree
+}
+
+func operatorRecoveryMainTopology(parents []string, mainTree, featureTree string) bool {
+	return len(parents) == 1 && parents[0] == operatorRecoveryBase &&
+		sha1Pattern.MatchString(mainTree) && mainTree == featureTree
+}
+
+func operatorRecoveryGitHubCheckout(root, head, branch string, findings *[]Finding) (planningGrantCheckout, bool) {
+	fail := func(code, message string) (planningGrantCheckout, bool) {
+		addFinding(findings, operatorRecoveryGrantPath, "public.operator_recovery."+code, "%s", message)
+		return planningGrantCheckout{}, false
+	}
+	if os.Getenv("CI") != "true" || os.Getenv("GITHUB_ACTIONS") != "true" || os.Getenv("RUNNER_ENVIRONMENT") != "github-hosted" ||
+		os.Getenv("GITHUB_REPOSITORY") != planningGrantRepository || os.Getenv("GITHUB_WORKFLOW") != planningGrantWorkflow ||
+		os.Getenv("GITHUB_JOB") != planningGrantWorkflowJob || os.Getenv("GITHUB_SHA") != head || !sha1Pattern.MatchString(head) ||
+		!samePlanningGrantRepositoryRoot(root, os.Getenv("GITHUB_WORKSPACE")) {
+		return fail("runner", "recovery CI requires the canonical hosted runner and exact repository checkout")
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ID")); !ok {
+		return fail("runner", "recovery CI run ID is invalid")
+	}
+	if _, ok := parsePositiveInt(os.Getenv("GITHUB_RUN_ATTEMPT")); !ok {
+		return fail("runner", "recovery CI run attempt is invalid")
+	}
+	workflow, err := readRepoFile(root, planningGrantWorkflowPath)
+	if err != nil || fileSHA256(workflow) != canonicalFoundationWorkflowSHA256 {
+		return fail("workflow", "recovery CI must retain the independently pinned public-gate workflow")
+	}
+	event, ok := readPlanningGrantGitHubEvent(os.Getenv("GITHUB_EVENT_PATH"))
+	if !ok || event.Repository.FullName != planningGrantRepository {
+		return fail("event", "recovery CI event repository is invalid")
+	}
+	workflowPrefix := planningGrantRepository + "/" + planningGrantWorkflowPath + "@"
+	switch os.Getenv("GITHUB_EVENT_NAME") {
+	case "pull_request":
+		ref := fmt.Sprintf("refs/pull/%d/merge", event.Number)
+		workflowRef := os.Getenv("GITHUB_WORKFLOW_REF")
+		if branch != "" || event.Number <= 0 || os.Getenv("GITHUB_REF") != ref || event.PullRequest == nil ||
+			os.Getenv("GITHUB_HEAD_REF") != operatorRecoveryBranch || os.Getenv("GITHUB_BASE_REF") != "main" ||
+			event.PullRequest.Head.Ref != operatorRecoveryBranch || event.PullRequest.Base.Ref != "main" ||
+			event.PullRequest.Base.SHA != operatorRecoveryBase || !sha1Pattern.MatchString(event.PullRequest.Head.SHA) ||
+			!validAdvisoryPullRequestMergeSHA(event.PullRequest.MergeCommitSHA) ||
+			workflowRef != workflowPrefix+ref && workflowRef != workflowPrefix+"refs/heads/main" {
+			return fail("event", "recovery PR event must bind its exact branch, positive PR number, immutable head, and signed main base")
+		}
+		parents, parentErr := planningGrantCommitParents(root, head)
+		mergeTree, mergeErr := planningGrantGitOutput(root, "rev-parse", "--verify", head+"^{tree}")
+		featureTree, featureErr := planningGrantGitOutput(root, "rev-parse", "--verify", event.PullRequest.Head.SHA+"^{tree}")
+		if parentErr != nil || mergeErr != nil || featureErr != nil ||
+			!operatorRecoveryPRTopology(parents, event.PullRequest.Head.SHA, strings.TrimSpace(string(mergeTree)), strings.TrimSpace(string(featureTree))) {
+			return fail("pr_topology", "recovery PR requires the exact-tree two-parent synthetic merge over the signed base")
+		}
+		return planningGrantCheckout{kind: planningGrantPullRequestMerge, expectedHead: event.PullRequest.Head.SHA}, true
+	case "push":
+		if branch != "" && branch != "main" || os.Getenv("GITHUB_REF") != "refs/heads/main" || os.Getenv("GITHUB_REF_PROTECTED") != "true" ||
+			os.Getenv("GITHUB_HEAD_REF") != "" || os.Getenv("GITHUB_BASE_REF") != "" || os.Getenv("GITHUB_WORKFLOW_REF") != workflowPrefix+"refs/heads/main" ||
+			event.Ref != "refs/heads/main" || event.Before != operatorRecoveryBase || event.After != head ||
+			event.HeadCommit == nil || event.HeadCommit.ID != head || event.PullRequest != nil {
+			return fail("event", "recovery push must be the exact protected-main squash event over the signed base")
+		}
+		return planningGrantCheckout{kind: planningGrantMainSquash, expectedHead: head}, true
+	default:
+		return fail("event", "unsupported recovery publication event")
+	}
 }

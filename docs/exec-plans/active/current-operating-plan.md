@@ -2,12 +2,42 @@
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
-**Updated:** 2026-08-31
+**Updated:** 2026-09-19
 **Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
 **Current Bead:** M3-W001 (display ID W-001)
 **Authority:** Beads/Dolt for work state; Git for this durable plan
+
+## Current operator source-recovery scope
+
+Accepted PR #16 merged as `ee0ef97e1a3c246e342ef3f467c3b95947a327b5`, with
+reviewed tree `8fd175afaf40335d8c8148dc5407c1047ee60cbf`. Its ticket-lifetime
+publication binding ended at accepted merge and protected-main readback. The
+retained terminal-publication projection below and its unchanged policy file
+are historical evidence, not permission for this recovery or a live claim.
+
+The separately signed `W-001-operator-recovery-v1` grant binds exactly sixteen
+paths on `codex/w-001-operator-recovery`, from that accepted base, during
+2026-09-19T14:03:20Z through 2026-09-26T14:03:20Z. It permits the bounded
+operator launcher and publication route, not canonical W-001 reopening or an
+unfenced P-001 claim. Source authorization, protected private operator profile,
+and one-attempt canonical execution authorization are distinct boundaries.
+
+The launcher source and focused tests now cover signed read and normal fenced
+claim/renewal/release/effect-validation routing. Full publication admission,
+independent review, accepted merge, and actual gateway inspection remain
+pending. No canonical state has been read or changed during this recovery.
+The retained-history and pinned-scanner blockers are resolved. Doctrine and
+public-content checks, the full test suite, and pinned worktree and history
+secret scans passed after the approved prerequisite recovery. Signed candidate
+publication, exact-head CI, ordered independent QA and Security review, accepted
+merge, and protected-main readback remain pending. Outcomes and retained failure
+history are recorded in `docs/evidence/W-001-operator-recovery.md`. This is not a
+canonical Bead or gateway RUN disposition. P-001 remains unselected by this
+source exception.
+
+## Retained terminal-publication history
 
 This is the only active execution plan. It is a Git-owned ordering and evidence
 contract, not a second ticket database. Canonical M3-W001 is now native

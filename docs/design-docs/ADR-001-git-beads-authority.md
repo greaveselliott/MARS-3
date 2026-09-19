@@ -278,6 +278,53 @@ Retries reuse the idempotency key and reconcile before repeating an effect.
 
 ## Consequences
 
+### Operator recovery boundary
+
+The exceptional source-recovery grant restores an operator entry point without
+reopening W-001 or creating an unfenced P-001 exception. Source authorization
+and canonical execution remain separate. The initial read-admission module
+verifies a pinned human signature in the distinct
+`mars3-operator-execution-v1` namespace and requires byte-exact canonical JSON.
+It binds the trusted runtime identity and one exact bounded request, derives a
+read-only principal outside request data, and consumes a one-attempt replay key
+before invoking the existing gateway. A backend error or post-consumption
+expiry burns the attempt rather than permitting uncertain replay.
+
+The replay-store interface requires atomic durable exclusion across processes;
+an in-memory test double is not an acceptable launcher implementation. The local
+adapter uses exclusive file creation and file/directory synchronization in a
+private operator-owned directory pinned by a root handle. It neither deletes
+consumed keys nor cleans up uncertain reservations. The deployment filesystem
+must support those durability primitives; distributed replay is not claimed.
+Runtime bindings must come from trusted launcher resolution, never caller claims.
+The read-only CLI now composes the existing Beads reader and PostgreSQL audit
+store through the gateway, without a native mutator or provisioning operation.
+The connection remains lazy until admission and replay reservation succeed.
+A separate pinned profile signature binds the running executable, native binary,
+workspace filesystem identity, sealed connection bytes, and local replay path.
+Only protected operator-owned files and explicitly scoped loopback/Unix-socket
+PostgreSQL URIs are admitted. Ambient PostgreSQL settings and implicit password
+files are denied. These private profile bytes are never public evidence.
+Explicit mutation mode uses a separately typed signed authorization and exactly
+one existing claim, renewal, release, or effect-validation request. Only that
+operation's capability is derived. The normal native CAS and PostgreSQL-backed
+gateway, not the launcher, validate dependency/owner/version/lease conditions.
+An uncertain mutation is never automatically retried with the consumed operator
+authorization. No reopen, reconciliation, review, terminal, provision, or
+arbitrary-effect route is exposed by this bounded launcher.
+Canonical execution and deployment qualification remain pending. No source grant
+is accepted as a runtime authorization, and read admission cannot issue a claim
+or lease. Inspection retains the gateway's normal audit events.
+
+Recovery publication uses a distinct signed tag and the unchanged pinned
+public-gate workflow. PR event identity, hosted-runner context, exact two-parent
+synthetic merge, and tag/head/tree equality are independent requirements.
+Protected main must be the in-window one-parent squash over the recovery base
+and retain the exact tag tree. Local source admission expires; later historical
+main auditing validates immutable chronology and a clean checkout rather than
+reviving an expired grant. Prior grants and their retained tags remain subject
+to their existing checks.
+
 The authority gateway and PostgreSQL lease store are security boundaries for
 mutating work. A missing Beads store prevents work transitions; outside the
 one signed W-001 bootstrap scope, a missing or expired live lease prevents
