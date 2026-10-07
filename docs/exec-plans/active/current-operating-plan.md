@@ -2,7 +2,7 @@
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
-**Updated:** 2026-09-19
+**Updated:** 2026-10-07
 **Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
@@ -17,25 +17,32 @@ publication binding ended at accepted merge and protected-main readback. The
 retained terminal-publication projection below and its unchanged policy file
 are historical evidence, not permission for this recovery or a live claim.
 
-The separately signed `W-001-operator-recovery-v1` grant binds exactly sixteen
-paths on `codex/w-001-operator-recovery`, from that accepted base, during
-2026-09-19T14:03:20Z through 2026-09-26T14:03:20Z. It permits the bounded
-operator launcher and publication route, not canonical W-001 reopening or an
-unfenced P-001 claim. Source authorization, protected private operator profile,
-and one-attempt canonical execution authorization are distinct boundaries.
+The retained `W-001-operator-recovery-v1` grant expired on
+2026-09-26T14:03:20Z. Its candidate
+`a8153480a7927c2eb7d77ea0d0ba36d85573930e` merged through PR #18 as
+`779ce8d585743fccf7abdc55631a1e9323516cfb`, with matching tree
+`e63e7e58e35034110a9d895281b646553a3a4bfd` and passing candidate and main CI.
+That merge preceded independent QA and Security review. Subsequent independent
+QA returned changes-requested for claim pool starvation; Security has not
+accepted it. CI and merge do not retroactively satisfy the required reviews.
 
-The launcher source and focused tests now cover signed read and normal fenced
-claim/renewal/release/effect-validation routing. Full publication admission,
-independent review, accepted merge, and actual gateway inspection remain
-pending. No canonical state has been read or changed during this recovery.
-The retained-history and pinned-scanner blockers are resolved. Doctrine and
-public-content checks, the full test suite, and pinned worktree and history
-secret scans passed after the approved prerequisite recovery. Signed candidate
-publication, exact-head CI, ordered independent QA and Security review, accepted
-merge, and protected-main readback remain pending. Outcomes and retained failure
-history are recorded in `docs/evidence/W-001-operator-recovery.md`. This is not a
-canonical Bead or gateway RUN disposition. P-001 remains unselected by this
-source exception.
+The owner approved the separately signed `W-001-operator-correction-v2` grant.
+It binds eleven exact paths on `codex/w-001-operator-correction-v2`, from the
+PR #18 squash base above, during 2026-10-07T20:31:36Z through
+2026-10-14T20:31:36Z. Its scope is the pool-capacity correction, related
+regressions, truthful documentation, and signed publication admission. Historical
+grants and tags remain immutable. New commits use the owner's GitHub identity.
+
+The correction configures three connections to preserve both claim locks while
+store work acquires a third. The complete local public gate passed with the
+restored native integration fixture; preliminary independent QA found no
+blocking issue. Signed candidate CI, final independent QA then Security,
+accepted corrective merge, and main readback remain pending.
+No canonical state has been read or changed during this recovery. Runtime
+inspection requires a separate fresh authorization after source acceptance.
+P-001 remains unselected by this source exception. Outcomes and retained failure
+history are recorded in `docs/evidence/W-001-operator-recovery.md`; these are
+not canonical Bead or gateway RUN dispositions.
 
 ## Retained terminal-publication history
 

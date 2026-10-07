@@ -770,7 +770,9 @@ func localPostgresConfig(connection []byte) (*pgxpool.Config, error) {
 		return nil, ErrGateway
 	}
 	config.MinConns = 0
-	config.MaxConns = 2
+	// A claim retains project-barrier and work-lock transactions while a
+	// third transaction performs saga lookup and subsequent store operations.
+	config.MaxConns = 3
 	config.ConnConfig.ConnectTimeout = 5 * time.Second
 	return config, nil
 }
