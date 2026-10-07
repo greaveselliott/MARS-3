@@ -1,5 +1,25 @@
 # ADR-001 — Git/Beads authority and reconciliation
 
+The proposed standing delivery mechanism in ADR-008 separates owner-signed
+finite-plan intent from live gateway authority. Contract validation alone
+cannot select canonical work, derive an implementation principal, issue a lease
+or authorize private resource access. The source-transition grant is limited to
+implementing and qualifying this admission foundation and public publication.
+
+PR #20 was rejected by Security after QA acceptance and passing CI: its
+constructor derived publication dates from an unauthenticated first read.
+The corrected source specification pins the signed issue/expiry dates beside
+the immutable grant digest. Authentication of another filesystem snapshot
+cannot preserve unsigned policy dates. The rejected v1 tag remains pinned to
+object `b29a8696a021bef5039db2b914dfca4c283a8f4f`; the successor uses a
+distinct v2 tag and needs fresh QA then Security acceptance. This correction
+does not activate a runtime delegation or retrospectively accept PR #20.
+
+Source-transition admission also pins accepted historical correction tag object
+`ca32502facd6be6fc5f56d578f2f09f6b2568962`, independently of its target,
+signature and chronology. A replacement tag cannot substitute for the retained
+accepted artifact, even when newly signed by the same trusted signer.
+
 **Status:** Accepted
 **Date:** 2026-08-26
 **Owners:** Product authority, Delivery Orchestrator

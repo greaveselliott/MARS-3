@@ -1,0 +1,44 @@
+schemaVersion: 1
+kind: MARS3StandingDeliverySourceTransitionGrant
+grant:
+  id: standing-delivery-source-transition-v1
+  classification: PUBLIC
+  ownerDirective: activate-bounded-standing-delegation-and-work-through-existing-plan
+  issuedAt: 2026-10-07T22:16:16Z
+  expiresAt: 2026-10-14T22:16:16Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 72e5bbc9a5c0975ebaf12487d50e096c9049b4a4
+  baseTree: 266f42ac2321bdd08d2d13184c83f7432d66db6e
+  branch: codex/standing-delivery-delegation
+  purpose: implement-and-qualify-finite-plan-delegation-admission
+  canonicalClaimAsserted: false
+  liveLeaseAsserted: false
+  canonicalExecutionAllowed: false
+  autonomousMutation: false
+  endsAt: accepted-source-merge-and-protected-main-readback
+  authorizedPaths:
+    - .harness/grants/standing-delivery-source-transition-v1.yaml
+    - .harness/grants/standing-delivery-source-transition-v1.yaml.sig
+    - internal/authority/delegation/delegation.go
+    - internal/authority/delegation/delegation_test.go
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+    - docs/features/F-002-work-authority.md
+    - docs/design-docs/ADR-008-standing-delivery-delegation.md
+    - docs/design-docs/ADR-001-git-beads-authority.md
+    - docs/exec-plans/active/current-operating-plan.md
+  allowedEffects:
+    - exact-path-source-implementation-and-regression-tests
+    - required-local-public-gates-and-synthetic-qualification
+    - owner-attributed-signed-candidate-and-distinct-review-tag
+    - bounded-publication-exact-head-CI-independent-QA-then-Security
+    - accepted-source-merge-and-protected-main-readback
+  prohibitedEffects:
+    - canonical-execution-or-direct-authority-store-access
+    - assert-an-active-plan-delegation-before-reviewed-runtime-enforcement
+    - credentials-private-data-production-release-or-destructive-effects
+    - rewrite-historical-grants-tags-or-review-dispositions
+  failurePolicy: stop-after-one-equivalent-automatic-retry
+integrity:
+  namespace: mars3-standing-delivery-source-transition-v1
+  publicKey: .harness/keys/genesis-signing-key.pub

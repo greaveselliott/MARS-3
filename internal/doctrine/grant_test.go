@@ -4839,6 +4839,84 @@ func TestOperatorCorrectionGrantExactDocumentAndSignature(t *testing.T) {
 	}
 }
 
+func TestStandingDeliveryRetainsExactHistoricalTagObject(t *testing.T) {
+	const accepted = "ca32502facd6be6fc5f56d578f2f09f6b2568962"
+	if !standingDeliveryHistoricalTagObjectValid(accepted + "\n") {
+		t.Fatal("accepted historical tag object rejected")
+	}
+	// A replacement tag has a different object ID even when it is signed by
+	// the same owner, retains the target and changes only its timestamp.
+	for _, replacement := range []string{"", strings.Repeat("a", 40), accepted + accepted, "f83975c37135189f5e1c1ca2ae706b6160161297"} {
+		if standingDeliveryHistoricalTagObjectValid(replacement) {
+			t.Fatal("replacement or missing historical tag object admitted")
+		}
+	}
+}
+
+func TestStandingDeliveryWindowRejectsUnsignedReadSwap(t *testing.T) {
+	repo := filepath.Join("..", "..")
+	document, err := readRepoFile(repo, standingDeliveryTransitionPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	signature, err := readRepoFile(repo, standingDeliveryTransitionPath+".sig")
+	if err != nil {
+		t.Fatal(err)
+	}
+	key, err := readRepoFile(repo, wave1PlanningGrantKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	grantPath := filepath.Join(root, filepath.FromSlash(standingDeliveryTransitionPath))
+	if err := os.MkdirAll(filepath.Dir(grantPath), 0700); err != nil {
+		t.Fatal(err)
+	}
+	unsigned := strings.Replace(string(document), "2026-10-14T22:16:16Z", "2030-10-14T22:16:16Z", 1)
+	if unsigned == string(document) {
+		t.Fatal("signed fixture expiry changed; update the regression deliberately")
+	}
+	if err := os.WriteFile(grantPath, []byte(unsigned), 0600); err != nil {
+		t.Fatal(err)
+	}
+	spec := standingDeliveryTransitionPublication(root)
+	if err := os.WriteFile(grantPath, document, 0600); err != nil {
+		t.Fatal(err)
+	}
+	restored, err := readRepoFile(root, standingDeliveryTransitionPath)
+	if err != nil || !spec.documentValid(restored, signature, key) {
+		t.Fatal("restored real signed grant denied")
+	}
+	if spec.documentValid([]byte(unsigned), signature, key) {
+		t.Fatal("unsigned extended-expiry grant admitted")
+	}
+	issued := time.Date(2026, 10, 7, 22, 16, 16, 0, time.UTC)
+	expires := time.Date(2026, 10, 14, 22, 16, 16, 0, time.UTC)
+	if spec.issued != issued || spec.expires != expires || !spec.windowValid(issued) || !spec.windowValid(expires.Add(-time.Nanosecond)) {
+		t.Fatal("window does not match the exact signed document")
+	}
+	for _, denied := range []time.Time{issued.Add(-time.Nanosecond), expires, time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC)} {
+		if spec.windowValid(denied) {
+			t.Fatal("unsigned first-read dates widened the signed window")
+		}
+	}
+}
+
+func TestStandingDeliveryRetainsRejectedTagAndUsesDistinctSuccessor(t *testing.T) {
+	if !standingDeliveryRejectedTagObjectValid("b29a8696a021bef5039db2b914dfca4c283a8f4f\n") {
+		t.Fatal("rejected evidence missing")
+	}
+	for _, replacement := range []string{"", strings.Repeat("a", 40), "b7750720f4348d392640946cc5de631b8973ff42"} {
+		if standingDeliveryRejectedTagObjectValid(replacement) {
+			t.Fatal("replacement rejected tag admitted")
+		}
+	}
+	spec := standingDeliveryTransitionPublication("")
+	if spec.reviewTag != "mars3/standing-delivery-source-transition-v2" || spec.reviewMessage != "MARS-3 standing delivery source transition attestation v2" {
+		t.Fatal("successor must not move or reuse the rejected review tag")
+	}
+}
+
 func TestOperatorCorrectionGrantWindowAndScope(t *testing.T) {
 	issued := time.Date(2026, 10, 7, 20, 31, 36, 0, time.UTC)
 	expires := issued.Add(7 * 24 * time.Hour)
