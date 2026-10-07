@@ -15385,11 +15385,11 @@ func VerifyStandingDeliverySignature(document, signature []byte) error {
 	return nil
 }
 
-func standingDeliveryTransitionPublication(root string) operatorPublicationSpec {
-	document, _ := readRepoFile(root, standingDeliveryTransitionPath)
-	values := yamlScalars(document)
-	issued, _ := time.Parse(time.RFC3339, values["grant.issuedAt"])
-	expires, _ := time.Parse(time.RFC3339, values["grant.expiresAt"])
+func standingDeliveryTransitionPublication(_ string) operatorPublicationSpec {
+	// These dates belong to the exact document digest below. Do not derive
+	// policy from an unauthenticated filesystem snapshot before validation.
+	issued := time.Date(2026, 10, 7, 22, 16, 16, 0, time.UTC)
+	expires := time.Date(2026, 10, 14, 22, 16, 16, 0, time.UTC)
 	return operatorPublicationSpec{
 		grantPath:     standingDeliveryTransitionPath,
 		digest:        "15bba5a524c7de7db7e3ee9956d9cc4521b6808d8610b29b9b5f70f4c645e482",
@@ -15397,8 +15397,8 @@ func standingDeliveryTransitionPublication(root string) operatorPublicationSpec 
 		base:          "72e5bbc9a5c0975ebaf12487d50e096c9049b4a4",
 		baseTree:      "266f42ac2321bdd08d2d13184c83f7432d66db6e",
 		branch:        "codex/standing-delivery-delegation",
-		reviewTag:     "mars3/standing-delivery-source-transition-v1",
-		reviewMessage: "MARS-3 standing delivery source transition attestation v1",
+		reviewTag:     "mars3/standing-delivery-source-transition-v2",
+		reviewMessage: "MARS-3 standing delivery source transition attestation v2",
 		findingPrefix: "public.standing_delivery_transition_",
 		issued:        issued, expires: expires,
 		paths: []string{
@@ -15428,9 +15428,26 @@ func standingDeliveryTransitionRetainedHistory(root string, publicKey []byte) er
 	if err != nil || verifyPlanningGrantCommit(object, publicKey) != nil {
 		return errors.New("accepted correction signature missing")
 	}
+	// PR 20 remains rejected evidence, not an accepted predecessor. Retain
+	// its immutable signed tag even when a successor receives acceptance.
+	rejectedSpec := standingDeliveryTransitionPublication(root)
+	rejectedSpec.reviewTag = "mars3/standing-delivery-source-transition-v1"
+	rejectedSpec.reviewMessage = "MARS-3 standing delivery source transition attestation v1"
+	rejectedObject, err := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+rejectedSpec.reviewTag+"^{tag}")
+	if err != nil || !standingDeliveryRejectedTagObjectValid(string(rejectedObject)) {
+		return errors.New("rejected standing delivery tag changed or missing")
+	}
+	rejectedTarget, err := operatorPublicationReviewTarget(root, publicKey, rejectedSpec)
+	if err != nil || rejectedTarget != "b7750720f4348d392640946cc5de631b8973ff42" {
+		return errors.New("rejected standing delivery signature or target invalid")
+	}
 	return nil
 }
 
 func standingDeliveryHistoricalTagObjectValid(objectID string) bool {
 	return strings.TrimSpace(objectID) == "ca32502facd6be6fc5f56d578f2f09f6b2568962"
+}
+
+func standingDeliveryRejectedTagObjectValid(objectID string) bool {
+	return strings.TrimSpace(objectID) == "b29a8696a021bef5039db2b914dfca4c283a8f4f"
 }

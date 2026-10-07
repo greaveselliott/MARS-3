@@ -28,6 +28,13 @@ windows fail closed. No wildcard source authority is admitted in this slice.
 
 ## Remaining activation work
 
+The first source candidate, PR #20, passed CI and QA but Security rejected a
+publication-window read-swap defect. Its signed tag and verdicts remain
+immutable rejected evidence. The corrected source constructor no longer reads
+policy dates from the filesystem: dates are pinned alongside the approved
+document digest. The successor uses a distinct v2 review tag and must obtain
+fresh QA followed by Security acceptance before any merge.
+
 The trusted issuer and gateway dispatcher must enforce current dependency
 readiness, per-Bead canonical contracts/paths, role separation, fresh claims,
 lease fencing, revocation and exact-operation durable replay. A signed contract

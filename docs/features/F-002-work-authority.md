@@ -2,6 +2,14 @@
 
 ### Standing delivery contract admission foundation
 
+The source-publication window is pinned to the exact signed grant digest:
+2026-10-07T22:16:16Z inclusive through 2026-10-14T22:16:16Z exclusive.
+Unsigned first-read dates cannot widen it when a later read authenticates a
+different document. A regression constructs the specification with an unsigned
+extended expiry, restores and authenticates the real grant, and denies the
+actual expiry and a later date. The v2 successor keeps rejected PR #20 and its
+exact v1 tag object immutable and requires fresh ordered review.
+
 Given the source transition retains an accepted historical correction tag,
 its exact tag object must remain `ca32502facd6be6fc5f56d578f2f09f6b2568962`.
 A missing or replacement object denies even if its signature, target and

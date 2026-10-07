@@ -9,7 +9,35 @@
 **Current Bead:** M3-W001 (display ID W-001)
 **Authority:** Beads/Dolt for work state; Git for this durable plan
 
-## Current operator source-recovery scope
+## Current standing-delivery source transition
+
+PR #19 merged as `72e5bbc9a5c0975ebaf12487d50e096c9049b4a4`, matching
+reviewed tree `266f42ac2321bdd08d2d13184c83f7432d66db6e` after ordered QA
+and Security acceptance. Protected-main CI and readback passed; its source
+correction grant is consumed. The operator-recovery section below is retained
+history, not a pending correction or active authority.
+
+The owner directed finite-plan standing delegation to remove repeated routine
+approval prompts. The signed `standing-delivery-source-transition-v1` grant
+permits ten exact source paths on `codex/standing-delivery-delegation` from
+that accepted main, through 2026-10-14T22:16:16Z. It authorizes no canonical
+execution, claim, lease, private configuration access or runtime activation.
+
+The first candidate, PR #20 at
+`b7750720f4348d392640946cc5de631b8973ff42`, passed CI and independent QA.
+Security reproduced a source-publication expiry bypass through unauthenticated
+first-read dates and returned changes-requested. The PR is closed, not merged;
+its immutable v1 tag object `b29a8696a021bef5039db2b914dfca4c283a8f4f`,
+CI and ordered verdicts remain public evidence. The corrected source pins the
+approved dates and adds a read-swap regression. Its distinct v2 review tag,
+exact-head CI, fresh QA then Security, accepted merge and main readback remain
+pending. No new generic owner approval is needed inside this existing scope.
+
+ADR-008 remains proposed/non-operational. The trusted issuer, runtime gateway
+wiring and protected resource provisioning remain unfinished. P-001 is not
+selected or claimed, and this source work changes no canonical lifecycle.
+
+## Retained operator source-recovery scope (historical snapshot)
 
 Accepted PR #16 merged as `ee0ef97e1a3c246e342ef3f467c3b95947a327b5`, with
 reviewed tree `8fd175afaf40335d8c8148dc5407c1047ee60cbf`. Its ticket-lifetime
