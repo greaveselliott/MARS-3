@@ -20,8 +20,139 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+
 	authorityv1 "github.com/greaveselliott/MARS-3/api/authority/v1"
+	"github.com/greaveselliott/MARS-3/internal/authority/postgres"
 )
+
+// Exercise the production store's nested claim transactions with the actual
+// launcher capacity, without opening a database or accessing canonical state.
+func TestLocalPostgresConfigSupportsClaimTransactions(t *testing.T) {
+	config, err := localPostgresConfig([]byte("postgres://operator@127.0.0.1:5432/synthetic?sslmode=disable"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name     string
+		capacity int32
+		blocked  bool
+	}{
+		{name: "two connections reproduce starvation", capacity: 2, blocked: true},
+		{name: "launcher capacity permits lookup", capacity: config.MaxConns},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			pool := &claimCapacityPool{slots: make(chan struct{}, test.capacity)}
+			store, err := postgres.New(pool, func(context.Context, string, string) (string, error) {
+				return "synthetic-generation", nil
+			}, time.Now, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			releaseProject, err := store.Enter(ctx, "synthetic-tenant", "synthetic-project")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer releaseProject()
+			releaseWork, err := store.EnterWork(ctx, "synthetic-tenant", "synthetic-project", "M3-SYNTHETIC")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer releaseWork()
+			if len(pool.slots) != 2 {
+				t.Fatal("claim locks did not retain both transactions")
+			}
+			_, found, err := store.Lookup(ctx, "synthetic-tenant", "synthetic-project", "synthetic-claim")
+			if test.blocked {
+				if !errors.Is(err, context.DeadlineExceeded) {
+					t.Fatalf("undersized pool lookup error = %v, want deadline exceeded", err)
+				}
+			} else if err != nil || found || pool.peak != 3 {
+				t.Fatalf("lookup: found=%v error=%v peak=%d, want absent saga and three transactions", found, err, pool.peak)
+			}
+			if len(pool.slots) != 2 {
+				t.Fatal("lookup leaked a transaction or released a claim lock")
+			}
+			releaseWork()
+			releaseProject()
+			if len(pool.slots) != 0 {
+				t.Fatal("claim lock release leaked pool capacity")
+			}
+		})
+	}
+}
+
+// Single-goroutine pool double: production Store owns the transaction ordering.
+type claimCapacityPool struct {
+	slots chan struct{}
+	peak  int
+}
+
+func (pool *claimCapacityPool) BeginTx(ctx context.Context, _ pgx.TxOptions) (pgx.Tx, error) {
+	select {
+	case pool.slots <- struct{}{}:
+		if len(pool.slots) > pool.peak {
+			pool.peak = len(pool.slots)
+		}
+		return &claimCapacityTx{pool: pool}, nil
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
+type claimCapacityTx struct {
+	pgx.Tx
+	pool   *claimCapacityPool
+	closed bool
+}
+
+func (tx *claimCapacityTx) Exec(_ context.Context, query string, _ ...any) (pgconn.CommandTag, error) {
+	if !strings.Contains(query, "set_config(") && !strings.Contains(query, "pg_advisory_xact_lock") {
+		return pgconn.CommandTag{}, errors.New("unexpected statement in claim capacity fixture")
+	}
+	return pgconn.NewCommandTag("SELECT 1"), nil
+}
+
+func (tx *claimCapacityTx) QueryRow(_ context.Context, query string, _ ...any) pgx.Row {
+	return claimCapacityRow{query: query}
+}
+
+func (tx *claimCapacityTx) Commit(context.Context) error {
+	return tx.release()
+}
+
+func (tx *claimCapacityTx) Rollback(context.Context) error {
+	return tx.release()
+}
+
+func (tx *claimCapacityTx) release() error {
+	if tx.closed {
+		return pgx.ErrTxClosed
+	}
+	tx.closed = true
+	<-tx.pool.slots
+	return nil
+}
+
+type claimCapacityRow struct {
+	query string
+}
+
+func (row claimCapacityRow) Scan(dest ...any) error {
+	if strings.Contains(row.query, "from mars3_authority.projects") && len(dest) == 3 {
+		*dest[0].(*string) = "synthetic-generation"
+		*dest[1].(*bool) = true
+		*dest[2].(*string) = "open"
+		return nil
+	}
+	if strings.Contains(row.query, "from mars3_authority.claim_sagas") {
+		return pgx.ErrNoRows
+	}
+	return errors.New("unexpected query in claim capacity fixture")
+}
 
 func TestFileReplayStoreSurvivesReopen(t *testing.T) {
 	directory := privateReplayFixture(t)
@@ -541,7 +672,7 @@ func TestLocalPostgresConfigRejectsAmbientAndRemoteConfiguration(t *testing.T) {
 	}
 	local := []byte("postgresql://operator_fixture@127.0.0.1:5432/authority_fixture?sslmode=disable")
 	config, err := localPostgresConfig(local)
-	if err != nil || config.ConnConfig.Host != "127.0.0.1" || config.MaxConns != 2 {
+	if err != nil || config.ConnConfig.Host != "127.0.0.1" || config.MaxConns != 3 {
 		t.Fatal("explicit local connection rejected")
 	}
 	for _, uri := range []string{

@@ -557,3 +557,24 @@ None. Only the CEO strategy principal may descope an in-scope scenario through
 a superseding product decision, affected-goal analysis, and active-plan update.
 The Work Authority Engineer, reviewer, or Delivery Orchestrator cannot descope
 a scenario through a claim, failure, or run disposition.
+
+### Operator claim connection capacity regression
+
+Given the local operator uses its bounded PostgreSQL pool configuration,
+when a claim retains the project-barrier and work-lock transactions,
+then saga lookup must acquire a third connection without releasing either lock.
+The regression exercises the production store's Enter -> EnterWork -> Lookup
+sequence with a bounded pool double: two connections time out, the configured
+three permit lookup, and releasing the locks returns all capacity. This fixture
+uses no real or canonical database and does not replace backend conformance.
+
+### Prospective operator correction publication
+
+The signed W-001-operator-correction-v2 grant binds eleven exact paths, the
+PR #18 squash base, its own branch, validity window and distinct signed tag.
+Absent, forged, changed, expired or out-of-scope correction authority fails
+closed. Candidate and main publication require their prescribed parent topology
+and identical signed trees. V1 grant bytes, signatures, candidate ancestry,
+chronology and tag objects remain independently checked as historical evidence.
+QA must accept the correction before Security review and accepted merge; the
+prior missing-review exception remains recorded.

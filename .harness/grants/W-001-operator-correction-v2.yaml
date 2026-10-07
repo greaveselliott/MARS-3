@@ -1,0 +1,117 @@
+schemaVersion: 1
+kind: MARS3W001OperatorCorrectionV2Grant
+
+grant:
+  id: W-001-operator-correction-v2
+  classification: PUBLIC
+  issuedAt: 2026-10-07T20:31:36Z
+  expiresAt: 2026-10-14T20:31:36Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 779ce8d585743fccf7abdc55631a1e9323516cfb
+  baseTree: e63e7e58e35034110a9d895281b646553a3a4bfd
+  workingBranch: codex/w-001-operator-correction-v2
+  beadContext: M3-W001
+  canonicalLifecycleExpected: done
+  signerRole: human-bootstrap-authority
+  coordinator: delivery-orchestrator
+  principal: work-authority-engineer
+  purpose: correct operator claim pool starvation and publish accepted recovery evidence
+  attemptId: w001-operator-correction-v2
+  authorityClass: prospective-exceptional-signed-transition-grant
+  approvalBasis: owner-approved-pool-fix-pending-signing-of-this-publication-grant
+  autonomousMutation: false
+  productionAllowed: false
+  implementationAllowed: true
+  canonicalLifecycleMutationAllowed: false
+  developmentLeaseAllowed: false
+  currentClaimAsserted: false
+  currentLeaseAsserted: false
+  equivalentFailureLimit: 2
+  consumedOn: first-accepted-corrective-merge-and-protected-main-readback
+  reviewTag: mars3/w001-operator-correction-v2
+  reviewTagMessage: MARS-3 W-001 operator correction attestation v2
+  requiredTaggerName: MARS-3 Release Manager
+  requiredTaggerEmail: release-manager@example.com
+  commitAttribution: owner-github-user
+  authorizedPaths:
+    - .harness/grants/W-001-operator-correction-v2.yaml
+    - .harness/grants/W-001-operator-correction-v2.yaml.sig
+    - .harness/manifest.yaml
+    - internal/authority/operator/operator.go
+    - internal/authority/operator/operator_test.go
+    - internal/doctrine/grant.go
+    - internal/doctrine/grant_test.go
+    - docs/features/F-002-work-authority.md
+    - docs/design-docs/ADR-001-git-beads-authority.md
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/W-001-operator-recovery.md
+  allowedEffects:
+    - retain-existing-owner-approved-local-pool-fix-and-regression
+    - correct-pool-capacity-and-directly-related-test-expectations
+    - qualify-production-store-claim-transaction-composition-on-disposable-fixtures
+    - admit-this-exact-signed-grant-base-branch-scope-and-review-tag-in-publication-validation
+    - retain-all-existing-historical-validation-and-rejected-candidate-evidence
+    - synchronize-implementation-contract-architecture-plan-and-public-safe-evidence
+    - create-owner-attributed-signed-commits-using-the-existing-pinned-agent-backed-signer
+    - create-one-distinct-immutable-signed-review-tag
+    - publish-one-delivery-branch-and-one-successor-PR
+    - obtain-public-CI-on-the-immutable-candidate
+    - obtain-independent-QA-then-independent-Security-acceptance-on-the-same-tree
+    - merge-only-after-both-verdicts-accept-and-verify-protected-main-tree-and-CI
+  prohibitedEffects:
+    - retroactively-accept-PR18-or-erase-its-missing-pre-merge-review-exception
+    - replay-extend-replace-or-edit-the-expired-v1-grant-or-its-signature
+    - rewrite-delete-move-or-reuse-historical-commits-tags-or-review-dispositions
+    - change-core-gateway-policy-datastore-schema-or-public-authority-API-types
+    - alter-CI-workflow-scanner-dependencies-or-branch-protection
+    - weaken-signature-time-scope-tree-or-review-admission
+    - mutate-canonical-W001-or-create-any-claim-or-lease
+    - inspect-canonical-workspaces-or-private-operator-configuration-under-this-source-grant
+    - direct-Beads-Dolt-PostgreSQL-authority-store-mutation
+    - implement-P001-or-any-other-Bead
+    - production-release-destructive-effects-credential-access-or-trust-escalation
+    - modify-paths-outside-the-eleven-exact-paths
+
+retainedHistory:
+  priorPullRequest: 18
+  priorCandidate: a8153480a7927c2eb7d77ea0d0ba36d85573930e
+  priorTree: e63e7e58e35034110a9d895281b646553a3a4bfd
+  priorTag: mars3/w001-operator-recovery-v1
+  priorTagObject: 4f6ce48322d000d17aabb38cf3473c07e87456e1
+  priorMainCommit: 779ce8d585743fccf7abdc55631a1e9323516cfb
+  priorCandidateRun: 35457245192
+  priorMainRun: 35457395834
+  priorQAVerdict: changes-requested
+  priorSecurityVerdict: not-performed
+  historicalPreMergeReviewRequirementSatisfied: false
+  retroactiveAcceptanceGranted: false
+
+verification:
+  order:
+    - exact-signed-grant-and-current-protected-base-admission
+    - meaningful-claim-capacity-regression-and-related-tests
+    - complete-public-commit-gate
+    - signed-owner-attributed-candidate-and-distinct-review-tag
+    - immutable-candidate-public-CI
+    - independent-qa
+    - independent-security-reviewer
+    - accepted-protected-main-merge-and-readback
+  requiredProperties:
+    - retained-project-and-work-locks-while-third-transaction-completes
+    - configured-pool-capacity-used-by-regression
+    - prior-two-connection-starvation-reproduced
+    - all-transaction-capacity-released
+    - no-canonical-work-or-lease-effects
+    - unchanged-historical-grant-signatures-and-tag-objects
+    - current-source-expiry-and-historical-main-audit-remain-distinct
+    - matching-signed-candidate-PR-and-protected-main-trees
+  publicCommitGateRequired: true
+  immutableCommitReviewRequired: true
+  protectedMainRequired: true
+  canonicalExecutionGranted: false
+
+integrity:
+  signatureFormat: openssh
+  signatureNamespace: mars3-w001-operator-correction-v2
+  detachedSignature: W-001-operator-correction-v2.yaml.sig
+  publicKey: ../keys/genesis-signing-key.pub

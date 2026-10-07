@@ -8,14 +8,15 @@ autonomous_mutation: disabled
 # Retained terminal-publication projection. Its ticket-lifetime binding ended
 # at accepted PR 16 merge/readback; it is not the recovery source authority.
 operator_recovery:
-  grant: .harness/grants/W-001-operator-recovery-v1.yaml
-  branch: codex/w-001-operator-recovery
+  grant: .harness/grants/W-001-operator-correction-v2.yaml
+  branch: codex/w-001-operator-correction-v2
   scope: exceptional-source-only
   canonical_claim_asserted: false
   live_lease_asserted: false
   prior_ticket_lifetime_binding: consumed
   canonical_execution: separate-signed-authorization-and-normal-gateway-policy
-  publication: pending-independent-review-and-accepted-merge
+  prior_publication: merged-before-review-qa-changes-requested
+  publication: correction-pending-independent-review-and-accepted-merge
 
 authority:
   work_definition_system: beads-dolt

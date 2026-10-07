@@ -4810,3 +4810,101 @@ func assertPlanningGrantTestGitConfigAbsent(t *testing.T, root, scope, key strin
 		t.Fatalf("disposable Git configuration persisted %s %s: output=%q err=%v", scope, key, output, err)
 	}
 }
+
+func TestOperatorCorrectionGrantExactDocumentAndSignature(t *testing.T) {
+	root := filepath.Join("..", "..")
+	document, err := readRepoFile(root, operatorCorrectionGrantPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	signature, err := readRepoFile(root, operatorCorrectionGrantPath+".sig")
+	if err != nil {
+		t.Fatal(err)
+	}
+	key, err := readRepoFile(root, wave1PlanningGrantKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !operatorCorrectionPublication().documentValid(document, signature, key) {
+		t.Fatal("exact signed grant denied")
+	}
+	if operatorCorrectionPublication().documentValid(append(append([]byte{}, document...), '\n'), signature, key) {
+		t.Fatal("changed grant admitted")
+	}
+	if operatorCorrectionPublication().documentValid(document, []byte("forged"), key) {
+		t.Fatal("forged signature admitted")
+	}
+	if operatorCorrectionPublication().documentValid(document, signature, []byte("wrong key")) {
+		t.Fatal("wrong signer admitted")
+	}
+}
+
+func TestOperatorCorrectionGrantWindowAndScope(t *testing.T) {
+	issued := time.Date(2026, 10, 7, 20, 31, 36, 0, time.UTC)
+	expires := issued.Add(7 * 24 * time.Hour)
+	if !operatorCorrectionPublication().windowValid(issued) || !operatorCorrectionPublication().windowValid(expires.Add(-time.Nanosecond)) ||
+		operatorCorrectionPublication().windowValid(issued.Add(-time.Nanosecond)) || operatorCorrectionPublication().windowValid(expires) {
+		t.Fatal("grant window boundary mismatch")
+	}
+	if len(operatorCorrectionPaths) != 11 || !operatorCorrectionPublication().pathsAllowed(operatorCorrectionPaths) {
+		t.Fatal("exact eleven-path scope denied")
+	}
+	if operatorCorrectionPublication().pathsAllowed(append(append([]string{}, operatorCorrectionPaths...), "AGENTS.md")) ||
+		operatorCorrectionPublication().pathsAllowed([]string{"internal/authority/operator/extra.go"}) {
+		t.Fatal("source authority escaped its signed scope")
+	}
+}
+
+func TestOperatorCorrectionPublicationTopology(t *testing.T) {
+	head, tree := strings.Repeat("a", 40), strings.Repeat("b", 40)
+	if !operatorPublicationPRTopology(operatorCorrectionPublication(), []string{operatorCorrectionBase, head}, head, tree, tree) {
+		t.Fatal("exact PR merge topology rejected")
+	}
+	if !operatorPublicationMainTopology(operatorCorrectionPublication(), []string{operatorCorrectionBase}, tree, tree) {
+		t.Fatal("exact squash topology rejected")
+	}
+	for _, parents := range [][]string{nil, {head}, {head, operatorCorrectionBase}, {operatorCorrectionBase, head, head}} {
+		if operatorPublicationPRTopology(operatorCorrectionPublication(), parents, head, tree, tree) {
+			t.Fatal("wrong PR parent topology admitted")
+		}
+	}
+	for _, parents := range [][]string{nil, {head}, {operatorCorrectionBase, head}} {
+		if operatorPublicationMainTopology(operatorCorrectionPublication(), parents, tree, tree) {
+			t.Fatal("wrong squash parent topology admitted")
+		}
+	}
+	if operatorPublicationPRTopology(operatorCorrectionPublication(), []string{operatorCorrectionBase, head}, head, tree, strings.Repeat("c", 40)) ||
+		operatorPublicationMainTopology(operatorCorrectionPublication(), []string{operatorCorrectionBase}, tree, strings.Repeat("c", 40)) ||
+		operatorPublicationMainTopology(operatorCorrectionPublication(), []string{operatorCorrectionBase}, "", "") {
+		t.Fatal("missing or mismatched publication tree admitted")
+	}
+}
+
+func TestOperatorCorrectionCIRejectsUntrustedRunner(t *testing.T) {
+	t.Setenv("CI", "true")
+	t.Setenv("GITHUB_ACTIONS", "true")
+	t.Setenv("RUNNER_ENVIRONMENT", "self-hosted")
+	var findings []Finding
+	if _, ok := operatorPublicationGitHubCheckout(filepath.Join("..", ".."), operatorCorrectionBase, "", &findings, operatorCorrectionPublication()); ok || len(findings) == 0 {
+		t.Fatal("untrusted runner admitted")
+	}
+}
+
+func TestOperatorCorrectionReviewTagStrictChronology(t *testing.T) {
+	issued := time.Date(2026, 10, 7, 20, 31, 36, 0, time.UTC)
+	expires := issued.Add(7 * 24 * time.Hour)
+	targetTime := issued.Add(time.Minute)
+	// This test targets chronology only; signature validation is a separate
+	// mandatory check before this helper is used by publication admission.
+	object := func(tagTime time.Time) []byte {
+		return []byte(fmt.Sprintf("object %s\ntype commit\ntag %s\ntagger MARS-3 Release Manager <release-manager@example.com> %d +0000\n\n%s\n-----BEGIN SSH SIGNATURE-----\nfixture\n-----END SSH SIGNATURE-----\n", strings.Repeat("a", 40), operatorCorrectionReviewTag, tagTime.Unix(), operatorCorrectionReviewMessage))
+	}
+	if err := validatePlanningGrantTagChronology(object(targetTime.Add(time.Second)), issued, expires, targetTime); err != nil {
+		t.Fatal(err)
+	}
+	for _, when := range []time.Time{issued.Add(-time.Second), targetTime, expires} {
+		if validatePlanningGrantTagChronology(object(when), issued, expires, targetTime) == nil {
+			t.Fatal("invalid recovery chronology admitted")
+		}
+	}
+}

@@ -151,3 +151,146 @@ pending signed candidate publication, exact-head CI, ordered independent QA and
 Security review, accepted merge, and protected-main readback. No canonical
 workspace read, claim, lease, lifecycle mutation, or active-plan advancement was
 performed. This entry is local Git evidence, not a canonical gateway RUN record.
+
+## Post-merge readback and missing-review exception, 2026-09-19
+
+The owner reported merging PR #18 and explicitly authorized protected-main
+verification and recording the review-gate exception. GitHub readback found
+PR #18 merged at 2026-09-19T17:13:07Z as
+`779ce8d585743fccf7abdc55631a1e9323516cfb`, the current protected main head.
+Its sole parent is the grant base
+`ee0ef97e1a3c246e342ef3f467c3b95947a327b5`. Its tree
+`e63e7e58e35034110a9d895281b646553a3a4bfd` equals candidate
+`a8153480a7927c2eb7d77ea0d0ba36d85573930e`. Retained review tag object
+`4f6ce48322d000d17aabb38cf3473c07e87456e1` targets that candidate.
+
+PR Foundation quality run/job `35457245192`/`105934609998` passed.
+Protected-main push run/job `35457395834`/`105935006502` passed at the exact
+merge commit, including doctrine, plan, documentation, public-content, test/vet,
+whitespace, scanner-canary, worktree-scan, and history-scan steps.
+
+At readback, the PR reviews and comments collections were empty. No ordered
+independent QA acceptance followed by Security acceptance was recorded before
+merge. Successful CI and tree equality do not satisfy or waive that signed
+requirement. This is a missing-pre-merge-review exception, not an accepted
+completion, retroactive authorization, or a claim that reviewers rejected the
+candidate. A later review cannot change the historical ordering.
+
+Local publication disposition: `blocked` pending independent QA then Security
+review of the immutable merged tree and an explicit prospective recovery
+resolution. This is not a canonical gateway RUN record. No canonical work,
+lease, profile execution, or plan advancement occurred. Historical refs remain
+unchanged. This evidence addition is uncommitted; a corrective Git publication
+must preserve the original candidate and exception history.
+
+## Independent post-merge QA verdict, 2026-09-19
+
+A separate reviewer, not the implementing agent, returned `changes-requested`
+for candidate `a8153480a7927c2eb7d77ea0d0ba36d85573930e`, tree
+`e63e7e58e35034110a9d895281b646553a3a4bfd`.
+
+P1: `internal/authority/operator/operator.go:773` sets PostgreSQL pool capacity
+to two. The claim path retains a project-barrier transaction and a work-lock
+transaction while acquiring a third transaction for saga lookup. The third
+acquisition cannot succeed before cancellation, so an otherwise valid claim
+can time out after consuming its one-attempt authorization. References:
+`internal/authority/gateway/claim.go:205` and
+`internal/authority/postgres/store.go:398` at the immutable candidate.
+
+The reviewer reproduced the production store's Enter -> EnterWork -> Lookup
+sequence with a bounded transaction-pool double in a disposable fixture.
+Capacity two returned context deadline exceeded; capacity three completed
+lookup. No database connection was made. This is a targeted reproduction, not
+a successful end-to-end signed CLI run against disposable real backends.
+
+Required correction: sufficient pool capacity for the nested transaction
+sequence, with a composition regression tied to the launcher's configuration.
+No correction has been applied. Focused operator, CLI admission, gateway
+claim/lease, recovery-validator, signature/tag chronology, and whitespace
+checks passed during review. Existing full-gate and CI results were supplied
+context, not independently re-fetched by the reviewer.
+
+Security review has not started because QA has not accepted this candidate.
+This post-merge verdict does not cure the historical missing-pre-merge-review
+exception or authorize canonical operations. This addition remains local,
+uncommitted evidence; the matching PR comment records the public disposition.
+
+## Owner-approved QA correction, 2026-09-19
+
+The owner approved fixing the reported pool-capacity defect and adding
+regression coverage. The local operator now configures three connections,
+retaining both claim locks while a third transaction performs store work.
+The new TestLocalPostgresConfigSupportsClaimTransactions exercises production
+Enter -> EnterWork -> Lookup methods using a bounded pool double and the actual
+launcher configuration. Its negative case specifies the prior two-connection
+timeout; its positive case specifies successful lookup and complete capacity
+release without releasing the locks prematurely. Linked feature and architecture
+records describe the correction and the fixture's limits.
+
+The correction is local and uncommitted. The new regression has not been run in
+this correction turn. No passing-test or review-acceptance claim is made here.
+The prior candidate, review tag, merge, and QA changes-requested verdict remain
+unchanged. Fresh qualification and QA acceptance are required before Security
+review; corrective publication must preserve the historical ordering exception.
+No canonical access, claim, lease, or plan advancement occurred.
+
+## Signed prospective v2 correction, 2026-10-07
+
+The owner explicitly approved signing the prepared eleven-path grant and
+continuing qualification and publication. W-001-operator-correction-v2 binds
+base 779ce8d585743fccf7abdc55631a1e9323516cfb and tree
+e63e7e58e35034110a9d895281b646553a3a4bfd. Its exact document SHA256 is
+cf661e03a44968bc48e7564988f6987264f95b6f91d27890031c7054adb90267.
+The pinned agent-backed Ed25519 signer produced a detached signature in namespace
+mars3-w001-operator-correction-v2; signature verification passed. The window is
+2026-10-07T20:31:36Z through 2026-10-14T20:31:36Z. The existing local correction
+was retained on codex/w-001-operator-correction-v2 from that exact base.
+
+Qualification before publication-validator changes found an older admission
+assertion still expecting two connections. Correcting that assertion to three
+made the operator and CLI suites pass with count=1, including the production-store
+capacity regression. Focused vet and whitespace checks passed. These are focused
+results, not a full publication or independent acceptance verdict.
+
+V2 publication admission pins the new signed bytes and reuses publication
+mechanics while retaining separate historical checks for V1 and the PR #16
+lineage. The active plan and manifest identify the current correction and the
+unresolved historical review exception. Full public gate, immutable candidate
+CI, ordered independent review and accepted corrective publication remain
+pending. No canonical store or lease operation occurred.
+
+### V2 fixture restoration and qualification
+
+The first complete-gate attempt passed doctrine, plan, docsync and public-content
+checks, then the Beads integration test failed because the previously disposable
+native executable was no longer present. The retained candidate binary's SHA256
+still matched 7325651446eb58de6e80c11e00647286de04da0940e590debb90eaa8704eb0f0.
+A new disposable executable copy was created without accessing canonical stores
+or changing the client source. The Beads package integration suite then passed
+with count=1. This restores the fixture prerequisite; it is not runtime authority
+or independent acceptance of the native client.
+
+V1 and V2 focused publication regressions passed with count=1. The pinned
+scanner canary detected one synthetic leak with expected exit status 1; worktree
+and history scans both returned zero with no findings. The history scan covered
+153 commits at this point. A separate QA reviewer is inspecting the local
+correction as a preliminary review; final acceptance must bind the immutable
+signed candidate after public CI. The first complete suite's missing-fixture
+failure remains recorded; the complete gate will be rerun with the restored
+fixture before any corrective commit or push.
+
+### V2 local gate and preliminary independent QA
+
+The corrected complete public gate passed with the restored native fixture:
+doctrine, plan, docsync, public-content checks, go test ./..., go vet ./...,
+whitespace, and pinned worktree/history secret scans. Some unchanged Go package
+results were cached; the restored native integration package ran successfully.
+No canonical database was used.
+
+A separate QA reviewer previewed the correction and found no blocking issue.
+The reviewer confirmed production-store capacity requirements, regression
+coverage of starvation and lock retention, preservation of V1 publication
+checks, and the retained historical review exception. The preview used static
+inspection and read-only Git checks, not independent runtime qualification.
+It is not final acceptance of an immutable published candidate. Final QA and
+Security verdicts must bind the same signed candidate after public CI.

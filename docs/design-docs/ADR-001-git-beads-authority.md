@@ -331,3 +331,23 @@ one signed W-001 bootstrap scope, a missing or expired live lease prevents
 external writes. Neither prevents a public clone from understanding product
 intent. A Git/Beads/lease mismatch produces an explicit reconciliation
 incident; no side silently wins.
+
+### Operator pool capacity correction after PR #18
+
+The local operator permits three PostgreSQL connections per invocation. Claim
+composition retains two lock transactions (project barrier and work lock), so
+saga lookup and subsequent store operations need a third connection. The limit
+must accommodate this nesting rather than releasing either authority lock early.
+A bounded-pool regression uses the production store and launcher configuration;
+it reproduces starvation at the former limit of two without database access.
+This corrects resource admission only, not gateway policy or canonical authority.
+
+### Signed v2 source correction publication
+
+The owner-approved eleven-path correction uses shared publication mechanics
+with separate pinned V1 and V2 documents, scopes, windows, bases, branches and
+review tags. V2 admission also validates the retained V1 grant and signed
+candidate, immutable tag, prior squash ancestry and tree. Historical validation
+uses historical times; active correction authority still expires. Source
+publication does not grant canonical execution authority. PR #18's missing
+pre-merge reviews remain an exception requiring a prospective accepted correction.
