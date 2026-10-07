@@ -9370,6 +9370,13 @@ func checkW001TerminalReconciliationGitDiff(root string, findings *[]Finding) {
 }
 
 func checkTicketLifetimeCorrectionGitDiff(root string, findings *[]Finding) {
+	if _, err := readRepoFile(root, standingDeliveryTransitionPath); err == nil {
+		checkOperatorPublicationGitDiff(root, findings, standingDeliveryTransitionPublication(root))
+		return
+	} else if !errors.Is(err, os.ErrNotExist) {
+		addFinding(findings, standingDeliveryTransitionPath, "public.standing_delivery_access", "standing delivery source transition must be readable")
+		return
+	}
 	if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(operatorCorrectionGrantPath))); err == nil {
 		checkOperatorPublicationGitDiff(root, findings, operatorCorrectionPublication())
 		return
@@ -15363,4 +15370,67 @@ func operatorCorrectionRetainedHistory(root string, publicKey []byte) error {
 		return errors.New("retained v1 squash topology invalid")
 	}
 	return nil
+}
+
+const standingDeliveryTransitionPath = ".harness/grants/standing-delivery-source-transition-v1.yaml"
+
+func VerifyStandingDeliverySignature(document, signature []byte) error {
+	if len(document) == 0 || len(document) > 65536 || len(signature) == 0 || len(signature) > 4096 {
+		return errors.New("standing delivery signature denied")
+	}
+	publicKey := []byte("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGEG9tVIYixGqx/Kl4Ag53SbGWnIMj7HIrHs0+0EYaMl")
+	if verifySSHSig(document, signature, publicKey, "mars3-standing-delivery-v1") != nil {
+		return errors.New("standing delivery signature denied")
+	}
+	return nil
+}
+
+func standingDeliveryTransitionPublication(root string) operatorPublicationSpec {
+	document, _ := readRepoFile(root, standingDeliveryTransitionPath)
+	values := yamlScalars(document)
+	issued, _ := time.Parse(time.RFC3339, values["grant.issuedAt"])
+	expires, _ := time.Parse(time.RFC3339, values["grant.expiresAt"])
+	return operatorPublicationSpec{
+		grantPath:     standingDeliveryTransitionPath,
+		digest:        "15bba5a524c7de7db7e3ee9956d9cc4521b6808d8610b29b9b5f70f4c645e482",
+		namespace:     "mars3-standing-delivery-source-transition-v1",
+		base:          "72e5bbc9a5c0975ebaf12487d50e096c9049b4a4",
+		baseTree:      "266f42ac2321bdd08d2d13184c83f7432d66db6e",
+		branch:        "codex/standing-delivery-delegation",
+		reviewTag:     "mars3/standing-delivery-source-transition-v1",
+		reviewMessage: "MARS-3 standing delivery source transition attestation v1",
+		findingPrefix: "public.standing_delivery_transition_",
+		issued:        issued, expires: expires,
+		paths: []string{
+			standingDeliveryTransitionPath, standingDeliveryTransitionPath + ".sig",
+			"internal/authority/delegation/delegation.go", "internal/authority/delegation/delegation_test.go",
+			"internal/doctrine/grant.go", "internal/doctrine/grant_test.go",
+			"docs/features/F-002-work-authority.md", "docs/design-docs/ADR-008-standing-delivery-delegation.md",
+			"docs/design-docs/ADR-001-git-beads-authority.md", "docs/exec-plans/active/current-operating-plan.md",
+		},
+		retainedHistory: standingDeliveryTransitionRetainedHistory,
+	}
+}
+
+func standingDeliveryTransitionRetainedHistory(root string, publicKey []byte) error {
+	if err := operatorCorrectionRetainedHistory(root, publicKey); err != nil {
+		return err
+	}
+	tagObject, err := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+operatorCorrectionPublication().reviewTag+"^{tag}")
+	if err != nil || !standingDeliveryHistoricalTagObjectValid(string(tagObject)) {
+		return errors.New("accepted correction tag object changed or missing")
+	}
+	target, err := operatorPublicationReviewTarget(root, publicKey, operatorCorrectionPublication())
+	if err != nil || target != "f83975c37135189f5e1c1ca2ae706b6160161297" {
+		return errors.New("accepted correction history missing")
+	}
+	object, err := planningGrantGitOutput(root, "cat-file", "commit", target)
+	if err != nil || verifyPlanningGrantCommit(object, publicKey) != nil {
+		return errors.New("accepted correction signature missing")
+	}
+	return nil
+}
+
+func standingDeliveryHistoricalTagObjectValid(objectID string) bool {
+	return strings.TrimSpace(objectID) == "ca32502facd6be6fc5f56d578f2f09f6b2568962"
 }

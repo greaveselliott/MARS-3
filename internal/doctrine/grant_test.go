@@ -4839,6 +4839,20 @@ func TestOperatorCorrectionGrantExactDocumentAndSignature(t *testing.T) {
 	}
 }
 
+func TestStandingDeliveryRetainsExactHistoricalTagObject(t *testing.T) {
+	const accepted = "ca32502facd6be6fc5f56d578f2f09f6b2568962"
+	if !standingDeliveryHistoricalTagObjectValid(accepted + "\n") {
+		t.Fatal("accepted historical tag object rejected")
+	}
+	// A replacement tag has a different object ID even when it is signed by
+	// the same owner, retains the target and changes only its timestamp.
+	for _, replacement := range []string{"", strings.Repeat("a", 40), accepted + accepted, "f83975c37135189f5e1c1ca2ae706b6160161297"} {
+		if standingDeliveryHistoricalTagObjectValid(replacement) {
+			t.Fatal("replacement or missing historical tag object admitted")
+		}
+	}
+}
+
 func TestOperatorCorrectionGrantWindowAndScope(t *testing.T) {
 	issued := time.Date(2026, 10, 7, 20, 31, 36, 0, time.UTC)
 	expires := issued.Add(7 * 24 * time.Hour)
