@@ -2,6 +2,84 @@
 
 ### Standing delivery contract admission foundation
 
+#### Operational runtime candidate (not activated)
+
+Given installed protected inputs, `mars3-authority operator-delegated` uses
+the signed runtime profile, a separately signed operational v2 parent,
+separately signed activation and authenticated role session, plus one typed
+request. Required flags are `--profile`, `--activation`, `--delegation`,
+`--session` and `--request`. Missing inputs, extra positionals and unknown
+flags deny. This command discovers or provisions no protected resource.
+
+The three operational signature namespaces are respectively
+`mars3-standing-delivery-runtime-v2`,
+`mars3-standing-delivery-activation-v2` and
+`mars3-standing-delivery-session-v2`. The old v1 contract remains data-only.
+Source-transition and v1 signatures cannot authenticate operational objects.
+All objects use canonical JSON without a trailing newline. Parent validity
+is at most thirty days; activation at most seven days within its parent;
+session at most one hour within its parent; request at most five minutes
+within its session. Execution is additionally bounded by the protected
+profile and activation expiry. Replacing activation cannot extend an already
+issued execution deadline.
+
+Given an authenticated session, the factory derives only the exact capability
+bundle required by the action from its parent role assignment. An individual request needs no
+owner signature. Implementation, QA, Security and Orchestrator operation
+classes are disjoint; no principal or profile may cross those role classes.
+The operator never treats a model-selected identity as authentication.
+Role classes must match canonical profiles: `qa` maps only to QA,
+`security-reviewer` only to Security, and `delivery-orchestrator` only to
+Orchestrator. Those profiles cannot be disguised as implementation or another
+review class. Principal separation is checked only after this canonical
+binding, so one principal cannot satisfy both reviewers by assigning them the
+same declared class. Even a correctly signed invalid parent denies before
+replay consumption or a production-gateway call.
+Protected role-session delivery to independent workers remains a trusted
+operator responsibility; a role label alone does not prove independence.
+
+Before any gateway read or mutation, the durable replay adapter consumes an
+identity scoped to tenant, project, parent digest and request ID. Changing
+request bytes, role or operation does not evade reuse of that ID. Persistence
+uncertainty denies, and a failed backend attempt remains consumed. Revocation,
+expiry or cancellation after consumption denies before gateway dispatch.
+
+Handoff includes permission to release only its exact presented lease as part
+of that action. A parent may explicitly allow `work.reclaim`: the trusted
+factory then uses the gateway's control-plane reconciliation solely for an
+existing in-progress claim owned by the authenticated profile, retaining its
+canonical claim-attempt provenance. Backlog bootstrap, ownership transfer,
+wrong provenance and replacement of an active lease deny. Same-Bead requested
+changes may resume under a newer bounded epoch without another owner prompt.
+This does not expose the unrestricted control-plane route over public HTTP.
+
+The operator reloads protected activation before dispatch and compares the
+accepted contract digest, feature and exact paths against the parent scope.
+Gateway work must match tenant/project, Bead, feature and paths. Claims and
+fences must match the activation's current accepted source base, not the
+operator release base. The gateway still owns version/dependency readiness,
+claim/lease acquisition, full fence checks and lifecycle/review ordering.
+Ready results are restricted to the authenticated session's one scoped Bead.
+Canonical directory scopes preserve their signed trailing slash and admit only
+safe descendants, never prefix siblings, traversal or Git metadata paths.
+
+Typed routes cover `work.get`, `work.ready`, `work.claim`, `work.reclaim`, `lease.renew`,
+`lease.release`, `effect.validate`, `work.handoff`, `review.record`,
+`run.disposition`, `work.reconcile` and `work.close`. This synthetic effect
+validation remains a point-in-time check, not an external-effect broker or a
+reusable effect capability. No production/release, destructive, credential
+discovery, spending or direct-store operation is admitted by this route.
+
+The prospective runtime source grant binds eighteen exact paths and immutable
+dates to its signed digest. It retains accepted PR #21's exact signed tag
+object and all earlier accepted/rejected history. Local regressions, signed
+namespace probes, a real-gateway read/denial bridge and the public gate passed
+as recorded in `docs/evidence/standing-delivery-runtime.md`. Positive delegated
+claim/lease, ordered lifecycle and same-owner correction integration also
+passed using disposable synthetic stores and the real gateway. Immutable
+publication and independent acceptance remain pending. No live activation or canonical
+mutation is asserted.
+
 The source-publication window is pinned to the exact signed grant digest:
 2026-10-07T22:16:16Z inclusive through 2026-10-14T22:16:16Z exclusive.
 Unsigned first-read dates cannot widen it when a later read authenticates a
@@ -603,3 +681,23 @@ and identical signed trees. V1 grant bytes, signatures, candidate ancestry,
 chronology and tag objects remain independently checked as historical evidence.
 QA must accept the correction before Security review and accepted merge; the
 prior missing-review exception remains recorded.
+# Runtime expiry construction regression
+
+Standing runtime admission and replacement-activation dispatch contexts use
+absolute signed expiry deadlines, never a relative timeout calculated from an
+earlier clock sample. Given a scheduling gap after an honest time sample that
+crosses initial or shortened replacement expiry, no dispatch is admitted.
+An earlier caller deadline remains effective; activation replacement cannot
+extend an already issued context. These synthetic regressions do not assert
+canonical execution or operational activation.
+
+## Sensitive absolute-deadline recovery regression
+
+The dispatch context deadline must not exceed the signed replacement activation
+expiry. A scheduling gap at the rejected implementation's relative-construction
+sample must expose that bound violation; denial at an earlier validation sample
+is not a sensitive regression. Initial replay admission must likewise receive
+no deadline beyond signed activation expiry. Both regressions must fail against
+the immutable rejected V2 implementation and pass against the corrected runtime.
+The owner-approved test recovery freezes runtime bytes at the rejected V3
+preimage and grants no operational authority.

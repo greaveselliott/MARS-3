@@ -9370,6 +9370,13 @@ func checkW001TerminalReconciliationGitDiff(root string, findings *[]Finding) {
 }
 
 func checkTicketLifetimeCorrectionGitDiff(root string, findings *[]Finding) {
+	if _, err := readRepoFile(root, standingRuntimeSourcePath); err == nil {
+		checkOperatorPublicationGitDiff(root, findings, standingRuntimePublication())
+		return
+	} else if !errors.Is(err, os.ErrNotExist) {
+		addFinding(findings, standingRuntimeSourcePath, "public.standing_runtime_access", "runtime source transition must be readable")
+		return
+	}
 	if _, err := readRepoFile(root, standingDeliveryTransitionPath); err == nil {
 		checkOperatorPublicationGitDiff(root, findings, standingDeliveryTransitionPublication(root))
 		return

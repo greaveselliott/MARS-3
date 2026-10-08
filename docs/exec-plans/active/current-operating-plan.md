@@ -2,14 +2,100 @@
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
-**Updated:** 2026-10-07
+**Updated:** 2026-10-08
 **Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
 **Current Bead:** M3-W001 (display ID W-001)
 **Authority:** Beads/Dolt for work state; Git for this durable plan
 
-## Current standing-delivery source transition
+## Current standing-delivery runtime implementation
+
+PR #21 merged as `880af5ddbc40d09ebe45af2cf0aec5b8a7286193`, retaining
+reviewed tree `7849d50fedcd8fc8794f5c7617f46a9ed3ae77f8`. Candidate CI
+`37701235027` and protected-main CI `37701757022` passed. Independent QA
+and subsequent Security accepted the same immutable candidate. Public
+protected-main readback is recorded on PR #21. The prior source-transition
+grant is consumed; the section below is retained candidate-time history.
+
+The owner-directed activation now proceeds under separately signed
+`standing-delivery-runtime-source-v1`, from that accepted main on
+`codex/standing-delivery-runtime`, valid 2026-10-07T23:32:36Z inclusive through
+2026-10-14T23:32:36Z exclusive. It names eighteen exact source paths and permits
+implementation, synthetic qualification, signed publication, ordered review,
+accepted merge and main readback. It permits no canonical execution, private
+profile or credential discovery, new private resources, live claim or lease.
+
+PD-005 and ADR-008 define the next implementation's acceptance boundary:
+distinct operational delegation, trusted profile/role/operation binding,
+short-lived exact-request admission, durable replay, expiry/revocation checks
+and gateway-only canonical transitions. Existing v1 contract signatures remain
+non-operational. The operator implementation and regression candidate now
+cover protected activation/session admission, durable replay, current
+scope/source-base checks, and typed gateway read, claim, lease and lifecycle
+dispatch. Focused regressions, the complete local public gate and signed
+namespace probes passed. A signed synthetic read reached the real gateway;
+the gateway also denied claims without its claim/lease substrate. Detailed
+bounded outcomes are recorded in `docs/evidence/standing-delivery-runtime.md`.
+These are locally qualified source results, not accepted runtime authority.
+Positive delegated claim/lease, ordered lifecycle and same-owner correction
+integration now pass with disposable synthetic stores and the real gateway.
+Directory scopes and action-bound capability bundles retain normal gateway
+semantics without widening signed operations. The next action is the final
+publication gate, immutable candidate/tag,
+exact-head CI and independent QA then Security. An accepted PR must merge
+before the next delivery step.
+
+PR #22 at `031a792970452fb859fee7dce65e7bc37d133420` passed exact-head
+CI `37706308491` / job `113081395802`, but independent QA reproduced
+`standing_delivery.role_class_canonical_profile_mismatch`: one principal
+could satisfy both canonical reviewers under declared class QA. The PR is
+closed without merge; its v1 tag object
+`6a91a2d0600e2634aa53cf932d3b7ed3f28c5b89`, CI and QA disposition
+`https://github.com/greaveselliott/MARS-3/pull/22#issuecomment-6049474538`
+remain immutable unaccepted evidence. Security did not review it.
+
+The bounded correction validates canonical profile/class mappings before
+principal separation and adds a production-gateway denial regression. It uses
+the existing signed source scope and a distinct v2 review tag. Fresh focused
+and full local qualification passed, as did byte-identical builds and a
+real-signature malformed-parent denial probe. Exact-head CI, QA then Security,
+accepted merge and protected-main
+readback remain required. This is not a new approval request or live authority.
+
+PR #23 at `7dbe1b718e585d43458a3e91f622481490ef70f4`, tree
+`943a97f4787833fb59c7456400e200ba26764207`, passed exact-head CI
+`37708418675` / `113088251542` and independent QA. Subsequent Security
+reproduced `standing_delivery.runtime_absolute_deadline_construction`:
+relative timeout construction could extend expiry during a scheduling gap.
+The PR is closed without merge; signed v2 tag object
+`099d8dbe63e46b0c479f3d4475126b1c2fa46612` and ordered verdicts remain
+immutable rejected evidence. The public disposition is
+`https://github.com/greaveselliott/MARS-3/pull/23#issuecomment-6049795320`.
+The one bounded correction uses absolute initial and replacement-activation
+deadlines with scheduling-gap regressions. It requires qualification, a distinct
+v3 tag, fresh CI and QA then Security before accepted merge/main readback.
+Equivalent recurrence stops automatic correction; no generic approval is
+requested for this first in-scope runtime deadline correction.
+
+PR #24 at `07c3930b1c074c8dbce5b943a8363e9a645859a4`, tree
+`9545c0dcbc98aeca0a202dd0efb54205a020ecfe`, passed final local qualification
+and exact-head CI `37709892361` / `113093085222`. QA requested changes for
+`standing_delivery.absolute_deadline_regression_not_sensitive`: new tests
+also pass with rejected V2, although an independent probe supports the V3
+implementation fix. The PR is closed without merge; signed v3 tag object
+`a8a3cb9fcffab0a6ec7eb5246d4d658dbcad3013`, CI and QA disposition remain
+rejected evidence. Security did not proceed. The bounded source run is blocked
+at its automatic runtime-deadline correction boundary, not a canonical Bead
+RUN. A deliberate test-design disposition must precede any further successor;
+no automatic patch, new PR, accepted merge or plan advancement is scheduled.
+
+No operational parent or protected runtime profile is installed, no live
+delegation is asserted, and P-001 remains unselected and unclaimed. Source
+acceptance will not substitute for the required protected activation and
+gateway readback.
+
+## Retained standing-delivery foundation candidate snapshot
 
 PR #19 merged as `72e5bbc9a5c0975ebaf12487d50e096c9049b4a4`, matching
 reviewed tree `266f42ac2321bdd08d2d13184c83f7432d66db6e` after ordered QA
@@ -622,3 +708,15 @@ authority while the lease service does not yet exist. Once self-hosted fencing
 exists, every mutation must pass the current authoritative state,
 exact required transition, allowed corrective action, and live epoch checks;
 the bootstrap grant is then unusable.
+
+## Current approved test-only recovery
+
+The owner explicitly approved the test-design recovery recorded on PR #24.
+`standing-delivery-runtime-test-recovery-v1` prospectively binds the rejected
+V3 preimage, nine exact test/publication/document paths, runtime-source freeze
+and the original source grant's remaining window. No prior rejection or blocked
+run is retroaccepted. Initial-admission and replacement-dispatch deadline-bound
+regressions must fail on rejected V2 and pass on the unchanged corrected runtime.
+Distinct V4 signed publication, exact-head CI, fresh QA then Security and accepted
+merge/protected-main readback remain required. Equivalent recurrence stops this
+recovery. P-001 selection and all operational activation remain outstanding.

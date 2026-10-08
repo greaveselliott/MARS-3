@@ -1,0 +1,59 @@
+schemaVersion: 1
+kind: MARS3StandingDeliveryRuntimeTestRecoveryGrant
+grant:
+  id: standing-delivery-runtime-test-recovery-v1
+  classification: PUBLIC
+  ownerDirective: approved-test-only-recovery-through-fresh-reviews-and-accepted-merge
+  issuedAt: 2026-10-08T05:31:22Z
+  expiresAt: 2026-10-14T23:32:36Z
+  repository: greaveselliott/MARS-3
+  branch: codex/standing-delivery-runtime
+  acceptedMainBase: 880af5ddbc40d09ebe45af2cf0aec5b8a7286193
+  acceptedMainTree: 7849d50fedcd8fc8794f5c7617f46a9ed3ae77f8
+  rejectedPreimage: 07c3930b1c074c8dbce5b943a8363e9a645859a4
+  rejectedPreimageTree: 9545c0dcbc98aeca0a202dd0efb54205a020ecfe
+  rejectedTagObject: a8a3cb9fcffab0a6ec7eb5246d4d658dbcad3013
+  priorSourceGrant: standing-delivery-runtime-source-v1
+  purpose: one-prospective-test-sensitivity-recovery-with-runtime-unchanged
+  finding: standing_delivery.absolute_deadline_regression_not_sensitive
+  canonicalExecutionAllowed: false
+  canonicalClaimAsserted: false
+  liveLeaseAsserted: false
+  autonomousMutation: false
+  endsAt: accepted-source-merge-and-protected-main-readback
+  authorizedPaths:
+    - .harness/grants/standing-delivery-runtime-test-recovery-v1.yaml
+    - .harness/grants/standing-delivery-runtime-test-recovery-v1.yaml.sig
+    - internal/authority/operator/delegated_test.go
+    - internal/doctrine/standing_runtime.go
+    - internal/doctrine/standing_runtime_test.go
+    - docs/features/F-002-work-authority.md
+    - docs/design-docs/ADR-008-standing-delivery-delegation.md
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/standing-delivery-runtime.md
+  allowedEffects:
+    - sensitive-deadline-bound-regressions-and-disposable-v2-negative-control
+    - prospective-recovery-admission-and-immutable-rejected-history-preservation
+    - truthful-contract-and-public-safe-evidence-updates
+    - complete-public-gate-and-reproducible-build-qualification
+    - existing-pinned-signing-agent-without-private-key-access
+    - owner-attributed-signed-candidate-and-distinct-v4-attestation
+    - exact-head-CI-independent-QA-then-Security
+    - accepted-source-merge-and-protected-main-readback
+  requiredInvariants:
+    - runtime-source-byte-identical-to-rejected-preimage
+    - no-retroactive-acceptance-or-rewrite-of-prior-grants-tags-or-verdicts
+    - sensitive-regressions-fail-on-v2-and-pass-on-corrected-candidate
+    - one-open-delivery-PR-and-accepted-merge-before-plan-advance
+    - prior-source-grant-window-and-source-only-boundaries-remain-binding
+  prohibitedEffects:
+    - runtime-behavior-change-or-source-scope-expansion
+    - canonical-execution-or-direct-authority-store-access
+    - private-resource-discovery-provisioning-or-new-signing-keys
+    - operational-activation-live-claim-or-lease-assertions
+    - production-release-destructive-spending-or-trust-escalation
+    - bypass-of-public-gates-or-independent-review
+  failurePolicy: stop-on-equivalent-recurrence-no-further-automatic-recovery
+integrity:
+  namespace: mars3-standing-delivery-runtime-test-recovery-v1
+  publicKey: .harness/keys/genesis-signing-key.pub

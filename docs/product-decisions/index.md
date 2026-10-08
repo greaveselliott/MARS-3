@@ -6,6 +6,7 @@
 | [PD-002](PD-002-git-beads-authority.md) | Accepted | Split durable product authority from mutable work authority. |
 | [PD-003](PD-003-provider-neutral.md) | Accepted | Separate hosted agent loops from open-model transports under factory authority. |
 | [PD-004](PD-004-standing-correction-authority.md) | Accepted | Carry one bounded ticket authorization through its correction and acceptance loop. |
+| [PD-005](PD-005-finite-plan-standing-delivery.md) | Proposed; non-operational | Admit finite-plan delivery through a trusted runtime, bounded roles and replay-safe requests without repeated routine owner prompts. |
 
 Superseding a decision requires a new decision record that names its owner,
 rationale, affected goals and scenarios, and migration consequences. Editing a
