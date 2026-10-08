@@ -82,8 +82,15 @@ the accepted binary/profile may remain stable while reviewed source advances.
 Updating the activation's source base is a trusted installer responsibility,
 not authority derived from a request or an unverified branch name.
 
-Role sessions bind one parent, principal, profile, role class and Bead. Only
-the trusted operator may deliver them to independently authenticated workers.
+Role sessions bind one parent, principal, profile, role class and Bead.
+Canonical profiles define independent review classes: `qa` is QA,
+`security-reviewer` is Security and `delivery-orchestrator` is Orchestrator.
+Class/profile disagreement denies before principal separation is evaluated.
+One principal cannot span those canonical profiles by giving them the same
+declared class. This corrects the independently reproduced PR #22 bypass;
+that rejected candidate remains preserved and closed without merge.
+
+Only the trusted operator may deliver sessions to independently authenticated workers.
 The factory derives an in-memory exact-operation admission from that session,
 the finite parent role assignment and canonical typed request. It does not
 publish a new reusable capability or require an owner signature per request.

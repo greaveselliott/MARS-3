@@ -46,6 +46,23 @@ publication gate, immutable candidate/tag,
 exact-head CI and independent QA then Security. An accepted PR must merge
 before the next delivery step.
 
+PR #22 at `031a792970452fb859fee7dce65e7bc37d133420` passed exact-head
+CI `37706308491` / job `113081395802`, but independent QA reproduced
+`standing_delivery.role_class_canonical_profile_mismatch`: one principal
+could satisfy both canonical reviewers under declared class QA. The PR is
+closed without merge; its v1 tag object
+`6a91a2d0600e2634aa53cf932d3b7ed3f28c5b89`, CI and QA disposition
+`https://github.com/greaveselliott/MARS-3/pull/22#issuecomment-6049474538`
+remain immutable unaccepted evidence. Security did not review it.
+
+The bounded correction validates canonical profile/class mappings before
+principal separation and adds a production-gateway denial regression. It uses
+the existing signed source scope and a distinct v2 review tag. Fresh focused
+and full local qualification passed, as did byte-identical builds and a
+real-signature malformed-parent denial probe. Exact-head CI, QA then Security,
+accepted merge and protected-main
+readback remain required. This is not a new approval request or live authority.
+
 No operational parent or protected runtime profile is installed, no live
 delegation is asserted, and P-001 remains unselected and unclaimed. Source
 acceptance will not substitute for the required protected activation and

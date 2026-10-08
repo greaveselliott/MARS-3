@@ -60,3 +60,14 @@ func TestStandingRuntimePublicationWindowHasImmutableDates(t *testing.T) {
 		t.Fatal("runtime transition lost accepted base or distinct tag")
 	}
 }
+
+func TestStandingRuntimeRetainsRejectedCandidateAndDistinctSuccessorTag(t *testing.T) {
+	spec := standingRuntimePublication()
+	if spec.reviewTag != "mars3/standing-delivery-runtime-v2" || spec.reviewMessage != "MARS-3 standing delivery runtime source attestation v2" {
+		t.Fatal("corrected runtime candidate reused rejected attestation")
+	}
+	if !standingRuntimeRejectedTagObjectValid("6a91a2d0600e2634aa53cf932d3b7ed3f28c5b89\n") ||
+		standingRuntimeRejectedTagObjectValid("0000000000000000000000000000000000000000") {
+		t.Fatal("rejected runtime evidence can be replaced")
+	}
+}

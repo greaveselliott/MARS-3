@@ -28,6 +28,13 @@ bundle required by the action from its parent role assignment. An individual req
 owner signature. Implementation, QA, Security and Orchestrator operation
 classes are disjoint; no principal or profile may cross those role classes.
 The operator never treats a model-selected identity as authentication.
+Role classes must match canonical profiles: `qa` maps only to QA,
+`security-reviewer` only to Security, and `delivery-orchestrator` only to
+Orchestrator. Those profiles cannot be disguised as implementation or another
+review class. Principal separation is checked only after this canonical
+binding, so one principal cannot satisfy both reviewers by assigning them the
+same declared class. Even a correctly signed invalid parent denies before
+replay consumption or a production-gateway call.
 Protected role-session delivery to independent workers remains a trusted
 operator responsibility; a role label alone does not prove independence.
 

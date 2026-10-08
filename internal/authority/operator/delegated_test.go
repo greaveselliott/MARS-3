@@ -822,6 +822,7 @@ func TestStandingCanonicalEncodingAndProductionSignaturesFailClosed(t *testing.T
 func TestStandingReadyDoesNotExposeOtherBeads(t *testing.T) {
 	fixture := newStandingFixture(t)
 	fixture.parent.Roles[0].Class, fixture.session.Class = "orchestrator", "orchestrator"
+	fixture.parent.Roles[0].ProfileID, fixture.session.ProfileID = "delivery-orchestrator", "delivery-orchestrator"
 	fixture.parent.Roles[0].Operations = []string{"work.ready"}
 	fixture.request.Operation = "work.ready"
 	fixture.request.Mutation = nil
@@ -843,7 +844,7 @@ func TestStandingRoleClassesRemainDisjoint(t *testing.T) {
 	for _, identity := range []string{"principal", "profile"} {
 		t.Run(identity, func(t *testing.T) {
 			fixture := newStandingFixture(t)
-			role := StandingRole{Bead: "M3-P001", PrincipalID: "synthetic-reviewer", ProfileID: "qa-engineer", Class: "qa", Operations: []string{"review.record"}}
+			role := StandingRole{Bead: "M3-P001", PrincipalID: "synthetic-reviewer", ProfileID: "qa", Class: "qa", Operations: []string{"review.record"}}
 			if identity == "principal" {
 				role.PrincipalID = fixture.session.PrincipalID
 			} else {
@@ -854,6 +855,57 @@ func TestStandingRoleClassesRemainDisjoint(t *testing.T) {
 				t.Fatal("one identity acquired implementation and review roles")
 			}
 		})
+	}
+}
+
+// Regression for independent QA's production-gateway reproduction. A signed
+// parent is still invalid when its declared class masks canonical profiles.
+func TestStandingCanonicalReviewerProfilesCannotShareOneQAClassPrincipal(t *testing.T) {
+	fixture := newStandingFixture(t)
+	fixture.parent.Roles = append(fixture.parent.Roles,
+		StandingRole{Bead: "M3-P001", PrincipalID: "synthetic-qa", ProfileID: "qa", Class: "qa", Operations: []string{"review.record"}},
+		StandingRole{Bead: "M3-P001", PrincipalID: "synthetic-qa", ProfileID: "security-reviewer", Class: "qa", Operations: []string{"review.record"}},
+		StandingRole{Bead: "M3-P001", PrincipalID: "synthetic-orchestrator", ProfileID: "delivery-orchestrator", Class: "orchestrator", Operations: []string{"work.close"}})
+	work := standingCopy(fixture.backend.work)
+	work.DisplayID, work.NativeStatus, work.LifecycleState = "P-001", "open", authorityv1.LifecycleBacklog
+	work.GoalIDs, work.ProductDecisionIDs = []string{"G-001"}, []string{"PD-002"}
+	work.ScenarioIDs, work.VerificationOrder = []string{"F-003-S1"}, []string{"qa", "security-reviewer", "delivery-orchestrator"}
+	work.Labels = []authorityv1.Label{authorityv1.LabelPublicAccepted}
+	work.Version = authorityv1.WorkVersion{AuthorityGeneration: "synthetic-authority", IssueIncarnation: "synthetic-incarnation", IssueMutationSequence: 1, DependencyGraphRevision: 1}
+	work.Integrity = authorityv1.IntegrityDigests{Lineage: strings.Repeat("1", 64), DependencyOutcomes: strings.Repeat("2", 64), Blockers: strings.Repeat("3", 64), ExclusivePaths: strings.Repeat("4", 64)}
+	fixture.request.Mutation.Claim.ExpectedVersion, fixture.request.Mutation.Claim.ExpectedIntegrity = work.Version, work.Integrity
+	canonical := &standingDeliveryWork{work: work}
+	leases := &standingDeliveryLeases{sagas: map[string]gateway.ClaimSaga{}, now: func() time.Time { return fixture.now }}
+	events := &standingEventFixture{}
+	service, err := gateway.NewWithClaims(canonical, leases, events, func() time.Time { return fixture.now })
+	if err != nil {
+		t.Fatal(err)
+	}
+	fixture.gate.gateway = &lazyReadGateway{service: service, mutations: true}
+	if _, err := fixture.execute(t); !errors.Is(err, ErrAuthorization) || canonical.claimCalls != 0 || canonical.lifecycleCalls != 0 || leases.epoch != 0 || len(events.events) != 0 || len(fixture.replays.used) != 0 {
+		t.Fatalf("one principal reached the production gateway with two canonical review profiles: %v", err)
+	}
+}
+
+func TestStandingRoleClassIsDerivedFromCanonicalProfile(t *testing.T) {
+	for _, test := range []struct {
+		profile, class string
+		valid          bool
+	}{
+		{"qa", "qa", true}, {"security-reviewer", "security", true}, {"delivery-orchestrator", "orchestrator", true}, {"platform-engineer", "implementation", true},
+		{"qa", "security", false}, {"qa", "implementation", false}, {"security-reviewer", "qa", false}, {"security-reviewer", "implementation", false},
+		{"delivery-orchestrator", "qa", false}, {"delivery-orchestrator", "implementation", false}, {"platform-engineer", "qa", false}, {"qa-engineer", "qa", false},
+	} {
+		if standingCanonicalRoleMatches(StandingRole{ProfileID: test.profile, Class: test.class}) != test.valid {
+			t.Fatalf("profile %q class %q mapping drifted", test.profile, test.class)
+		}
+	}
+	fixture := newStandingFixture(t)
+	fixture.parent.Roles = append(fixture.parent.Roles,
+		StandingRole{Bead: "M3-P001", PrincipalID: "synthetic-shared-reviewer", ProfileID: "qa", Class: "qa", Operations: []string{"review.record"}},
+		StandingRole{Bead: "M3-P001", PrincipalID: "synthetic-shared-reviewer", ProfileID: "security-reviewer", Class: "security", Operations: []string{"review.record"}})
+	if _, err := fixture.execute(t); !errors.Is(err, ErrAuthorization) || fixture.backend.reads != 0 {
+		t.Fatal("canonical class names allowed one principal to span independent reviewers")
 	}
 }
 

@@ -1,6 +1,6 @@
 # Standing delivery runtime candidate evidence
 
-**Status:** Local and mutation-integration qualification passed; publication and acceptance pending
+**Status:** V1 rejected by QA; V2 locally qualified, fresh independent acceptance pending
 **Goal:** G-001
 **Feature:** F-002
 **Decision:** PD-005 (proposed)
@@ -20,6 +20,38 @@ object is `12d832740cae5a32331b24089e10528d417ed4af`; the rejected PR #20
 v1 object and earlier reviewed lineage remain retained, not retroaccepted.
 
 ## Implementation candidate
+
+PR #22's immutable v1 candidate is rejected, not accepted source:
+head `031a792970452fb859fee7dce65e7bc37d133420`, tree
+`d49c8a4900cee6e91b9039b29cab44943d08f15b`, tag object
+`6a91a2d0600e2634aa53cf932d3b7ed3f28c5b89`. Exact-head run/job
+`37706308491` / `113081395802` passed. Independent QA then reproduced
+P1 `standing_delivery.role_class_canonical_profile_mismatch`: one principal
+could hold QA and Security canonical profiles with both declared class QA,
+pass both production-gateway reviews and close the synthetic Bead.
+
+The [public QA disposition](https://github.com/greaveselliott/MARS-3/pull/22#issuecomment-6049474538)
+records the finding. PR #22 closed without merge before a successor opened;
+its head, signed tag and CI remain immutable. Security did not run and no
+activation is accepted.
+
+The V2 correction binds canonical profile/class pairs before principal
+separation. QA, Security and Orchestrator profiles cannot masquerade as another
+class. A negative production-gateway regression rejects the reproduced parent
+before replay consumption, gateway events, claim CAS or lease issuance.
+Distinct correctly declared QA/Security classes also reject a shared principal.
+The historical V1 qualification below does not accept its rejected tree.
+V2 focused tests and the complete local public gate passed, including the
+124.682-second complete doctrine suite and scanner canary/worktree/history
+checks. Two corrected builds were byte-identical, SHA-256
+`2a8aa075d53b22364ae233c0c1c49aefa347abbdd8519b2369eec95337459ad7`.
+A separate synthetic probe verified real owner signatures on the malformed
+parent and its session, then confirmed denial before activation lookup,
+replay consumption or gateway access. This is policy rejection of an
+authenticated invalid assignment, not a forgery test.
+
+V2 still requires a distinct signed tag, exact-head CI, fresh QA then
+Security, accepted merge and main readback inside the original signed scope.
 
 - Distinct operational parent, activation and authenticated role-session kinds
   and signature namespaces; v1 remains non-operational data.

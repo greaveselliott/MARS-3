@@ -304,6 +304,9 @@ func validStandingParent(parent StandingRuntime, runtime RuntimeBinding, now tim
 	}
 	identities, assignments := map[string]string{}, map[string]bool{}
 	for _, role := range parent.Roles {
+		if !standingCanonicalRoleMatches(role) {
+			return false
+		}
 		_, found := standingScope(parent.Scopes, role.Bead)
 		if !found || !standingIdentifierPattern.MatchString(role.PrincipalID) || !standingIdentifierPattern.MatchString(role.ProfileID) || len(role.Operations) == 0 || len(role.Operations) > 12 {
 			return false
@@ -344,6 +347,21 @@ func standingClassAllows(class, operation string) bool {
 		return slices.Contains([]string{"work.ready", "run.disposition", "work.reconcile", "work.close"}, operation)
 	}
 	return false
+}
+
+// Canonical gateway reviewers are profiles, not caller-declared class names.
+// Validate that binding before using Class to separate principal identities.
+func standingCanonicalRoleMatches(role StandingRole) bool {
+	switch role.ProfileID {
+	case "qa":
+		return role.Class == "qa"
+	case "security-reviewer":
+		return role.Class == "security"
+	case "delivery-orchestrator":
+		return role.Class == "orchestrator"
+	default:
+		return role.Class == "implementation"
+	}
 }
 
 func standingRoleAllows(parent StandingRuntime, session StandingSession, operation string) bool {

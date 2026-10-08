@@ -35,6 +35,12 @@ revocation identity and a maximum thirty-day validity window. A trusted
 factory composition resolves these bindings; model output cannot nominate its
 own identity, accepted contracts or protected resource handles.
 
+The parent must bind each declared review class to its canonical profile:
+`qa`, `security-reviewer` and `delivery-orchestrator` identify distinct policy
+roles. Giving QA and Security the same declared class never permits a shared
+principal. Invalid profile/class assignments deny even with a valid owner
+signature; signatures authenticate decisions, not their policy correctness.
+
 Each invocation remains a typed proposal. The operator checks its exact
 operation and request digest against the parent, assigns only the exact
 capability bundle required by that action, and durably consumes a tenant/project-scoped operation

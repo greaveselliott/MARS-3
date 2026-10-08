@@ -393,3 +393,10 @@ lifecycle integration now also pass with synthetic stores. Explicit same-owner
 correction restores an operational epoch through the guarded control-plane
 route without altering canonical ownership. Independent review and installation remain pending; no live authority or
 downstream Bead claim is asserted by its source files.
+
+The corrected runtime candidate binds declared classes to canonical QA,
+Security and Orchestrator profiles before testing principal separation.
+A signed parent cannot disguise both reviewer profiles as one class to admit
+the same principal. Rejected PR #22, its signed v1 tag and successful CI remain
+unaccepted history; a distinct v2 source attestation requires fresh ordered
+review before merge.
