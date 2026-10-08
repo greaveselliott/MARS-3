@@ -51,8 +51,8 @@ func standingRuntimePublication() operatorPublicationSpec {
 		base:          "880af5ddbc40d09ebe45af2cf0aec5b8a7286193",
 		baseTree:      "7849d50fedcd8fc8794f5c7617f46a9ed3ae77f8",
 		branch:        "codex/standing-delivery-runtime",
-		reviewTag:     "mars3/standing-delivery-runtime-v2",
-		reviewMessage: "MARS-3 standing delivery runtime source attestation v2",
+		reviewTag:     "mars3/standing-delivery-runtime-v3",
+		reviewMessage: "MARS-3 standing delivery runtime source attestation v3",
 		findingPrefix: "public.standing_runtime_",
 		issued:        time.Date(2026, 10, 7, 23, 32, 36, 0, time.UTC),
 		expires:       time.Date(2026, 10, 14, 23, 32, 36, 0, time.UTC),
@@ -103,9 +103,27 @@ func standingRuntimeRetainedHistory(root string, publicKey []byte) error {
 	if err != nil || verifyPlanningGrantCommit(object, publicKey) != nil {
 		return errors.New("rejected runtime candidate signature invalid")
 	}
+	rejected.reviewTag = "mars3/standing-delivery-runtime-v2"
+	rejected.reviewMessage = "MARS-3 standing delivery runtime source attestation v2"
+	object, err = planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+rejected.reviewTag+"^{tag}")
+	if err != nil || !standingRuntimeRejectedV2TagObjectValid(string(object)) {
+		return errors.New("rejected runtime v2 tag changed or missing")
+	}
+	target, err = operatorPublicationReviewTarget(root, publicKey, rejected)
+	if err != nil || target != "7dbe1b718e585d43458a3e91f622481490ef70f4" {
+		return errors.New("rejected runtime v2 target invalid")
+	}
+	object, err = planningGrantGitOutput(root, "cat-file", "commit", target)
+	if err != nil || verifyPlanningGrantCommit(object, publicKey) != nil {
+		return errors.New("rejected runtime v2 candidate signature invalid")
+	}
 	return nil
 }
 
 func standingRuntimeRejectedTagObjectValid(object string) bool {
 	return strings.TrimSpace(object) == "6a91a2d0600e2634aa53cf932d3b7ed3f28c5b89"
+}
+
+func standingRuntimeRejectedV2TagObjectValid(object string) bool {
+	return strings.TrimSpace(object) == "099d8dbe63e46b0c479f3d4475126b1c2fa46612"
 }

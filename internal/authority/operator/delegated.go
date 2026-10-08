@@ -210,7 +210,7 @@ func (gate *StandingGate) Execute(ctx context.Context, document, signature, sess
 	if remaining <= 0 {
 		return nil, ErrAuthorization
 	}
-	bounded, cancel := context.WithTimeout(ctx, remaining)
+	bounded, cancel := context.WithDeadline(ctx, deadline)
 	defer cancel()
 	// Reserve the request identity across all roles/operations, not its digest:
 	// changing a consumed request's payload must not create another replay key.
@@ -265,7 +265,7 @@ func (gate *StandingGate) Execute(ctx context.Context, document, signature, sess
 		return nil, ErrAuthorization
 	}
 	// Never extend an already-issued deadline when activation is replaced.
-	dispatchCtx, dispatchCancel := context.WithTimeout(bounded, activation.ExpiresAt.Sub(gate.now()))
+	dispatchCtx, dispatchCancel := context.WithDeadline(bounded, activation.ExpiresAt)
 	defer dispatchCancel()
 	if dispatchCtx.Err() != nil {
 		return nil, ErrAuthorization

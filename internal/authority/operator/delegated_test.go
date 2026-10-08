@@ -784,6 +784,66 @@ func TestStandingChecksRevocationAndExpiryAfterConsumptionAndRead(t *testing.T) 
 	}
 }
 
+// Sample real time, then delay returning it until after the signed expiry.
+// This models preemption without inventing a clock offset from context timers.
+func TestStandingAbsoluteDeadlinesDenySchedulingGap(t *testing.T) {
+	for _, stage := range []string{"initial", "shortened-after-read"} {
+		t.Run(stage, func(t *testing.T) {
+			fixture := newStandingFixture(t)
+			afterRead, samples, delayed := false, 0, false
+			if stage == "initial" {
+				fixture.activation.value.ExpiresAt = time.Now().UTC().Add(time.Second)
+			} else {
+				fixture.backend.onRead = func() {
+					fixture.activation.value.ExpiresAt = time.Now().UTC().Add(time.Second)
+					afterRead = true
+				}
+			}
+			fixture.gate.now = func() time.Time {
+				sampled := time.Now().UTC()
+				if stage == "initial" || afterRead {
+					samples++
+					// Initial admission: root, activation, remaining check.
+					// After read: request check, replacement activation check.
+					target := 3
+					if stage != "initial" {
+						target = 2
+					}
+					if samples == target {
+						if !sampled.Before(fixture.activation.value.ExpiresAt) {
+							t.Fatal("fixture expired before the scheduling gap")
+						}
+						time.Sleep(time.Until(fixture.activation.value.ExpiresAt) + 25*time.Millisecond)
+						delayed = true
+					}
+				}
+				return sampled
+			}
+			result, err := fixture.execute(t)
+			if !delayed || !errors.Is(err, ErrAuthorization) || result != nil || fixture.backend.dispatches != 0 {
+				t.Fatalf("scheduling gap: delayed=%v result=%v error=%v dispatches=%d", delayed, result, err, fixture.backend.dispatches)
+			}
+			if stage == "initial" && fixture.backend.reads != 0 {
+				t.Fatal("expired initial deadline reached the gateway")
+			}
+		})
+	}
+}
+
+func TestStandingAbsoluteDeadlinePreservesEarlierCallerDeadline(t *testing.T) {
+	fixture := newStandingFixture(t)
+	document := standingEncode(t, fixture.parent)
+	fixture.session.DelegationSHA256 = standingDigest(document)
+	fixture.activation.value.DelegationSHA256 = fixture.session.DelegationSHA256
+	deadline := time.Now().Add(10 * time.Second)
+	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	defer cancel()
+	_, err := fixture.gate.Execute(ctx, document, []byte("synthetic-signature"), standingEncode(t, fixture.session), []byte("synthetic-signature"), standingEncode(t, fixture.request))
+	if err != nil || fixture.backend.dispatches != 1 || !fixture.backend.deadline.Equal(deadline) {
+		t.Fatalf("caller deadline extended: error=%v deadline=%v", err, fixture.backend.deadline)
+	}
+}
+
 func TestStandingBackendFailureAndUncertainPersistenceDoNotRetryEffects(t *testing.T) {
 	fixture := newStandingFixture(t)
 	fixture.backend.fail = true

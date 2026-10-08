@@ -681,3 +681,12 @@ and identical signed trees. V1 grant bytes, signatures, candidate ancestry,
 chronology and tag objects remain independently checked as historical evidence.
 QA must accept the correction before Security review and accepted merge; the
 prior missing-review exception remains recorded.
+# Runtime expiry construction regression
+
+Standing runtime admission and replacement-activation dispatch contexts use
+absolute signed expiry deadlines, never a relative timeout calculated from an
+earlier clock sample. Given a scheduling gap after an honest time sample that
+crosses initial or shortened replacement expiry, no dispatch is admitted.
+An earlier caller deadline remains effective; activation replacement cannot
+extend an already issued context. These synthetic regressions do not assert
+canonical execution or operational activation.

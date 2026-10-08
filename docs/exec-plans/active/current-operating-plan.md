@@ -63,6 +63,21 @@ real-signature malformed-parent denial probe. Exact-head CI, QA then Security,
 accepted merge and protected-main
 readback remain required. This is not a new approval request or live authority.
 
+PR #23 at `7dbe1b718e585d43458a3e91f622481490ef70f4`, tree
+`943a97f4787833fb59c7456400e200ba26764207`, passed exact-head CI
+`37708418675` / `113088251542` and independent QA. Subsequent Security
+reproduced `standing_delivery.runtime_absolute_deadline_construction`:
+relative timeout construction could extend expiry during a scheduling gap.
+The PR is closed without merge; signed v2 tag object
+`099d8dbe63e46b0c479f3d4475126b1c2fa46612` and ordered verdicts remain
+immutable rejected evidence. The public disposition is
+`https://github.com/greaveselliott/MARS-3/pull/23#issuecomment-6049795320`.
+The one bounded correction uses absolute initial and replacement-activation
+deadlines with scheduling-gap regressions. It requires qualification, a distinct
+v3 tag, fresh CI and QA then Security before accepted merge/main readback.
+Equivalent recurrence stops automatic correction; no generic approval is
+requested for this first in-scope runtime deadline correction.
+
 No operational parent or protected runtime profile is installed, no live
 delegation is asserted, and P-001 remains unselected and unclaimed. Source
 acceptance will not substitute for the required protected activation and

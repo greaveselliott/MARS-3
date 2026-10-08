@@ -1,6 +1,6 @@
 # Standing delivery runtime candidate evidence
 
-**Status:** V1 rejected by QA; V2 locally qualified, fresh independent acceptance pending
+**Status:** V1 rejected by QA; V2 rejected by Security; V3 locally qualified, independent acceptance pending
 **Goal:** G-001
 **Feature:** F-002
 **Decision:** PD-005 (proposed)
@@ -130,6 +130,42 @@ The next evidence must rerun the publication gate for the final candidate,
 bind an immutable candidate/tag and
 exact-head CI, obtain QA then Security acceptance, merge and read back
 protected main.
+
+## V2 independent review and V3 correction
+
+PR #23 retains head `7dbe1b718e585d43458a3e91f622481490ef70f4`, tree
+`943a97f4787833fb59c7456400e200ba26764207` and signed v2 tag object
+`099d8dbe63e46b0c479f3d4475126b1c2fa46612`. Exact-head CI run/job
+`37708418675` / `113088251542` passed. Independent QA accepted the unchanged
+candidate with 24 bounded regressions and independently verified CI:
+[QA disposition](https://github.com/greaveselliott/MARS-3/pull/23#issuecomment-6049717876).
+Subsequent independent Security requested changes:
+[Security rejection and closure disposition](https://github.com/greaveselliott/MARS-3/pull/23#issuecomment-6049795320).
+PR #23 is closed without merge; its immutable objects and ordered verdicts
+remain rejected evidence.
+
+Foundation-owned `standing_delivery.runtime_absolute_deadline_construction`
+(public disposition alias `standing_delivery.activation_relative_deadline_gap`)
+is a new runtime deadline-construction finding, not the previously corrected
+source-publication unsigned-read-swap finding. A genuine wall-clock sample
+followed by a scheduling delay before relative timeout creation extended the
+effective deadline beyond a shortened activation expiry. A synthetic execution
+dispatched once and returned success after expiry. No canonical resources or
+signature bypass were involved.
+
+The single bounded correction uses absolute deadlines for initial admission
+and replacement activation, preserves earlier caller deadlines and retains
+the pre-dispatch cancellation check. New regressions model scheduling delay
+after a genuine clock sample at initial admission and after shortened activation
+reload; neither may dispatch after expiry. Focused regressions and the full
+local doctrine, plan, documentation-sync, public-content, Go test, vet and
+whitespace gates passed; the doctrine suite took 107.363 seconds. Two builds
+were byte-identical with SHA-256
+`9b3ce67710ffa036f645d5964bc93e0839d6c8f63a4ae2837975a3d413bc4763`.
+These bytes are not independently accepted. A distinct v3 attestation, final public
+gate, exact-head CI, fresh QA then Security, accepted merge and protected-main
+readback remain required. Equivalent recurrence must stop automatic correction.
+No canonical RUN disposition or live authority is asserted.
 
 ## Runtime activation remains outstanding
 

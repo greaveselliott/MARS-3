@@ -128,3 +128,12 @@ Directory scope syntax follows canonical gateway paths: an explicit trailing
 slash admits descendants, not wildcard expansion or sibling prefixes. The
 same signed strings must still equal canonical paths. Traversal and Git
 metadata descendants deny before effect validation.
+# Absolute runtime expiry deadlines
+
+The runtime constructs contexts with absolute signed deadlines at initial
+admission and after activation reload. Converting a sampled remaining duration
+into a new relative timeout could extend authorization across a scheduling gap.
+Replacement activation can shorten, never extend, an issued context; an earlier
+caller deadline remains binding. The pre-dispatch cancellation check remains
+required. PR #23's rejected source candidate and Security disposition are retained
+in runtime evidence; this correction does not activate the proposed delegation.
