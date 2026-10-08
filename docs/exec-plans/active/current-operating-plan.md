@@ -2,14 +2,56 @@
 
 **Status:** Active
 **Owner:** Delivery Orchestrator
-**Updated:** 2026-10-07
+**Updated:** 2026-10-08
 **Phase:** delivery
 **Goal:** G-001
 **Current feature:** F-002
 **Current Bead:** M3-W001 (display ID W-001)
 **Authority:** Beads/Dolt for work state; Git for this durable plan
 
-## Current standing-delivery source transition
+## Current standing-delivery runtime implementation
+
+PR #21 merged as `880af5ddbc40d09ebe45af2cf0aec5b8a7286193`, retaining
+reviewed tree `7849d50fedcd8fc8794f5c7617f46a9ed3ae77f8`. Candidate CI
+`37701235027` and protected-main CI `37701757022` passed. Independent QA
+and subsequent Security accepted the same immutable candidate. Public
+protected-main readback is recorded on PR #21. The prior source-transition
+grant is consumed; the section below is retained candidate-time history.
+
+The owner-directed activation now proceeds under separately signed
+`standing-delivery-runtime-source-v1`, from that accepted main on
+`codex/standing-delivery-runtime`, valid 2026-10-07T23:32:36Z inclusive through
+2026-10-14T23:32:36Z exclusive. It names eighteen exact source paths and permits
+implementation, synthetic qualification, signed publication, ordered review,
+accepted merge and main readback. It permits no canonical execution, private
+profile or credential discovery, new private resources, live claim or lease.
+
+PD-005 and ADR-008 define the next implementation's acceptance boundary:
+distinct operational delegation, trusted profile/role/operation binding,
+short-lived exact-request admission, durable replay, expiry/revocation checks
+and gateway-only canonical transitions. Existing v1 contract signatures remain
+non-operational. The operator implementation and regression candidate now
+cover protected activation/session admission, durable replay, current
+scope/source-base checks, and typed gateway read, claim, lease and lifecycle
+dispatch. Focused regressions, the complete local public gate and signed
+namespace probes passed. A signed synthetic read reached the real gateway;
+the gateway also denied claims without its claim/lease substrate. Detailed
+bounded outcomes are recorded in `docs/evidence/standing-delivery-runtime.md`.
+These are locally qualified source results, not accepted runtime authority.
+Positive delegated claim/lease, ordered lifecycle and same-owner correction
+integration now pass with disposable synthetic stores and the real gateway.
+Directory scopes and action-bound capability bundles retain normal gateway
+semantics without widening signed operations. The next action is the final
+publication gate, immutable candidate/tag,
+exact-head CI and independent QA then Security. An accepted PR must merge
+before the next delivery step.
+
+No operational parent or protected runtime profile is installed, no live
+delegation is asserted, and P-001 remains unselected and unclaimed. Source
+acceptance will not substitute for the required protected activation and
+gateway readback.
+
+## Retained standing-delivery foundation candidate snapshot
 
 PR #19 merged as `72e5bbc9a5c0975ebaf12487d50e096c9049b4a4`, matching
 reviewed tree `266f42ac2321bdd08d2d13184c83f7432d66db6e` after ordered QA

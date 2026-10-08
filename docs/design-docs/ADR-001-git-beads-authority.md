@@ -371,3 +371,25 @@ candidate, immutable tag, prior squash ancestry and tree. Historical validation
 uses historical times; active correction authority still expires. Source
 publication does not grant canonical execution authority. PR #18's missing
 pre-merge reviews remain an exception requiring a prospective accepted correction.
+
+## Standing runtime candidate authority boundary
+
+The owner-directed runtime source transition starts from accepted PR #21 and
+its protected-main tree. PD-005 and ADR-008 specify a distinct operational
+parent, protected activation and authenticated role session; the earlier v1
+contract remains non-operational. The candidate `operator-delegated` route
+issues only an in-memory exact-request admission after finite role/scope and
+durable replay checks. It does not create canonical claims, live leases or
+review acceptance. Those remain normal gateway transitions.
+
+A protected activation supplies the accepted current source base separately
+from the operator release identity and reloads before dispatch. Request fields
+cannot nominate trusted activation bindings, widen paths or select a reviewer
+identity. Production, new private resources, credential discovery, destructive
+effects and scope/trust expansion remain outside standing delivery. This
+implementation has passed local regressions, signed namespace probes and a
+real-gateway read/denial bridge. Positive delegated claim/lease and ordered
+lifecycle integration now also pass with synthetic stores. Explicit same-owner
+correction restores an operational epoch through the guarded control-plane
+route without altering canonical ownership. Independent review and installation remain pending; no live authority or
+downstream Bead claim is asserted by its source files.

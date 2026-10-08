@@ -32,6 +32,9 @@ func main() {
 }
 
 func run(args []string) error {
+	if len(args) > 0 && args[0] == "operator-delegated" {
+		return operator.RunDelegatedCLI(args[1:], os.Stdout)
+	}
 	if len(args) > 0 && args[0] == "operator" {
 		return operator.RunCLI(args[1:], os.Stdout)
 	}

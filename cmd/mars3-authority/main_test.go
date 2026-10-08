@@ -27,6 +27,14 @@ func TestOperatorRequiresProtectedSignedInputs(t *testing.T) {
 	}
 }
 
+func TestDelegatedOperatorRequiresInstalledProtectedInputs(t *testing.T) {
+	for _, args := range [][]string{{"operator-delegated"}, {"operator-delegated", "unexpected"}, {"operator-delegated", "--connection", "forbidden"}, {"operator-delegated", "--profile", "/nonexistent/synthetic-profile"}} {
+		if err := run(args); err == nil || strings.Contains(err.Error(), "unknown authority command") {
+			t.Fatalf("delegated operator did not fail closed at its own boundary: %v", err)
+		}
+	}
+}
+
 func TestTerminalReconcileRequiresCompleteBoundedInputs(t *testing.T) {
 	if err := run([]string{"terminal-reconcile"}); err == nil {
 		t.Fatal("terminal reconciliation accepted missing canonical handles")

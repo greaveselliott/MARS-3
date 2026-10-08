@@ -1,0 +1,67 @@
+schemaVersion: 1
+kind: MARS3StandingDeliveryRuntimeSourceGrant
+grant:
+  id: standing-delivery-runtime-source-v1
+  classification: PUBLIC
+  ownerDirective: activate-bounded-standing-delegation-and-work-through-existing-plan
+  issuedAt: 2026-10-07T23:32:36Z
+  expiresAt: 2026-10-14T23:32:36Z
+  repository: greaveselliott/MARS-3
+  baseCommit: 880af5ddbc40d09ebe45af2cf0aec5b8a7286193
+  baseTree: 7849d50fedcd8fc8794f5c7617f46a9ed3ae77f8
+  branch: codex/standing-delivery-runtime
+  purpose: implement-qualify-and-publish-finite-plan-runtime-delegation
+  canonicalClaimAsserted: false
+  liveLeaseAsserted: false
+  canonicalExecutionAllowed: false
+  autonomousMutation: false
+  endsAt: accepted-source-merge-and-protected-main-readback
+  authorizedPaths:
+    - .harness/grants/standing-delivery-runtime-source-v1.yaml
+    - .harness/grants/standing-delivery-runtime-source-v1.yaml.sig
+    - internal/authority/operator/delegated.go
+    - internal/authority/operator/delegated_test.go
+    - internal/authority/operator/operator.go
+    - internal/authority/operator/operator_test.go
+    - internal/doctrine/grant.go
+    - internal/doctrine/standing_runtime.go
+    - internal/doctrine/standing_runtime_test.go
+    - cmd/mars3-authority/main.go
+    - cmd/mars3-authority/main_test.go
+    - docs/product-decisions/PD-005-finite-plan-standing-delivery.md
+    - docs/product-decisions/index.md
+    - docs/design-docs/ADR-008-standing-delivery-delegation.md
+    - docs/design-docs/ADR-001-git-beads-authority.md
+    - docs/features/F-002-work-authority.md
+    - docs/exec-plans/active/current-operating-plan.md
+    - docs/evidence/standing-delivery-runtime.md
+  allowedEffects:
+    - exact-path-runtime-issuer-dispatcher-and-regression-implementation
+    - finite-plan-policy-specification-without-live-activation-claims
+    - required-local-public-gates-and-synthetic-qualification
+    - existing-pinned-signing-agent-without-private-key-access
+    - owner-attributed-signed-candidate-and-distinct-review-tag
+    - bounded-publication-exact-head-CI-independent-QA-then-Security
+    - accepted-source-merge-and-protected-main-readback
+  requiredInvariants:
+    - distinct-operational-contract-kind-and-signature-namespace
+    - old-v1-contract-remains-non-operational-data
+    - trusted-runtime-profile-and-finite-role-operation-bindings
+    - current-canonical-contract-path-and-dependency-checks
+    - gateway-only-claims-live-leases-and-lifecycle-transitions
+    - short-lived-exact-operation-admission-with-durable-replay
+    - expiry-revocation-and-context-recheck-before-dispatch
+    - independent-QA-then-Security-on-the-same-immutable-candidate
+    - one-open-delivery-PR-and-accepted-merge-before-advance
+  prohibitedEffects:
+    - canonical-execution-or-direct-authority-store-access
+    - private-profile-connection-or-credential-discovery
+    - provision-new-private-resources-or-signing-keys
+    - assert-a-live-delegation-claim-or-lease-from-source-acceptance
+    - production-release-destructive-spending-or-trust-escalation
+    - bypass-gateway-policy-review-or-public-commit-gates
+    - rewrite-historical-grants-tags-or-review-dispositions
+  failurePolicy: stop-after-one-equivalent-automatic-retry
+integrity:
+  namespace: mars3-standing-delivery-runtime-source-v1
+  publicKey: .harness/keys/genesis-signing-key.pub
