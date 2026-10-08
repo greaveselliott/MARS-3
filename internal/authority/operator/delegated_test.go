@@ -1019,3 +1019,58 @@ func TestStandingPayloadTargetsCoverLifecycleAndLeaseRoutes(t *testing.T) {
 		})
 	}
 }
+
+// The rejected relative-timeout implementation takes a third post-read sample.
+// Delay precisely there, then assert the signed deadline rather than denial alone.
+func TestStandingReplacementDeadlineBoundDetectsRelativeConstruction(t *testing.T) {
+	f := newStandingFixture(t)
+	afterRead, samples := false, 0
+	f.backend.onRead = func() { f.activation.value.ExpiresAt = time.Now().UTC().Add(time.Second); afterRead = true }
+	f.gate.now = func() time.Time {
+		sampled := time.Now().UTC()
+		if afterRead {
+			samples++
+			if samples == 3 {
+				time.Sleep(time.Until(f.activation.value.ExpiresAt) + 25*time.Millisecond)
+			}
+		}
+		return sampled
+	}
+	_, err := f.execute(t)
+	if err != nil || f.backend.dispatches != 1 {
+		t.Fatalf("unexpected synthetic dispatch: error=%v dispatches=%d", err, f.backend.dispatches)
+	}
+	if f.backend.deadline.After(f.activation.value.ExpiresAt) {
+		t.Fatal("dispatch deadline exceeds signed activation expiry")
+	}
+}
+
+type standingDeadlineReplayCapture struct{ deadline time.Time }
+
+func (c *standingDeadlineReplayCapture) Consume(ctx context.Context, _ string) error {
+	c.deadline, _ = ctx.Deadline()
+	return nil
+}
+
+func TestStandingInitialDeadlineBoundDetectsRelativeConstruction(t *testing.T) {
+	f := newStandingFixture(t)
+	f.activation.value.ExpiresAt = time.Now().UTC().Add(time.Second)
+	capture := &standingDeadlineReplayCapture{}
+	f.gate.replays = capture
+	samples := 0
+	f.gate.now = func() time.Time {
+		sampled := time.Now().UTC()
+		samples++
+		if samples == 3 {
+			time.Sleep(time.Until(f.activation.value.ExpiresAt) + 25*time.Millisecond)
+		}
+		return sampled
+	}
+	_, err := f.execute(t)
+	if !errors.Is(err, ErrAuthorization) || f.backend.reads != 0 || f.backend.dispatches != 0 || capture.deadline.IsZero() {
+		t.Fatalf("unexpected expired admission: error=%v reads=%d dispatches=%d", err, f.backend.reads, f.backend.dispatches)
+	}
+	if capture.deadline.After(f.activation.value.ExpiresAt) {
+		t.Fatal("admission deadline exceeds signed activation expiry")
+	}
+}

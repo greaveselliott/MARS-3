@@ -12,11 +12,13 @@ package doctrine
 
 import (
 	"errors"
+	"os"
 	"strings"
 	"time"
 )
 
 const standingRuntimeSourcePath = ".harness/grants/standing-delivery-runtime-source-v1.yaml"
+const standingRuntimeTestRecoveryPath = ".harness/grants/standing-delivery-runtime-test-recovery-v1.yaml"
 
 // Operational, activation and identity signatures are deliberately distinct
 // from the non-operational v1 contract and every source-publication signature.
@@ -51,13 +53,14 @@ func standingRuntimePublication() operatorPublicationSpec {
 		base:          "880af5ddbc40d09ebe45af2cf0aec5b8a7286193",
 		baseTree:      "7849d50fedcd8fc8794f5c7617f46a9ed3ae77f8",
 		branch:        "codex/standing-delivery-runtime",
-		reviewTag:     "mars3/standing-delivery-runtime-v3",
-		reviewMessage: "MARS-3 standing delivery runtime source attestation v3",
+		reviewTag:     "mars3/standing-delivery-runtime-v4",
+		reviewMessage: "MARS-3 standing delivery runtime source attestation v4",
 		findingPrefix: "public.standing_runtime_",
 		issued:        time.Date(2026, 10, 7, 23, 32, 36, 0, time.UTC),
 		expires:       time.Date(2026, 10, 14, 23, 32, 36, 0, time.UTC),
 		paths: []string{
 			standingRuntimeSourcePath, standingRuntimeSourcePath + ".sig",
+			standingRuntimeTestRecoveryPath, standingRuntimeTestRecoveryPath + ".sig",
 			"internal/authority/operator/delegated.go", "internal/authority/operator/delegated_test.go",
 			"internal/authority/operator/operator.go", "internal/authority/operator/operator_test.go",
 			"internal/doctrine/grant.go", "internal/doctrine/standing_runtime.go", "internal/doctrine/standing_runtime_test.go",
@@ -117,7 +120,7 @@ func standingRuntimeRetainedHistory(root string, publicKey []byte) error {
 	if err != nil || verifyPlanningGrantCommit(object, publicKey) != nil {
 		return errors.New("rejected runtime v2 candidate signature invalid")
 	}
-	return nil
+	return standingRuntimeTestRecoveryHistory(root, publicKey)
 }
 
 func standingRuntimeRejectedTagObjectValid(object string) bool {
@@ -126,4 +129,87 @@ func standingRuntimeRejectedTagObjectValid(object string) bool {
 
 func standingRuntimeRejectedV2TagObjectValid(object string) bool {
 	return strings.TrimSpace(object) == "099d8dbe63e46b0c479f3d4475126b1c2fa46612"
+}
+
+// The original grant fences aggregate publication; this additional prospective
+// grant fences only the post-rejection delta and excludes all runtime sources.
+func standingRuntimeTestRecoverySpec() operatorPublicationSpec {
+	return operatorPublicationSpec{
+		grantPath: standingRuntimeTestRecoveryPath,
+		digest:    "bf4a29d4b1bbf4e206f5f0df6e8826654af218306fd73a6e7955be6ea420b3ec",
+		namespace: "mars3-standing-delivery-runtime-test-recovery-v1",
+		base:      "07c3930b1c074c8dbce5b943a8363e9a645859a4", baseTree: "9545c0dcbc98aeca0a202dd0efb54205a020ecfe",
+		issued: time.Date(2026, 10, 8, 5, 31, 22, 0, time.UTC), expires: time.Date(2026, 10, 14, 23, 32, 36, 0, time.UTC),
+		paths: []string{standingRuntimeTestRecoveryPath, standingRuntimeTestRecoveryPath + ".sig",
+			"internal/authority/operator/delegated_test.go", "internal/doctrine/standing_runtime.go", "internal/doctrine/standing_runtime_test.go",
+			"docs/features/F-002-work-authority.md", "docs/design-docs/ADR-008-standing-delivery-delegation.md",
+			"docs/exec-plans/active/current-operating-plan.md", "docs/evidence/standing-delivery-runtime.md"},
+	}
+}
+
+func standingRuntimeTestRecoveryHistory(root string, key []byte) error {
+	spec := standingRuntimeTestRecoverySpec()
+	document, err := readRepoFile(root, spec.grantPath)
+	signature, sigErr := readRepoFile(root, spec.grantPath+".sig")
+	if err != nil || sigErr != nil || !spec.documentValid(document, signature, key) {
+		return errors.New("test recovery requires its exact signed prospective grant")
+	}
+	rejected := standingRuntimePublication()
+	rejected.reviewTag = "mars3/standing-delivery-runtime-v3"
+	rejected.reviewMessage = "MARS-3 standing delivery runtime source attestation v3"
+	object, err := planningGrantGitOutput(root, "rev-parse", "--verify", "refs/tags/"+rejected.reviewTag+"^{tag}")
+	if err != nil || strings.TrimSpace(string(object)) != "a8a3cb9fcffab0a6ec7eb5246d4d658dbcad3013" {
+		return errors.New("rejected v3 tag changed")
+	}
+	target, err := operatorPublicationReviewTarget(root, key, rejected)
+	if err != nil || target != spec.base {
+		return errors.New("rejected v3 target changed")
+	}
+	object, err = planningGrantGitOutput(root, "cat-file", "commit", target)
+	if err != nil || verifyPlanningGrantCommit(object, key) != nil {
+		return errors.New("rejected v3 signature invalid")
+	}
+	tree, err := planningGrantGitOutput(root, "rev-parse", "--verify", spec.base+"^{tree}")
+	if err != nil || strings.TrimSpace(string(tree)) != spec.baseTree {
+		return errors.New("test recovery preimage changed")
+	}
+	headBytes, err := planningGrantGitOutput(root, "rev-parse", "--verify", "HEAD^{commit}")
+	if err != nil {
+		return err
+	}
+	head := strings.TrimSpace(string(headBytes))
+	branch, _ := planningGrantGitOutput(root, "symbolic-ref", "--quiet", "--short", "HEAD")
+	if os.Getenv("GITHUB_ACTIONS") == "true" || strings.TrimSpace(string(branch)) == "main" {
+		head, err = operatorPublicationReviewTarget(root, key, standingRuntimePublication())
+		if err != nil {
+			return err
+		}
+	}
+	if _, err := planningGrantGitOutput(root, "merge-base", "--is-ancestor", spec.base, head); err != nil {
+		return err
+	}
+	commits, err := planningGrantCommitRangeFrom(root, spec.base, head)
+	if err != nil {
+		return err
+	}
+	previous := spec.base
+	for _, commit := range commits {
+		changed, diffErr := planningGrantGitOutput(root, "diff-tree", "--no-commit-id", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "-r", previous, commit.id)
+		paths, pathsErr := normalizedPlanningGrantGitPaths(changed)
+		object, objectErr := planningGrantGitOutput(root, "cat-file", "commit", commit.id)
+		committedAt, timeErr := planningGrantCommitTime(root, commit.id)
+		grant, grantErr := planningGrantGitOutput(root, "show", commit.id+":"+spec.grantPath)
+		sig, sigErr := planningGrantGitOutput(root, "show", commit.id+":"+spec.grantPath+".sig")
+		if len(commit.parents) != 1 || commit.parents[0] != previous || diffErr != nil || pathsErr != nil || !spec.pathsAllowed(paths) || objectErr != nil || verifyPlanningGrantCommit(object, key) != nil || timeErr != nil || !spec.windowValid(committedAt) || grantErr != nil || sigErr != nil || !spec.documentValid(grant, sig, key) {
+			return errors.New("test recovery must be prospective, signed, exact-scope and runtime-frozen")
+		}
+		previous = commit.id
+	}
+	tracked, trackedErr := planningGrantGitOutput(root, "diff", "--no-renames", "--no-ext-diff", "--no-textconv", "--name-only", "-z", "HEAD", "--")
+	untracked, untrackedErr := planningGrantGitOutput(root, "ls-files", "--others", "--exclude-standard", "-z", "--")
+	paths, pathsErr := normalizedPlanningGrantGitPaths(tracked, untracked)
+	if trackedErr != nil || untrackedErr != nil || pathsErr != nil || !spec.pathsAllowed(paths) {
+		return errors.New("test recovery worktree exceeds exact delta scope")
+	}
+	return nil
 }

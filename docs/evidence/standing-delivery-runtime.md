@@ -1,6 +1,6 @@
 # Standing delivery runtime candidate evidence
 
-**Status:** V1 rejected by QA; V2 rejected by Security; V3 locally qualified, independent acceptance pending
+**Status:** V1/V2/V3 rejected; approved test-only recovery locally qualified, independent acceptance pending
 **Goal:** G-001
 **Feature:** F-002
 **Decision:** PD-005 (proposed)
@@ -167,6 +167,36 @@ gate, exact-head CI, fresh QA then Security, accepted merge and protected-main
 readback remain required. Equivalent recurrence must stop automatic correction.
 No canonical RUN disposition or live authority is asserted.
 
+## V3 review and bounded source-run stop
+
+PR #24 retains immutable head `07c3930b1c074c8dbce5b943a8363e9a645859a4`,
+tree `9545c0dcbc98aeca0a202dd0efb54205a020ecfe` and signed v3 tag object
+`a8a3cb9fcffab0a6ec7eb5246d4d658dbcad3013`. Final local public qualification
+passed, including the 107.547-second doctrine suite, expected scanner canary,
+clean worktree and all 161 commits. Exact-head CI run/job
+`37709892361` / `113093085222` passed and QA independently verified it.
+
+Independent QA requested changes with foundation-owned
+`standing_delivery.absolute_deadline_regression_not_sensitive`. All 26 bounded
+candidate tests passed, but both scheduling-gap cases also passed with rejected
+V2 implementation substituted in a disposable fixture. The shortened case
+delayed validation rather than the vulnerable relative-timeout construction
+sample; a later fresh sample therefore denied without exposing the bug.
+An independent synthetic probe reproduced a dispatch context deadline about
+one second beyond signed activation expiry on V2 and passed on V3. No remaining
+implementation defect was reproduced, but the candidate's regression coverage
+does not protect the correction. Security was not run after QA rejection.
+
+PR #24 is closed without merge, with public QA rejection and stop disposition.
+The source-qualification run is `blocked`: the single automatic runtime-deadline
+correction did not achieve independent acceptance. No further automatic patch
+or successor PR is scheduled at this boundary. Required deliberate next action
+is a test-design disposition for a construction-gap/deadline-bound regression
+that demonstrably fails on V2 and passes on V3, followed by fresh qualification
+and ordered review under applicable authority. This is Git-owned source evidence,
+not a gateway or canonical Bead RUN record. All rejected objects remain retained;
+no accepted source merge, live authority or plan advancement is asserted.
+
 ## Runtime activation remains outstanding
 
 No protected operational parent, activation or authenticated role session has
@@ -178,3 +208,31 @@ gateway readback before ordinary selection/claim of P-001 can proceed.
 Synthetic dispatcher fixtures prove admission sequencing only. They do not
 prove worker isolation, independence of reviewers, live gateway conformance,
 private-resource provisioning or an active plan-wide delegation.
+
+## Owner-approved prospective test recovery
+
+The owner approved the recorded test-only recovery. The separately signed
+`standing-delivery-runtime-test-recovery-v1` binds rejected V3 head
+`07c3930b1c074c8dbce5b943a8363e9a645859a4` and tree
+`9545c0dcbc98aeca0a202dd0efb54205a020ecfe`, nine exact paths and the window
+2026-10-08T05:31:22Z inclusive to 2026-10-14T23:32:36Z exclusive. Its SHA-256 is
+`bf4a29d4b1bbf4e206f5f0df6e8826654af218306fd73a6e7955be6ea420b3ec`.
+This is a prospective exception, not a retry reset, runtime change or acceptance
+of any rejected candidate. The prior blocked source-run record remains history.
+
+The recovery adds signed-expiry deadline bounds at initial replay admission
+and replacement dispatch. The replacement case introduces the scheduling gap
+at the rejected relative-timeout construction sample, rather than at earlier
+validation. Runtime source is unchanged. Qualification and immutable V4
+publication results must be recorded before fresh independent acceptance.
+
+Recovery local qualification passed. Both new deadline-bound tests failed
+against immutable rejected V2 with the expected initial-admission and dispatch
+expiry-bound messages, and passed against the corrected candidate. This negative
+control used only a disposable public source tree and synthetic gateway fixtures.
+The complete doctrine suite took 118.763 seconds; all public validators, full Go
+tests, vet and whitespace checks passed. Runtime source diff against V3 was empty.
+Two builds were byte-identical, SHA-256
+`bdccda7a9bd6b10b37c9084fcd52a6e32ac6bfcfadc326cdd90dadd5fe6cde45`.
+The pinned scanner detected its one synthetic canary and found no worktree leaks.
+These are local qualification results, not independent acceptance or activation.

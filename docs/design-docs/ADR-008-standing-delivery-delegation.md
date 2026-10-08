@@ -137,3 +137,16 @@ Replacement activation can shorten, never extend, an issued context; an earlier
 caller deadline remains binding. The pre-dispatch cancellation check remains
 required. PR #23's rejected source candidate and Security disposition are retained
 in runtime evidence; this correction does not activate the proposed delegation.
+
+## Prospective test-only recovery boundary
+
+The separately signed `standing-delivery-runtime-test-recovery-v1` records the
+owner's explicit recovery decision after PR #24 QA rejected insensitive tests.
+It freezes runtime sources at V3, permits nine exact test/publication/document
+paths and preserves all rejected candidates. Original source-grant dates and
+protected-main topology remain binding; the additional grant checks prospective
+post-V3 commit chronology, exact delta scope and signature retention. Its two
+new grant paths are admitted only with that signed recovery, not by rewriting
+the original eighteen-path grant. Sensitive deadline-bound tests use V2 as a
+negative control. Fresh QA then Security and accepted merge/readback remain
+mandatory; source acceptance never installs operational activation.

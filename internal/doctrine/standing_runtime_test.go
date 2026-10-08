@@ -43,7 +43,7 @@ func TestStandingRuntimeSourceGrantIsPinnedAndDistinctFromOperationalSignatures(
 	if spec.documentValid(append(append([]byte{}, document...), '\n'), signature, key) {
 		t.Fatal("altered source grant admitted")
 	}
-	if len(spec.paths) != 18 || spec.pathsAllowed([]string{"internal/authority/gateway/lifecycle.go"}) || spec.pathsAllowed([]string{"outside.go"}) {
+	if len(spec.paths) != 20 || spec.pathsAllowed([]string{"internal/authority/gateway/lifecycle.go"}) || spec.pathsAllowed([]string{"outside.go"}) {
 		t.Fatal("runtime source paths expanded")
 	}
 }
@@ -63,7 +63,7 @@ func TestStandingRuntimePublicationWindowHasImmutableDates(t *testing.T) {
 
 func TestStandingRuntimeRetainsRejectedCandidateAndDistinctSuccessorTag(t *testing.T) {
 	spec := standingRuntimePublication()
-	if spec.reviewTag != "mars3/standing-delivery-runtime-v3" || spec.reviewMessage != "MARS-3 standing delivery runtime source attestation v3" {
+	if spec.reviewTag != "mars3/standing-delivery-runtime-v4" || spec.reviewMessage != "MARS-3 standing delivery runtime source attestation v4" {
 		t.Fatal("corrected runtime candidate reused rejected attestation")
 	}
 	if !standingRuntimeRejectedTagObjectValid("6a91a2d0600e2634aa53cf932d3b7ed3f28c5b89\n") ||
@@ -73,5 +73,36 @@ func TestStandingRuntimeRetainsRejectedCandidateAndDistinctSuccessorTag(t *testi
 	if !standingRuntimeRejectedV2TagObjectValid("099d8dbe63e46b0c479f3d4475126b1c2fa46612\n") ||
 		standingRuntimeRejectedV2TagObjectValid("0000000000000000000000000000000000000000") {
 		t.Fatal("rejected runtime v2 evidence can be replaced")
+	}
+}
+
+func TestStandingRuntimeTestRecoveryIsProspectiveAndRuntimeFrozen(t *testing.T) {
+	spec := standingRuntimeTestRecoverySpec()
+	root := filepath.Join("..", "..")
+	document, err := os.ReadFile(filepath.Join(root, spec.grantPath))
+	if err != nil {
+		t.Fatal(err)
+	}
+	signature, err := os.ReadFile(filepath.Join(root, spec.grantPath+".sig"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	key, err := os.ReadFile(filepath.Join(root, ".harness/keys/genesis-signing-key.pub"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !spec.documentValid(document, signature, key) || spec.documentValid(append(document, '\n'), signature, key) {
+		t.Fatal("recovery signature/digest not exact")
+	}
+	if len(spec.paths) != 9 || spec.pathsAllowed([]string{"internal/authority/operator/delegated.go"}) || spec.pathsAllowed([]string{standingRuntimeSourcePath}) || spec.pathsAllowed([]string{"internal/authority/gateway/lifecycle.go"}) {
+		t.Fatal("test recovery expanded runtime scope")
+	}
+	if spec.windowValid(spec.issued.Add(-time.Nanosecond)) || !spec.windowValid(spec.issued) || spec.windowValid(spec.expires) || spec.base != "07c3930b1c074c8dbce5b943a8363e9a645859a4" {
+		t.Fatal("test recovery preimage/window drift")
+	}
+	for _, verify := range []func([]byte, []byte) error{VerifyStandingRuntimeSignature, VerifyStandingActivationSignature, VerifyStandingSessionSignature} {
+		if verify(document, signature) == nil {
+			t.Fatal("recovery signature became operational authority")
+		}
 	}
 }

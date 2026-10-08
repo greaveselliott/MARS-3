@@ -690,3 +690,14 @@ crosses initial or shortened replacement expiry, no dispatch is admitted.
 An earlier caller deadline remains effective; activation replacement cannot
 extend an already issued context. These synthetic regressions do not assert
 canonical execution or operational activation.
+
+## Sensitive absolute-deadline recovery regression
+
+The dispatch context deadline must not exceed the signed replacement activation
+expiry. A scheduling gap at the rejected implementation's relative-construction
+sample must expose that bound violation; denial at an earlier validation sample
+is not a sensitive regression. Initial replay admission must likewise receive
+no deadline beyond signed activation expiry. Both regressions must fail against
+the immutable rejected V2 implementation and pass against the corrected runtime.
+The owner-approved test recovery freezes runtime bytes at the rejected V3
+preimage and grants no operational authority.

@@ -78,6 +78,18 @@ v3 tag, fresh CI and QA then Security before accepted merge/main readback.
 Equivalent recurrence stops automatic correction; no generic approval is
 requested for this first in-scope runtime deadline correction.
 
+PR #24 at `07c3930b1c074c8dbce5b943a8363e9a645859a4`, tree
+`9545c0dcbc98aeca0a202dd0efb54205a020ecfe`, passed final local qualification
+and exact-head CI `37709892361` / `113093085222`. QA requested changes for
+`standing_delivery.absolute_deadline_regression_not_sensitive`: new tests
+also pass with rejected V2, although an independent probe supports the V3
+implementation fix. The PR is closed without merge; signed v3 tag object
+`a8a3cb9fcffab0a6ec7eb5246d4d658dbcad3013`, CI and QA disposition remain
+rejected evidence. Security did not proceed. The bounded source run is blocked
+at its automatic runtime-deadline correction boundary, not a canonical Bead
+RUN. A deliberate test-design disposition must precede any further successor;
+no automatic patch, new PR, accepted merge or plan advancement is scheduled.
+
 No operational parent or protected runtime profile is installed, no live
 delegation is asserted, and P-001 remains unselected and unclaimed. Source
 acceptance will not substitute for the required protected activation and
@@ -696,3 +708,15 @@ authority while the lease service does not yet exist. Once self-hosted fencing
 exists, every mutation must pass the current authoritative state,
 exact required transition, allowed corrective action, and live epoch checks;
 the bootstrap grant is then unusable.
+
+## Current approved test-only recovery
+
+The owner explicitly approved the test-design recovery recorded on PR #24.
+`standing-delivery-runtime-test-recovery-v1` prospectively binds the rejected
+V3 preimage, nine exact test/publication/document paths, runtime-source freeze
+and the original source grant's remaining window. No prior rejection or blocked
+run is retroaccepted. Initial-admission and replacement-dispatch deadline-bound
+regressions must fail on rejected V2 and pass on the unchanged corrected runtime.
+Distinct V4 signed publication, exact-head CI, fresh QA then Security and accepted
+merge/protected-main readback remain required. Equivalent recurrence stops this
+recovery. P-001 selection and all operational activation remain outstanding.
